@@ -15,6 +15,11 @@ import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 
 export default function ReferencePage() {
 
+// hounslow dark purple
+// #652F6C 
+// houslow light puple
+// #E0D4FD
+
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
   ...theme.typography.body2,
@@ -29,8 +34,9 @@ const Item = styled(Paper)(({ theme }) => ({
 const ScanBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
   height: 180,
+  backgroundColor: '#E0D4FD',
   border: '2px dashed',
-  borderColor: theme.palette.grey[300],
+  borderColor: theme.palette.grey[600],
   borderRadius: theme.shape.borderRadius * 2,
   display: 'flex',
   flexDirection: 'column',
@@ -71,7 +77,12 @@ return (
                         <Button
                             variant="contained"
                             endIcon={<EastRoundedIcon />}
-                            sx={{ width: '100%' }}
+                            sx={{
+                                backgroundColor: '#652F6C',
+                                color: '#fff',
+                                width: '100%',
+                                '&:hover': { backgroundColor: '#502555' },
+                            }}
                         >
                             Check Status
                         </Button>
