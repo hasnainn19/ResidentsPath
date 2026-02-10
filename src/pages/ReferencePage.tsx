@@ -3,11 +3,11 @@ import {
   Paper,
   Box,
   TextField,
-  Typography,
   Button,
   styled
 } from '@mui/material';
-
+import { grey } from '@mui/material/colors';
+import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import EastRoundedIcon from '@mui/icons-material/EastRounded';
@@ -20,23 +20,29 @@ export default function ReferencePage() {
 // houslow light puple
 // #E0D4FD
 
+// const Item = styled(Paper)(({ theme }) => ({
+//   backgroundColor: '#fff',
+//   ...theme.typography.body2,
+//   padding: theme.spacing(3),
+//   textAlign: 'center',
+//   color: (theme.vars ?? theme).palette.text.secondary,
+//   ...theme.applyStyles('dark', {
+//     backgroundColor: '#1A2027',
+//   }),
+// }));
+
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#fff',
-  ...theme.typography.body2,
   padding: theme.spacing(3),
   textAlign: 'center',
-  color: (theme.vars ?? theme).palette.text.secondary,
-  ...theme.applyStyles('dark', {
-    backgroundColor: '#1A2027',
-  }),
+  color: theme.palette.text.secondary,
 }));
 
 const ScanBox = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
-  height: 180,
+  minHeight: 180,
   backgroundColor: '#E0D4FD',
   border: '2px dashed',
-  borderColor: theme.palette.grey[600],
+  borderColor: grey[600],
   borderRadius: theme.shape.borderRadius * 2,
   display: 'flex',
   flexDirection: 'column',
@@ -46,8 +52,8 @@ const ScanBox = styled(Box)(({ theme }) => ({
   cursor: 'pointer',
 
   '&:hover': {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.action.hover,
+    borderColor: grey[600],
+    backgroundColor: grey[500],
   },
 }));
 
@@ -63,9 +69,11 @@ return (
         >
             <Grid sx={{ display: 'flex'}} size={4}>
                 <Item sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
+                <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C' }}>
                     <SearchRoundedIcon />
-                    <h3>Manual Entry</h3>
-                    <h4>Enter your reference code here:</h4>
+                </Avatar>
+                    <h2>Manual Entry</h2>
+                    <h3>Enter your reference code here:</h3>
                     <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
                         <TextField
                             id="outlined-basic"
@@ -92,9 +100,11 @@ return (
 
             <Grid sx={{ display: 'flex'}} size={4}>
                 <Item sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
-                    <QrCode2OutlinedIcon />
-                    <h3>Scan QR Code</h3>
-                    <h4>Click to use the camera to scan the QR code:</h4>
+                    <Avatar sx={{ bgcolor: '#652F6C' }}>
+                        <QrCode2OutlinedIcon />
+                    </Avatar>
+                    <h2>Scan QR Code</h2>
+                    <h3>Click to use the camera to scan the QR code:</h3>
 
                     <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
                         <ScanBox onClick={() => console.log('Start camera')} sx={{ width: '100%' }}>
