@@ -1,6 +1,5 @@
 import {
   Grid,
-  Paper,
   Box,
   TextField,
   Button,
@@ -48,20 +47,17 @@ const ScanButton = styled(ButtonBase)(({ theme }) => ({
 
 return (
     <div className="reference-page">
-        <h1>Use one of the following methods to view your queue details</h1>
-        <Grid container 
-            spacing={3} 
-            direction="row"
-            alignItems="stretch"
-            sx={{ justifyContent: "center", }}
-        >
+        <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 }}>
+        Use one of the following methods to view your queue details
+        </Typography>
+        <Grid container spacing={3} sx={{ justifyContent: "center", }}>
             <Grid item sx={{ display: 'flex'}} size={4}>
-            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3 }}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3, height: '100%' }}>
                 <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C' }}>
                     <SearchRoundedIcon />
                 </Avatar>
-                <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700}}>
                 Manual Entry
                 </Typography>
 
@@ -69,19 +65,18 @@ return (
                 Enter your reference code here:
                 </Typography>
 
-                <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
+                <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480 }}>
                     <TextField fullWidth placeholder="Reference code" sx={{ mb: 2 }} />
                 </Box>
                 </CardContent>
 
                 <CardActions sx={{ px: 3, pb: 3 }}>
-                <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto' }}>
+                <Box sx={{ width: '100%', maxWidth: 480}}>
                         <Button
                             variant="contained"
                             endIcon={<EastRoundedIcon />}
                             sx={{
                                 backgroundColor: '#652F6C',
-                                color: '#fff',
                                 width: '100%',
                                 '&:hover': { backgroundColor: '#502555' },
                             }}
@@ -99,7 +94,7 @@ return (
                     <Avatar sx={{ bgcolor: '#652F6C' }}>
                     <QrCode2OutlinedIcon />
                     </Avatar>
-                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
                     Scan QR Code
                     </Typography>
                     <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
@@ -112,11 +107,7 @@ return (
                     <ScanButton
                         onClick={() => console.log('Start QR scanner')}
                         aria-label="Start QR scanner"
-                        sx={{
-                        width: '100%',
-                        flexDirection: 'column',   // stack icon above text
-                        py: 3,                     // vertical padding to make the box taller
-                        }}
+                        sx={{ flexDirection: 'column', py: 3}}
                     >
                         <QrCodeScannerRoundedIcon fontSize="large" />
                         <Box component="span" sx={{ mt: 2, fontWeight: 600 }}>
