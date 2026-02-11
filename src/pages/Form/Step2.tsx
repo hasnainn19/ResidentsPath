@@ -523,6 +523,53 @@ export default function Step2() {
                     </Box>
                   </>
                 )}
+                {/* Urgency */}
+                <Box>
+                  <Typography fontWeight={700} sx={{ mb: 1 }}>
+                    Is this issue urgent?
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                    Urgent issues may include immediate safety or homelessness risk
+                  </Typography>
+
+                  <Stack spacing={1}>
+                    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Radio
+                            checked={formData.urgent === "yes"}
+                            onChange={() => setField("urgent", "yes")}
+                          />
+                        }
+                        label="Yes"
+                      />
+                    </Paper>
+
+                    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Radio
+                            checked={formData.urgent === "no"}
+                            onChange={() => setField("urgent", "no")}
+                          />
+                        }
+                        label="No"
+                      />
+                    </Paper>
+
+                    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
+                      <FormControlLabel
+                        control={
+                          <Radio
+                            checked={formData.urgent === "unsure"}
+                            onChange={() => setField("urgent", "unsure")}
+                          />
+                        }
+                        label="Unsure"
+                      />
+                    </Paper>
+                  </Stack>
+                </Box>
               </Stack>
             </Box>
           </Paper>
