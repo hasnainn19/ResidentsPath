@@ -268,7 +268,9 @@ export default function Step2() {
                   </Typography>
 
                   <FormControl fullWidth required>
-                    <InputLabel id="service-label">Select a service...</InputLabel>
+                    <InputLabel id="service-label">
+                      Select a service...
+                    </InputLabel>
                     <Select
                       labelId="service-label"
                       label="Select a service..."
@@ -279,11 +281,18 @@ export default function Step2() {
                         setFormData((prev) => ({
                           ...prev,
                           service: next,
-                          housingType: next === "Housing" ? prev.housingType : "",
-                          hasChildren: next === "Housing" ? prev.hasChildren : false,
-                          childrenCount: next === "Housing" ? prev.childrenCount : "0",
-                          hasDisabilityOrSensory: next === "Housing" ? prev.hasDisabilityOrSensory : false,
-                          disabilityType: next === "Housing" ? prev.disabilityType : "",
+                          housingType:
+                            next === "Housing" ? prev.housingType : "",
+                          hasChildren:
+                            next === "Housing" ? prev.hasChildren : false,
+                          childrenCount:
+                            next === "Housing" ? prev.childrenCount : "0",
+                          hasDisabilityOrSensory:
+                            next === "Housing"
+                              ? prev.hasDisabilityOrSensory
+                              : false,
+                          disabilityType:
+                            next === "Housing" ? prev.disabilityType : "",
                         }));
                       }}
                     >
@@ -298,7 +307,13 @@ export default function Step2() {
                 </Box>
                 {/* Further information */}
                 {isHousing && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                  <Box
+                    sx={{
+                      borderLeft: "4px solid",
+                      borderColor: "primary.main",
+                      pl: 3,
+                    }}
+                  >
                     <Stack spacing={3}>
                       <Box>
                         <Typography fontWeight={700} sx={{ mb: 1 }}>
@@ -309,19 +324,38 @@ export default function Step2() {
                         </Typography>
 
                         <FormControl fullWidth required>
-                          <InputLabel id="housing-type-label">Select housing issue...</InputLabel>
+                          <InputLabel id="housing-type-label">
+                            Select housing issue...
+                          </InputLabel>
                           <Select
                             labelId="housing-type-label"
                             label="Select housing issue..."
                             value={formData.housingType}
-                            onChange={(e) => setField("housingType", e.target.value as HousingType)}
+                            onChange={(e) =>
+                              setField(
+                                "housingType",
+                                e.target.value as HousingType,
+                              )
+                            }
                           >
-                            <MenuItem value="">Select housing issue...</MenuItem>
-                            <MenuItem value="Homelessness support">Homelessness support</MenuItem>
-                            <MenuItem value="Housing repairs">Housing repairs</MenuItem>
-                            <MenuItem value="Housing application">Housing application</MenuItem>
-                            <MenuItem value="Rent arrears">Rent arrears</MenuItem>
-                            <MenuItem value="Other housing issue">Other housing issue</MenuItem>
+                            <MenuItem value="">
+                              Select housing issue...
+                            </MenuItem>
+                            <MenuItem value="Homelessness support">
+                              Homelessness support
+                            </MenuItem>
+                            <MenuItem value="Housing repairs">
+                              Housing repairs
+                            </MenuItem>
+                            <MenuItem value="Housing application">
+                              Housing application
+                            </MenuItem>
+                            <MenuItem value="Rent arrears">
+                              Rent arrears
+                            </MenuItem>
+                            <MenuItem value="Other housing issue">
+                              Other housing issue
+                            </MenuItem>
                           </Select>
                         </FormControl>
                       </Box>
@@ -343,7 +377,9 @@ export default function Step2() {
                                   setFormData((prev) => ({
                                     ...prev,
                                     hasChildren: checked,
-                                    childrenCount: checked ? prev.childrenCount : "0",
+                                    childrenCount: checked
+                                      ? prev.childrenCount
+                                      : "0",
                                   }));
                                 }}
                               />
@@ -353,13 +389,18 @@ export default function Step2() {
 
                           {formData.hasChildren && (
                             <FormControl fullWidth>
-                              <InputLabel id="children-count-label">How many children?</InputLabel>
+                              <InputLabel id="children-count-label">
+                                How many children?
+                              </InputLabel>
                               <Select
                                 labelId="children-count-label"
                                 label="How many children?"
                                 value={formData.childrenCount}
                                 onChange={(e) =>
-                                  setField("childrenCount", e.target.value as Count)
+                                  setField(
+                                    "childrenCount",
+                                    e.target.value as Count,
+                                  )
                                 }
                               >
                                 <MenuItem value="0">0</MenuItem>
@@ -387,7 +428,9 @@ export default function Step2() {
                               setFormData((prev) => ({
                                 ...prev,
                                 hasDisabilityOrSensory: checked,
-                                disabilityType: checked ? prev.disabilityType : "",
+                                disabilityType: checked
+                                  ? prev.disabilityType
+                                  : "",
                               }));
                             }}
                           />
@@ -397,31 +440,53 @@ export default function Step2() {
 
                       {formData.hasDisabilityOrSensory && (
                         <FormControl fullWidth>
-                          <InputLabel id="disability-type-label">Select a type...</InputLabel>
+                          <InputLabel id="disability-type-label">
+                            Select a type...
+                          </InputLabel>
                           <Select
                             labelId="disability-type-label"
                             label="Select a type..."
                             value={formData.disabilityType}
                             onChange={(e) =>
-                              setField("disabilityType", e.target.value as DisabilityType)
+                              setField(
+                                "disabilityType",
+                                e.target.value as DisabilityType,
+                              )
                             }
                           >
                             <MenuItem value="">Select...</MenuItem>
-                            <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
-                            <MenuItem value="Visual impairment">Visual impairment</MenuItem>
-                            <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
-                            <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
-                            <MenuItem value="Mental health">Mental health</MenuItem>
+                            <MenuItem value="Mobility impairment">
+                              Mobility impairment
+                            </MenuItem>
+                            <MenuItem value="Visual impairment">
+                              Visual impairment
+                            </MenuItem>
+                            <MenuItem value="Hearing impairment">
+                              Hearing impairment
+                            </MenuItem>
+                            <MenuItem value="Cognitive / learning">
+                              Cognitive / learning
+                            </MenuItem>
+                            <MenuItem value="Mental health">
+                              Mental health
+                            </MenuItem>
                             <MenuItem value="Other">Other</MenuItem>
-                            <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                            <MenuItem value="Prefer not to say">
+                              Prefer not to say
+                            </MenuItem>
                           </Select>
                         </FormControl>
                       )}
                     </Box>
 
-                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                    <Box
+                      sx={{
+                        borderLeft: "4px solid",
+                        borderColor: "primary.main",
+                        pl: 3,
+                      }}
+                    >
                       <Stack spacing={3}>
-
                         <Stack direction="row" spacing={2}>
                           <FormControl fullWidth>
                             <InputLabel id="age-label">Age range</InputLabel>
@@ -442,18 +507,25 @@ export default function Step2() {
                               <MenuItem value="55-64">55-64</MenuItem>
                               <MenuItem value="65-74">65-74</MenuItem>
                               <MenuItem value="75+">75+</MenuItem>
-                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                              <MenuItem value="Prefer not to say">
+                                Prefer not to say
+                              </MenuItem>
                             </Select>
                           </FormControl>
 
                           <FormControl fullWidth>
-                            <InputLabel id="household-label">Household size</InputLabel>
+                            <InputLabel id="household-label">
+                              Household size
+                            </InputLabel>
                             <Select
                               labelId="household-label"
                               label="Household size"
                               value={formData.householdSize}
                               onChange={(e) =>
-                                setField("householdSize", e.target.value as HouseholdSize)
+                                setField(
+                                  "householdSize",
+                                  e.target.value as HouseholdSize,
+                                )
                               }
                             >
                               <MenuItem value="">Select...</MenuItem>
@@ -463,7 +535,9 @@ export default function Step2() {
                               <MenuItem value="4">4</MenuItem>
                               <MenuItem value="5">5</MenuItem>
                               <MenuItem value="6+">6+</MenuItem>
-                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                              <MenuItem value="Prefer not to say">
+                                Prefer not to say
+                              </MenuItem>
                             </Select>
                           </FormControl>
                         </Stack>
@@ -477,8 +551,12 @@ export default function Step2() {
                                 setFormData((prev) => ({
                                   ...prev,
                                   domesticAbuseRelated: checked,
-                                  safeToContact: checked ? prev.safeToContact : "prefer_not_to_say",
-                                  safeContactNotes: checked ? prev.safeContactNotes : "",
+                                  safeToContact: checked
+                                    ? prev.safeToContact
+                                    : "prefer_not_to_say",
+                                  safeContactNotes: checked
+                                    ? prev.safeContactNotes
+                                    : "",
                                 }));
                               }}
                             />
@@ -487,21 +565,34 @@ export default function Step2() {
                         />
 
                         {formData.domesticAbuseRelated && (
-                          <Box sx={{ bgcolor: "primary.light", p: 2, borderRadius: 1 }}>
+                          <Box
+                            sx={{
+                              bgcolor: "primary.light",
+                              p: 2,
+                              borderRadius: 1,
+                            }}
+                          >
                             <Stack spacing={2}>
                               <FormControl fullWidth>
-                                <InputLabel id="safe-contact-label">Safe to contact?</InputLabel>
+                                <InputLabel id="safe-contact-label">
+                                  Safe to contact?
+                                </InputLabel>
                                 <Select
                                   labelId="safe-contact-label"
                                   label="Safe to contact?"
                                   value={formData.safeToContact}
                                   onChange={(e) =>
-                                    setField("safeToContact", e.target.value as SafeToContact)
+                                    setField(
+                                      "safeToContact",
+                                      e.target.value as SafeToContact,
+                                    )
                                   }
                                 >
                                   <MenuItem value="yes">Yes</MenuItem>
                                   <MenuItem value="no">No</MenuItem>
-                                  <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
+                                  <MenuItem value="prefer_not_to_say">
+                                    Prefer not to say
+                                  </MenuItem>
                                 </Select>
                               </FormControl>
 
@@ -528,8 +619,13 @@ export default function Step2() {
                   <Typography fontWeight={700} sx={{ mb: 1 }}>
                     Is this issue urgent?
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                    Urgent issues may include immediate safety or homelessness risk
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1.5 }}
+                  >
+                    Urgent issues may include immediate safety or homelessness
+                    risk
                   </Typography>
 
                   <Stack spacing={1}>
@@ -568,6 +664,45 @@ export default function Step2() {
                         label="Unsure"
                       />
                     </Paper>
+                  </Stack>
+                </Box>
+                {/* Additional info */}
+                <Box>
+                  <Typography fontWeight={700} sx={{ mb: 1 }}>
+                    Please provide any additional information{" "}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      (optional)
+                    </Typography>
+                  </Typography>
+
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={4}
+                    placeholder="Any other details that might help us assist you..."
+                    value={formData.additionalInfo}
+                    onChange={(e) => setField("additionalInfo", e.target.value)}
+                  />
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    sx={{ mt: 1.5 }}
+                  >
+                    <MicIcon fontSize="small" />
+                    <Button
+                      type="button"
+                      size="small"
+                      onClick={handleVoiceInput}
+                      sx={{ textTransform: "none" }}
+                    >
+                      Voice input (mock)
+                    </Button>
                   </Stack>
                 </Box>
               </Stack>
