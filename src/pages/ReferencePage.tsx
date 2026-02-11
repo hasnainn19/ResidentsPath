@@ -4,7 +4,11 @@ import {
   Box,
   TextField,
   Button,
-  styled
+  styled,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Avatar from '@mui/material/Avatar';
@@ -12,6 +16,8 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import EastRoundedIcon from '@mui/icons-material/EastRounded';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
+import ButtonBase from '@mui/material/ButtonBase';
+
 
 export default function ReferencePage() {
 
@@ -20,42 +26,24 @@ export default function ReferencePage() {
 // houslow light puple
 // #E0D4FD
 
-// const Item = styled(Paper)(({ theme }) => ({
-//   backgroundColor: '#fff',
-//   ...theme.typography.body2,
-//   padding: theme.spacing(3),
-//   textAlign: 'center',
-//   color: (theme.vars ?? theme).palette.text.secondary,
-//   ...theme.applyStyles('dark', {
-//     backgroundColor: '#1A2027',
-//   }),
-// }));
 
-const Item = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
 
-const ScanBox = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(2),
+const ScanButton = styled(ButtonBase)(({ theme }) => ({
+  display: 'flex',
+  width: '100%',
   minHeight: 180,
   backgroundColor: '#E0D4FD',
-  border: '2px dashed',
-  borderColor: grey[600],
+  border: `2px dashed ${grey[600]}`,
   borderRadius: theme.shape.borderRadius * 2,
-  display: 'flex',
-  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  color: theme.palette.text.secondary,
-  cursor: 'pointer',
-
   '&:hover': {
-    borderColor: grey[600],
-    backgroundColor: grey[500],
-  },
+    backgroundColor: '#e3d9faff',
+    borderColor: grey[900],
+  }
 }));
+
+
 
 
 return (
@@ -67,21 +55,27 @@ return (
             alignItems="stretch"
             sx={{ justifyContent: "center", }}
         >
-            <Grid sx={{ display: 'flex'}} size={4}>
-                <Item sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
+            <Grid item sx={{ display: 'flex'}} size={4}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3 }}>
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C' }}>
                     <SearchRoundedIcon />
                 </Avatar>
-                    <h2>Manual Entry</h2>
-                    <h3>Enter your reference code here:</h3>
-                    <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
-                        <TextField
-                            id="outlined-basic"
-                            variant="outlined"
-                            fullWidth
-                            placeholder="Reference code"
-                            sx={{ mb: 2 }}
-                        />
+                <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                Manual Entry
+                </Typography>
+
+                <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                Enter your reference code here:
+                </Typography>
+
+                <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
+                    <TextField fullWidth placeholder="Reference code" sx={{ mb: 2 }} />
+                </Box>
+                </CardContent>
+
+                <CardActions sx={{ px: 3, pb: 3 }}>
+                <Box sx={{ width: '100%', maxWidth: 480, mx: 'auto' }}>
                         <Button
                             variant="contained"
                             endIcon={<EastRoundedIcon />}
@@ -94,28 +88,47 @@ return (
                         >
                             Check Status
                         </Button>
-                    </Box>
-                </Item>
+                </Box>
+                </CardActions>
+            </Card>
             </Grid>
 
-            <Grid sx={{ display: 'flex'}} size={4}>
-                <Item sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
+            <Grid item sx={{ display: 'flex'}} size={4}>
+                <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', borderRadius: 3 }}>
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Avatar sx={{ bgcolor: '#652F6C' }}>
-                        <QrCode2OutlinedIcon />
+                    <QrCode2OutlinedIcon />
                     </Avatar>
-                    <h2>Scan QR Code</h2>
-                    <h3>Click to use the camera to scan the QR code:</h3>
+                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    Scan QR Code
+                    </Typography>
+                    <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                    Click to use the camera to scan the QR code:
+                    </Typography>
+                </CardContent>
 
-                    <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480, mx: 'auto' }}>
-                        <ScanBox onClick={() => console.log('Start camera')} sx={{ width: '100%' }}>
-                            <QrCodeScannerRoundedIcon fontSize="large" />
-                            <Box mt={1}>Tap to start camera</Box>
-                        </ScanBox>
+                <CardActions sx={{ px: 3, pb: 3, justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: 560, mx: 'auto' }}>
+                    <ScanButton
+                        onClick={() => console.log('Start QR scanner')}
+                        aria-label="Start QR scanner"
+                        sx={{
+                        width: '100%',
+                        flexDirection: 'column',   // stack icon above text
+                        py: 3,                     // vertical padding to make the box taller
+                        }}
+                    >
+                        <QrCodeScannerRoundedIcon fontSize="large" />
+                        <Box component="span" sx={{ mt: 2, fontWeight: 600 }}>
+                        Tap to start camera
+                        </Box>
+                    </ScanButton>
                     </Box>
-                </Item>
+                </CardActions>
+                </Card>
             </Grid>
-
         </Grid>
+
     </div>
 )
 
