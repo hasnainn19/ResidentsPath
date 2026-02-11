@@ -14,7 +14,6 @@ import {
   MenuItem,
   Paper,
   Radio,
-  RadioGroup,
   Select,
   Stack,
   TextField,
@@ -30,13 +29,7 @@ type Urgency = "yes" | "no" | "unsure";
 
 type Language = "en" | "cy" | "pl" | "ur";
 
-type Service =
-  | ""
-  | "Housing"
-  | "Social Care"
-  | "Benefits"
-  | "Council Tax"
-  | "Other";
+type Service = "" | "Housing" | "Social Care" | "Benefits" | "Council Tax" | "Other";
 
 type HousingType =
   | ""
@@ -46,11 +39,7 @@ type HousingType =
   | "Rent arrears"
   | "Other housing issue";
 
-type Proceed =
-  | ""
-  | "Join digital queue"
-  | "Schedule appointment"
-  | "Request callback";
+type Proceed = "" | "Join digital queue" | "Schedule appointment" | "Request callback";
 
 type ContactMethod = "" | "Text message" | "Phone call" | "Email" | "Letter";
 
@@ -68,15 +57,7 @@ type AgeBand =
   | "75+"
   | "Prefer not to say";
 
-type HouseholdSize =
-  | ""
-  | "1"
-  | "2"
-  | "3"
-  | "4"
-  | "5"
-  | "6+"
-  | "Prefer not to say";
+type HouseholdSize = "" | "1" | "2" | "3" | "4" | "5" | "6+" | "Prefer not to say";
 
 type DisabilityType =
   | ""
@@ -198,12 +179,7 @@ export default function Step2() {
           </Stack>
 
           {/* Header row: title and language select */}
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="flex-start"
-            sx={{ mb: 3 }}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
             <Box>
               <Typography variant="h5" fontWeight={800}>
                 Council Service Request
@@ -219,9 +195,7 @@ export default function Step2() {
                 labelId="lang-label"
                 label="Language"
                 value={formData.language}
-                onChange={(e) =>
-                  setField("language", e.target.value as Language)
-                }
+                onChange={(e) => setField("language", e.target.value as Language)}
               >
                 <MenuItem value="en">English</MenuItem>
                 <MenuItem value="cy">Cymraeg</MenuItem>
@@ -233,11 +207,7 @@ export default function Step2() {
 
           {/* Progress indicator */}
           <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              sx={{ mb: 1 }}
-            >
+            <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
               <Typography variant="body2" fontWeight={700}>
                 Step 2 of 3: Service Details
               </Typography>
@@ -298,7 +268,13 @@ export default function Step2() {
                 </Box>
                 {/* Further information */}
                 {isHousing && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                  <Box
+                    sx={{
+                      borderLeft: "4px solid",
+                      borderColor: "primary.main",
+                      pl: 3,
+                    }}
+                  >
                     <Stack spacing={3}>
                       <Box>
                         <Typography fontWeight={700} sx={{ mb: 1 }}>
@@ -358,9 +334,7 @@ export default function Step2() {
                                 labelId="children-count-label"
                                 label="How many children?"
                                 value={formData.childrenCount}
-                                onChange={(e) =>
-                                  setField("childrenCount", e.target.value as Count)
-                                }
+                                onChange={(e) => setField("childrenCount", e.target.value as Count)}
                               >
                                 <MenuItem value="0">0</MenuItem>
                                 <MenuItem value="1">1</MenuItem>
@@ -402,9 +376,7 @@ export default function Step2() {
                             labelId="disability-type-label"
                             label="Select a type..."
                             value={formData.disabilityType}
-                            onChange={(e) =>
-                              setField("disabilityType", e.target.value as DisabilityType)
-                            }
+                            onChange={(e) => setField("disabilityType", e.target.value as DisabilityType)}
                           >
                             <MenuItem value="">Select...</MenuItem>
                             <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
@@ -419,9 +391,14 @@ export default function Step2() {
                       )}
                     </Box>
 
-                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                    <Box
+                      sx={{
+                        borderLeft: "4px solid",
+                        borderColor: "primary.main",
+                        pl: 3,
+                      }}
+                    >
                       <Stack spacing={3}>
-
                         <Stack direction="row" spacing={2}>
                           <FormControl fullWidth>
                             <InputLabel id="age-label">Age range</InputLabel>
@@ -429,9 +406,7 @@ export default function Step2() {
                               labelId="age-label"
                               label="Age range"
                               value={formData.ageBand}
-                              onChange={(e) =>
-                                setField("ageBand", e.target.value as AgeBand)
-                              }
+                              onChange={(e) => setField("ageBand", e.target.value as AgeBand)}
                             >
                               <MenuItem value="">Select...</MenuItem>
                               <MenuItem value="Under 18">Under 18</MenuItem>
@@ -452,9 +427,7 @@ export default function Step2() {
                               labelId="household-label"
                               label="Household size"
                               value={formData.householdSize}
-                              onChange={(e) =>
-                                setField("householdSize", e.target.value as HouseholdSize)
-                              }
+                              onChange={(e) => setField("householdSize", e.target.value as HouseholdSize)}
                             >
                               <MenuItem value="">Select...</MenuItem>
                               <MenuItem value="1">1</MenuItem>
@@ -487,7 +460,13 @@ export default function Step2() {
                         />
 
                         {formData.domesticAbuseRelated && (
-                          <Box sx={{ bgcolor: "primary.light", p: 2, borderRadius: 1 }}>
+                          <Box
+                            sx={{
+                              bgcolor: "primary.light",
+                              p: 2,
+                              borderRadius: 1,
+                            }}
+                          >
                             <Stack spacing={2}>
                               <FormControl fullWidth>
                                 <InputLabel id="safe-contact-label">Safe to contact?</InputLabel>
@@ -495,9 +474,7 @@ export default function Step2() {
                                   labelId="safe-contact-label"
                                   label="Safe to contact?"
                                   value={formData.safeToContact}
-                                  onChange={(e) =>
-                                    setField("safeToContact", e.target.value as SafeToContact)
-                                  }
+                                  onChange={(e) => setField("safeToContact", e.target.value as SafeToContact)}
                                 >
                                   <MenuItem value="yes">Yes</MenuItem>
                                   <MenuItem value="no">No</MenuItem>
@@ -511,9 +488,7 @@ export default function Step2() {
                                   label="Safe contact notes"
                                   placeholder="Safe time or method, or do not contact"
                                   value={formData.safeContactNotes}
-                                  onChange={(e) =>
-                                    setField("safeContactNotes", e.target.value)
-                                  }
+                                  onChange={(e) => setField("safeContactNotes", e.target.value)}
                                 />
                               )}
                             </Stack>
@@ -536,10 +511,7 @@ export default function Step2() {
                     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
                       <FormControlLabel
                         control={
-                          <Radio
-                            checked={formData.urgent === "yes"}
-                            onChange={() => setField("urgent", "yes")}
-                          />
+                          <Radio checked={formData.urgent === "yes"} onChange={() => setField("urgent", "yes")} />
                         }
                         label="Yes"
                       />
@@ -547,12 +519,7 @@ export default function Step2() {
 
                     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
                       <FormControlLabel
-                        control={
-                          <Radio
-                            checked={formData.urgent === "no"}
-                            onChange={() => setField("urgent", "no")}
-                          />
-                        }
+                        control={<Radio checked={formData.urgent === "no"} onChange={() => setField("urgent", "no")} />}
                         label="No"
                       />
                     </Paper>
@@ -560,10 +527,7 @@ export default function Step2() {
                     <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
                       <FormControlLabel
                         control={
-                          <Radio
-                            checked={formData.urgent === "unsure"}
-                            onChange={() => setField("urgent", "unsure")}
-                          />
+                          <Radio checked={formData.urgent === "unsure"} onChange={() => setField("urgent", "unsure")} />
                         }
                         label="Unsure"
                       />
@@ -623,7 +587,13 @@ export default function Step2() {
                 </Box>
                 {/* Support options */}
                 {formData.proceed !== "" && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                  <Box
+                    sx={{
+                      borderLeft: "4px solid",
+                      borderColor: "primary.main",
+                      pl: 3,
+                    }}
+                  >
                     <Typography fontWeight={700} sx={{ mb: 1 }}>
                       Support Options
                     </Typography>
@@ -650,6 +620,75 @@ export default function Step2() {
                     </FormGroup>
                   </Box>
                 )}
+                {/* Contact method */}
+                <Box>
+                  <Typography fontWeight={700} sx={{ mb: 1 }}>
+                    Please select your preferred method of contact{" "}
+                    <Typography component="span" color="error">
+                      *
+                    </Typography>
+                  </Typography>
+
+                  <Stack direction="row" spacing={2} alignItems="flex-end">
+                    <Box sx={{ flex: 1 }}>
+                      <FormControl fullWidth required>
+                        <InputLabel id="contact-label">Select contact method...</InputLabel>
+                        <Select
+                          labelId="contact-label"
+                          label="Select contact method..."
+                          value={formData.contactMethod}
+                          onChange={(e) => setField("contactMethod", e.target.value as ContactMethod)}
+                        >
+                          <MenuItem value="">Select contact method...</MenuItem>
+                          <MenuItem value="Text message">Text message</MenuItem>
+                          <MenuItem value="Phone call">Phone call</MenuItem>
+                          <MenuItem value="Email">Email</MenuItem>
+                          <MenuItem value="Letter">Letter</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        bgcolor: "grey.100",
+                        border: "1px solid",
+                        borderColor: "grey.300",
+                        borderRadius: 1,
+                        px: 2,
+                        py: 1.5,
+                        maxWidth: 320,
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        <InfoOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: "text-bottom" }} />
+                        We will use this to update you on your request
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+                {/* Navigation Buttons */}
+                <Box sx={{ pt: 2 }}>
+                  <Divider sx={{ mb: 3 }} />
+
+                  <Stack direction="row" spacing={2}>
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                      Submit request
+                    </Button>
+
+                    <Button type="button" variant="outlined" color="primary" fullWidth onClick={handleSave}>
+                      Save and continue later
+                    </Button>
+                  </Stack>
+
+                  <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+                    <Button type="button" onClick={() => nav("/form/step-1")} sx={{ textTransform: "none" }}>
+                      {"<-"} Previous
+                    </Button>
+                    <Button type="button" onClick={() => nav("/form/step-3")} sx={{ textTransform: "none" }}>
+                      Next {"->"}
+                    </Button>
+                  </Stack>
+                </Box>
               </Stack>
             </Box>
           </Paper>
