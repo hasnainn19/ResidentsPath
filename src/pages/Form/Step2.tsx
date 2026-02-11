@@ -2,18 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Alert, Box, Button, Checkbox, Container, Divider, FormControl, FormControlLabel, FormGroup,
-  FormHelperText, InputLabel, LinearProgress, MenuItem, Paper, Radio, RadioGroup, Select,
-  Stack, TextField, Typography,
+  Box,
+  Button,
+  Container,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Radio,
+  RadioGroup,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+  Checkbox,
 } from "@mui/material";
 
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import MicIcon from "@mui/icons-material/Mic";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+
+type Urgency = "yes" | "no" | "unsure";
 
 type Language = "en" | "cy" | "pl" | "ur";
-type Service = "" | "Housing" | "Social Care" | "Benefits" | "Council Tax" | "Other";
+
+type Service =
+  | ""
+  | "Housing"
+  | "Social Care"
+  | "Benefits"
+  | "Council Tax"
+  | "Other";
+
 type HousingType =
   | ""
   | "Homelessness support"
@@ -22,43 +46,64 @@ type HousingType =
   | "Rent arrears"
   | "Other housing issue";
 
-type Urgency = "yes" | "no" | "unsure";
-type Proceed = "" | "Join digital queue" | "Schedule appointment" | "Request callback";
+type Proceed =
+  | ""
+  | "Join digital queue"
+  | "Schedule appointment"
+  | "Request callback";
+
 type ContactMethod = "" | "Text message" | "Phone call" | "Email" | "Letter";
 
 type Count = "0" | "1" | "2" | "3" | "4" | "5" | "6+";
 
-type AgeBand = "" | "Under 18" | "18-24" | "25-34" | "35-44" | "45-54" | "55-64" | "65-74" | "75+" | "Prefer not to say";
+type AgeBand =
+  | ""
+  | "Under 18"
+  | "18-24"
+  | "25-34"
+  | "35-44"
+  | "45-54"
+  | "55-64"
+  | "65-74"
+  | "75+"
+  | "Prefer not to say";
 
-type HouseholdSize = "" | "1" | "2" | "3" | "4" | "5" | "6+" | "Prefer not to say";
+type HouseholdSize =
+  | ""
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6+"
+  | "Prefer not to say";
 
 type DisabilityType =
-| ""
-| "Mobility impairment"
-| "Visual impairment"
-| "Hearing impairment"
-| "Cognitive / learning"
-| "Mental health"
-| "Other"
-| "Prefer not to say";
+  | ""
+  | "Mobility impairment"
+  | "Visual impairment"
+  | "Hearing impairment"
+  | "Cognitive / learning"
+  | "Mental health"
+  | "Other"
+  | "Prefer not to say";
 
 type SafeToContact = "yes" | "no" | "prefer_not_to_say";
 
 type FormData = {
   language: Language;
+
   service: Service;
-
   housingType: HousingType;
-
-  // Priority questions
-  ageBand: AgeBand;
-  householdSize: HouseholdSize;
 
   hasChildren: boolean;
   childrenCount: Count;
 
   hasDisabilityOrSensory: boolean;
   disabilityType: DisabilityType;
+
+  ageBand: AgeBand;
+  householdSize: HouseholdSize;
 
   domesticAbuseRelated: boolean;
   safeToContact: SafeToContact;
@@ -68,31 +113,30 @@ type FormData = {
   additionalInfo: string;
 
   proceed: Proceed;
+
   needsAccessibility: boolean;
   needsLanguage: boolean;
 
   contactMethod: ContactMethod;
 };
 
-type FormErrors = Partial<Record<keyof FormData, string>>;
-
 export default function Step2() {
   const nav = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
     language: "en",
+
     service: "",
-
     housingType: "",
-
-    ageBand: "",
-    householdSize: "",
 
     hasChildren: false,
     childrenCount: "0",
 
     hasDisabilityOrSensory: false,
     disabilityType: "",
+
+    ageBand: "",
+    householdSize: "",
 
     domesticAbuseRelated: false,
     safeToContact: "prefer_not_to_say",
@@ -108,11 +152,8 @@ export default function Step2() {
     contactMethod: "",
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
-
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
   // TODO(BACKEND): Replace with Text-to-Speech
@@ -121,33 +162,145 @@ export default function Step2() {
   // TODO(BACKEND): Replace with Speech-to-Text
   const handleVoiceInput = () => alert("Voice input started (mock)");
 
-  // TODO(BACKEND): Save draft
+  // TODO(BACKEND)
   const handleSave = () => alert("Saved (mock)");
 
-  function validate(): FormErrors {
-    const next: FormErrors = {};
-    if (!formData.service) next.service = "Please select a service.";
-    if (formData.service === "Housing" && !formData.housingType) {
-      next.housingType = "Please select the type of Housing issue.";
-    }
-    if (!formData.proceed) next.proceed = "Please select how you'd like to proceed.";
-    if (!formData.contactMethod) next.contactMethod = "Please select a contact method.";
+  // TODO(BACKEND)
+  const submitToBackend = () => {
+    alert("Submitted (mock)");
+  };
 
-    if (formData.hasChildren && formData.childrenCount === "0") {
-      next.childrenCount = "Please select how many children (or untick the option).";
-    }
-    if (formData.hasDisabilityOrSensory && !formData.disabilityType) {
-      next.disabilityType = "Please select an option (or choose Prefer not to say).";
-    }
-    if (formData.domesticAbuseRelated && formData.safeToContact === "no" && !formData.safeContactNotes.trim()) {
-      next.safeContactNotes = "Please add safe contact notes (or choose Prefer not to say).";
-    }
+  const isHousing = formData.service === "Housing";
 
-    return next;
-  }
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
+      <Container maxWidth="lg">
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 6,
+            borderWidth: 2,
+            borderRadius: 2,
+            bgcolor: "background.paper",
+          }}
+        >
+          {/* Listen to instructions */}
+          <Stack direction="row" sx={{ mb: 2 }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<VolumeUpIcon />}
+              onClick={handleListenAll}
+              sx={{ textTransform: "none", color: "primary.main" }}
+            >
+              Listen to instructions
+            </Button>
+          </Stack>
 
-  const isElderly = formData.ageBand === "65-74" || formData.ageBand === "75+";
-  const isLargeHousehold = formData.householdSize === "6+";
+          {/* Header row: title and language select */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            sx={{ mb: 3 }}
+          >
+            <Box>
+              <Typography variant="h5" fontWeight={800}>
+                Council Service Request
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please complete this form to help us assist you today
+              </Typography>
+            </Box>
 
-  return null;
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel id="lang-label">Language</InputLabel>
+              <Select
+                labelId="lang-label"
+                label="Language"
+                value={formData.language}
+                onChange={(e) =>
+                  setField("language", e.target.value as Language)
+                }
+              >
+                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="cy">Cymraeg</MenuItem>
+                <MenuItem value="pl">Polski</MenuItem>
+                <MenuItem value="ur">اردو</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+
+          {/* Progress indicator */}
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, mb: 3 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              sx={{ mb: 1 }}
+            >
+              <Typography variant="body2" fontWeight={700}>
+                Step 2 of 3: Service Details
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                66% Complete
+              </Typography>
+            </Stack>
+            <LinearProgress variant="determinate" value={66} />
+          </Paper>
+          {/* Main form card */}
+          <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
+            <Box
+              component="form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // TODO(BACKEND)
+                submitToBackend();
+              }}
+            >
+              <Stack spacing={4}>
+                {/* Service */}
+                <Box>
+                  <Typography fontWeight={700} sx={{ mb: 1 }}>
+                    What service do you need?{" "}
+                    <Typography component="span" color="error">
+                      *
+                    </Typography>
+                  </Typography>
+
+                  <FormControl fullWidth required>
+                    <InputLabel id="service-label">Select a service...</InputLabel>
+                    <Select
+                      labelId="service-label"
+                      label="Select a service..."
+                      value={formData.service}
+                      onChange={(e) => {
+                        const next = e.target.value as Service;
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          service: next,
+                          housingType: next === "Housing" ? prev.housingType : "",
+                          hasChildren: next === "Housing" ? prev.hasChildren : false,
+                          childrenCount: next === "Housing" ? prev.childrenCount : "0",
+                          hasDisabilityOrSensory: next === "Housing" ? prev.hasDisabilityOrSensory : false,
+                          disabilityType: next === "Housing" ? prev.disabilityType : "",
+                        }));
+                      }}
+                    >
+                      <MenuItem value="">Select a service...</MenuItem>
+                      <MenuItem value="Housing">Housing</MenuItem>
+                      <MenuItem value="Social Care">Social Care</MenuItem>
+                      <MenuItem value="Benefits">Benefits</MenuItem>
+                      <MenuItem value="Council Tax">Council Tax</MenuItem>
+                      <MenuItem value="Other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Stack>
+            </Box>
+          </Paper>
+        </Paper>
+      </Container>
+    </Box>
+  );
 }
