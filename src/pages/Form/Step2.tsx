@@ -325,106 +325,203 @@ export default function Step2() {
                           </Select>
                         </FormControl>
                       </Box>
+                    </Stack>
+                  </Box>
+                )}
+                {formData.service !== "" && (
+                  <>
+                    {/* Children */}
+                    <Box>
+                      <Stack direction="row" spacing={2} alignItems="flex-end">
+                        <Box sx={{ flex: 1 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={formData.hasChildren}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    hasChildren: checked,
+                                    childrenCount: checked ? prev.childrenCount : "0",
+                                  }));
+                                }}
+                              />
+                            }
+                            label="I have dependent children"
+                          />
 
-                      {/* Children */}
-                      <Box>
-                        <Stack direction="row" spacing={2} alignItems="flex-end">
-                          <Box sx={{ flex: 1 }}>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={formData.hasChildren}
-                                  onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      hasChildren: checked,
-                                      childrenCount: checked ? prev.childrenCount : "0",
-                                    }));
-                                  }}
-                                />
-                              }
-                              label="I have dependent children"
-                            />
+                          {formData.hasChildren && (
+                            <FormControl fullWidth>
+                              <InputLabel id="children-count-label">How many children?</InputLabel>
+                              <Select
+                                labelId="children-count-label"
+                                label="How many children?"
+                                value={formData.childrenCount}
+                                onChange={(e) =>
+                                  setField("childrenCount", e.target.value as Count)
+                                }
+                              >
+                                <MenuItem value="0">0</MenuItem>
+                                <MenuItem value="1">1</MenuItem>
+                                <MenuItem value="2">2</MenuItem>
+                                <MenuItem value="3">3</MenuItem>
+                                <MenuItem value="4">4</MenuItem>
+                                <MenuItem value="5">5</MenuItem>
+                                <MenuItem value="6+">6+</MenuItem>
+                              </Select>
+                            </FormControl>
+                          )}
+                        </Box>
+                      </Stack>
+                    </Box>
 
-                            {formData.hasChildren && (
-                              <FormControl fullWidth>
-                                <InputLabel id="children-count-label">How many children?</InputLabel>
-                                <Select
-                                  labelId="children-count-label"
-                                  label="How many children?"
-                                  value={formData.childrenCount}
-                                  onChange={(e) => setField("childrenCount", e.target.value as Count)}
-                                >
-                                  <MenuItem value="0">0</MenuItem>
-                                  <MenuItem value="1">1</MenuItem>
-                                  <MenuItem value="2">2</MenuItem>
-                                  <MenuItem value="3">3</MenuItem>
-                                  <MenuItem value="4">4</MenuItem>
-                                  <MenuItem value="5">5</MenuItem>
-                                  <MenuItem value="6+">6+</MenuItem>
-                                </Select>
-                              </FormControl>
-                            )}
-                          </Box>
-
-                          <Box
-                            sx={{
-                              bgcolor: "grey.100",
-                              border: "1px solid",
-                              borderColor: "grey.300",
-                              borderRadius: 1,
-                              px: 2,
-                              py: 1.5,
-                              maxWidth: 320,
+                    {/* Disability */}
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.hasDisabilityOrSensory}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setFormData((prev) => ({
+                                ...prev,
+                                hasDisabilityOrSensory: checked,
+                                disabilityType: checked ? prev.disabilityType : "",
+                              }));
                             }}
-                          >
-                          </Box>
-                        </Stack>
-                      </Box>
+                          />
+                        }
+                        label="I have a disability or sensory impairment"
+                      />
 
-                      {/* Disability */}
-                      <Box>
+                      {formData.hasDisabilityOrSensory && (
+                        <FormControl fullWidth>
+                          <InputLabel id="disability-type-label">Select a type...</InputLabel>
+                          <Select
+                            labelId="disability-type-label"
+                            label="Select a type..."
+                            value={formData.disabilityType}
+                            onChange={(e) =>
+                              setField("disabilityType", e.target.value as DisabilityType)
+                            }
+                          >
+                            <MenuItem value="">Select...</MenuItem>
+                            <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
+                            <MenuItem value="Visual impairment">Visual impairment</MenuItem>
+                            <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
+                            <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
+                            <MenuItem value="Mental health">Mental health</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
+                            <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Box>
+
+                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                      <Stack spacing={3}>
+
+                        <Stack direction="row" spacing={2}>
+                          <FormControl fullWidth>
+                            <InputLabel id="age-label">Age range</InputLabel>
+                            <Select
+                              labelId="age-label"
+                              label="Age range"
+                              value={formData.ageBand}
+                              onChange={(e) =>
+                                setField("ageBand", e.target.value as AgeBand)
+                              }
+                            >
+                              <MenuItem value="">Select...</MenuItem>
+                              <MenuItem value="Under 18">Under 18</MenuItem>
+                              <MenuItem value="18-24">18-24</MenuItem>
+                              <MenuItem value="25-34">25-34</MenuItem>
+                              <MenuItem value="35-44">35-44</MenuItem>
+                              <MenuItem value="45-54">45-54</MenuItem>
+                              <MenuItem value="55-64">55-64</MenuItem>
+                              <MenuItem value="65-74">65-74</MenuItem>
+                              <MenuItem value="75+">75+</MenuItem>
+                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                            </Select>
+                          </FormControl>
+
+                          <FormControl fullWidth>
+                            <InputLabel id="household-label">Household size</InputLabel>
+                            <Select
+                              labelId="household-label"
+                              label="Household size"
+                              value={formData.householdSize}
+                              onChange={(e) =>
+                                setField("householdSize", e.target.value as HouseholdSize)
+                              }
+                            >
+                              <MenuItem value="">Select...</MenuItem>
+                              <MenuItem value="1">1</MenuItem>
+                              <MenuItem value="2">2</MenuItem>
+                              <MenuItem value="3">3</MenuItem>
+                              <MenuItem value="4">4</MenuItem>
+                              <MenuItem value="5">5</MenuItem>
+                              <MenuItem value="6+">6+</MenuItem>
+                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Stack>
+
                         <FormControlLabel
                           control={
                             <Checkbox
-                              checked={formData.hasDisabilityOrSensory}
+                              checked={formData.domesticAbuseRelated}
                               onChange={(e) => {
                                 const checked = e.target.checked;
                                 setFormData((prev) => ({
                                   ...prev,
-                                  hasDisabilityOrSensory: checked,
-                                  disabilityType: checked ? prev.disabilityType : "",
+                                  domesticAbuseRelated: checked,
+                                  safeToContact: checked ? prev.safeToContact : "prefer_not_to_say",
+                                  safeContactNotes: checked ? prev.safeContactNotes : "",
                                 }));
                               }}
                             />
                           }
-                          label="I have a disability or sensory impairment"
+                          label="This request relates to domestic abuse, or I may be at risk"
                         />
 
-                        {formData.hasDisabilityOrSensory && (
-                          <FormControl fullWidth>
-                            <InputLabel id="disability-type-label">Select a type...</InputLabel>
-                            <Select
-                              labelId="disability-type-label"
-                              label="Select a type..."
-                              value={formData.disabilityType}
-                              onChange={(e) => setField("disabilityType", e.target.value as DisabilityType)}
-                            >
-                              <MenuItem value="">Select...</MenuItem>
-                              <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
-                              <MenuItem value="Visual impairment">Visual impairment</MenuItem>
-                              <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
-                              <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
-                              <MenuItem value="Mental health">Mental health</MenuItem>
-                              <MenuItem value="Other">Other</MenuItem>
-                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
-                            </Select>
-                          </FormControl>
+                        {formData.domesticAbuseRelated && (
+                          <Box sx={{ bgcolor: "primary.light", p: 2, borderRadius: 1 }}>
+                            <Stack spacing={2}>
+                              <FormControl fullWidth>
+                                <InputLabel id="safe-contact-label">Safe to contact?</InputLabel>
+                                <Select
+                                  labelId="safe-contact-label"
+                                  label="Safe to contact?"
+                                  value={formData.safeToContact}
+                                  onChange={(e) =>
+                                    setField("safeToContact", e.target.value as SafeToContact)
+                                  }
+                                >
+                                  <MenuItem value="yes">Yes</MenuItem>
+                                  <MenuItem value="no">No</MenuItem>
+                                  <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
+                                </Select>
+                              </FormControl>
+
+                              {formData.safeToContact === "no" && (
+                                <TextField
+                                  fullWidth
+                                  label="Safe contact notes"
+                                  placeholder="Safe time or method, or do not contact"
+                                  value={formData.safeContactNotes}
+                                  onChange={(e) =>
+                                    setField("safeContactNotes", e.target.value)
+                                  }
+                                />
+                              )}
+                            </Stack>
+                          </Box>
                         )}
-                      </Box>
-                    </Stack>
-                  </Box>
+                      </Stack>
+                    </Box>
+                  </>
                 )}
               </Stack>
             </Box>
