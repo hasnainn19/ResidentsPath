@@ -296,6 +296,136 @@ export default function Step2() {
                     </Select>
                   </FormControl>
                 </Box>
+                {/* Further information */}
+                {isHousing && (
+                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                    <Stack spacing={3}>
+                      <Box>
+                        <Typography fontWeight={700} sx={{ mb: 1 }}>
+                          Please select the type of Housing issue{" "}
+                          <Typography component="span" color="error">
+                            *
+                          </Typography>
+                        </Typography>
+
+                        <FormControl fullWidth required>
+                          <InputLabel id="housing-type-label">Select housing issue...</InputLabel>
+                          <Select
+                            labelId="housing-type-label"
+                            label="Select housing issue..."
+                            value={formData.housingType}
+                            onChange={(e) => setField("housingType", e.target.value as HousingType)}
+                          >
+                            <MenuItem value="">Select housing issue...</MenuItem>
+                            <MenuItem value="Homelessness support">Homelessness support</MenuItem>
+                            <MenuItem value="Housing repairs">Housing repairs</MenuItem>
+                            <MenuItem value="Housing application">Housing application</MenuItem>
+                            <MenuItem value="Rent arrears">Rent arrears</MenuItem>
+                            <MenuItem value="Other housing issue">Other housing issue</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Children */}
+                      <Box>
+                        <Stack direction="row" spacing={2} alignItems="flex-end">
+                          <Box sx={{ flex: 1 }}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={formData.hasChildren}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      hasChildren: checked,
+                                      childrenCount: checked ? prev.childrenCount : "0",
+                                    }));
+                                  }}
+                                />
+                              }
+                              label="I have dependent children"
+                            />
+
+                            {formData.hasChildren && (
+                              <FormControl fullWidth>
+                                <InputLabel id="children-count-label">How many children?</InputLabel>
+                                <Select
+                                  labelId="children-count-label"
+                                  label="How many children?"
+                                  value={formData.childrenCount}
+                                  onChange={(e) => setField("childrenCount", e.target.value as Count)}
+                                >
+                                  <MenuItem value="0">0</MenuItem>
+                                  <MenuItem value="1">1</MenuItem>
+                                  <MenuItem value="2">2</MenuItem>
+                                  <MenuItem value="3">3</MenuItem>
+                                  <MenuItem value="4">4</MenuItem>
+                                  <MenuItem value="5">5</MenuItem>
+                                  <MenuItem value="6+">6+</MenuItem>
+                                </Select>
+                              </FormControl>
+                            )}
+                          </Box>
+
+                          <Box
+                            sx={{
+                              bgcolor: "grey.100",
+                              border: "1px solid",
+                              borderColor: "grey.300",
+                              borderRadius: 1,
+                              px: 2,
+                              py: 1.5,
+                              maxWidth: 320,
+                            }}
+                          >
+                          </Box>
+                        </Stack>
+                      </Box>
+
+                      {/* Disability */}
+                      <Box>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.hasDisabilityOrSensory}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  hasDisabilityOrSensory: checked,
+                                  disabilityType: checked ? prev.disabilityType : "",
+                                }));
+                              }}
+                            />
+                          }
+                          label="I have a disability or sensory impairment"
+                        />
+
+                        {formData.hasDisabilityOrSensory && (
+                          <FormControl fullWidth>
+                            <InputLabel id="disability-type-label">Select a type...</InputLabel>
+                            <Select
+                              labelId="disability-type-label"
+                              label="Select a type..."
+                              value={formData.disabilityType}
+                              onChange={(e) => setField("disabilityType", e.target.value as DisabilityType)}
+                            >
+                              <MenuItem value="">Select...</MenuItem>
+                              <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
+                              <MenuItem value="Visual impairment">Visual impairment</MenuItem>
+                              <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
+                              <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
+                              <MenuItem value="Mental health">Mental health</MenuItem>
+                              <MenuItem value="Other">Other</MenuItem>
+                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                            </Select>
+                          </FormControl>
+                        )}
+                      </Box>
+                    </Stack>
+                  </Box>
+                )}
               </Stack>
             </Box>
           </Paper>
