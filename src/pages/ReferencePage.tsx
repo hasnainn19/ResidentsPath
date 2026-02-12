@@ -16,6 +16,7 @@ import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import EastRoundedIcon from '@mui/icons-material/EastRounded';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ButtonBase from '@mui/material/ButtonBase';
+import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 
 
 export default function ReferencePage() {
@@ -25,13 +26,11 @@ export default function ReferencePage() {
 // houslow light puple
 // #E0D4FD
 
-
-
 const ScanButton = styled(ButtonBase)(({ theme }) => ({
   display: 'flex',
   width: '100%',
   minHeight: 180,
-  backgroundColor: '#E0D4FD',
+  backgroundColor: '#e7dff9',
   border: `2px dashed ${grey[600]}`,
   borderRadius: theme.shape.borderRadius * 2,
   alignItems: 'center',
@@ -41,9 +40,6 @@ const ScanButton = styled(ButtonBase)(({ theme }) => ({
     borderColor: grey[900],
   }
 }));
-
-
-
 
 return (
     <div className="reference-page">
@@ -74,7 +70,7 @@ return (
                 <Box sx={{ width: '100%', maxWidth: 480}}>
                         <Button
                             variant="contained"
-                            endIcon={<EastRoundedIcon />}
+                            endIcon={<ManageSearchOutlinedIcon />}
                             sx={{
                                 backgroundColor: '#652F6C',
                                 width: '100%',
