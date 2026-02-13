@@ -181,7 +181,7 @@ export default function Step2() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!canGoNext) return;
-            submitToBackend();
+            nav("/form/step-3");
           }}
         >
           <Stack spacing={4}>
@@ -723,7 +723,6 @@ export default function Step2() {
                 </Box>
               </Stack>
             </Box>
-
             {/* Navigation Buttons */}
             <Box sx={{ pt: 2 }}>
               <Divider sx={{ mb: 3 }} />
@@ -734,7 +733,7 @@ export default function Step2() {
                 </Button>
 
                 <Button type="submit" variant="contained" color="primary" fullWidth disabled={!canGoNext}>
-                  Submit request
+                  Continue
                 </Button>
               </Stack>
 
@@ -742,11 +741,10 @@ export default function Step2() {
                 <Button type="button" onClick={() => nav("/form/step-1")} sx={{ textTransform: "none" }}>
                   {"<-"} Previous
                 </Button>
-                <Button type="button" onClick={() => nav("/form/step-3")} disabled={!canGoNext} sx={{ textTransform: "none" }}>
-                  Next {"->"}
-                </Button>
+                <Box />
               </Stack>
             </Box>
+
           </Stack>
         </Box>
       </Paper>
