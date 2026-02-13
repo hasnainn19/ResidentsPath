@@ -7,6 +7,8 @@ export const initialFormData: FormData = {
   firstName: "",
   lastName: "",
   email: "",
+  phoneCountry: "GB",
+  phoneType: "",
   phone: "",
   dob: null,
 

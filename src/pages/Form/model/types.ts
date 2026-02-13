@@ -46,9 +46,12 @@ export type YesNo = "yes" | "no";
 export type FormData = {
   language: string;
 
+  provideDetails: YesNo;
   firstName: string;
   lastName: string;
   email: string;
+  phoneCountry: string;
+  phoneType: "" | "Mobile" | "Home phone";
   phone: string;
   dob: string | null;
 
