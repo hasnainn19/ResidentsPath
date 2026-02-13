@@ -6,7 +6,6 @@ export default function NavBar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const  userSettings= ['Account', 'Login/signup', 'Logout'];
 
-
   const handleOpenUserMenu = (event:any) => {
     setAnchorElUser(event.currentTarget);
   };
