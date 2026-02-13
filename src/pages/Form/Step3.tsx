@@ -14,6 +14,18 @@ export default function Step3() {
     alert("Submitted (mock)");
   };
 
+  // TODO(BACKEND)
+  const submitToBackend = () => {
+    const payload = {
+      ...formData,
+      childrenCount: formData.hasChildren ? formData.childrenCount : "0",
+      disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
+      urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
+    };
+    console.log(payload);
+    alert("Submitted (mock)");
+  };
+
   return (
     <StepShell
       step={3}

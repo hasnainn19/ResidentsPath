@@ -42,7 +42,6 @@ export function getEnquiryOptions(topLevel: string, choice: string): EnquiryItem
 export function computeCanGoNext(data: FormData, hasEnoughToProceed: boolean, needsUrgentReason: boolean) {
   if (!hasEnoughToProceed) return false;
   if (data.proceed === "") return false;
-  if (data.contactMethod === "") return false;
   if (needsUrgentReason && data.urgentReason === "") return false;
   if (needsUrgentReason && data.urgentReason === "Other" && data.urgentOtherReason.trim() === "") return false;
   return true;
@@ -58,7 +57,7 @@ export function resetFormInfo(prev: FormData): FormData {
     householdSize: "",
 
     hasChildren: false,
-    childrenCount: "1",
+    childrenCount: "0",
 
     hasDisabilityOrSensory: false,
     disabilityType: "",

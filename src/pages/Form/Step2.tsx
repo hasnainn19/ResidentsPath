@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 
 import MicIcon from "@mui/icons-material/Mic";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import StepShell from "./components/StepShell";
 import LeftCheckRow from "./components/LeftCheckRow";
@@ -37,7 +36,7 @@ import {
   resetFormInfo,
 } from "./model/step2Logic";
 
-import type { ContactMethod, Count, Department, DisabilityType, FormData, HouseholdSize, Proceed, SafeToContact, Urgency } from "./model/types";
+import type { Count, Department, DisabilityType, FormData, HouseholdSize, Proceed, SafeToContact, Urgency } from "./model/types";
 
 export default function Step2() {
   const nav = useNavigate();
@@ -55,18 +54,6 @@ export default function Step2() {
 
   // TODO(BACKEND)
   const handleSave = () => alert("Saved (mock)");
-
-  // TODO(BACKEND)
-  const submitToBackend = () => {
-    const payload = {
-      ...formData,
-      childrenCount: formData.hasChildren ? formData.childrenCount : "0",
-      disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
-      urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
-    };
-    console.log(payload);
-    alert("Submitted (mock)");
-  };
 
   const isGeneralServices = formData.topLevel === "GeneralServices";
   const generalServicesIsSection =
@@ -676,53 +663,6 @@ export default function Step2() {
                 </Stack>
               </Box>
             )}
-
-            {/* Contact method */}
-            <Box>
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                Preferred method of contact{" "}
-                <Typography component="span" color="error">
-                  *
-                </Typography>
-              </Typography>
-
-              <Stack direction="row" spacing={2} alignItems="flex-end">
-                <Box sx={{ flex: 1 }}>
-                  <FormControl fullWidth required>
-                    <InputLabel id="contact-label">Select a contact method...</InputLabel>
-                    <Select
-                      labelId="contact-label"
-                      label="Select a contact method..."
-                      value={formData.contactMethod}
-                      onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
-                    >
-                      <MenuItem value="">Select a contact method...</MenuItem>
-                      <MenuItem value="Text message">Text message</MenuItem>
-                      <MenuItem value="Phone call">Phone call</MenuItem>
-                      <MenuItem value="Email">Email</MenuItem>
-                      <MenuItem value="Letter">Letter</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <Box
-                  sx={{
-                    bgcolor: "grey.100",
-                    border: "1px solid",
-                    borderColor: "grey.300",
-                    borderRadius: 1,
-                    px: 2,
-                    py: 1.5,
-                    maxWidth: 320,
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    <InfoOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: "text-bottom" }} />
-                    We will use this to update you on your request
-                  </Typography>
-                </Box>
-              </Stack>
-            </Box>
             {/* Navigation Buttons */}
             <Box sx={{ pt: 2 }}>
               <Divider sx={{ mb: 3 }} />

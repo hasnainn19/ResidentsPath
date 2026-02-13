@@ -21,7 +21,7 @@ type Props = {
   title: string;
   subtitle?: string;
 
-  onBack: () => void;
+  onBack?: () => void;
   onListenAll: () => void;
 
   languageValue: string;
@@ -40,9 +40,15 @@ export default function StepShell(props: Props) {
         <Paper variant="outlined" sx={{ p: 6, borderWidth: 2, borderRadius: 2, bgcolor: "background.paper" }}>
           {/* Top row */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          {props.step > 1 && props.onBack ? (
             <Button type="button" variant="text" onClick={props.onBack} sx={{ textTransform: "none" }}>
               {"<-"} Back
             </Button>
+          ) : (
+            <Box sx={{ width: 80 }} />
+          )}
+
+
 
             <Button
               variant="contained"

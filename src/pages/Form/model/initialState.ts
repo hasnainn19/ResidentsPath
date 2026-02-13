@@ -3,6 +3,13 @@ import type { FormData } from "./types";
 export const initialFormData: FormData = {
   language: "en",
 
+  provideDetails: "yes",
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  dob: null,
+
   topLevel: "",
   generalServicesChoice: "",
 
@@ -11,7 +18,7 @@ export const initialFormData: FormData = {
   routedDepartment: "",
 
   hasChildren: false,
-  childrenCount: "1",
+  childrenCount: "0",
 
   hasDisabilityOrSensory: false,
   disabilityType: "",
