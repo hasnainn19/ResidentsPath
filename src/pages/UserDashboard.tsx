@@ -1,10 +1,11 @@
-import {Grid, styled, Paper, Typography, Box, Button, Stack, Icon} from '@mui/material';
+import {Grid, styled, Paper, Typography, Box, Button, Stack} from '@mui/material';
 import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+
 
 export default function UserDashboard() {
 
@@ -67,7 +68,7 @@ export default function UserDashboard() {
                                         <Dangerous sx={{color:'red', padding:0.5}}/>
                                         <Typography variant='h6'>Please note</Typography>
                                     </Stack>
-                                    <Typography variant='body1'>Wait times are estimated and may vary. Urgent cases may prioritised and seen before you.</Typography>
+                                    <Typography variant='body1'>Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.</Typography>
                                     <Typography variant='subtitle2' color='#d95a49'>We appreciate your patience and understanding.</Typography>
                                 </Item>
                             </Grid>
