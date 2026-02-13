@@ -1,0 +1,185 @@
+import type { EnquiryItem } from "../model/types";
+
+export const TOP_LEVEL: { value: string; label: string }[] = [
+  { value: "CouncilTax", label: "Council Tax" },
+  { value: "Housing", label: "Housing" },
+  { value: "AdultsDuty", label: "Support for adults" },
+  { value: "ChildrensDuty", label: "Children and families" },
+  { value: "CommunityHub", label: "Community Hub and language support" },
+  { value: "GeneralServices", label: "Other council services" },
+];
+
+export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
+  { value: "EnvWaste", label: "Environment and waste" },
+  { value: "RoadsParking", label: "Roads, parking and street issues" },
+  { value: "PlanBuildLicense", label: "Planning, building and licensing" },
+  { value: "ParksLeisureLibraries", label: "Parks, leisure and libraries" },
+  { value: "RegistrationCivic", label: "Registration and civic services" },
+];
+
+export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
+  CouncilTax: [
+    {
+      value: "council_tax_help",
+      label: "Council Tax help",
+      department: "Council Tax or Housing Benefit Help",
+      askHouseholdSize: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "council_tax_appointment",
+      label: "Council Tax appointment",
+      department: "Council Tax or Housing Benefit Help",
+      askHouseholdSize: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "liberata",
+      label: "Liberata (payments, bills or letters)",
+      department: "Council Tax or Housing Benefit Help",
+      askHouseholdSize: true,
+      askChildrenQs: true,
+    },
+  ],
+  Housing: [
+    {
+      value: "housing_benefit_help",
+      label: "Housing Benefit help",
+      department: "Council Tax or Housing Benefit Help",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "homelessness",
+      label: "Homelessness",
+      department: "Homelessness",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "voids_lettings",
+      label: "Voids and lettings",
+      department: "Homelessness",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "housing_issue",
+      label: "Housing issue",
+      department: "Homelessness",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+  ],
+  AdultsDuty: [
+    { value: "blue_badges", label: "Blue Badges", department: "Adults duty", askVulnerabilityQs: true },
+    { value: "freedom_passes", label: "Freedom Passes", department: "Adults duty", askVulnerabilityQs: true },
+  ],
+  ChildrensDuty: [
+    {
+      value: "child_prot_case_conference",
+      label: "Child protection case conference",
+      department: "Childrens duty",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+    {
+      value: "youth_offending_service",
+      label: "Youth Offending Service",
+      department: "Childrens duty",
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+    },
+  ],
+  CommunityHub: [
+    {
+      value: "community_hub_advisor",
+      label: "Community Hub Advisor",
+      department: "Community Hub Advisor",
+      askVulnerabilityQs: true,
+      askDomesticAbuseQs: true,
+    },
+    { value: "translation", label: "Translation", department: "Community Hub Advisor", askVulnerabilityQs: true },
+  ],
+};
+
+export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]> = {
+  EnvWaste: [
+    { value: "environment", label: "Environment", department: "General customer services" },
+    {
+      value: "waste_recycling",
+      label: "Waste and recycling",
+      department: "General customer services",
+      specifics: [
+        { value: "waste", label: "Waste" },
+        { value: "recycling", label: "Recycling" },
+      ],
+    },
+  ],
+  RoadsParking: [
+    { value: "highways", label: "Highways", department: "General customer services" },
+    {
+      value: "parking",
+      label: "Parking",
+      department: "General customer services",
+      specifics: [
+        { value: "permit", label: "Parking permit" },
+        { value: "other", label: "Other parking issue" },
+      ],
+    },
+  ],
+  PlanBuildLicense: [
+    { value: "planning", label: "Planning", department: "General customer services" },
+    { value: "building_control", label: "Building Control", department: "General customer services" },
+    { value: "licensing", label: "Licensing", department: "General customer services" },
+  ],
+  ParksLeisureLibraries: [
+    { value: "parks", label: "Parks", department: "General customer services" },
+    { value: "leisure_centres", label: "Leisure centres", department: "General customer services" },
+    { value: "libraries", label: "Libraries", department: "General customer services" },
+    { value: "allotments", label: "Allotments", department: "General customer services" },
+  ],
+  RegistrationCivic: [
+    { value: "registrars", label: "Registrars", department: "General customer services" },
+    { value: "cemeteries", label: "Cemeteries", department: "General customer services" },
+    { value: "elections", label: "Elections", department: "General customer services" },
+    {
+      value: "members_mps",
+      label: "Members and MPs",
+      department: "General customer services",
+      specifics: [
+        { value: "member", label: "Councillor (Member)" },
+        { value: "mp", label: "Member of Parliament (MP)" },
+      ],
+    },
+  ],
+};
+
+export const GENERAL_SERVICES_DIRECT_ITEMS: EnquiryItem[] = [
+  { value: "floorwalker", label: "Floorwalker", department: "General customer services", askVulnerabilityQs: true },
+  {
+    value: "fraud",
+    label: "Fraud",
+    department: "General customer services",
+    askDomesticAbuseQs: true,
+    askVulnerabilityQs: true,
+  },
+  { value: "complaints", label: "Complaints", department: "General customer services" },
+];
+
+const sectionOptions = GENERAL_SERVICES_SECTIONS.map((s) => ({ value: "section:" + s.value, label: s.label }));
+const directOptions = GENERAL_SERVICES_DIRECT_ITEMS.map((i) => ({ value: "direct:" + i.value, label: i.label }));
+
+export const GENERAL_SERVICES_CHOICE_OPTIONS = sectionOptions.concat(directOptions);
