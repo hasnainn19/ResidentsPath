@@ -8,8 +8,8 @@ import theme from './Constants/Theme';
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-    <ThemeProvider theme={theme}>
-      <RouterProvider router={router} />
-    </ThemeProvider>
-  </StrictMode>
+		<ThemeProvider theme={theme}>
+			<RouterProvider router={router} />
+		</ThemeProvider>
+	</StrictMode>
 )

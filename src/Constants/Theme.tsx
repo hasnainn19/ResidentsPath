@@ -12,7 +12,7 @@ const theme = createTheme({
       dark: '#652f6c',
     },
     secondary: {
-      main: '#f7f7f7',    
+      main: '#ffffff',    
     },
     error: {
       main: '#d32f2f',
