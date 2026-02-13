@@ -17,6 +17,8 @@ const BookingPage = () => {
     const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs('2022-04-17'));
     const [selectedTime, setSelectedTime] = useState("");
     const [unavailableTimes, setUnavailableTimes] = useState([]);
+    const [selectedTimezone, setSelectedTimezone] = useState('UTC');
+
 
     // Generate 30-minute slots (9am–5pm)
     const generateTimes = () => {
@@ -41,6 +43,29 @@ const BookingPage = () => {
         }
     }, [availableTimes]);
 
+    const getTimezones = (): string[] => {
+    // This returns all IANA time zone names
+    return Intl.supportedValuesOf?.('timeZone') || [
+        // Fallback list if browser doesn't support supportedValuesOf
+        'UTC',
+        'Europe/London',
+        'America/New_York',
+        'Asia/Tokyo',
+        'Australia/Sydney',
+    ];
+    };
+
+    const allTimezones = getTimezones();
+
+
+    const formatTimezoneName = (tz: string) => {
+    const offset = new Date().toLocaleString('en-US', {
+        timeZone: tz,
+        timeZoneName: 'short',
+    });
+    return `${tz} (${offset.split(' ')[2]})`; // e.g., "America/New_York (EDT)"
+    };
+
 
         return (
 
@@ -48,11 +73,33 @@ const BookingPage = () => {
             <CardContent>
                 <Stack direction="row" spacing={2} alignItems="center">
                     {/* LEFT SIDE */}
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DateCalendar value={dateValue} onChange={(newValue) => setDateValue(newValue)} />
-                    </LocalizationProvider>
+                    <Box display="flex" flexDirection="column" alignItems="center">
+                        <Typography variant="h6">
+                        Please select your appointment date:
+                        </Typography>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateCalendar value={dateValue} onChange={(newValue) => setDateValue(newValue)} />
+                        </LocalizationProvider>
+                        <Divider />
+                        <Typography variant="h6" mt={2}>
+                        Your Timezone:
+                        </Typography>
+                        <Select
+                            value={selectedTimezone}
+                            onChange={(e) => setSelectedTimezone(e.target.value)}
+                            displayEmpty
+                            fullWidth
+                        >
+                            {allTimezones.map((tz) => (
+                                <MenuItem key={tz} value={tz}>
+                                {formatTimezoneName(tz)}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Box>
 
                     <Divider orientation="vertical" flexItem />
+
 
                     {/* RIGHT SIDE */}
                     <Box display="flex" flexDirection="column" gap={2} minWidth={200}>
