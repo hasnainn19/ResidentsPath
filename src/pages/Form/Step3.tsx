@@ -5,8 +5,10 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
 import StepActions from "./components/StepActions";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { getEnquiryContext } from "./model/enquiriesContext";
+
+type EnquiryContext = ReturnType<typeof getEnquiryContext>;
 
 export default function Step3() {
   const nav = useNavigate();
@@ -47,6 +49,16 @@ export default function Step3() {
     urgent: "Do you need support sooner today?",
     urgentReason: "What best describes why?",
     urgentOtherReason: "Please tell us why",
+
+    needsAccessibility: "Accessibility support (for example: step-free access, hearing loop)",
+    needsLanguage: "Language support / interpretation",
+    needsSeating: "Seating (cannot stand for long)",
+    needsWrittenUpdates: "Written updates (for example: cannot hear announcements)",
+    needsLargeText: "Large text / help reading",
+    needsQuietSpace: "Quieter space",
+    needsBSL: "Interpreter (BSL)",
+    needsHelpWithForms: "Help completing forms",
+    otherSupport: "Other support",
 
     additionalInfo: "Anything else you want to tell us",
     proceed: "How would you like to proceed?",
@@ -98,6 +110,21 @@ export default function Step3() {
       ],
       editTo: "/form/step-2",
     },
+    {
+      title: "Support needs",
+      keys: [
+        "needsAccessibility",
+        "needsLanguage",
+        "needsSeating",
+        "needsWrittenUpdates",
+        "needsLargeText",
+        "needsQuietSpace",
+        "needsBSL",
+        "needsHelpWithForms",
+        "otherSupport",
+      ],
+      editTo: "/form/step-2",
+    },
   ];
 
   function ReviewRow({ label, value }: { label: string; value: string }) {
@@ -135,43 +162,85 @@ export default function Step3() {
     );
   }
 
-  function isNotNull(x: React.ReactNode) {
+  function isNotNull(x: ReactNode): x is Exclude<ReactNode, null | undefined | false> {
     return x !== null && x !== undefined && x !== false;
   }
+
+  const SHOW_ONLY_WHEN_TRUE: ReadonlySet<keyof FormData> = new Set([
+    "needsAccessibility",
+    "needsLanguage",
+    "needsSeating",
+    "needsWrittenUpdates",
+    "needsLargeText",
+    "needsQuietSpace",
+    "needsBSL",
+    "needsHelpWithForms",
+  ]);
+
+  function isEmptyForReview(key: keyof FormData, val: unknown) {
+    if (val === null || val === undefined) return true;
+    if (typeof val === "string" && val.trim() === "") return true;
+    if (typeof val === "boolean" && SHOW_ONLY_WHEN_TRUE.has(key) && val === false) return true;
+    return false;
+  }
+
+  const DEPENDS_ON: Partial<Record<keyof FormData, (fd: FormData) => boolean>> = {
+    childrenCount: (fd) => fd.hasChildren,
+    disabilityType: (fd) => fd.hasDisabilityOrSensory,
+    safeToContact: (fd) => fd.domesticAbuse,
+    safeContactNotes: (fd) => fd.domesticAbuse && fd.safeToContact === "no",
+    urgentReason: (fd) => fd.urgent === "yes",
+    urgentOtherReason: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
+  };
 
   const enquiryContext = useMemo(
     () => getEnquiryContext(formData),
     [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
   );
+
+  const ASKED_IN_CONTEXT: Partial<Record<keyof FormData, (context: EnquiryContext) => boolean>> = {
+    hasChildren: (context) => context.showChildrenQs,
+    childrenCount: (context) => context.showChildrenQs,
+
+    hasDisabilityOrSensory: (context) => context.showDisabilityQs,
+    disabilityType: (context) => context.showDisabilityQs,
+
+    householdSize: (context) => context.showHouseholdSize,
+
+    domesticAbuse: (context) => context.showDomesticAbuseQs,
+    safeToContact: (context) => context.showDomesticAbuseQs,
+    safeContactNotes: (context) => context.showDomesticAbuseQs,
+  };
+
+  const STEP1_KEYS: ReadonlySet<keyof FormData> = new Set([
+    "firstName",
+    "lastName",
+    "email",
+    "phone",
+    "dob",
+    "contactMethod",
+  ]);
+
   function renderReviewItem(key: keyof FormData) {
     const label = reviewLabels[key] || String(key);
 
-    const selectedEnquiry = enquiryContext.selectedEnquiry;
+    const wasAsked = ASKED_IN_CONTEXT[key];
+    if (wasAsked && !wasAsked(enquiryContext)) return null;
 
-    const showChildrenQs = enquiryContext.showChildrenQs;
-    const showDisabilityQs = enquiryContext.showDisabilityQs;
-    const showHouseholdSize = enquiryContext.showHouseholdSize;
-    const showDomesticAbuseQs = enquiryContext.showDomesticAbuseQs;
+    if (STEP1_KEYS.has(key) && formData.provideDetails !== "yes") return null;
+
+    const dep = DEPENDS_ON[key];
+    if (dep && !dep(formData)) return null;
 
     let val: unknown = formData[key];
 
     if (key === "enquiryId") {
-      val = selectedEnquiry?.label || "";
+      val = enquiryContext.selectedEnquiry?.label || "";
     }
 
     if (key === "specificDetailId") {
-      val = selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
+      val = enquiryContext.selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
     }
-
-    const step1Keys: Array<keyof FormData> = ["firstName", "lastName", "email", "phone", "dob", "contactMethod"];
-    if (step1Keys.includes(key) && formData.provideDetails !== "yes") return null;
-    if (!showChildrenQs && (key === "hasChildren" || key === "childrenCount")) return null;
-    if (!showDisabilityQs && (key === "hasDisabilityOrSensory" || key === "disabilityType")) return null;
-    if (!showHouseholdSize && key === "householdSize") return null;
-    if (!showDomesticAbuseQs && (key === "domesticAbuse" || key === "safeToContact" || key === "safeContactNotes"))
-      return null;
-    if (key === "urgentReason" && formData.urgent !== "yes") return null;
-    if (key === "urgentOtherReason" && !(formData.urgent === "yes" && formData.urgentReason === "Other")) return null;
 
     if (key === "urgent" && typeof val === "string") {
       val = URGENCY_LABELS[val] || val;
@@ -181,11 +250,9 @@ export default function Step3() {
       val = SAFE_TO_CONTACT_LABELS[val] || val;
     }
 
-    if (val === null || val === undefined) return null;
-    if (typeof val === "string" && val.trim() === "") return null;
+    if (isEmptyForReview(key, val)) return null;
 
     const displayValue = typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
-
     return <ReviewRow key={String(key)} label={label} value={displayValue} />;
   }
 

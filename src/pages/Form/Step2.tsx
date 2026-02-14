@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
+  Collapse,
   Divider,
   FormControl,
   InputLabel,
@@ -37,7 +38,7 @@ import type {
   Urgency,
 } from "./model/types";
 import StepActions from "./components/StepActions";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getEnquiryContext } from "./model/enquiriesContext";
 
 export default function Step2() {
@@ -147,6 +148,7 @@ export default function Step2() {
     });
   }
 
+  const [showMoreSupport, setShowMoreSupport] = useState(false);
   return (
     <StepShell
       step={2}
@@ -619,39 +621,23 @@ export default function Step2() {
                     onChange={(checked) => setField("needsLanguage", checked)}
                     label="Language support / interpretation"
                   />
+                  <Button
+                    type="button"
+                    size="small"
+                    onClick={() => setShowMoreSupport((s) => !s)}
+                    sx={{ textTransform: "none", alignSelf: "flex-start" }}
+                  >
+                    {showMoreSupport ? "Hide options" : "Show more support options"}
+                  </Button>
 
-                  {formData.hasDisabilityOrSensory && (
-                    <>
-                      <LeftCheckRow
-                        checked={formData.needsSeating}
-                        onChange={(c) => setField("needsSeating", c)}
-                        label="Seating (cannot stand for long)"
-                      />
-                      <LeftCheckRow
-                        checked={formData.needsWrittenUpdates}
-                        onChange={(c) => setField("needsWrittenUpdates", c)}
-                        label="Written updates (for example: cannot hear announcements)"
-                      />
-                      <LeftCheckRow
-                        checked={formData.needsLargeText}
-                        onChange={(c) => setField("needsLargeText", c)}
-                        label="Large text / help reading"
-                      />
-                      <LeftCheckRow
-                        checked={formData.needsQuietSpace}
-                        onChange={(c) => setField("needsQuietSpace", c)}
-                        label="Quieter space"
-                      />
-                      <LeftCheckRow
-                        checked={formData.needsBSL}
-                        onChange={(c) => setField("needsBSL", c)}
-                        label="Interpreter (BSL)"
-                      />
-                      <LeftCheckRow
-                        checked={formData.needsHelpWithForms}
-                        onChange={(c) => setField("needsHelpWithForms", c)}
-                        label="Help completing forms"
-                      />
+                  <Collapse in={showMoreSupport} timeout={200} unmountOnExit>
+                    <Stack spacing={1.25} sx={{ mt: 1 }}>
+                      <LeftCheckRow checked={formData.needsSeating} onChange={(c) => setField("needsSeating", c)} label="Seating (cannot stand for long)" />
+                      <LeftCheckRow checked={formData.needsWrittenUpdates} onChange={(c) => setField("needsWrittenUpdates", c)} label="Written updates (for example: cannot hear announcements)" />
+                      <LeftCheckRow checked={formData.needsLargeText} onChange={(c) => setField("needsLargeText", c)} label="Large text / help reading" />
+                      <LeftCheckRow checked={formData.needsQuietSpace} onChange={(c) => setField("needsQuietSpace", c)} label="Quieter space" />
+                      <LeftCheckRow checked={formData.needsBSL} onChange={(c) => setField("needsBSL", c)} label="Interpreter (BSL)" />
+                      <LeftCheckRow checked={formData.needsHelpWithForms} onChange={(c) => setField("needsHelpWithForms", c)} label="Help completing forms" />
 
                       <TextField
                         fullWidth
@@ -660,8 +646,8 @@ export default function Step2() {
                         value={formData.otherSupport}
                         onChange={(e) => setField("otherSupport", e.target.value)}
                       />
-                    </>
-                  )}
+                    </Stack>
+                  </Collapse>
                 </Stack>
               </Box>
             )}
