@@ -4,13 +4,13 @@ import StepShell from "./components/StepShell";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
-import { getEnquiryOptions } from "./model/step2Logic";
 import StepActions from "./components/StepActions";
+import { useMemo } from "react";
+import { getEnquiryContext } from "./model/enquiriesContext";
 
 export default function Step3() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
-
 
   // TODO(BACKEND)
   const submitToBackend = () => {
@@ -139,11 +139,19 @@ export default function Step3() {
     return x !== null && x !== undefined && x !== false;
   }
 
+  const enquiryContext = useMemo(
+    () => getEnquiryContext(formData),
+    [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
+  );
   function renderReviewItem(key: keyof FormData) {
     const label = reviewLabels[key] || String(key);
 
-    const enquiryOptions = getEnquiryOptions(formData.topLevel, formData.generalServicesChoice);
-    const selectedEnquiry = enquiryOptions.find((x) => x.value === formData.enquiryId) || null;
+    const selectedEnquiry = enquiryContext.selectedEnquiry;
+
+    const showChildrenQs = enquiryContext.showChildrenQs;
+    const showDisabilityQs = enquiryContext.showDisabilityQs;
+    const showHouseholdSize = enquiryContext.showHouseholdSize;
+    const showDomesticAbuseQs = enquiryContext.showDomesticAbuseQs;
 
     let val: unknown = formData[key];
 
@@ -157,11 +165,11 @@ export default function Step3() {
 
     const step1Keys: Array<keyof FormData> = ["firstName", "lastName", "email", "phone", "dob", "contactMethod"];
     if (step1Keys.includes(key) && formData.provideDetails !== "yes") return null;
-
-    if (key === "childrenCount" && !formData.hasChildren) return null;
-    if (key === "disabilityType" && !formData.hasDisabilityOrSensory) return null;
-    if (key === "safeToContact" && !formData.domesticAbuse) return null;
-    if (key === "safeContactNotes" && !(formData.domesticAbuse && formData.safeToContact === "no")) return null;
+    if (!showChildrenQs && (key === "hasChildren" || key === "childrenCount")) return null;
+    if (!showDisabilityQs && (key === "hasDisabilityOrSensory" || key === "disabilityType")) return null;
+    if (!showHouseholdSize && key === "householdSize") return null;
+    if (!showDomesticAbuseQs && (key === "domesticAbuse" || key === "safeToContact" || key === "safeContactNotes"))
+      return null;
     if (key === "urgentReason" && formData.urgent !== "yes") return null;
     if (key === "urgentOtherReason" && !(formData.urgent === "yes" && formData.urgentReason === "Other")) return null;
 
@@ -234,7 +242,7 @@ export default function Step3() {
                     position: "absolute",
                     top: 0,
                     bottom: 0,
-                    left: "calc(50% + 0px)", 
+                    left: "calc(50% + 0px)",
                     width: "1px",
                     bgcolor: "grey.300",
                     pointerEvents: "none",

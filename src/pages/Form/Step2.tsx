@@ -22,22 +22,23 @@ import LeftCheckRow from "./components/LeftCheckRow";
 import { useFormWizard } from "./context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
-import {
-  GENERAL_SERVICES_CHOICE_OPTIONS,
-  GENERAL_SERVICES_DIRECT_ITEMS,
-  TOP_LEVEL,
-} from "./data/enquiries";
+import { GENERAL_SERVICES_CHOICE_OPTIONS, GENERAL_SERVICES_DIRECT_ITEMS, TOP_LEVEL } from "./data/enquiries";
 
-import {
-  ALL_SUPPORT_RESET,
-  DISABILITY_SUPPORT_RESET,
-  computeCanGoNext,
-  getEnquiryOptions,
-  resetFormInfo,
-} from "./model/step2Logic";
+import { ALL_SUPPORT_RESET, DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/step2Logic";
 
-import type { Count, Department, DisabilityType, FormData, HouseholdSize, Proceed, SafeToContact, Urgency } from "./model/types";
+import type {
+  Count,
+  Department,
+  DisabilityType,
+  FormData,
+  HouseholdSize,
+  Proceed,
+  SafeToContact,
+  Urgency,
+} from "./model/types";
 import StepActions from "./components/StepActions";
+import { useMemo } from "react";
+import { getEnquiryContext } from "./model/enquiriesContext";
 
 export default function Step2() {
   const nav = useNavigate();
@@ -50,25 +51,26 @@ export default function Step2() {
   // TODO(BACKEND): Replace with Speech-to-Text
   const handleVoiceInput = () => alert("Voice input started (mock)");
 
+  const enquiryContex = useMemo(
+    () => getEnquiryContext(formData),
+    [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
+  );
 
-  const isGeneralServices = formData.topLevel === "GeneralServices";
-  const generalServicesIsSection =
-    isGeneralServices && formData.generalServicesChoice !== "" && formData.generalServicesChoice.startsWith("section:");
+  const isGeneralServices = enquiryContex.isGeneralServices;
+  const generalServicesIsSection = enquiryContex.generalServicesIsSection;
 
-  const enquiryOptions = getEnquiryOptions(formData.topLevel, formData.generalServicesChoice);
-  const selectedEnquiry = enquiryOptions.find((x) => x.value === formData.enquiryId) || null;
+  const enquiryOptions = enquiryContex.enquiryOptions;
 
-  const specificOptions = selectedEnquiry?.specifics || [];
-  const showSpecificDropdown = !!selectedEnquiry && specificOptions.length > 0;
+  const specificOptions = enquiryContex.specificOptions;
+  const showSpecificDropdown = enquiryContex.showSpecificDropdown;
 
-  const hasChosenEnquiry = formData.enquiryId !== "";
-  const hasSatisfiedSpecific = !showSpecificDropdown || formData.specificDetailId !== "";
-  const hasEnoughToProceed = hasChosenEnquiry && hasSatisfiedSpecific;
+  const hasChosenEnquiry = enquiryContex.hasChosenEnquiry;
+  const hasEnoughToProceed = enquiryContex.hasEnoughToProceed;
 
-  const showChildrenQs = formData.topLevel === "ChildrensDuty" || !!selectedEnquiry?.askChildrenQs;
-  const showDisabilityQs = !!selectedEnquiry?.askVulnerabilityQs;
-  const showHouseholdSize = !!selectedEnquiry?.askHouseholdSize;
-  const showDomesticAbuseQs = !!selectedEnquiry?.askDomesticAbuseQs;
+  const showChildrenQs = enquiryContex.showChildrenQs;
+  const showDisabilityQs = enquiryContex.showDisabilityQs;
+  const showHouseholdSize = enquiryContex.showHouseholdSize;
+  const showDomesticAbuseQs = enquiryContex.showDomesticAbuseQs;
 
   const showSupportNeeds = formData.proceed === "Join digital queue" || formData.proceed === "Schedule appointment";
   const needsUrgentReason = formData.urgent === "yes";
@@ -640,7 +642,11 @@ export default function Step2() {
                         onChange={(c) => setField("needsQuietSpace", c)}
                         label="Quieter space"
                       />
-                      <LeftCheckRow checked={formData.needsBSL} onChange={(c) => setField("needsBSL", c)} label="Interpreter (BSL)" />
+                      <LeftCheckRow
+                        checked={formData.needsBSL}
+                        onChange={(c) => setField("needsBSL", c)}
+                        label="Interpreter (BSL)"
+                      />
                       <LeftCheckRow
                         checked={formData.needsHelpWithForms}
                         onChange={(c) => setField("needsHelpWithForms", c)}
