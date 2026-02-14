@@ -38,7 +38,7 @@ export default function StepShell(props: Props) {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
-  
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
       <Container maxWidth="lg">
@@ -47,7 +47,7 @@ export default function StepShell(props: Props) {
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           {props.step > 1 && props.onBack ? (
             <Button type="button" variant="text" onClick={props.onBack} sx={{ textTransform: "none" }}>
-              {"<-"} Back
+              {"<-"} Previous
             </Button>
           ) : (
             <Box sx={{ width: 80 }} />

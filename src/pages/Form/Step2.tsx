@@ -37,23 +37,19 @@ import {
 } from "./model/step2Logic";
 
 import type { Count, Department, DisabilityType, FormData, HouseholdSize, Proceed, SafeToContact, Urgency } from "./model/types";
+import StepActions from "./components/StepActions";
 
 export default function Step2() {
   const nav = useNavigate();
-  const { formData, setFormData } = useFormWizard();
+  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
-  // TODO(BACKEND): Replace with Text-to-Speech
-  const handleListenAll = () => alert("Reading instructions (mock)");
-
   // TODO(BACKEND): Replace with Speech-to-Text
   const handleVoiceInput = () => alert("Voice input started (mock)");
 
-  // TODO(BACKEND)
-  const handleSave = () => alert("Saved (mock)");
 
   const isGeneralServices = formData.topLevel === "GeneralServices";
   const generalServicesIsSection =
@@ -664,27 +660,13 @@ export default function Step2() {
               </Box>
             )}
             {/* Navigation Buttons */}
-            <Box sx={{ pt: 2 }}>
-              <Divider sx={{ mb: 3 }} />
-
-              <Stack direction="row" spacing={2}>
-                <Button type="button" variant="outlined" color="primary" fullWidth onClick={handleSave}>
-                  Save and continue later
-                </Button>
-
-                <Button type="submit" variant="contained" color="primary" fullWidth disabled={!canGoNext}>
-                  Continue
-                </Button>
-              </Stack>
-
-              <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-                <Button type="button" onClick={() => nav("/form/step-1")} sx={{ textTransform: "none" }}>
-                  {"<-"} Previous
-                </Button>
-                <Box />
-              </Stack>
-            </Box>
-
+            <StepActions
+              onSave={handleSave}
+              advanceLabel="Continue"
+              advanceDisabled={!canGoNext}
+              showPrevious
+              onPrevious={() => nav("/form/step-1")}
+            />
           </Stack>
         </Box>
       </Paper>

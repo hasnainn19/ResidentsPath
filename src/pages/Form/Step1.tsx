@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Paper,
   Typography,
-  Button,
   Stack,
   Alert,
   Box,
@@ -30,6 +29,7 @@ import StepShell from "./components/StepShell";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData } from "./model/types";
+import StepActions from "./components/StepActions";
 
 type PhoneType = "" | "Mobile" | "Home phone";
 
@@ -39,10 +39,7 @@ function digitsOnly(s: string) {
 
 export default function Step1() {
   const nav = useNavigate();
-  const { formData, setFormData } = useFormWizard();
-
-  // TODO(BACKEND): Replace with Text-to-Speech
-  const handleListenAll = () => alert("Reading instructions (mock)");
+  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -50,9 +47,6 @@ export default function Step1() {
 
   const provideDetails: YesNo = formData.provideDetails ?? "yes";
   const dobValue = formData.dob ? dayjs(formData.dob) : null;
-
-  // TODO(BACKEND)
-  const handleSave = () => alert("Saved (mock)");
 
   // If the user says no, wipe the personal fields
   function handleProvideDetailsChange(v: YesNo) {
@@ -342,7 +336,6 @@ export default function Step1() {
                           <MenuItem value="Text message">Text message</MenuItem>
                           <MenuItem value="Phone call">Phone call</MenuItem>
                           <MenuItem value="Email">Email</MenuItem>
-                          <MenuItem value="Letter">Letter</MenuItem>
                         </Select>
                       </FormControl>
                     </Box>
@@ -372,17 +365,10 @@ export default function Step1() {
             <Divider />
 
             {/* Navigation Buttons */}
-            <Box sx={{ pt: 2 }}>
-              <Divider sx={{ mb: 3 }} />
-              <Stack direction="row" spacing={2}>
-                <Button type="button" variant="outlined" color="primary" fullWidth onClick={handleSave}>
-                  Save and continue later
-                </Button>
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Continue
-                </Button>
-              </Stack>
-            </Box>
+            <StepActions
+              onSave={handleSave}
+              advanceLabel="Continue"
+            />
           </Stack>
         </Paper>
       </Box>

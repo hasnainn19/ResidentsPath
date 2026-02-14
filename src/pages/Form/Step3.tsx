@@ -5,12 +5,12 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
 import { getEnquiryOptions } from "./model/step2Logic";
+import StepActions from "./components/StepActions";
 
 export default function Step3() {
   const nav = useNavigate();
-  const { formData, setFormData } = useFormWizard();
+  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
 
-  const handleListenAll = () => alert("Reading instructions (mock)");
 
   // TODO(BACKEND)
   const submitToBackend = () => {
@@ -247,14 +247,14 @@ export default function Step3() {
           );
         })}
 
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={() => nav("/form/step-2")}>
-            Previous
-          </Button>
-          <Button variant="contained" onClick={submitToBackend}>
-            Submit
-          </Button>
-        </Stack>
+        {/* Navigation Buttons */}
+        <StepActions
+          onSave={handleSave}
+          advanceLabel="Submit request"
+          onAdvanceClick={submitToBackend}
+          showPrevious
+          onPrevious={() => nav("/form/step-2")}
+        />
       </Paper>
     </StepShell>
   );
