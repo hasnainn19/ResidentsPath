@@ -67,18 +67,22 @@ export default function Step3() {
   const SECTIONS: Array<{
     title: string;
     keys: Array<keyof FormData>;
+    editTo: "/form/step-1" | "/form/step-2";
   }> = [
     {
       title: "Your details",
       keys: ["firstName", "lastName", "dob", "email", "phone", "contactMethod"],
+      editTo: "/form/step-1",
     },
     {
       title: "Your request",
       keys: ["enquiryId", "specificDetailId", "proceed", "additionalInfo"],
+      editTo: "/form/step-2",
     },
     {
       title: "Urgency",
       keys: ["urgent", "urgentReason", "urgentOtherReason"],
+      editTo: "/form/step-2",
     },
     {
       title: "Additional questions",
@@ -92,6 +96,7 @@ export default function Step3() {
         "safeToContact",
         "safeContactNotes",
       ],
+      editTo: "/form/step-2",
     },
   ];
 
@@ -207,6 +212,16 @@ export default function Step3() {
               <Typography variant="h6" fontWeight={800} sx={{ mb: 0.5 }}>
                 {section.title}
               </Typography>
+
+              <Button
+                type="button"
+                size="medium"
+                variant="text"
+                onClick={() => nav(section.editTo)}
+                sx={{ textTransform: "none" }}
+              >
+                Edit
+              </Button>
 
               <Paper
                 variant="outlined"

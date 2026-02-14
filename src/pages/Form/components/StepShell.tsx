@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import type { LanguageOption } from "../model/types";
+import { useEffect } from "react";
 
 type Props = {
   step: number;
@@ -34,6 +35,10 @@ type Props = {
 export default function StepShell(props: Props) {
   const percent = Math.round((props.step / props.totalSteps) * 100);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+  
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
       <Container maxWidth="lg">
