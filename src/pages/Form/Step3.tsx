@@ -1,18 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { Paper, Typography, Button, Stack } from "@mui/material";
+import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
 import StepShell from "./components/StepShell";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
+import type { FormData } from "./model/types";
+import { getEnquiryOptions } from "./model/step2Logic";
 
 export default function Step3() {
   const nav = useNavigate();
   const { formData, setFormData } = useFormWizard();
 
   const handleListenAll = () => alert("Reading instructions (mock)");
-  const submit = () => {
-    console.log("Submitting payload:", formData);
-    alert("Submitted (mock)");
-  };
 
   // TODO(BACKEND)
   const submitToBackend = () => {
@@ -25,6 +23,158 @@ export default function Step3() {
     console.log(payload);
     alert("Submitted (mock)");
   };
+
+  const reviewLabels: Partial<Record<keyof FormData, string>> = {
+    firstName: "First name",
+    lastName: "Last name",
+    email: "Email",
+    phone: "Phone number",
+    dob: "Date of birth",
+    contactMethod: "Preferred method of contact",
+
+    enquiryId: "Choose an enquiry",
+    specificDetailId: "More detail",
+
+    hasChildren: "I have dependent children",
+    childrenCount: "How many children?",
+    householdSize: "How many people are in your household?",
+    hasDisabilityOrSensory: "I have a disability or sensory impairment",
+    disabilityType: "Select a type...",
+    domesticAbuse: "I am a domestic abuse victim/survivor",
+    safeToContact: "Is it safe for us to contact you?",
+    safeContactNotes: "Safe contact notes",
+
+    urgent: "Do you need support sooner today?",
+    urgentReason: "What best describes why?",
+    urgentOtherReason: "Please tell us why",
+
+    additionalInfo: "Anything else you want to tell us",
+    proceed: "How would you like to proceed?",
+  };
+
+  const URGENCY_LABELS: Record<string, string> = {
+    yes: "Yes",
+    no: "No",
+    unsure: "Unsure",
+  };
+
+  const SAFE_TO_CONTACT_LABELS: Record<string, string> = {
+    yes: "Yes",
+    no: "No",
+    prefer_not_to_say: "Prefer not to say",
+  };
+
+  const SECTIONS: Array<{
+    title: string;
+    keys: Array<keyof FormData>;
+  }> = [
+    {
+      title: "Your details",
+      keys: ["firstName", "lastName", "dob", "email", "phone", "contactMethod"],
+    },
+    {
+      title: "Your request",
+      keys: ["enquiryId", "specificDetailId", "proceed", "additionalInfo"],
+    },
+    {
+      title: "Urgency",
+      keys: ["urgent", "urgentReason", "urgentOtherReason"],
+    },
+    {
+      title: "Additional questions",
+      keys: [
+        "hasChildren",
+        "childrenCount",
+        "householdSize",
+        "hasDisabilityOrSensory",
+        "disabilityType",
+        "domesticAbuse",
+        "safeToContact",
+        "safeContactNotes",
+      ],
+    },
+  ];
+
+  function ReviewRow({ label, value }: { label: string; value: string }) {
+    return (
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "minmax(260px, 1fr) minmax(260px, 1fr)",
+          py: 1.25,
+          px: 2,
+          "&:hover": { bgcolor: "grey.50" },
+        }}
+      >
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: "left", pr: 2, minWidth: 220, fontWeight: 800 }}
+        >
+          {label}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            textAlign: "right",
+            wordBreak: "break-word",
+            flex: 1,
+            fontWeight: 800,
+            pl: 2,
+          }}
+        >
+          {value}
+        </Typography>
+      </Box>
+    );
+  }
+
+  function isNotNull(x: React.ReactNode) {
+    return x !== null && x !== undefined && x !== false;
+  }
+
+  function renderReviewItem(key: keyof FormData) {
+    const label = reviewLabels[key] || String(key);
+
+    const enquiryOptions = getEnquiryOptions(formData.topLevel, formData.generalServicesChoice);
+    const selectedEnquiry = enquiryOptions.find((x) => x.value === formData.enquiryId) || null;
+
+    let val: unknown = formData[key];
+
+    if (key === "enquiryId") {
+      val = selectedEnquiry?.label || "";
+    }
+
+    if (key === "specificDetailId") {
+      val = selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
+    }
+
+    const step1Keys: Array<keyof FormData> = ["firstName", "lastName", "email", "phone", "dob", "contactMethod"];
+    if (step1Keys.includes(key) && formData.provideDetails !== "yes") return null;
+
+    if (key === "childrenCount" && !formData.hasChildren) return null;
+    if (key === "disabilityType" && !formData.hasDisabilityOrSensory) return null;
+    if (key === "safeToContact" && !formData.domesticAbuse) return null;
+    if (key === "safeContactNotes" && !(formData.domesticAbuse && formData.safeToContact === "no")) return null;
+    if (key === "urgentReason" && formData.urgent !== "yes") return null;
+    if (key === "urgentOtherReason" && !(formData.urgent === "yes" && formData.urgentReason === "Other")) return null;
+
+    if (key === "urgent" && typeof val === "string") {
+      val = URGENCY_LABELS[val] || val;
+    }
+
+    if (key === "safeToContact" && typeof val === "string") {
+      val = SAFE_TO_CONTACT_LABELS[val] || val;
+    }
+
+    if (val === null || val === undefined) return null;
+    if (typeof val === "string" && val.trim() === "") return null;
+
+    const displayValue = typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
+
+    return <ReviewRow key={String(key)} label={label} value={displayValue} />;
+  }
 
   return (
     <StepShell
@@ -40,15 +190,53 @@ export default function Step3() {
     >
       <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
         <Typography fontWeight={800} sx={{ mb: 2 }}>
-          Step 3 
+          Step 3
         </Typography>
 
+        <Typography variant="h6" sx={{ mb: 3 }}>
+          Please review your information before submitting:
+        </Typography>
+
+        {SECTIONS.map((section) => {
+          const items = section.keys.map((k) => renderReviewItem(k)).filter(isNotNull);
+
+          if (items.length === 0) return null;
+
+          return (
+            <Box key={section.title} sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight={800} sx={{ mb: 0.5 }}>
+                {section.title}
+              </Typography>
+
+              <Paper
+                variant="outlined"
+                sx={{
+                  borderRadius: 2,
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    bottom: 0,
+                    left: "calc(50% + 0px)", 
+                    width: "1px",
+                    bgcolor: "grey.300",
+                    pointerEvents: "none",
+                  },
+                }}
+              >
+                <Stack divider={<Divider flexItem />}>{items}</Stack>
+              </Paper>
+            </Box>
+          );
+        })}
 
         <Stack direction="row" spacing={2}>
           <Button variant="outlined" onClick={() => nav("/form/step-2")}>
             Previous
           </Button>
-          <Button variant="contained" onClick={submit}>
+          <Button variant="contained" onClick={submitToBackend}>
             Submit
           </Button>
         </Stack>
