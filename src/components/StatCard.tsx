@@ -8,6 +8,7 @@ interface StatCardProps {
   label: string;
   change: string;
   isPositive: boolean;
+  lastUpdated?: string;
 }
 const StatCard = ({
   icon: Icon,
@@ -15,6 +16,7 @@ const StatCard = ({
   label,
   change,
   isPositive,
+  lastUpdated,
 }: StatCardProps) => {
   return (
     <Card sx={{ borderRadius: 3, height: "100%" }}>
@@ -45,6 +47,9 @@ const StatCard = ({
 
         <Typography variant="body2" color="text.secondary">
           {label}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+          Last updated: {lastUpdated ? lastUpdated : "--:--"}
         </Typography>
       </CardContent>
     </Card>

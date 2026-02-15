@@ -6,6 +6,8 @@ import {
   Box,
   Chip,
 } from "@mui/material";
+import ServiceQueueModal from "./ServiceQueueModal";
+import React from "react";
 
 type PriorityBreakdown = {
   Low: number;
@@ -30,6 +32,9 @@ const QueueRow = ({
   steppedOut,
   availableStaff,
 }: QueueRowProps) => {
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const handleOpen = () => setModalOpen(true);
+  const handleClose = () => setModalOpen(false);
   return (
     <TableRow hover>
       <TableCell>
@@ -66,9 +71,10 @@ const QueueRow = ({
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button variant="outlined" size="small">
+          <Button variant="outlined" size="small" onClick={handleOpen}>
             Adjust
           </Button>
+          <ServiceQueueModal open={modalOpen} handleClose={handleClose} />
           <Button variant="outlined" size="small" color="error">
             Cases
           </Button>

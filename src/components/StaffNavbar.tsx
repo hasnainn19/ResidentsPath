@@ -63,6 +63,11 @@ const StaffNavbar = () => {
           url="/staff/appointments"
         />
         <StaffNavItem
+          icon={<EventIcon />}
+          label="Current Staff"
+          url="/staff/staff"
+        />
+        <StaffNavItem
           icon={<SettingsIcon />}
           label="Settings"
           url="/staff/settings"

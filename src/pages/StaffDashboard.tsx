@@ -59,6 +59,7 @@ const StaffDashboard = () => {
       label: "Longest Wait Time",
       change: "+5%",
       isPositive: true,
+      lastUpdated: "2024-06-01 14:30",
     },
   ];
 
