@@ -1,4 +1,3 @@
-import StaffNavbar from "../components/StaffNavbar";
 import {
   Box,
   Grid,
@@ -11,13 +10,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
 import {
   People as PeopleIcon,
   HowToReg as HowToRegIcon,
   AccessTime as AccessTimeIcon,
   TrendingUp as TrendingUpIcon,
-  TrendingUp,
 } from "@mui/icons-material";
 
 import StatCard from "../components/StatCard";
