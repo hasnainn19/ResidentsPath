@@ -23,7 +23,7 @@ export default function NavBar() {
             <Tooltip title="Show queue information">
               <Button color="inherit">Queue</Button>
             </Tooltip>
-            <Tooltip title="Create you case">
+            <Tooltip title="Create your case">
               <Button color="inherit">Form</Button>
             </Tooltip>
             <Box>
@@ -53,7 +53,7 @@ export default function NavBar() {
                 ))}
               </Menu>
             </Box>
-            <Tooltip title="Redirect to hounslow council website">
+            <Tooltip title="Redirect to Hounslow Council website">
               <Button color="inherit">Hounslow Website</Button>
             </Tooltip>
           </Stack>
