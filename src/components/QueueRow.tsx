@@ -74,7 +74,11 @@ const QueueRow = ({
           <Button variant="outlined" size="small" onClick={handleOpen}>
             Adjust
           </Button>
-          <ServiceQueueModal open={modalOpen} handleClose={handleClose} />
+          <ServiceQueueModal
+            serviceName={service}
+            open={modalOpen}
+            handleClose={handleClose}
+          />
           <Button variant="outlined" size="small" color="error">
             Cases
           </Button>

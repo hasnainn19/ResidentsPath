@@ -7,6 +7,7 @@ import { Height } from "@mui/icons-material";
 import ConfirmChangeModal from "./ConfirmChangeModal";
 
 interface ServiceQueueModalProps {
+  serviceName: string;
   open: boolean;
   handleClose: () => void;
 }
@@ -79,7 +80,11 @@ const initialServiceCases = [
   },
 ];
 
-const ServiceQueueModal = ({ open, handleClose }: ServiceQueueModalProps) => {
+const ServiceQueueModal = ({
+  serviceName,
+  open,
+  handleClose,
+}: ServiceQueueModalProps) => {
   const [serviceCases, setServiceCases] = useState(initialServiceCases);
   const [confirmationModalOpen, setConfirmationModalOpen] =
     React.useState(false);
@@ -128,7 +133,7 @@ const ServiceQueueModal = ({ open, handleClose }: ServiceQueueModalProps) => {
       <Box sx={style}>
         <Box>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Service Name
+            {serviceName} Service Queue
           </Typography>
         </Box>
         <DragDropProvider
