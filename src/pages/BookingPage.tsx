@@ -43,7 +43,7 @@ const BookingPage = () => {
     // Filter out unavailable times for the selected date
     const availableTimes = allTimes.filter(time => !unavailableTimes.includes(time));
 
-    // if the selected time becomes unavailable (e.g., user changes date), clear the selection
+    // If the selected time becomes unavailable (e.g., user changes date), clear the selection
     useEffect(() => {
         if (!availableTimes.includes(selectedTime)) {
             setSelectedTime('');
@@ -56,8 +56,6 @@ const BookingPage = () => {
             allTimes.filter(time => !unavailableTimes.includes(time))
         }
     }, [selectedDate, unavailableTimes]);
-
-
 
     function handleConfirm() {
         // navigate to next page
@@ -75,134 +73,75 @@ const BookingPage = () => {
     </Typography>
     <Card variant="outlined" sx={{ borderWidth: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} >
     <CardContent sx={{ p: 5 }}>
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'stretch',
-            gap: 3,
-            minHeight: 400,
-            flexDirection: 'row',
-
-        }}
-        >
-            <Box
-              sx={{
-                flex: 1,
-                height: '100%',
-                minWidth: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-                <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',  
-                    justifyContent: 'space-between', 
-                    mb: 2,
-                }}
-            >            
+        <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 3, minHeight: 400, flexDirection: 'row' }}>
+            <Box sx={{ flex: 1, height: '100%',  minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>            
                     <Typography variant="h5" color="text.primary" sx={{ fontWeight: 700}}>
                         Select the date:   
                     </Typography>
                     <Avatar sx={{ ml: 3, bgcolor: '#E0D4FD', color: '#652F6C', width: 36, height: 36 }}>
                         <CalendarMonthOutlinedIcon />
                     </Avatar>
-            </Box>
-            
-            <Box sx={{ minWidth: 320 }}>
-
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <StaticDatePicker
-                        displayStaticWrapperAs="desktop"
-                        value={selectedDate}
-                        onChange={(newValue) => setselectedDate(newValue)}
-                        minDate={dayjs()}
-                        sx = {{
-                            color: '#6d3874',
-                        }}
-                        slotProps={{
-                            toolbar: { toolbarFormat: 'ddd DD MMMM', hidden: false },
-                            actionBar: { actions: [] }, 
-                        }}
-                    />
-                </LocalizationProvider>
-            </Box>
-          </Box>
-
-        <Divider orientation="vertical" flexItem aria-hidden="true" sx={{  borderWidth: 1 }} />
-
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0,}}>
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',  
-                    justifyContent: 'space-between', 
-                    mb: 2,
-                }}
-            >
-                <Typography variant="h5" color="text.primary" sx={{ fontWeight: 700 }}>
-                    Select a time below:
-                </Typography>
-                <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C', width: 36, height: 36 }}>
-                    <ScheduleOutlinedIcon />
-                </Avatar>
-            </Box>
-                
-                <Box
-                className="bookingpage-time-list"
-                sx={{
-                    border: '2px solid #6d3874',
-                    borderRadius: 1,
-                    maxHeight: 300, 
-                    overflowY: 'scroll',
-                }}
-                >
-                    <List disablePadding >
-                        {availableTimes.map(time => (
-                        <ListItem key={time}disablePadding>
-                            <ListItemButton 
-                                selected={selectedTime === time} 
-                                className="bookingpage-time-list-item-btn"
-                                onClick={() => setSelectedTime(time)} 
-                                  sx={{
-
-                                    borderBottom: '1px solid #ddd', 
-                                }}
-                            >
-                                <ListItemText primary={time} />
-                            </ListItemButton>
-                        </ListItem>
-                        ))}
-                    </List>
                 </Box>
-                <Chip
-                    icon={<HistoryToggleOffOutlinedIcon />}
-                    label={selectedTime || '--:--'}
-                    color="secondary"
-                    variant="outlined"
-                    sx={{
-                        fontWeight: 700,
-                        bgcolor: '#E0D4FD',       // background color
-                        color: '#652F6C',          // text & icon color
-                        height: 40,                // optional: match your design
-                    }}
-                />
+                <Box sx={{ minWidth: 320 }}>
+
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <StaticDatePicker
+                            displayStaticWrapperAs="desktop"
+                            value={selectedDate}
+                            onChange={(newValue) => setselectedDate(newValue)}
+                            minDate={dayjs()}
+                            sx = {{
+                                color: '#6d3874',
+                            }}
+                            slotProps={{
+                                toolbar: { toolbarFormat: 'ddd DD MMMM', hidden: false },
+                                actionBar: { actions: [] }, 
+                            }}
+                        />
+                    </LocalizationProvider>
+                </Box>
+            </Box>
+
+            <Divider orientation="vertical" flexItem aria-hidden="true" sx={{  borderWidth: 1 }} />
+
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0,}}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                    <Typography variant="h5" color="text.primary" sx={{ fontWeight: 700 }}>
+                        Select a time below:
+                    </Typography>
+                    <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C', width: 36, height: 36 }}>
+                        <ScheduleOutlinedIcon />
+                    </Avatar>
+                </Box>
+                    
+                <Box className="bookingpage-time-list" sx={{ border: '2px solid #6d3874', borderRadius: 1,  maxHeight: 300, overflowY: 'scroll' }}>
+                        <List disablePadding >
+                            {availableTimes.map(time => (
+                            <ListItem key={time}disablePadding>
+                                <ListItemButton selected={selectedTime === time} className="bookingpage-time-list-item-btn" onClick={() => setSelectedTime(time)} sx={{ borderBottom: '1px solid #ddd' }}>
+                                    <ListItemText primary={time} />
+                                </ListItemButton>
+                            </ListItem>
+                            ))}
+                        </List>
+                </Box>
+                <Chip icon={<HistoryToggleOffOutlinedIcon />} label={selectedTime || '--:--'} color="secondary" variant="outlined" sx={{ fontWeight: 700, bgcolor: '#E0D4FD', color: '#652F6C', height: 40,  }} />
                 <CardActions>
-                <Tooltip title="Clear appointment selection" placement="top">
-                    <Button variant="outlined" color="secondary" onClick={handleClear}>
-                        Clear
-                    </Button>
-                </Tooltip>
-                <Tooltip title={'Confirm your appointment'} placement="top">
-                    <Button variant="contained" color="secondary" disabled={!selectedTime} onClick={handleConfirm}>
-                        Confirm
-                    </Button>
-                </Tooltip>
+                    <Tooltip title="Clear appointment selection" placement="top">
+                        <Button variant="outlined" color="secondary" onClick={handleClear}>
+                            Clear
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title={'Confirm your appointment'} placement="top">
+                        <Button variant="contained" color="secondary" disabled={!selectedTime} onClick={handleConfirm}>
+                            Confirm
+                        </Button>
+                    </Tooltip>
                 </CardActions>
-          </Box>
+            </Box>
         </Box>
-      </CardContent>
+    </CardContent>
     </Card>
     </div>
   );
