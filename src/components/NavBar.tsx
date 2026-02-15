@@ -20,37 +20,42 @@ export default function NavBar() {
             ResidentsPath
           </Typography>
           <Stack direction='row' spacing={2}>
-          <Button color="inherit">Queue</Button>
-          <Button color="inherit">Form</Button>
-          <Button color="inherit">Hounslow Website</Button>
-          <Box>
-            <Tooltip title="Open user settings">
-              <Button onClick={handleOpenUserMenu} color="inherit">Profile</Button>
+            <Tooltip title="Show queue information">
+              <Button color="inherit">Queue</Button>
             </Tooltip>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              sx={{mt:4}}
-            >
-              {userSettings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Button color="inherit">Login</Button>
+            <Tooltip title="Create you case">
+              <Button color="inherit">Form</Button>
+            </Tooltip>
+            <Box>
+              <Tooltip title="Open user settings">
+                <Button onClick={handleOpenUserMenu} color="inherit">Profile</Button>
+              </Tooltip>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+                sx={{mt:4}}
+              >
+                {userSettings.map((setting) => (
+                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            <Tooltip title="Redirect to hounslow council website">
+              <Button color="inherit">Hounslow Website</Button>
+            </Tooltip>
           </Stack>
         </Toolbar>
       </AppBar>
