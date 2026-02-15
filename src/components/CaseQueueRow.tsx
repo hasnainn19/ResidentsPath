@@ -21,10 +21,10 @@ const CaseQueueRow = ({
 }: CaseQueueRowProps) => {
   const { ref, handleRef, isDragging } = useSortable({
     id,
-    index: queuePosition - 1, // Assuming queuePosition starts at 1
+    index: queuePosition - 1,
   });
 
-  console.log(`CaseQueueRow ${id} rendering with position:`, queuePosition); // Add this debug log
+  console.log(`CaseQueueRow ${id} rendering with position:`, queuePosition);
 
   return (
     <li ref={ref} style={{ listStyle: "none" }}>
@@ -79,9 +79,9 @@ const CaseQueueRow = ({
           {description}
         </Typography>
 
-        <Typography variant="caption">
+        {/* <Typography variant="caption">
           Queue Position: {queuePosition}
-        </Typography>
+        </Typography> */}
       </Box>
     </li>
   );

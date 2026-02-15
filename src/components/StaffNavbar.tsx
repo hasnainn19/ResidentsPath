@@ -15,6 +15,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import EventIcon from "@mui/icons-material/Event";
 import SettingsIcon from "@mui/icons-material/Settings";
+import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
 const drawerWidth = 240;
 
@@ -57,21 +58,22 @@ const StaffNavbar = () => {
           label="Current Cases"
           url="/staff/cases"
         />
-        <StaffNavItem
+        {/* <StaffNavItem
           icon={<EventIcon />}
           label="Appointments"
           url="/staff/appointments"
-        />
+        /> */}
         <StaffNavItem
           icon={<EventIcon />}
           label="Current Staff"
           url="/staff/directory"
         />
         <StaffNavItem
-          icon={<SettingsIcon />}
-          label="Settings"
-          url="/staff/settings"
+          icon={<WorkIcon />}
+          label="My cases"
+          url="/staff/my-cases"
         />
+        <StaffNavItem icon={<SettingsIcon />} label="Settings" url="/staff" />
       </List>
     </Drawer>
   );

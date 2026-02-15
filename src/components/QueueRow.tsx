@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import ServiceQueueModal from "./ServiceQueueModal";
 import React from "react";
+import { useNavigate } from "react-router";
 
 type PriorityBreakdown = {
   Low: number;
@@ -35,6 +36,7 @@ const QueueRow = ({
   const [modalOpen, setModalOpen] = React.useState(false);
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
+  const navigate = useNavigate();
   return (
     <TableRow hover>
       <TableCell>
@@ -79,7 +81,12 @@ const QueueRow = ({
             open={modalOpen}
             handleClose={handleClose}
           />
-          <Button variant="outlined" size="small" color="error">
+          <Button
+            variant="outlined"
+            size="small"
+            color="error"
+            onClick={() => navigate(`/staff/cases/`)}
+          >
             Cases
           </Button>
         </Box>
