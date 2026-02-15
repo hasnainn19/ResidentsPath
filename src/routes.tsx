@@ -3,6 +3,7 @@ import App from "./App";
 import StaffDashboard from "./pages/StaffDashboard";
 import CaseManagementPage from "./pages/CaseManagement";
 import StaffLayout from "./layouts/StaffLayout";
+import StaffDirectoryPage from "./pages/StaffDirectoryPage";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "cases",
         element: <CaseManagementPage />,
+      },
+      {
+        path: "directory",
+        element: <StaffDirectoryPage />,
       },
     ],
   },

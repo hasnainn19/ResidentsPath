@@ -65,7 +65,7 @@ const StaffNavbar = () => {
         <StaffNavItem
           icon={<EventIcon />}
           label="Current Staff"
-          url="/staff/staff"
+          url="/staff/directory"
         />
         <StaffNavItem
           icon={<SettingsIcon />}
