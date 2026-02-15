@@ -1,5 +1,16 @@
 import StaffNavbar from "../components/StaffNavbar";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 
 import {
   People as PeopleIcon,
@@ -8,8 +19,9 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingUp,
 } from "@mui/icons-material";
+
 import StatCard from "../components/StatCard";
-import QueueItem from "../components/QueueItem";
+import QueueRow from "../components/QueueRow";
 
 const StaffDashboard = () => {
   const stats = [
@@ -41,117 +53,105 @@ const StaffDashboard = () => {
       change: "+5%",
       isPositive: true,
     },
+    {
+      icon: TrendingUpIcon,
+      value: "94%",
+      label: "Longest Wait Time",
+      change: "+5%",
+      isPositive: true,
+    },
   ];
 
   const queues = [
     {
-      service: "Primary Care",
+      service: "Benefits and financial support",
       waiting: 12,
-      averageWaitTime: "15 mins",
-      averagePriority: "Medium",
+      longestWaitTime: "15 mins",
+      priorityBreakdown: { Low: 2, Medium: 5, High: 5 },
       steppedOut: 3,
     },
     {
-      service: "Emergency",
+      service: "Births, deaths and ceremonies",
       waiting: 8,
-      averageWaitTime: "5 mins",
-      averagePriority: "High",
+      longestWaitTime: "5 mins",
+      priorityBreakdown: { Low: 1, Medium: 3, High: 4 },
       steppedOut: 1,
     },
     {
-      service: "Specialist ",
+      service: "Business and licensing",
       waiting: 5,
-      averageWaitTime: "25 mins",
-      averagePriority: "Low",
+      longestWaitTime: "25 mins",
+      priorityBreakdown: { Low: 3, Medium: 1, High: 1 },
       steppedOut: 2,
     },
     {
-      service: "Pharmacy",
+      service: "Community hub and libraries",
       waiting: 18,
-      averageWaitTime: "10 mins",
-      averagePriority: "Medium",
+      longestWaitTime: "10 mins",
+      priorityBreakdown: { Low: 5, Medium: 8, High: 5 },
+      steppedOut: 4,
+    },
+    {
+      service: "Community hub and libraries",
+      waiting: 18,
+      longestWaitTime: "10 mins",
+      priorityBreakdown: { Low: 2, Medium: 4, High: 2 },
+      steppedOut: 4,
+    },
+    {
+      service: "Community hub and libraries",
+      waiting: 18,
+      longestWaitTime: "10 mins",
+      priorityBreakdown: { Low: 1, Medium: 2, High: 1 },
       steppedOut: 4,
     },
   ];
 
   return (
-    <div>
-      <Box sx={{ display: "flex" }}>
-        <StaffNavbar />
-
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 4,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 4,
-              width: "100%",
-              maxWidth: 1200,
-              boxSizing: "border-box",
-            }}
-          >
-            <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>
-              Current Stats
-            </Typography>
-
-            <Grid
-              sx={{ justifyContent: "center" }}
-              container
-              spacing={3}
-              width={"100%"}
-            >
-              {stats.map((stat) => (
-                <Grid sx={{ width: "20%" }} key={stat.label}>
-                  <StatCard
-                    icon={stat.icon}
-                    value={stat.value}
-                    label={stat.label}
-                    change={stat.change}
-                    isPositive={stat.isPositive}
-                  />
-                </Grid>
-              ))}
+    <>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { sm: "100%", md: "100%" },
+          p: 3,
+        }}
+      >
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
+          Overview
+        </Typography>
+        <Grid container spacing={2} columns={15} sx={{ mb: 4 }}>
+          {stats.map((stat, index) => (
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatCard {...stat} />
             </Grid>
-          </Paper>
+          ))}
+        </Grid>
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
+          Current Queues
+        </Typography>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Service</TableCell>
+                <TableCell>Waiting</TableCell>
+                <TableCell>Longest Wait</TableCell>
+                <TableCell>Priority</TableCell>
+                <TableCell>Stepped Out</TableCell>
+                <TableCell>Available Staff</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
 
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 4,
-              width: "100%",
-              maxWidth: 1200,
-              boxSizing: "border-box",
-              bgcolor: "white",
-            }}
-          >
-            <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>
-              All Queues
-            </Typography>
-
-            {queues.map((queue, index) => (
-              <QueueItem
-                key={index}
-                service={queue.service}
-                waiting={queue.waiting}
-                averageWaitTime={queue.averageWaitTime}
-                averagePriority={queue.averagePriority}
-                steppedOut={queue.steppedOut}
-              />
-            ))}
-          </Paper>
-        </Box>
+            <TableBody>
+              {queues.map((queue) => (
+                <QueueRow availableStaff={0} key={queue.service} {...queue} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
-    </div>
+    </>
   );
 };
 

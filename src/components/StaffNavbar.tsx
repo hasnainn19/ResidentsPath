@@ -28,7 +28,7 @@ const StaffNavbar = () => {
         [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#5E35B1",
+          backgroundColor: "#5C2D91",
           color: "white",
         },
       }}
@@ -51,10 +51,22 @@ const StaffNavbar = () => {
       </Toolbar>
 
       <List sx={{ mt: 3 }}>
-        <StaffNavItem icon={<DashboardIcon />} label="Dashboard" />
-        <StaffNavItem icon={<QueueIcon />} label="All Queues" />
-        <StaffNavItem icon={<EventIcon />} label="Appointments" />
-        <StaffNavItem icon={<SettingsIcon />} label="Settings" />
+        <StaffNavItem icon={<DashboardIcon />} label="Dashboard" url="/staff" />
+        <StaffNavItem
+          icon={<QueueIcon />}
+          label="Current Cases"
+          url="/staff/cases"
+        />
+        <StaffNavItem
+          icon={<EventIcon />}
+          label="Appointments"
+          url="/staff/appointments"
+        />
+        <StaffNavItem
+          icon={<SettingsIcon />}
+          label="Settings"
+          url="/staff/settings"
+        />
       </List>
     </Drawer>
   );
