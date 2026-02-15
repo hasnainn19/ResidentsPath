@@ -1,6 +1,27 @@
+/**
+ * TextToSpeechButton Component
+ *
+ * A reusable React component that provides Text-to-Speech (TTS) functionality
+ * using the browser's built-in Web Speech API.
+ *
+ * When clicked, the button reads the provided text aloud to the user.
+ *
+ * Props:
+ * - text (string): The text to be spoken when the button is pressed.
+ *
+ * Usage example:
+ * <TextToSpeechButton text="You are currently in the queue" />
+ *
+ * Notes:
+ * - Put next to text to improve accesibility for various users.
+ * - Voice availability may vary depending on browser and OS.
+ */
+
+
 import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import {VolumeUp, Stop} from '@mui/icons-material';
+
 
 type TextToSpeechButtonProps = {
   text: string;
