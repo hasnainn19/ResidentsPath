@@ -82,6 +82,7 @@ const statusColorMap: Record<CaseStatus, "error" | "default"> = {
   Standard: "default",
 };
 
+// This page displays a searchable and filterable list of current cases for staff users, allowing them to review case details and statuses. Each case is presented in a card format with key information and a link to view more details.
 const CaseManagementPage: React.FC = () => {
   const [search, setSearch] = useState("");
 

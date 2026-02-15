@@ -1,4 +1,3 @@
-import React from "react";
 import { Avatar, Box, Card, CardContent, Typography } from "@mui/material";
 import type { SvgIconComponent } from "@mui/icons-material";
 
@@ -10,6 +9,7 @@ interface StatCardProps {
   isPositive: boolean;
   lastUpdated?: string;
 }
+// This component represents a single statistic card on the staff dashboard, displaying an icon, a key metric value, a label, and the change from the previous period. It also shows the last updated time for the data. The card is styled to visually indicate whether the change is positive or negative.
 const StatCard = ({
   icon: Icon,
   value,
@@ -32,13 +32,13 @@ const StatCard = ({
           <Avatar sx={{ bgcolor: "#5E35B1", width: 48, height: 48 }}>
             <Icon />
           </Avatar>
-          {/* <Typography
+          <Typography
             variant="body2"
             fontWeight={600}
             sx={{ color: isPositive ? "#388E3C" : "#D32F2F" }}
           >
             {change}
-          </Typography> */}
+          </Typography>
         </Box>
 
         <Typography variant="h4" fontWeight={600} sx={{ mb: 0.5 }}>

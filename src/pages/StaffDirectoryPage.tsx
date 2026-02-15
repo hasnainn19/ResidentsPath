@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 
@@ -56,6 +56,7 @@ const mockStaff: StaffMember[] = [
   },
 ];
 
+// This page displays a searchable and filterable staff directory for council employees, allowing users to find and connect with their colleagues. Each staff member is shown with their name, role, status, and a profile picture, along with an option to send them a message directly from the directory.
 const StaffDirectoryPage = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");

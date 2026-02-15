@@ -3,7 +3,6 @@ import { Box, Modal, Typography } from "@mui/material";
 import React, { useState } from "react";
 import CaseQueueRow from "./CaseQueueRow";
 import { DragDropProvider } from "@dnd-kit/react";
-import { Height } from "@mui/icons-material";
 import ConfirmChangeModal from "./ConfirmChangeModal";
 
 interface ServiceQueueModalProps {
@@ -80,6 +79,7 @@ const initialServiceCases = [
   },
 ];
 
+// Modal for managing a specific service queue, allowing staff to view and reorder cases based on priority. It integrates the CaseQueueRow component for each case and includes a confirmation modal for changes that require validation.
 const ServiceQueueModal = ({
   serviceName,
   open,
@@ -104,7 +104,7 @@ const ServiceQueueModal = ({
     const { active, over } = event;
 
     console.log("Active:", active, "Over:", over);
-    handleConfirmationOpen();
+    handleConfirmationOpen(); // Incomplete Logic - This will open the confirmation modal, but we need to handle the actual position update after confirmation and password validation.
     if (over && active.id !== over.id) {
       console.log("Updating positions...");
       setServiceCases((items) => {

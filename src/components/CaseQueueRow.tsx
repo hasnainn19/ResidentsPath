@@ -12,6 +12,7 @@ interface CaseQueueRowProps {
   priority: "Urgent" | "Priority" | "Standard";
 }
 
+// This component represents a single case in the service queue modal, designed to be draggable for reordering.
 const CaseQueueRow = ({
   id,
   title,
@@ -24,7 +25,7 @@ const CaseQueueRow = ({
     index: queuePosition - 1,
   });
 
-  console.log(`CaseQueueRow ${id} rendering with position:`, queuePosition);
+  // console.log(`CaseQueueRow ${id} rendering with position:`, queuePosition);
 
   return (
     <li ref={ref} style={{ listStyle: "none" }}>
@@ -78,10 +79,6 @@ const CaseQueueRow = ({
         >
           {description}
         </Typography>
-
-        {/* <Typography variant="caption">
-          Queue Position: {queuePosition}
-        </Typography> */}
       </Box>
     </li>
   );

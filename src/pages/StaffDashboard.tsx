@@ -23,6 +23,7 @@ import {
 import StatCard from "../components/StatCard";
 import QueueRow from "../components/QueueRow";
 
+// Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
 const StaffDashboard = () => {
   const stats = [
     {

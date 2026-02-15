@@ -24,7 +24,7 @@ interface QueueRowProps {
   steppedOut: number;
   availableStaff: number;
 }
-
+// This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
   service,
   waiting,

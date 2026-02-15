@@ -1,19 +1,13 @@
 import {
   Drawer,
   List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Toolbar,
   Typography,
   Box,
-  styled,
-  Paper,
   Avatar,
   Accordion,
   AccordionSummary,
 } from "@mui/material";
-
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import EventIcon from "@mui/icons-material/Event";
@@ -22,6 +16,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
 const drawerWidth = 240;
 
+// This component represents the sidebar navigation for staff users, providing links to key sections of the dashboard such as the main dashboard, current cases, staff directory, and personal cases. It also includes a user profile section with an accordion for additional options like viewing the profile, audit logs, and logging out.
 const StaffNavbar = () => {
   return (
     <Drawer
@@ -74,11 +69,6 @@ const StaffNavbar = () => {
             label="Current Cases"
             url="/staff/cases"
           />
-          {/* <StaffNavItem
-            icon={<EventIcon />}
-            label="Appointments"
-            url="/staff/appointments"
-          /> */}
           <StaffNavItem
             icon={<EventIcon />}
             label="Current Staff"

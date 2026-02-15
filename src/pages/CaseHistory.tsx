@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Card,
@@ -82,7 +82,8 @@ const statusColorMap: Record<CaseStatus, "error" | "default"> = {
   Standard: "default",
 };
 
-const CaseHistory: React.FC = () => {
+// This page displays a searchable and filterable list of past cases for staff users, allowing them to review case details and statuses. Each case is presented in a card format with key information and a link to view more details.
+const CaseHistory = () => {
   const [search, setSearch] = useState("");
 
   const filteredCases = useMemo(() => {

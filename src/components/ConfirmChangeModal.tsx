@@ -1,6 +1,4 @@
 import { Box, Button, Input, Modal, Typography } from "@mui/material";
-import React from "react";
-
 interface ConfirmChangeModalProps {
   open: boolean;
   handleClose: () => void;
@@ -11,7 +9,6 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: "75%",
-
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -19,6 +16,7 @@ const style = {
   overflow: "scroll",
   scrollbarWidth: "thin",
 };
+// This component is a modal that appears when the user attempts to make changes that require confirmation, such as reordering cases in the service queue. It prompts the user to enter their password to confirm the changes.
 const ConfirmChangeModal = ({ open, handleClose }: ConfirmChangeModalProps) => {
   return (
     <Modal open={open} onClose={handleClose}>
