@@ -19,6 +19,11 @@ export const initialFormData: FormData = {
   phoneType: "",
   phone: "",
   dob: null,
+  addressLine1: "",
+  addressLine2: "",
+  addressLine3: "",
+  townOrCity: "",
+  postcode: "",
 
   topLevel: "",
   generalServicesChoice: "",

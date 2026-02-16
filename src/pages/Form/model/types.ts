@@ -65,6 +65,11 @@ export type FormData = {
   phoneType: "" | "Mobile" | "Home phone";
   phone: string;
   dob: string | null;
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  townOrCity: string;
+  postcode: string;
 
   topLevel: string;
   generalServicesChoice: string;

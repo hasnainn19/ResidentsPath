@@ -8,6 +8,7 @@
  * contact method) and then moves on to Step 2 for the actual request/triage.
  */
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Paper,
@@ -48,6 +49,18 @@ function digitsOnly(s: string) {
   return s.replace(/\D/g, "");
 }
 
+function normaliseUkPostcode(postCode: string) {
+  return postCode.toUpperCase().replace(/\s+/g, " ").trim();
+}
+
+function isValidUkPostcode(postCode: string) {
+  const s = normaliseUkPostcode(postCode);
+  if (!s) return true;
+
+  const re = /^(GIR 0AA|[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2})$/;
+  return re.test(s);
+}
+
 export default function Step1() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
@@ -76,6 +89,11 @@ export default function Step1() {
           phoneCountry: "GB",
           phoneType: "" as PhoneType,
           contactMethod: "" as "" | ContactMethod,
+          addressLine1: "",
+          addressLine2: "",
+          addressLine3: "",
+          townOrCity: "",
+          postcode: "",
         };
       }
 
@@ -143,6 +161,12 @@ export default function Step1() {
     }));
   }
 
+  // Determine if the postcode field has been filled
+  const [postcodeTouched, setPostcodeTouched] = useState(false);
+
+  const postcodeRaw = formData.postcode ?? "";
+  const postcodeInvalid = provideDetails === "yes" && postcodeRaw.trim() !== "" && !isValidUkPostcode(postcodeRaw);
+
   return (
     <StepShell
       step={1}
@@ -157,6 +181,10 @@ export default function Step1() {
         component="form"
         onSubmit={(e) => {
           e.preventDefault();
+          if (provideDetails === "yes" && postcodeInvalid) {
+            setPostcodeTouched(true);
+            return;
+          }
           nav("/form/step-2");
         }}
       >
@@ -376,11 +404,84 @@ export default function Step1() {
                 </Stack>
               </Stack>
             </Collapse>
+            <Divider />
+
+            {/* Address */}
+            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+              Address
+            </Typography>
+
+            <Stack spacing={2}>
+              <TextField
+                label="Address line 1 (optional)"
+                value={formData.addressLine1 ?? ""}
+                onChange={(e) => setField("addressLine1", e.target.value)}
+                fullWidth
+                autoComplete="address-line1"
+              />
+
+              <TextField
+                label="Address line 2 (optional)"
+                value={formData.addressLine2 ?? ""}
+                onChange={(e) => setField("addressLine2", e.target.value)}
+                fullWidth
+                autoComplete="address-line2"
+              />
+
+              <TextField
+                label="Address line 3 (optional)"
+                value={formData.addressLine3 ?? ""}
+                onChange={(e) => setField("addressLine3", e.target.value)}
+                fullWidth
+                autoComplete="address-line3"
+              />
+
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
+                <TextField
+                  label="Town or city (optional)"
+                  value={formData.townOrCity ?? ""}
+                  onChange={(e) => setField("townOrCity", e.target.value)}
+                  fullWidth
+                  autoComplete="address-level2"
+                />
+
+                <TextField
+                  label="Postcode (optional)"
+                  value={formData.postcode ?? ""}
+                  onChange={(e) => setField("postcode", e.target.value)}
+                  onBlur={() => {
+                    setPostcodeTouched(true);
+                    setField("postcode", normaliseUkPostcode(formData.postcode ?? ""));
+                  }}
+                  error={postcodeTouched && postcodeInvalid}
+                  helperText={
+                    postcodeTouched && postcodeInvalid
+                      ? "Enter a valid UK postcode (e.g. TW3 1JL) or leave blank."
+                      : " "
+                  }
+                  fullWidth
+                  autoComplete="postal-code"
+                  placeholder="e.g. TW3 1JL"
+                  slotProps={{
+                    htmlInput: {
+                      autoCapitalize: "characters",
+                      spellCheck: false,
+                    },
+                  }}
+                />
+              </Box>
+            </Stack>
+
+            <Divider />
 
             <Divider />
 
             {/* Navigation Buttons */}
-            <StepActions onSave={handleSave} advanceLabel="Continue" />
+            <StepActions
+              onSave={handleSave}
+              advanceLabel="Continue"
+              advanceDisabled={provideDetails === "yes" && postcodeInvalid}
+            />
           </Stack>
         </Paper>
       </Box>

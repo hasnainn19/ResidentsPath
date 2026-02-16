@@ -42,6 +42,11 @@ export default function Step3() {
     phone: "Phone number",
     dob: "Date of birth",
     contactMethod: "Preferred method of contact",
+    addressLine1 : "Address line 1",
+    addressLine2 : "Address line 2",
+    addressLine3 : "Address line 3",
+    townOrCity : "Town or city",
+    postcode : "Postcode",
 
     enquiryId: "Choose an enquiry",
     specificDetailId: "More detail",
@@ -93,7 +98,7 @@ export default function Step3() {
   }> = [
     {
       title: "Your details",
-      keys: ["firstName", "lastName", "dob", "email", "phone", "contactMethod"],
+      keys: ["firstName", "lastName", "dob", "email", "phone", "contactMethod", "addressLine1", "addressLine2", "addressLine3", "townOrCity", "postcode"],
       editTo: "/form/step-1",
     },
     {
@@ -236,6 +241,11 @@ export default function Step3() {
     "phone",
     "dob",
     "contactMethod",
+    "addressLine1",
+    "addressLine2",
+    "addressLine3",
+    "townOrCity",
+    "postcode",
   ]);
 
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
