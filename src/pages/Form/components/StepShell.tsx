@@ -12,9 +12,9 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import type { LanguageOption } from "../model/types";
 import { useEffect } from "react";
+import TextToSpeechButton from "../../../components/TextToSpeechButton";
 
 type Props = {
   step: number;
@@ -23,7 +23,6 @@ type Props = {
   subtitle?: string;
 
   onBack?: () => void;
-  onListenAll: () => void;
 
   languageValue: string;
   onLanguageChange: (code: string) => void;
@@ -38,6 +37,10 @@ export default function StepShell(props: Props) {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  const listenText = [props.title, props.subtitle, `Step ${props.step} of ${props.totalSteps}.`]
+    .filter(Boolean)
+    .join(". ");
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
@@ -55,15 +58,7 @@ export default function StepShell(props: Props) {
 
 
 
-            <Button
-              variant="contained"
-              color="secondary"
-              startIcon={<VolumeUpIcon />}
-              onClick={props.onListenAll}
-              sx={{ textTransform: "none", color: "primary.main" }}
-            >
-              Listen to instructions
-            </Button>
+          <TextToSpeechButton text={listenText} />
           </Stack>
 
           {/* Title + language */}

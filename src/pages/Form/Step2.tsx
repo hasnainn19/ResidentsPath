@@ -43,7 +43,7 @@ import { getEnquiryContext } from "./model/enquiriesContext";
 
 export default function Step2() {
   const nav = useNavigate();
-  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
+  const { formData, setFormData, handleSave } = useFormWizard();
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -156,7 +156,6 @@ export default function Step2() {
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
       onBack={() => nav("/form/step-1")}
-      onListenAll={handleListenAll}
       languageValue={formData.language}
       onLanguageChange={(code) => setField("language", code)}
       languageOptions={LANGUAGE_OPTIONS}

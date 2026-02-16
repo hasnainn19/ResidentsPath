@@ -12,7 +12,7 @@ type EnquiryContext = ReturnType<typeof getEnquiryContext>;
 
 export default function Step3() {
   const nav = useNavigate();
-  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
+  const { formData, setFormData, handleSave } = useFormWizard();
 
   // TODO(BACKEND)
   const submitToBackend = () => {
@@ -263,7 +263,6 @@ export default function Step3() {
       title="Council service request"
       subtitle="Please review and submit"
       onBack={() => nav("/form/step-2")}
-      onListenAll={handleListenAll}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}

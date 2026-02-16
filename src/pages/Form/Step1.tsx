@@ -39,7 +39,7 @@ function digitsOnly(s: string) {
 
 export default function Step1() {
   const nav = useNavigate();
-  const { formData, setFormData, handleSave, handleListenAll } = useFormWizard();
+  const { formData, setFormData, handleSave } = useFormWizard();
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -132,7 +132,6 @@ export default function Step1() {
       totalSteps={3}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
-      onListenAll={handleListenAll}
       languageValue={formData.language}
       onLanguageChange={(code) => setField("language", code as FormData["language"])}
       languageOptions={LANGUAGE_OPTIONS}
