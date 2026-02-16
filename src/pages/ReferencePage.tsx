@@ -24,6 +24,7 @@ const ReferencePage = () => {
         display: 'flex',
         width: '100%',
         height: 220,
+        // position: 'relative', 
         backgroundColor: theme.palette.secondary.light,
         border: `2px dashed ${grey[600]}`,
         borderRadius: 8,
@@ -36,25 +37,64 @@ const ReferencePage = () => {
         }
     }));
 
-    function handleQRScanner() {
-        setScanning(true);
-        setTimeout(() => {
-            const scanner = new Html5Qrcode("qr-reader");
-            scannerRef.current = scanner;
-            scanner.start(
-            { facingMode: "environment" }, // rear camera
+    // function handleQRScanner() {
+    //     setScanning(true);
+    //     setTimeout(() => {
+    //         const scanner = new Html5Qrcode("qr-reader");
+    //         scannerRef.current = scanner;
+    //         scanner.start(
+    //         { facingMode: "environment" }, // rear camera
+    //         { fps: 10, qrbox: 250 },
+    //         (decodedText) => {
+    //             setRefNo(decodedText)
+    //             console.log("Decoded QR code:", decodedText);
+    //             // process ref no.
+    //             stopScanner();
+    //         },
+    //         (error) => {
+    //             setQrScanError(error);
+    //         }
+    //         );
+    // }, 300)};
+function handleQRScanner() {
+    if (scanning) return;
+    setScanning(true);
+}
+
+
+useEffect(() => {
+    if (!scanning) return;
+    if (scannerRef.current) return;
+
+    let cancelled = false;
+
+    requestAnimationFrame(() => {
+        if (cancelled) return;
+
+        const scanner = new Html5Qrcode("qr-reader");
+        scannerRef.current = scanner;
+
+        scanner.start(
+            { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             (decodedText) => {
-                setRefNo(decodedText)
+                setRefNo(decodedText);
                 console.log("Decoded QR code:", decodedText);
-                // process ref no.
                 stopScanner();
             },
             (error) => {
                 setQrScanError(error);
             }
-            );
-    }, 300)};
+        );
+    });
+
+    return () => {
+        cancelled = true;
+    };
+}, [scanning]);
+
+
+
 
     function stopScanner() {
         if (scannerRef.current) {
@@ -124,30 +164,30 @@ const ReferencePage = () => {
                                 Click to use the camera to scan the QR code:
                             </Typography>
                             <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan the QR code.'/>
-
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4, justifyContent: 'center' }}>
-                            <Box sx={{ width: '100%', mx: 'auto' }}>
-                                <ScanButton onClick={handleQRScanner} sx={{ flexDirection: 'column', py: 3 }}>
-                                    {scanning ? (
-                                        <Box sx={{ width: '100%', height: '100%' }}>
-                                        <div id="qr-reader" style={{ width: '100%', height: '100%' }} />
-                                        <Tooltip title="Cancel QR Scan" placement="top">
-                                            <Button size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); setScanning(false)}} sx={{ position: 'absolute', top: 4, right: 8, zIndex: 10, }}>
-                                                Cancel
-                                            </Button>
-                                        </Tooltip>
-                                        </Box>
-                                    ) : (
-                                        <>
+                            <Box sx={{ width: '100%', mx: 'auto', position: 'relative' }}>
+                                    <ScanButton onClick={handleQRScanner} sx={{ flexDirection: 'column', py: 3 }}>
+                                    {!scanning && (
+                                    <>
                                         <QrCodeScannerRoundedIcon fontSize="large" />
                                         <Box component="span" sx={{ mt: 2, fontWeight: 600 }}>
-                                            Tap to open scanner
+                                        Tap to open scanner
                                         </Box>
-                                        </>
+                                    </>
                                     )}
                                 </ScanButton>
+                                <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 220, zIndex: 10, visibility: scanning ? 'visible' : 'hidden', pointerEvents: scanning ? 'auto' : 'none', overflow: 'hidden', borderRadius: 1, }}>
+                                    <div id="qr-reader" style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
+                                    {scanning && (
+                                        <Tooltip title="Cancel QR Scan" placement="top">
+                                        <Button variant='contained' size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: 6, right: 6, zIndex: 20 }} >
+                                            Cancel
+                                        </Button>
+                                        </Tooltip>
+                                    )}
+                                </Box>
                             </Box>
                         </CardActions>
                     </Card>
