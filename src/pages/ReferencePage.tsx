@@ -10,6 +10,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
+import ScanButton from "../components/ReferencePageComponents/ScanButton"
 
 
 const ReferencePage = () => {
@@ -18,29 +19,10 @@ const ReferencePage = () => {
     const [ refNo, setRefNo ] = useState('');
     const [ qrScanError, setQrScanError] = useState('');
 
-
-    // Styled component for the QR scanner button
-    const ScanButton = styled(ButtonBase)(({ theme }) => ({
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        backgroundColor: theme.palette.secondary.light,
-        border: `2px dashed ${grey[600]}`,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        '&:hover': {
-            backgroundColor: '#e3d9faff',
-            borderColor: grey[900],
-        }
-    }));
-
     function handleQRScanner() {
         if (scanning) return;
         setScanning(true);
     }
-
 
     useEffect(() => {
         if (!scanning) return;
@@ -72,9 +54,6 @@ const ReferencePage = () => {
             cancelled = true;
         };
     }, [scanning]);
-
-
-
 
     function stopScanner() {
         if (scannerRef.current) {
@@ -151,7 +130,7 @@ const ReferencePage = () => {
                                 <ScanButton onClick={handleQRScanner} sx={{ flexDirection: 'column', py: 3 }}>
                                     {!scanning && (
                                     <>
-                                        <QrCodeScannerRoundedIcon fontSize="large" size="large" />
+                                        <QrCodeScannerRoundedIcon fontSize="large" size="large"  />
                                         <Box component="span" sx={{ mt: 2, fontWeight: 600, fontSize:"large" }}>
                                             Tap to open scanner
                                         </Box>
@@ -171,7 +150,7 @@ const ReferencePage = () => {
                                 {/* Placeholder showing qr code extracts text */}
                                 {refNo && (
                                     <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                                        Reference code retrieved: {refNo}
+                                        Reference number retrieved: {refNo}
                                     </Typography>
                                 )}
                             </Box>
