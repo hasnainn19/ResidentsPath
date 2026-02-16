@@ -75,7 +75,6 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all departments
-			allow.guest().to(["read"]) // Department data is publically readable
 		]),
 
 	// Ticket - represents a queue entry for a resident's visit
