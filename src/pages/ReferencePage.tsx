@@ -36,7 +36,7 @@ const ReferencePage = () => {
         }
     }));
 
-    function handleQRScannerClick() {
+    function handleQRScanner() {
         setScanning(true);
         setTimeout(() => {
             const scanner = new Html5Qrcode("qr-reader");
@@ -66,7 +66,7 @@ const ReferencePage = () => {
         }
     }
 
-    function handleCheckStatusClick() {
+    function handleCheckStatus() {
         // process ref no. 
         // navigate to next page
     }
@@ -76,8 +76,11 @@ const ReferencePage = () => {
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center'  }}>
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
-                Use one of the following methods to view your queue details
-                <TextToSpeechButton text='Use one of the following methods to view your queue details'/>
+                Use one of the following methods to see more details
+            </Typography>
+            <Typography variant="h4" component="h2"  gutterBottom sx={{ fontWeight: 700 , mb: 4 }}>
+                Check your queue details OR check in for an appointment
+                <TextToSpeechButton text='Use one of the following methods to either check yout queue details or check in for an appointment'/>
             </Typography>
             <Grid container spacing={3} sx={{ justifyContent: "center", }}>
                 <Grid sx={{ display: 'flex'}} size={6}>
@@ -99,7 +102,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth id="outlined-search" label="Reference code" sx={{ mb: 3 }} value={refNo} />
                                 <Tooltip title="Check your status" placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatusClick} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
                                     </Button>
                                 </Tooltip>
@@ -126,7 +129,7 @@ const ReferencePage = () => {
 
                         <CardActions sx={{ px: 4, pb: 4, justifyContent: 'center' }}>
                             <Box sx={{ width: '100%', mx: 'auto' }}>
-                                <ScanButton onClick={handleQRScannerClick} sx={{ flexDirection: 'column', py: 3 }}>
+                                <ScanButton onClick={handleQRScanner} sx={{ flexDirection: 'column', py: 3 }}>
                                     {scanning ? (
                                         <Box sx={{ width: '100%', height: '100%' }}>
                                         <div id="qr-reader" style={{ width: '100%', height: '100%' }} />
