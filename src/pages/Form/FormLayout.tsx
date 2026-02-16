@@ -7,11 +7,19 @@
  */
 
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { FormWizardProvider } from "./context/FormWizardProvider";
 import NavBar from "../../components/NavBar";
+import { useEffect } from "react";
 
 export default function FormLayout() {
+  const location = useLocation();
+
+  // Stop any running TTS whenever the active form step changes.
+  useEffect(() => {
+    window.speechSynthesis.cancel();
+  }, [location.pathname]);
+  
   return (
     <FormWizardProvider>
       <NavBar />

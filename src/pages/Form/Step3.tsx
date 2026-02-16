@@ -1,3 +1,4 @@
+// src/pages/Form/Step3.tsx
 /**
  * Step 3: review and submit.
  *
@@ -6,14 +7,15 @@
  * that apply based on earlier choices).
  */
 
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
 import StepShell from "./components/StepShell";
+import WithTTS from "./components/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
 import StepActions from "./components/StepActions";
-import { useMemo, type ReactNode } from "react";
 import { getEnquiryContext } from "./model/enquiriesContext";
 
 type EnquiryContext = ReturnType<typeof getEnquiryContext>;
@@ -43,11 +45,11 @@ export default function Step3() {
     phone: "Phone number",
     dob: "Date of birth",
     contactMethod: "Preferred method of contact",
-    addressLine1 : "Address line 1",
-    addressLine2 : "Address line 2",
-    addressLine3 : "Address line 3",
-    townOrCity : "Town or city",
-    postcode : "Postcode",
+    addressLine1: "Address line 1",
+    addressLine2: "Address line 2",
+    addressLine3: "Address line 3",
+    townOrCity: "Town or city",
+    postcode: "Postcode",
 
     enquiryId: "Choose an enquiry",
     specificDetailId: "More detail",
@@ -100,7 +102,19 @@ export default function Step3() {
   }> = [
     {
       title: "Your details",
-      keys: ["firstName", "lastName", "dob", "email", "phone", "contactMethod", "addressLine1", "addressLine2", "addressLine3", "townOrCity", "postcode"],
+      keys: [
+        "firstName",
+        "lastName",
+        "dob",
+        "email",
+        "phone",
+        "contactMethod",
+        "addressLine1",
+        "addressLine2",
+        "addressLine3",
+        "townOrCity",
+        "postcode",
+      ],
       editTo: "/form/step-1",
     },
     {
@@ -181,7 +195,7 @@ export default function Step3() {
     );
   }
 
-  function isNotNull(x: ReactNode): x is Exclude<ReactNode, null | undefined | false> {
+  function isNotNull<T>(x: T | null | undefined | false): x is T {
     return x !== null && x !== undefined && x !== false;
   }
 
@@ -252,10 +266,12 @@ export default function Step3() {
     "postcode",
   ]);
 
-  // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
-  function renderReviewItem(key: keyof FormData) {
-    const label = reviewLabels[key] || String(key);
+  function getReviewLabel(key: keyof FormData) {
+    return reviewLabels[key] || String(key);
+  }
 
+  // For each field, determine if it should be shown on the review page, and if so return its display value
+  function getDisplayValueForReview(key: keyof FormData): string | null {
     // If this field was not asked based on the enquiry context, don't show it on the review page at all
     const wasAsked = ASKED_IN_CONTEXT[key];
     if (wasAsked && !wasAsked(enquiryContext)) return null;
@@ -274,7 +290,7 @@ export default function Step3() {
       val = enquiryContext.selectedEnquiry?.label || "";
     }
 
-    // For the specificDetailId, we need to look up the label of the selected option within the 
+    // For the specificDetailId, we need to look up the label of the selected option within the
     // currently selected enquiry's specifics to make it human-readable on the review page
     if (key === "specificDetailId") {
       val = enquiryContext.selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
@@ -290,8 +306,24 @@ export default function Step3() {
 
     if (isEmptyForReview(key, val)) return null;
 
-    const displayValue = typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
-    return <ReviewRow key={String(key)} label={label} value={displayValue} />;
+    return typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
+  }
+
+  // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
+  function renderReviewItem(key: keyof FormData) {
+    const label = getReviewLabel(key);
+    const value = getDisplayValueForReview(key);
+    if (value === null) return null;
+    return <ReviewRow key={String(key)} label={label} value={value} />;
+  }
+
+  function buildSectionTts(title: string, pairs: Array<{ label: string; value: string }>) {
+    const parts: string[] = [];
+    parts.push(title);
+    for (const p of pairs) {
+      parts.push(p.label + ": " + p.value);
+    }
+    return parts.join(". ");
   }
 
   return (
@@ -313,27 +345,35 @@ export default function Step3() {
         <Typography variant="h6" sx={{ mb: 3 }}>
           Please review your information before submitting:
         </Typography>
+
         {/* Review items */}
         {SECTIONS.map((section) => {
+          const pairs = section.keys
+            .map((k) => {
+              const value = getDisplayValueForReview(k);
+              if (value === null) return null;
+              return { label: getReviewLabel(k), value };
+            })
+            .filter(isNotNull);
+
+          if (pairs.length === 0) return null;
+
+          const ttsText = buildSectionTts(section.title, pairs);
           const items = section.keys.map((k) => renderReviewItem(k)).filter(isNotNull);
 
-          if (items.length === 0) return null;
-
           return (
-            <Box key={section.title} sx={{ mb: 3 }}>
-              <Typography variant="h6" fontWeight={800} sx={{ mb: 0.5 }}>
-                {section.title}
-              </Typography>
-
-              <Button
-                type="button"
-                size="medium"
-                variant="text"
-                onClick={() => nav(section.editTo)}
-                sx={{ textTransform: "none" }}
-              >
-                Edit
-              </Button>
+            <WithTTS key={section.title} copy={{ label: section.title, tts: ttsText }} titleVariant="h6" sx={{ mb: 3 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+                <Button
+                  type="button"
+                  size="medium"
+                  variant="text"
+                  onClick={() => nav(section.editTo)}
+                  sx={{ textTransform: "none" }}
+                >
+                  Edit
+                </Button>
+              </Box>
 
               <Paper
                 variant="outlined"
@@ -355,7 +395,7 @@ export default function Step3() {
               >
                 <Stack divider={<Divider flexItem />}>{items}</Stack>
               </Paper>
-            </Box>
+            </WithTTS>
           );
         })}
 

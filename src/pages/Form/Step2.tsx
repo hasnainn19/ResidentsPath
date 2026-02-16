@@ -1,3 +1,4 @@
+// src/pages/Form/Step2.tsx
 /**
  * Step 2: select the service request and answer any relevant follow-up questions.
  *
@@ -14,7 +15,7 @@
  * current path have been completed.
  */
 
-
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -36,6 +37,7 @@ import {
 import MicIcon from "@mui/icons-material/Mic";
 
 import StepShell from "./components/StepShell";
+import WithTTS from "./components/WithTTS";
 import LeftCheckRow from "./components/LeftCheckRow";
 import { useFormWizard } from "./context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -56,7 +58,6 @@ import type {
   ageRange,
 } from "./model/types";
 import StepActions from "./components/StepActions";
-import { useMemo, useState } from "react";
 import { getEnquiryContext } from "./model/enquiriesContext";
 
 export default function Step2() {
@@ -174,6 +175,59 @@ export default function Step2() {
 
   // Keep the support section short unless "Show more" is opened
   const [showMoreSupport, setShowMoreSupport] = useState(false);
+
+  // Build TTS strings for each section based on what is currently shown
+  function buildServiceTts() {
+    const parts: string[] = [];
+    parts.push("What do you need help with? Select an area.");
+
+    if (!formData.topLevel) return parts.join(" ");
+
+    if (isGeneralServices) {
+      if (!formData.generalServicesChoice) {
+        parts.push("Then choose a topic.");
+        return parts.join(" ");
+      }
+
+      if (!formData.generalServicesChoice.startsWith("direct:")) {
+      }
+      parts.push("Then choose an enquiry.");
+    } else {
+      parts.push("Then choose an enquiry.");
+    }
+
+    if (hasChosenEnquiry && showSpecificDropdown) {
+      parts.push("Then choose more detail.");
+    }
+
+    return parts.join(" ");
+  }
+
+  // Build the TTS string for the additional questions section based on which questions are shown
+  function buildAdditionalQuestionsTts() {
+    const parts: string[] = [];
+    parts.push("Additional questions.");
+
+    if (showChildrenQs) parts.push("Do you have dependent children?");
+    if (showDisabilityQs) parts.push("Do you have a disability or sensory impairment?");
+    if (showHouseholdSize) parts.push("How many people are in your household?");
+    if (showAgeRange) parts.push("What is your age range?");
+    if (showDomesticAbuseQs) parts.push("Are you a domestic abuse victim/survivor?");
+
+    return parts.join(" ");
+  }
+
+  const urgencyTts = "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason. If you choose other, type a short explanation."; 
+
+  const proceedTts =
+    "How would you like to proceed? Select join the digital queue or book an appointment. We may suggest a quicker online or self-service option if available.";
+
+  const additionalInfoTts =
+    "Anything else you want to tell us. This is optional. Add any details that might help. You can also use voice input.";
+
+  const supportTts =
+    "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options.";
+
   return (
     <StepShell
       step={2}
@@ -197,14 +251,11 @@ export default function Step2() {
         >
           <Stack spacing={4}>
             {/* Service */}
-            <Box>
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                What do you need help with?{" "}
-                <Typography component="span" color="error">
-                  *
-                </Typography>
-              </Typography>
-
+            <WithTTS
+              copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
+              required
+              titleVariant="subtitle1"
+            >
               <FormControl fullWidth required>
                 <InputLabel id="top-label">Select an area...</InputLabel>
                 <Select
@@ -221,299 +272,310 @@ export default function Step2() {
                   ))}
                 </Select>
               </FormControl>
-            </Box>
+            </WithTTS>
 
             {/* Further information */}
-            {// For General Services: only show enquiries after a section is chosen (unless it is a direct item) 
-            isGeneralServices && formData.topLevel !== "" && (
-              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                <Typography fontWeight={700} sx={{ mb: 1 }}>
-                  Choose a topic{" "}
-                  <Typography component="span" color="error">
-                    *
-                  </Typography>
-                </Typography>
-
-                <FormControl fullWidth required>
-                  <InputLabel id="general-services-choice-label">Select a topic...</InputLabel>
-                  <Select
-                    labelId="general-services-choice-label"
-                    label="Select a topic..."
-                    value={formData.generalServicesChoice}
-                    onChange={(e) => handleGeneralServicesChoiceChange(String(e.target.value))}
-                  >
-                    <MenuItem value="">Select a topic...</MenuItem>
-                    {GENERAL_SERVICES_CHOICE_OPTIONS.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
-
-            {// Show the enquiry dropdown when a top-level area is chosen
-            formData.topLevel !== "" &&
-              // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
-              (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
-                <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                  <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    Choose an enquiry{" "}
-                    <Typography component="span" color="error">
-                      *
-                    </Typography>
-                  </Typography>
-
+            {
+              // For General Services: only show enquiries after a section is chosen (unless it is a direct item)
+              isGeneralServices && formData.topLevel !== "" && (
+                <WithTTS
+                  copy={{ label: "Choose a topic", tts: "Choose a topic. This helps narrow down your request." }}
+                  required
+                  sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+                >
                   <FormControl fullWidth required>
-                    <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                    <InputLabel id="general-services-choice-label">Select a topic...</InputLabel>
                     <Select
-                      labelId="enquiry-label"
-                      label="Select an enquiry..."
-                      value={formData.enquiryId}
-                      onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                      labelId="general-services-choice-label"
+                      label="Select a topic..."
+                      value={formData.generalServicesChoice}
+                      onChange={(e) => handleGeneralServicesChoiceChange(String(e.target.value))}
                     >
-                      <MenuItem value="">Select an enquiry...</MenuItem>
-                      {enquiryOptions.map((opt) => (
+                      <MenuItem value="">Select a topic...</MenuItem>
+                      {GENERAL_SERVICES_CHOICE_OPTIONS.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                </Box>
-              )}
+                </WithTTS>
+              )
+            }
 
-            {// Show the "more detail" dropdown when relevant
-            hasChosenEnquiry && showSpecificDropdown && (
-              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                <Typography fontWeight={700} sx={{ mb: 1 }}>
-                  More detail{" "}
-                  <Typography component="span" color="error">
-                    *
-                  </Typography>
-                </Typography>
-
-                <FormControl fullWidth required>
-                  <InputLabel id="detail-label">Select a detail...</InputLabel>
-                  <Select
-                    labelId="detail-label"
-                    label="Select a detail..."
-                    value={formData.specificDetailId}
-                    onChange={(e) => setField("specificDetailId", String(e.target.value))}
+            {
+              // Show the enquiry dropdown when a top-level area is chosen
+              formData.topLevel !== "" &&
+                // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
+                (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
+                  <WithTTS
+                    copy={{
+                      label: "Choose an enquiry",
+                      tts: "Choose an enquiry. This tells us what you need help with.",
+                    }}
+                    required
+                    sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
                   >
-                    <MenuItem value="">Select a detail...</MenuItem>
-                    {specificOptions.map((d) => (
-                      <MenuItem key={d.value} value={d.value}>
-                        {d.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
+                    <FormControl fullWidth required>
+                      <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                      <Select
+                        labelId="enquiry-label"
+                        label="Select an enquiry..."
+                        value={formData.enquiryId}
+                        onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                      >
+                        <MenuItem value="">Select an enquiry...</MenuItem>
+                        {enquiryOptions.map((opt) => (
+                          <MenuItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </WithTTS>
+                )
+            }
 
-            {// Show follow-up questions only when a specific enquiry has been chosen
-            hasEnoughToProceed && (showChildrenQs || showDisabilityQs) && (
-              <>
-                {/* Children */}
-                {showChildrenQs && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                    <LeftCheckRow
-                      checked={formData.hasChildren}
-                      onChange={(checked) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          hasChildren: checked,
-                          childrenCount: checked ? "1" : "0",
-                        }))
-                      }
-                      label="I have dependent children"
+            {
+              // Show the "more detail" dropdown when relevant
+              hasChosenEnquiry && showSpecificDropdown && (
+                <WithTTS
+                  copy={{
+                    label: "More detail",
+                    tts: "More detail. Choose the option that best matches your situation.",
+                  }}
+                  required
+                  sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+                >
+                  <FormControl fullWidth required>
+                    <InputLabel id="detail-label">Select a detail...</InputLabel>
+                    <Select
+                      labelId="detail-label"
+                      label="Select a detail..."
+                      value={formData.specificDetailId}
+                      onChange={(e) => setField("specificDetailId", String(e.target.value))}
                     >
-                      {formData.hasChildren && (
-                        <Box sx={{ mt: 1 }}>
+                      <MenuItem value="">Select a detail...</MenuItem>
+                      {specificOptions.map((d) => (
+                        <MenuItem key={d.value} value={d.value}>
+                          {d.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </WithTTS>
+              )
+            }
+
+            {
+              // Show follow-up questions only when a specific enquiry has been chosen
+              hasEnoughToProceed &&
+                (showChildrenQs || showDisabilityQs || showHouseholdSize || showDomesticAbuseQs || showAgeRange) && (
+                  <WithTTS
+                    copy={{ label: "Additional questions", tts: buildAdditionalQuestionsTts() }}
+                    titleVariant="subtitle2"
+                  >
+                    <Stack spacing={3}>
+                      {/* Children */}
+                      {showChildrenQs && (
+                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                          <LeftCheckRow
+                            checked={formData.hasChildren}
+                            onChange={(checked) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                hasChildren: checked,
+                                childrenCount: checked ? "1" : "0",
+                              }))
+                            }
+                            label="I have dependent children"
+                          >
+                            {formData.hasChildren && (
+                              <Box sx={{ mt: 1 }}>
+                                <FormControl fullWidth>
+                                  <InputLabel id="children-count-label">How many children?</InputLabel>
+                                  <Select
+                                    labelId="children-count-label"
+                                    label="How many children?"
+                                    value={formData.childrenCount}
+                                    onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
+                                  >
+                                    <MenuItem value="1">1</MenuItem>
+                                    <MenuItem value="2">2</MenuItem>
+                                    <MenuItem value="3">3</MenuItem>
+                                    <MenuItem value="4">4</MenuItem>
+                                    <MenuItem value="5">5</MenuItem>
+                                    <MenuItem value="6+">6+</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              </Box>
+                            )}
+                          </LeftCheckRow>
+                        </Box>
+                      )}
+
+                      {/* Disability */}
+                      {showDisabilityQs && (
+                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                          <LeftCheckRow
+                            checked={formData.hasDisabilityOrSensory}
+                            onChange={(checked) =>
+                              setFormData((prev) =>
+                                checked
+                                  ? { ...prev, hasDisabilityOrSensory: true }
+                                  : {
+                                      ...prev,
+                                      hasDisabilityOrSensory: false,
+                                      disabilityType: "",
+                                      ...DISABILITY_SUPPORT_RESET,
+                                    },
+                              )
+                            }
+                            label="I have a disability or sensory impairment"
+                          >
+                            {formData.hasDisabilityOrSensory && (
+                              <Box sx={{ mt: 1 }}>
+                                <FormControl fullWidth>
+                                  <InputLabel id="disability-type-label">Select a type</InputLabel>
+                                  <Select
+                                    labelId="disability-type-label"
+                                    label="Select a type..."
+                                    value={formData.disabilityType}
+                                    onChange={(e) =>
+                                      setField("disabilityType", String(e.target.value) as DisabilityType)
+                                    }
+                                  >
+                                    <MenuItem value="">Select...</MenuItem>
+                                    <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
+                                    <MenuItem value="Visual impairment">Visual impairment</MenuItem>
+                                    <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
+                                    <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
+                                    <MenuItem value="Mental health">Mental health</MenuItem>
+                                    <MenuItem value="Other">Other</MenuItem>
+                                    <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              </Box>
+                            )}
+                          </LeftCheckRow>
+                        </Box>
+                      )}
+
+                      {showHouseholdSize && (
+                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                           <FormControl fullWidth>
-                            <InputLabel id="children-count-label">How many children?</InputLabel>
+                            <InputLabel id="household-label">How many people are in your household?</InputLabel>
                             <Select
-                              labelId="children-count-label"
-                              label="How many children?"
-                              value={formData.childrenCount}
-                              onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
+                              labelId="household-label"
+                              label="How many people are in your household?"
+                              value={formData.householdSize}
+                              onChange={(e) => setField("householdSize", String(e.target.value) as HouseholdSize)}
                             >
+                              <MenuItem value="">Select...</MenuItem>
                               <MenuItem value="1">1</MenuItem>
                               <MenuItem value="2">2</MenuItem>
                               <MenuItem value="3">3</MenuItem>
                               <MenuItem value="4">4</MenuItem>
                               <MenuItem value="5">5</MenuItem>
                               <MenuItem value="6+">6+</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      )}
-                    </LeftCheckRow>
-                  </Box>
-                )}
-
-                {/* Disability */}
-                {showDisabilityQs && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                    <LeftCheckRow
-                      checked={formData.hasDisabilityOrSensory}
-                      onChange={(checked) =>
-                        setFormData((prev) =>
-                          checked
-                            ? { ...prev, hasDisabilityOrSensory: true }
-                            : {
-                                ...prev,
-                                hasDisabilityOrSensory: false,
-                                disabilityType: "",
-                                ...DISABILITY_SUPPORT_RESET,
-                              },
-                        )
-                      }
-                      label="I have a disability or sensory impairment"
-                    >
-                      {formData.hasDisabilityOrSensory && (
-                        <Box sx={{ mt: 1 }}>
-                          <FormControl fullWidth>
-                            <InputLabel id="disability-type-label">Select a type...</InputLabel>
-                            <Select
-                              labelId="disability-type-label"
-                              label="Select a type..."
-                              value={formData.disabilityType}
-                              onChange={(e) => setField("disabilityType", String(e.target.value) as DisabilityType)}
-                            >
-                              <MenuItem value="">Select...</MenuItem>
-                              <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
-                              <MenuItem value="Visual impairment">Visual impairment</MenuItem>
-                              <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
-                              <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
-                              <MenuItem value="Mental health">Mental health</MenuItem>
-                              <MenuItem value="Other">Other</MenuItem>
                               <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
                             </Select>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                              People who usually live with you (including you).
+                            </Typography>
                           </FormControl>
                         </Box>
                       )}
-                    </LeftCheckRow>
-                  </Box>
-                )}
-              </>
-            )}
 
-            {hasEnoughToProceed && showHouseholdSize && (
-              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                <FormControl fullWidth>
-                  <InputLabel id="household-label">How many people are in your household?</InputLabel>
-                  <Select
-                    labelId="household-label"
-                    label="How many people are in your household?"
-                    value={formData.householdSize}
-                    onChange={(e) => setField("householdSize", String(e.target.value) as HouseholdSize)}
-                  >
-                    <MenuItem value="">Select...</MenuItem>
-                    <MenuItem value="1">1</MenuItem>
-                    <MenuItem value="2">2</MenuItem>
-                    <MenuItem value="3">3</MenuItem>
-                    <MenuItem value="4">4</MenuItem>
-                    <MenuItem value="5">5</MenuItem>
-                    <MenuItem value="6+">6+</MenuItem>
-                    <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
-                  </Select>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    People who usually live with you (including you).
-                  </Typography>
-                </FormControl>
-              </Box>
-            )}
-           {
-             // If DOB was not provided in Step 1, offer an optional age range after the enquiry is chosen
-              showAgeRange && (
-                <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                  <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    Age range{" "}
-                    <Typography component="span" variant="body2" color="text.secondary">
-                      (optional)
-                    </Typography>
-                  </Typography>
-                  <FormControl fullWidth>
-                    <InputLabel id="age-range-label">Select an age range...</InputLabel>
-                    <Select
-                      labelId="age-range-label"
-                      label="Select an age range..."
-                      value={formData.ageRange}
-                      onChange={(e) => setField("ageRange", String(e.target.value) as ageRange)}
-                    >
-                      <MenuItem value="">Select...</MenuItem>
-                      <MenuItem value="Under 18">Under 18</MenuItem>
-                      <MenuItem value="18-24">18-24</MenuItem>
-                      <MenuItem value="25-34">25-34</MenuItem>
-                      <MenuItem value="35-44">35-44</MenuItem>
-                      <MenuItem value="45-54">45-54</MenuItem>
-                      <MenuItem value="55-64">55-64</MenuItem>
-                      <MenuItem value="65+">65+</MenuItem>
-                      <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              )
-           }
-            {hasEnoughToProceed && showDomesticAbuseQs && (
-              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                <LeftCheckRow
-                  checked={formData.domesticAbuse}
-                  onChange={(checked) =>
-                    setFormData((prev) =>
-                      checked
-                        ? { ...prev, domesticAbuse: true }
-                        : {
-                            ...prev,
-                            domesticAbuse: false,
-                            safeToContact: "prefer_not_to_say",
-                            safeContactNotes: "",
-                          },
-                    )
-                  }
-                  label="I am a domestic abuse victim/survivor"
-                >
-                  {formData.domesticAbuse && (
-                    <Box sx={{ mt: 1.5 }}>
-                      <Stack spacing={2}>
-                        <FormControl fullWidth>
-                          <InputLabel id="safe-contact-label">Is it safe for us to contact you?</InputLabel>
-                          <Select
-                            labelId="safe-contact-label"
-                            label="Is it safe for us to contact you?"
-                            value={formData.safeToContact}
-                            onChange={(e) => setField("safeToContact", String(e.target.value) as SafeToContact)}
+                      {
+                        // If DOB was not provided in Step 1, offer an optional age range after the enquiry is chosen
+                        showAgeRange && (
+                          <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                            <FormControl fullWidth>
+                              <InputLabel id="age-range-label">Select an age range (optional)</InputLabel>
+                              <Select
+                                labelId="age-range-label"
+                                label="Select an age range... (optional)"
+                                value={formData.ageRange}
+                                onChange={(e) => setField("ageRange", String(e.target.value) as ageRange)}
+                              >
+                                <MenuItem value="">Select...</MenuItem>
+                                <MenuItem value="Under 18">Under 18</MenuItem>
+                                <MenuItem value="18-24">18-24</MenuItem>
+                                <MenuItem value="25-34">25-34</MenuItem>
+                                <MenuItem value="35-44">35-44</MenuItem>
+                                <MenuItem value="45-54">45-54</MenuItem>
+                                <MenuItem value="55-64">55-64</MenuItem>
+                                <MenuItem value="65+">65+</MenuItem>
+                                <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        )
+                      }
+
+                      {showDomesticAbuseQs && (
+                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                          <LeftCheckRow
+                            checked={formData.domesticAbuse}
+                            onChange={(checked) =>
+                              setFormData((prev) =>
+                                checked
+                                  ? { ...prev, domesticAbuse: true }
+                                  : {
+                                      ...prev,
+                                      domesticAbuse: false,
+                                      safeToContact: "prefer_not_to_say",
+                                      safeContactNotes: "",
+                                    },
+                              )
+                            }
+                            label="I am a domestic abuse victim/survivor"
                           >
-                            <MenuItem value="yes">Yes</MenuItem>
-                            <MenuItem value="no">No</MenuItem>
-                            <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
-                          </Select>
-                        </FormControl>
+                            {formData.domesticAbuse && (
+                              <Box sx={{ mt: 1.5 }}>
+                                <Stack spacing={2}>
+                                  <FormControl fullWidth>
+                                    <InputLabel id="safe-contact-label">Is it safe for us to contact you?</InputLabel>
+                                    <Select
+                                      labelId="safe-contact-label"
+                                      label="Is it safe for us to contact you?"
+                                      value={formData.safeToContact}
+                                      onChange={(e) =>
+                                        setField("safeToContact", String(e.target.value) as SafeToContact)
+                                      }
+                                    >
+                                      <MenuItem value="yes">Yes</MenuItem>
+                                      <MenuItem value="no">No</MenuItem>
+                                      <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
+                                    </Select>
+                                  </FormControl>
 
-                        {formData.safeToContact === "no" && (
-                          <TextField
-                            fullWidth
-                            label="Safe contact notes (optional)"
-                            placeholder="Safe time or method, or do not contact"
-                            value={formData.safeContactNotes}
-                            onChange={(e) => setField("safeContactNotes", e.target.value)}
-                          />
-                        )}
-                      </Stack>
-                    </Box>
-                  )}
-                </LeftCheckRow>
-              </Box>
-            )}
+                                  {formData.safeToContact === "no" && (
+                                    <TextField
+                                      fullWidth
+                                      label="Safe contact notes (optional)"
+                                      placeholder="Safe time or method, or do not contact"
+                                      value={formData.safeContactNotes}
+                                      onChange={(e) => setField("safeContactNotes", e.target.value)}
+                                    />
+                                  )}
+                                </Stack>
+                              </Box>
+                            )}
+                          </LeftCheckRow>
+                        </Box>
+                      )}
+                    </Stack>
+                  </WithTTS>
+                )
+            }
 
             {/* Urgency */}
-            <Box>
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                Do you need support sooner today?
-              </Typography>
+            <WithTTS
+              copy={{ label: "Do you need support sooner today?", tts: urgencyTts }}
+              titleVariant="subtitle1"
+            >
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                 For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something
                 time-limited today.
@@ -604,17 +666,13 @@ export default function Step2() {
                   )}
                 </Box>
               )}
-            </Box>
+            </WithTTS>
 
             {/* Additional info */}
-            <Box>
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                Anything else you want to tell us{" "}
-                <Typography component="span" variant="body2" color="text.secondary">
-                  (optional)
-                </Typography>
-              </Typography>
-
+            <WithTTS
+              copy={{ label: "Anything else you want to tell us (optional)", tts: additionalInfoTts }}
+              titleVariant="subtitle1"
+            >
               <TextField
                 fullWidth
                 multiline
@@ -630,44 +688,43 @@ export default function Step2() {
                   Voice input (mock)
                 </Button>
               </Stack>
-            </Box>
+            </WithTTS>
 
             {/* Proceed */}
             <Box sx={{ pt: 2 }}>
               <Divider sx={{ mb: 3 }} />
 
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                How would you like to proceed?{" "}
-                <Typography component="span" color="error">
-                  *
-                </Typography>
-              </Typography>
+              <WithTTS
+                copy={{ label: "How would you like to proceed?", tts: proceedTts }}
+                required
+                titleVariant="subtitle1"
+              >
+                <FormControl fullWidth required>
+                  <InputLabel id="proceed-label">Select an option...</InputLabel>
+                  <Select
+                    labelId="proceed-label"
+                    label="Select an option..."
+                    value={formData.proceed}
+                    onChange={(e) => handleProceedChange(String(e.target.value) as Proceed)}
+                  >
+                    <MenuItem value="">Select an option...</MenuItem>
+                    <MenuItem value="Join digital queue">Join the digital queue</MenuItem>
+                    <MenuItem value="Schedule appointment">Book an appointment</MenuItem>
+                  </Select>
 
-              <FormControl fullWidth required>
-                <InputLabel id="proceed-label">Select an option...</InputLabel>
-                <Select
-                  labelId="proceed-label"
-                  label="Select an option..."
-                  value={formData.proceed}
-                  onChange={(e) => handleProceedChange(String(e.target.value) as Proceed)}
-                >
-                  <MenuItem value="">Select an option...</MenuItem>
-                  <MenuItem value="Join digital queue">Join the digital queue</MenuItem>
-                  <MenuItem value="Schedule appointment">Book an appointment</MenuItem>
-                </Select>
-
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  We may suggest a quicker online or self-service option if available.
-                </Typography>
-              </FormControl>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    We may suggest a quicker online or self-service option if available.
+                  </Typography>
+                </FormControl>
+              </WithTTS>
             </Box>
 
             {/* Support options */}
-            <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-              <Typography fontWeight={700} sx={{ mb: 1 }}>
-                Support needs (optional)
-              </Typography>
-
+            <WithTTS
+              copy={{ label: "Support needs (optional)", tts: supportTts }}
+              sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+              titleVariant="subtitle1"
+            >
               <Stack spacing={1.25}>
                 <LeftCheckRow
                   checked={formData.needsAccessibility}
@@ -690,12 +747,36 @@ export default function Step2() {
 
                 <Collapse in={showMoreSupport} timeout={200} unmountOnExit>
                   <Stack spacing={1.25} sx={{ mt: 1 }}>
-                    <LeftCheckRow checked={formData.needsSeating} onChange={(c) => setField("needsSeating", c)} label="Seating (cannot stand for long)" />
-                    <LeftCheckRow checked={formData.needsWrittenUpdates} onChange={(c) => setField("needsWrittenUpdates", c)} label="Written updates (for example: cannot hear announcements)" />
-                    <LeftCheckRow checked={formData.needsLargeText} onChange={(c) => setField("needsLargeText", c)} label="Large text / help reading" />
-                    <LeftCheckRow checked={formData.needsQuietSpace} onChange={(c) => setField("needsQuietSpace", c)} label="Quieter space" />
-                    <LeftCheckRow checked={formData.needsBSL} onChange={(c) => setField("needsBSL", c)} label="Interpreter (BSL)" />
-                    <LeftCheckRow checked={formData.needsHelpWithForms} onChange={(c) => setField("needsHelpWithForms", c)} label="Help completing forms" />
+                    <LeftCheckRow
+                      checked={formData.needsSeating}
+                      onChange={(c) => setField("needsSeating", c)}
+                      label="Seating (cannot stand for long)"
+                    />
+                    <LeftCheckRow
+                      checked={formData.needsWrittenUpdates}
+                      onChange={(c) => setField("needsWrittenUpdates", c)}
+                      label="Written updates (for example: cannot hear announcements)"
+                    />
+                    <LeftCheckRow
+                      checked={formData.needsLargeText}
+                      onChange={(c) => setField("needsLargeText", c)}
+                      label="Large text / help reading"
+                    />
+                    <LeftCheckRow
+                      checked={formData.needsQuietSpace}
+                      onChange={(c) => setField("needsQuietSpace", c)}
+                      label="Quieter space"
+                    />
+                    <LeftCheckRow
+                      checked={formData.needsBSL}
+                      onChange={(c) => setField("needsBSL", c)}
+                      label="Interpreter (BSL)"
+                    />
+                    <LeftCheckRow
+                      checked={formData.needsHelpWithForms}
+                      onChange={(c) => setField("needsHelpWithForms", c)}
+                      label="Help completing forms"
+                    />
 
                     <TextField
                       fullWidth
@@ -707,7 +788,8 @@ export default function Step2() {
                   </Stack>
                 </Collapse>
               </Stack>
-            </Box>
+            </WithTTS>
+
             {/* Navigation Buttons */}
             <StepActions
               onSave={handleSave}

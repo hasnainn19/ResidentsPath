@@ -48,6 +48,7 @@ export type EnquiryItem = {
   askVulnerabilityQs?: boolean;
   askHouseholdSize?: boolean;
   askDomesticAbuseQs?: boolean;
+  askAgeQs?: boolean;
 };
 
 export type LanguageOption = { code: string; label: string };

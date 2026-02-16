@@ -1,3 +1,4 @@
+// src/pages/Form/Step1.tsx
 /**
  * Step 1: optional resident details.
  *
@@ -37,6 +38,8 @@ import dayjs, { type Dayjs } from "dayjs";
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 
 import StepShell from "./components/StepShell";
+import WithTTS from "./components/WithTTS";
+import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData } from "./model/types";
@@ -64,6 +67,29 @@ function isValidUkPostcode(postCode: string) {
 export default function Step1() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
+
+  const COPY = {
+    info: {
+      label: "Your details (optional)",
+      tts: "Your details are optional. Only council staff can view the information you provide. You can continue without providing details. If you want updates, add at least one contact method.",
+    },
+    provideDetails: {
+      label: "Would you like to provide your details?",
+      tts: "Would you like to provide your details? Choose yes to provide optional details, or no to continue without details.",
+    },
+    personalDetails: {
+      label: "Personal details",
+      tts: "Personal details. First name, last name, and date of birth are optional.",
+    },
+    contactDetails: {
+      label: "Contact details",
+      tts: "Contact details. Email and phone are optional. You can also select a preferred contact method if you want updates.",
+    },
+    address: {
+      label: "Address",
+      tts: "Address. Address lines, town or city, and postcode are optional.",
+    },
+  } as const;
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -207,11 +233,15 @@ export default function Step1() {
                 };
               }}
             >
-              <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
-                <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px", opacity: 0 }} aria-hidden />
-                <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }} color="primary.main">
-                  Your details (optional)
-                </Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                <Stack direction="row" spacing={1} alignItems="flex-start">
+                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px", opacity: 0 }} aria-hidden />
+                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }} color="primary.main">
+                    {COPY.info.label}
+                  </Typography>
+                </Stack>
+
+                <TextToSpeechButton text={(COPY.info.tts ?? COPY.info.label).trim()} />
               </Stack>
 
               <Stack component="ul" spacing={1} sx={{ m: 0, p: 0, listStyle: "none" }}>
@@ -240,7 +270,11 @@ export default function Step1() {
 
             {/* Option to not provide details */}
             <FormControl component="fieldset">
-              <FormLabel sx={{ fontWeight: 800, mb: 1 }}>Would you like to provide your details?</FormLabel>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <FormLabel sx={{ fontWeight: 800 }}>{COPY.provideDetails.label}</FormLabel>
+                <TextToSpeechButton text={(COPY.provideDetails.tts ?? COPY.provideDetails.label).trim()} />
+              </Stack>
+
               <RadioGroup
                 value={provideDetails}
                 onChange={(e) => handleProvideDetailsChange((e.target as HTMLInputElement).value as YesNo)}
@@ -253,230 +287,228 @@ export default function Step1() {
             {/* Personal details */}
             <Collapse in={provideDetails === "yes"} timeout={200} unmountOnExit>
               <Stack spacing={2}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                  Personal details
-                </Typography>
+                <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
+                  <Stack spacing={2}>
+                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+                      <TextField
+                        label="First name (optional)"
+                        value={formData.firstName ?? ""}
+                        onChange={(e) => setField("firstName", e.target.value)}
+                        fullWidth
+                        autoComplete="given-name"
+                      />
 
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-                  <TextField
-                    label="First name (optional)"
-                    value={formData.firstName ?? ""}
-                    onChange={(e) => setField("firstName", e.target.value)}
-                    fullWidth
-                    autoComplete="given-name"
-                  />
+                      <TextField
+                        label="Last name (optional)"
+                        value={formData.lastName ?? ""}
+                        onChange={(e) => setField("lastName", e.target.value)}
+                        fullWidth
+                        autoComplete="family-name"
+                      />
+                    </Box>
 
-                  <TextField
-                    label="Last name (optional)"
-                    value={formData.lastName ?? ""}
-                    onChange={(e) => setField("lastName", e.target.value)}
-                    fullWidth
-                    autoComplete="family-name"
-                  />
-                </Box>
+                    {/* DOB */}
+                    <DatePicker
+                      label="Date of birth (optional)"
+                      value={dobValue}
+                      disableFuture
+                      openTo="year"
+                      views={["year", "month", "day"]}
+                      onChange={(date: Dayjs | null) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          dob: date ? date.format("YYYY-MM-DD") : null,
+                          ageRange: date ? "" : prev.ageRange,
+                        }))
+                      }
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          slotProps: { htmlInput: { autoComplete: "bday" } },
+                        },
+                      }}
+                    />
+                  </Stack>
+                </WithTTS>
 
-                {/* DOB */}
-                <DatePicker
-                  label="Date of birth (optional)"
-                  value={dobValue}
-                  disableFuture
-                  openTo="year"
-                  views={["year", "month", "day"]}
-                  onChange={(date: Dayjs | null) =>
-                    setFormData((prev) => ({
-                    ...prev,
-                      dob: date ? date.format("YYYY-MM-DD") : null,
-                      ageRange: date ? "" : prev.ageRange,
-                    }))
-                  }
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      slotProps: { htmlInput: { autoComplete: "bday" } },
-                    },
-                  }}
-                />
 
                 <Divider />
 
                 {/* Contact details */}
-                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                  Contact details
-                </Typography>
-
-                <Stack spacing={2}>
-                  {/* Email */}
-                  <TextField
-                    label="Email (optional)"
-                    type="email"
-                    value={formData.email ?? ""}
-                    onChange={(e) => setField("email", e.target.value)}
-                    fullWidth
-                    autoComplete="email"
-                    inputMode="email"
-                  />
-
-                  {/* Phone controls: type + country/dial + digits-only number */}
-                  <Box sx={{ display: "grid", gridTemplateColumns: "220px 1fr 1fr", gap: 2 }}>
-                    <FormControl fullWidth>
-                      <InputLabel id="phone-type-label">Phone type (optional)</InputLabel>
-                      <Select
-                        labelId="phone-type-label"
-                        label="Phone type (optional)"
-                        value={(formData.phoneType ?? "") as PhoneType}
-                        onChange={(e) => setField("phoneType", String(e.target.value) as FormData["phoneType"])}
-                      >
-                        <MenuItem value="">No selection</MenuItem>
-                        <MenuItem value="Mobile">Mobile</MenuItem>
-                        <MenuItem value="Home phone">Home phone</MenuItem>
-                      </Select>
-                    </FormControl>
-
-                    <FormControl fullWidth>
-                      <InputLabel id="phone-country-label">Country / dial code</InputLabel>
-                      <Select
-                        labelId="phone-country-label"
-                        label="Country / dial code"
-                        value={phoneCountry}
-                        onChange={(e) => handleCountryChange(String(e.target.value) as CountryCode)}
-                      >
-                        {dialOptions.map((opt) => (
-                          <MenuItem key={opt.country} value={opt.country}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
+                <WithTTS copy={COPY.contactDetails} titleVariant="subtitle2">
+                  <Stack spacing={2}>
+                    {/* Email */}
                     <TextField
-                      label="Phone number (optional)"
-                      value={nationalDigits}
-                      onChange={(e) => handleNationalPhoneChange(e.target.value)}
+                      label="Email (optional)"
+                      type="email"
+                      value={formData.email ?? ""}
+                      onChange={(e) => setField("email", e.target.value)}
                       fullWidth
-                      autoComplete="tel-national"
-                      inputMode="numeric"
-                      placeholder={phoneCountry === "GB" ? "e.g. 7912345678" : "Digits only"}
-                      slotProps={{
-                        htmlInput: {
-                          maxLength: maxNationalLen,
-                          pattern: "[0-9]*",
-                        },
-                      }}
+                      autoComplete="email"
+                      inputMode="email"
                     />
-                  </Box>
 
-                  {/* Preferred contact method */}
-                  <Box>
-                    <Typography fontWeight={700} sx={{ mb: 1 }}>
-                      Preferred method of contact (optional)
-                    </Typography>
-                  </Box>
-
-                  <Stack direction="row" spacing={2} alignItems="flex-end">
-                    <Box sx={{ flex: 1 }}>
+                    {/* Phone controls: type + country/dial + digits-only number */}
+                    <Box sx={{ display: "grid", gridTemplateColumns: "220px 1fr 1fr", gap: 2 }}>
                       <FormControl fullWidth>
-                        <InputLabel id="contact-label">Select a contact method...</InputLabel>
+                        <InputLabel id="phone-type-label">Phone type (optional)</InputLabel>
                         <Select
-                          labelId="contact-label"
-                          label="Select a contact method..."
-                          value={formData.contactMethod ?? ""}
-                          onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
+                          labelId="phone-type-label"
+                          label="Phone type (optional)"
+                          value={(formData.phoneType ?? "") as PhoneType}
+                          onChange={(e) => setField("phoneType", String(e.target.value) as FormData["phoneType"])}
                         >
-                          <MenuItem value="">Select a contact method...</MenuItem>
-                          <MenuItem value="Text message">Text message</MenuItem>
-                          <MenuItem value="Email">Email</MenuItem>
+                          <MenuItem value="">No selection</MenuItem>
+                          <MenuItem value="Mobile">Mobile</MenuItem>
+                          <MenuItem value="Home phone">Home phone</MenuItem>
                         </Select>
                       </FormControl>
+
+                      <FormControl fullWidth>
+                        <InputLabel id="phone-country-label">Country / dial code</InputLabel>
+                        <Select
+                          labelId="phone-country-label"
+                          label="Country / dial code"
+                          value={phoneCountry}
+                          onChange={(e) => handleCountryChange(String(e.target.value) as CountryCode)}
+                        >
+                          {dialOptions.map((opt) => (
+                            <MenuItem key={opt.country} value={opt.country}>
+                              {opt.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        label="Phone number (optional)"
+                        value={nationalDigits}
+                        onChange={(e) => handleNationalPhoneChange(e.target.value)}
+                        fullWidth
+                        autoComplete="tel-national"
+                        inputMode="numeric"
+                        placeholder={phoneCountry === "GB" ? "e.g. 7912345678" : "Digits only"}
+                        slotProps={{
+                          htmlInput: {
+                            maxLength: maxNationalLen,
+                            pattern: "[0-9]*",
+                          },
+                        }}
+                      />
                     </Box>
 
-                    {/* Small help box */}
-                    <Box
-                      sx={{
-                        bgcolor: "grey.100",
-                        border: "1px solid",
-                        borderColor: "grey.300",
-                        borderRadius: 1,
-                        px: 2,
-                        py: 1.5,
-                        maxWidth: 320,
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        <InfoOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: "text-bottom" }} />
-                        We will use this to update you on your request
+                    {/* Preferred contact method */}
+                    <Box>
+                      <Typography fontWeight={700} sx={{ mb: 1 }}>
+                        Preferred method of contact (optional)
                       </Typography>
                     </Box>
+
+                    <Stack direction="row" spacing={2} alignItems="flex-end">
+                      <Box sx={{ flex: 1 }}>
+                        <FormControl fullWidth>
+                          <InputLabel id="contact-label">Select a contact method...</InputLabel>
+                          <Select
+                            labelId="contact-label"
+                            label="Select a contact method..."
+                            value={formData.contactMethod ?? ""}
+                            onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
+                          >
+                            <MenuItem value="">Select a contact method...</MenuItem>
+                            <MenuItem value="Text message">Text message</MenuItem>
+                            <MenuItem value="Email">Email</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Small help box */}
+                      <Box
+                        sx={{
+                          bgcolor: "grey.100",
+                          border: "1px solid",
+                          borderColor: "grey.300",
+                          borderRadius: 1,
+                          px: 2,
+                          py: 1.5,
+                          maxWidth: 320,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          <InfoOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: "text-bottom" }} />
+                          We will use this to update you on your request
+                        </Typography>
+                      </Box>
+                    </Stack>
                   </Stack>
-                </Stack>
+                </WithTTS>
               </Stack>
             </Collapse>
+
             <Divider />
 
             {/* Address */}
-            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-              Address
-            </Typography>
-
-            <Stack spacing={2}>
-              <TextField
-                label="Address line 1 (optional)"
-                value={formData.addressLine1 ?? ""}
-                onChange={(e) => setField("addressLine1", e.target.value)}
-                fullWidth
-                autoComplete="address-line1"
-              />
-
-              <TextField
-                label="Address line 2 (optional)"
-                value={formData.addressLine2 ?? ""}
-                onChange={(e) => setField("addressLine2", e.target.value)}
-                fullWidth
-                autoComplete="address-line2"
-              />
-
-              <TextField
-                label="Address line 3 (optional)"
-                value={formData.addressLine3 ?? ""}
-                onChange={(e) => setField("addressLine3", e.target.value)}
-                fullWidth
-                autoComplete="address-line3"
-              />
-
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
+            <WithTTS copy={COPY.address} titleVariant="subtitle2">
+              <Stack spacing={2}>
                 <TextField
-                  label="Town or city (optional)"
-                  value={formData.townOrCity ?? ""}
-                  onChange={(e) => setField("townOrCity", e.target.value)}
+                  label="Address line 1 (optional)"
+                  value={formData.addressLine1 ?? ""}
+                  onChange={(e) => setField("addressLine1", e.target.value)}
                   fullWidth
-                  autoComplete="address-level2"
+                  autoComplete="address-line1"
                 />
 
                 <TextField
-                  label="Postcode (optional)"
-                  value={formData.postcode ?? ""}
-                  onChange={(e) => setField("postcode", e.target.value)}
-                  onBlur={() => {
-                    setPostcodeTouched(true);
-                    setField("postcode", normaliseUkPostcode(formData.postcode ?? ""));
-                  }}
-                  error={postcodeTouched && postcodeInvalid}
-                  helperText={
-                    postcodeTouched && postcodeInvalid
-                      ? "Enter a valid UK postcode (e.g. TW3 1JL) or leave blank."
-                      : " "
-                  }
+                  label="Address line 2 (optional)"
+                  value={formData.addressLine2 ?? ""}
+                  onChange={(e) => setField("addressLine2", e.target.value)}
                   fullWidth
-                  autoComplete="postal-code"
-                  placeholder="e.g. TW3 1JL"
-                  slotProps={{
-                    htmlInput: {
-                      autoCapitalize: "characters",
-                      spellCheck: false,
-                    },
-                  }}
+                  autoComplete="address-line2"
                 />
-              </Box>
-            </Stack>
+
+                <TextField
+                  label="Address line 3 (optional)"
+                  value={formData.addressLine3 ?? ""}
+                  onChange={(e) => setField("addressLine3", e.target.value)}
+                  fullWidth
+                  autoComplete="address-line3"
+                />
+
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
+                  <TextField
+                    label="Town or city (optional)"
+                    value={formData.townOrCity ?? ""}
+                    onChange={(e) => setField("townOrCity", e.target.value)}
+                    fullWidth
+                    autoComplete="address-level2"
+                  />
+
+                  <TextField
+                    label="Postcode (optional)"
+                    value={formData.postcode ?? ""}
+                    onChange={(e) => setField("postcode", e.target.value)}
+                    onBlur={() => {
+                      setPostcodeTouched(true);
+                      setField("postcode", normaliseUkPostcode(formData.postcode ?? ""));
+                    }}
+                    error={postcodeTouched && postcodeInvalid}
+                    helperText={
+                      postcodeTouched && postcodeInvalid
+                        ? "Enter a valid UK postcode (e.g. TW3 1JL) or leave blank."
+                        : " "
+                    }
+                    fullWidth
+                    autoComplete="postal-code"
+                    placeholder="e.g. TW3 1JL"
+                    slotProps={{
+                      htmlInput: {
+                        autoCapitalize: "characters",
+                        spellCheck: false,
+                      },
+                    }}
+                  />
+                </Box>
+              </Stack>
+            </WithTTS>
 
             <Divider />
 

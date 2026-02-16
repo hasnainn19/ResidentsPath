@@ -35,28 +35,38 @@ export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
 
 // The actual enquiries, grouped by top-level area or General Services section. 
 // Each enquiry can optionally have "specifics" which are more detailed options shown if the user selects that enquiry
+// Enquiries can also have flags saying which follow up questions apply
 export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
   CouncilTax: [
     {
       value: "council_tax_help",
       label: "Council Tax help",
       department: "Council Tax or Housing Benefit Help",
+      askVulnerabilityQs: true,
       askHouseholdSize: true,
+      askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "council_tax_appointment",
       label: "Council Tax appointment",
       department: "Council Tax or Housing Benefit Help",
+      askVulnerabilityQs: true,
       askHouseholdSize: true,
+      askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "liberata",
       label: "Liberata (payments, bills or letters)",
       department: "Council Tax or Housing Benefit Help",
+      askVulnerabilityQs: true,
       askHouseholdSize: true,
+      askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
   ],
   Housing: [
@@ -68,6 +78,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "homelessness",
@@ -77,6 +88,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "voids_lettings",
@@ -86,6 +98,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "housing_issue",
@@ -95,11 +108,31 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
   ],
   AdultsDuty: [
-    { value: "blue_badges", label: "Blue Badges", department: "Adults duty", askVulnerabilityQs: true },
-    { value: "freedom_passes", label: "Freedom Passes", department: "Adults duty", askVulnerabilityQs: true },
+    { 
+      value: "blue_badges", 
+      label: "Blue Badges", 
+      department: "Adults duty", 
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+      askAgeQs: true,
+      
+    },
+    { 
+      value: "freedom_passes", 
+      label: "Freedom Passes", 
+      department: "Adults duty", 
+      askVulnerabilityQs: true,
+      askHouseholdSize: true,
+      askDomesticAbuseQs: true,
+      askChildrenQs: true,
+      askAgeQs: true,
+    },
   ],
   ChildrensDuty: [
     {
@@ -110,6 +143,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
     {
       value: "youth_offending_service",
@@ -119,6 +153,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
       askChildrenQs: true,
+      askAgeQs: true,
     },
   ],
   CommunityHub: [
@@ -127,7 +162,10 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
       label: "Community Hub Advisor",
       department: "Community Hub Advisor",
       askVulnerabilityQs: true,
+      askHouseholdSize: true,
       askDomesticAbuseQs: true,
+      askChildrenQs: true,
+      askAgeQs: true,
     },
     { value: "translation", label: "Translation", department: "Community Hub Advisor", askVulnerabilityQs: true },
   ],
