@@ -25,6 +25,7 @@ const BookingPage = () => {
     };
     const allTimes = generateTimes();
 
+
     function handleConfirm() {
         // navigate to next page
     }
