@@ -69,9 +69,7 @@ const schema = a.schema({
 
 			// Relationships
 			cases: a.hasMany("Case", "departmentId"),
-			tickets: a.hasMany("Ticket", "departmentId"),
 			staff: a.hasMany("Staff", "departmentId"),
-			appointments: a.hasMany("Appointment", "departmentId"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all departments
@@ -82,7 +80,6 @@ const schema = a.schema({
 		.model({
 			// Foreign keys
 			caseId: a.id().required(),
-			departmentId: a.id().required(),
 
 			// Display information
 			ticketNumber: a.string().required(),
@@ -104,7 +101,6 @@ const schema = a.schema({
 
 			// Relationships
 			case: a.belongsTo("Case", "caseId"),
-			department: a.belongsTo("Department", "departmentId"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all tickets
@@ -137,7 +133,6 @@ const schema = a.schema({
 		.model({
 			// Foreign keys
 			userId: a.id().required(),
-			departmentId: a.id().required(),
 			caseId: a.id().required(),
 
 			// Appointment scheduling
@@ -152,7 +147,6 @@ const schema = a.schema({
 
 			// Relationships
 			user: a.belongsTo("User", "userId"),
-			department: a.belongsTo("Department", "departmentId"),
 			case: a.belongsTo("Case", "caseId"),
 		})
 		.authorization((allow) => [

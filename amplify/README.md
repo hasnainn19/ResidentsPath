@@ -58,14 +58,44 @@ npm --version
 2. **Case** - Issues/matters that residents need help with
 3. **Department** - Service departments (Housing, Council Tax, etc.)
 4. **Ticket** - Queue entries for a resident's visit
-5. **Staff** - Staff members working in departments
+5. **Appointment** - Scheduled appointments for residents
+6. **Staff** - Staff members working in departments
 
 ### Relationships
-- User → has many Cases
-- Case → belongs to User, Department; has many Tickets
-- Ticket → belongs to Case, Department
-- Staff → belongs to Department
-- Department → has many Cases, Tickets, Staff
+- **User** → has many Cases, Appointments
+- **Case** → belongs to User, Department; has many Tickets, Appointments
+- **Ticket** → belongs to Case (department accessed through Case)
+- **Appointment** → belongs to User, Case (department accessed through Case)
+- **Staff** → belongs to Department
+- **Department** → has many Cases, Staff
+
+### Data Structure (Normalized)
+
+```
+Department
+  ├─ cases (hasMany Case)
+  └─ staff (hasMany Staff)
+
+Case
+  ├─ user (belongsTo User)
+  ├─ department (belongsTo Department)
+  ├─ tickets (hasMany Ticket)
+  └─ appointments (hasMany Appointment)
+
+User
+  ├─ cases (hasMany Case)
+  └─ appointments (hasMany Appointment)
+
+Ticket
+  └─ case (belongsTo Case)
+
+Appointment
+  ├─ user (belongsTo User)
+  └─ case (belongsTo Case)
+
+Staff
+  └─ department (belongsTo Department)
+```
 
 All models have auto-generated fields from Amplify: `id`, `createdAt`, `updatedAt`
 
