@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { getTicketStatus } from '../functions/getTicketStatus/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -107,7 +108,6 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all tickets
-			allow.guest().to(["read"]) // Ticket data is publically readable for walk-ins
 		]),
 
 	// Staff - represents a staff member at Hounslow
@@ -131,6 +131,21 @@ const schema = a.schema({
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can see staff information
 		]),
+	
+	// Custom queries and mutations (lambdas defined in amplify/functions)
+	getTicketStatus: a
+		.query()
+		.arguments({
+			ticketNumber: a.string().required()
+		})
+		.returns(a.customType({
+			ticketNumber: a.string(),
+			status: a.string(),
+			placement: a.integer(),
+			estimatedWaitTime: a.string(),
+		}))
+		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
+		.handler(a.handler.function(getTicketStatus)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
