@@ -175,6 +175,7 @@ npx ampx sandbox
 npx ampx sandbox
 
 # This creates a cloud sandbox that auto-deploys changes
+# Generates amplify_outputs.json which is connected to the frontend in main.tsx
 # Keep this running while developing
 ```
 
