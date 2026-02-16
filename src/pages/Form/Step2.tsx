@@ -14,6 +14,7 @@
  * current path have been completed.
  */
 
+
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -52,6 +53,7 @@ import type {
   Proceed,
   SafeToContact,
   Urgency,
+  ageRange,
 } from "./model/types";
 import StepActions from "./components/StepActions";
 import { useMemo, useState } from "react";
@@ -89,6 +91,7 @@ export default function Step2() {
   const showDisabilityQs = enquiryContex.showDisabilityQs;
   const showHouseholdSize = enquiryContex.showHouseholdSize;
   const showDomesticAbuseQs = enquiryContex.showDomesticAbuseQs;
+  const showAgeRange = enquiryContex.showAgeRange;
 
   const needsUrgentReason = formData.urgent === "yes";
 
@@ -221,27 +224,57 @@ export default function Step2() {
             </Box>
 
             {/* Further information */}
-            {
-              // For General Services: only show enquiries after a section is chosen (unless it is a direct item)
-              isGeneralServices && formData.topLevel !== "" && (
+            {// For General Services: only show enquiries after a section is chosen (unless it is a direct item) 
+            isGeneralServices && formData.topLevel !== "" && (
+              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                <Typography fontWeight={700} sx={{ mb: 1 }}>
+                  Choose a topic{" "}
+                  <Typography component="span" color="error">
+                    *
+                  </Typography>
+                </Typography>
+
+                <FormControl fullWidth required>
+                  <InputLabel id="general-services-choice-label">Select a topic...</InputLabel>
+                  <Select
+                    labelId="general-services-choice-label"
+                    label="Select a topic..."
+                    value={formData.generalServicesChoice}
+                    onChange={(e) => handleGeneralServicesChoiceChange(String(e.target.value))}
+                  >
+                    <MenuItem value="">Select a topic...</MenuItem>
+                    {GENERAL_SERVICES_CHOICE_OPTIONS.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            )}
+
+            {// Show the enquiry dropdown when a top-level area is chosen
+            formData.topLevel !== "" &&
+              // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
+              (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
                 <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                   <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    Choose a topic{" "}
+                    Choose an enquiry{" "}
                     <Typography component="span" color="error">
                       *
                     </Typography>
                   </Typography>
 
                   <FormControl fullWidth required>
-                    <InputLabel id="general-services-choice-label">Select a topic...</InputLabel>
+                    <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
                     <Select
-                      labelId="general-services-choice-label"
-                      label="Select a topic..."
-                      value={formData.generalServicesChoice}
-                      onChange={(e) => handleGeneralServicesChoiceChange(String(e.target.value))}
+                      labelId="enquiry-label"
+                      label="Select an enquiry..."
+                      value={formData.enquiryId}
+                      onChange={(e) => handleEnquiryChange(String(e.target.value))}
                     >
-                      <MenuItem value="">Select a topic...</MenuItem>
-                      {GENERAL_SERVICES_CHOICE_OPTIONS.map((opt) => (
+                      <MenuItem value="">Select an enquiry...</MenuItem>
+                      {enquiryOptions.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </MenuItem>
@@ -249,162 +282,124 @@ export default function Step2() {
                     </Select>
                   </FormControl>
                 </Box>
-              )
-            }
+              )}
 
-            {
-              // Show the enquiry dropdown when a top-level area is chosen
-              formData.topLevel !== "" &&
-                // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
-                (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                    <Typography fontWeight={700} sx={{ mb: 1 }}>
-                      Choose an enquiry{" "}
-                      <Typography component="span" color="error">
-                        *
-                      </Typography>
-                    </Typography>
-
-                    <FormControl fullWidth required>
-                      <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
-                      <Select
-                        labelId="enquiry-label"
-                        label="Select an enquiry..."
-                        value={formData.enquiryId}
-                        onChange={(e) => handleEnquiryChange(String(e.target.value))}
-                      >
-                        <MenuItem value="">Select an enquiry...</MenuItem>
-                        {enquiryOptions.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Box>
-                )
-            }
-
-            {
-              // Show the "more detail" dropdown when relevant
-              hasChosenEnquiry && showSpecificDropdown && (
-                <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                  <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    More detail{" "}
-                    <Typography component="span" color="error">
-                      *
-                    </Typography>
+            {// Show the "more detail" dropdown when relevant
+            hasChosenEnquiry && showSpecificDropdown && (
+              <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                <Typography fontWeight={700} sx={{ mb: 1 }}>
+                  More detail{" "}
+                  <Typography component="span" color="error">
+                    *
                   </Typography>
+                </Typography>
 
-                  <FormControl fullWidth required>
-                    <InputLabel id="detail-label">Select a detail...</InputLabel>
-                    <Select
-                      labelId="detail-label"
-                      label="Select a detail..."
-                      value={formData.specificDetailId}
-                      onChange={(e) => setField("specificDetailId", String(e.target.value))}
+                <FormControl fullWidth required>
+                  <InputLabel id="detail-label">Select a detail...</InputLabel>
+                  <Select
+                    labelId="detail-label"
+                    label="Select a detail..."
+                    value={formData.specificDetailId}
+                    onChange={(e) => setField("specificDetailId", String(e.target.value))}
+                  >
+                    <MenuItem value="">Select a detail...</MenuItem>
+                    {specificOptions.map((d) => (
+                      <MenuItem key={d.value} value={d.value}>
+                        {d.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            )}
+
+            {// Show follow-up questions only when a specific enquiry has been chosen
+            hasEnoughToProceed && (showChildrenQs || showDisabilityQs) && (
+              <>
+                {/* Children */}
+                {showChildrenQs && (
+                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                    <LeftCheckRow
+                      checked={formData.hasChildren}
+                      onChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          hasChildren: checked,
+                          childrenCount: checked ? "1" : "0",
+                        }))
+                      }
+                      label="I have dependent children"
                     >
-                      <MenuItem value="">Select a detail...</MenuItem>
-                      {specificOptions.map((d) => (
-                        <MenuItem key={d.value} value={d.value}>
-                          {d.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              )
-            }
+                      {formData.hasChildren && (
+                        <Box sx={{ mt: 1 }}>
+                          <FormControl fullWidth>
+                            <InputLabel id="children-count-label">How many children?</InputLabel>
+                            <Select
+                              labelId="children-count-label"
+                              label="How many children?"
+                              value={formData.childrenCount}
+                              onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
+                            >
+                              <MenuItem value="1">1</MenuItem>
+                              <MenuItem value="2">2</MenuItem>
+                              <MenuItem value="3">3</MenuItem>
+                              <MenuItem value="4">4</MenuItem>
+                              <MenuItem value="5">5</MenuItem>
+                              <MenuItem value="6+">6+</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      )}
+                    </LeftCheckRow>
+                  </Box>
+                )}
 
-            {
-              // Show follow-up questions only when a specific enquiry has been chosen
-              hasEnoughToProceed && (showChildrenQs || showDisabilityQs) && (
-                <>
-                  {/* Children */}
-                  {showChildrenQs && (
-                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                      <LeftCheckRow
-                        checked={formData.hasChildren}
-                        onChange={(checked) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            hasChildren: checked,
-                            childrenCount: checked ? "1" : "0",
-                          }))
-                        }
-                        label="I have dependent children"
-                      >
-                        {formData.hasChildren && (
-                          <Box sx={{ mt: 1 }}>
-                            <FormControl fullWidth>
-                              <InputLabel id="children-count-label">How many children?</InputLabel>
-                              <Select
-                                labelId="children-count-label"
-                                label="How many children?"
-                                value={formData.childrenCount}
-                                onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
-                              >
-                                <MenuItem value="1">1</MenuItem>
-                                <MenuItem value="2">2</MenuItem>
-                                <MenuItem value="3">3</MenuItem>
-                                <MenuItem value="4">4</MenuItem>
-                                <MenuItem value="5">5</MenuItem>
-                                <MenuItem value="6+">6+</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Box>
-                        )}
-                      </LeftCheckRow>
-                    </Box>
-                  )}
-
-                  {/* Disability */}
-                  {showDisabilityQs && (
-                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
-                      <LeftCheckRow
-                        checked={formData.hasDisabilityOrSensory}
-                        onChange={(checked) =>
-                          setFormData((prev) =>
-                            checked
-                              ? { ...prev, hasDisabilityOrSensory: true }
-                              : {
-                                  ...prev,
-                                  hasDisabilityOrSensory: false,
-                                  disabilityType: "",
-                                  ...DISABILITY_SUPPORT_RESET,
-                                },
-                          )
-                        }
-                        label="I have a disability or sensory impairment"
-                      >
-                        {formData.hasDisabilityOrSensory && (
-                          <Box sx={{ mt: 1 }}>
-                            <FormControl fullWidth>
-                              <InputLabel id="disability-type-label">Select a type...</InputLabel>
-                              <Select
-                                labelId="disability-type-label"
-                                label="Select a type..."
-                                value={formData.disabilityType}
-                                onChange={(e) => setField("disabilityType", String(e.target.value) as DisabilityType)}
-                              >
-                                <MenuItem value="">Select...</MenuItem>
-                                <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
-                                <MenuItem value="Visual impairment">Visual impairment</MenuItem>
-                                <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
-                                <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
-                                <MenuItem value="Mental health">Mental health</MenuItem>
-                                <MenuItem value="Other">Other</MenuItem>
-                                <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Box>
-                        )}
-                      </LeftCheckRow>
-                    </Box>
-                  )}
-                </>
-              )
-            }
+                {/* Disability */}
+                {showDisabilityQs && (
+                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                    <LeftCheckRow
+                      checked={formData.hasDisabilityOrSensory}
+                      onChange={(checked) =>
+                        setFormData((prev) =>
+                          checked
+                            ? { ...prev, hasDisabilityOrSensory: true }
+                            : {
+                                ...prev,
+                                hasDisabilityOrSensory: false,
+                                disabilityType: "",
+                                ...DISABILITY_SUPPORT_RESET,
+                              },
+                        )
+                      }
+                      label="I have a disability or sensory impairment"
+                    >
+                      {formData.hasDisabilityOrSensory && (
+                        <Box sx={{ mt: 1 }}>
+                          <FormControl fullWidth>
+                            <InputLabel id="disability-type-label">Select a type...</InputLabel>
+                            <Select
+                              labelId="disability-type-label"
+                              label="Select a type..."
+                              value={formData.disabilityType}
+                              onChange={(e) => setField("disabilityType", String(e.target.value) as DisabilityType)}
+                            >
+                              <MenuItem value="">Select...</MenuItem>
+                              <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
+                              <MenuItem value="Visual impairment">Visual impairment</MenuItem>
+                              <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
+                              <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
+                              <MenuItem value="Mental health">Mental health</MenuItem>
+                              <MenuItem value="Other">Other</MenuItem>
+                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      )}
+                    </LeftCheckRow>
+                  </Box>
+                )}
+              </>
+            )}
 
             {hasEnoughToProceed && showHouseholdSize && (
               <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
@@ -431,7 +426,38 @@ export default function Step2() {
                 </FormControl>
               </Box>
             )}
-
+           {
+             // If DOB was not provided in Step 1, offer an optional age range after the enquiry is chosen
+              showAgeRange && (
+                <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                  <Typography fontWeight={700} sx={{ mb: 1 }}>
+                    Age range{" "}
+                    <Typography component="span" variant="body2" color="text.secondary">
+                      (optional)
+                    </Typography>
+                  </Typography>
+                  <FormControl fullWidth>
+                    <InputLabel id="age-range-label">Select an age range...</InputLabel>
+                    <Select
+                      labelId="age-range-label"
+                      label="Select an age range..."
+                      value={formData.ageRange}
+                      onChange={(e) => setField("ageRange", String(e.target.value) as ageRange)}
+                    >
+                      <MenuItem value="">Select...</MenuItem>
+                      <MenuItem value="Under 18">Under 18</MenuItem>
+                      <MenuItem value="18-24">18-24</MenuItem>
+                      <MenuItem value="25-34">25-34</MenuItem>
+                      <MenuItem value="35-44">35-44</MenuItem>
+                      <MenuItem value="45-54">45-54</MenuItem>
+                      <MenuItem value="55-64">55-64</MenuItem>
+                      <MenuItem value="65+">65+</MenuItem>
+                      <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )
+           }
             {hasEnoughToProceed && showDomesticAbuseQs && (
               <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                 <LeftCheckRow
@@ -664,36 +690,12 @@ export default function Step2() {
 
                 <Collapse in={showMoreSupport} timeout={200} unmountOnExit>
                   <Stack spacing={1.25} sx={{ mt: 1 }}>
-                    <LeftCheckRow
-                      checked={formData.needsSeating}
-                      onChange={(c) => setField("needsSeating", c)}
-                      label="Seating (cannot stand for long)"
-                    />
-                    <LeftCheckRow
-                      checked={formData.needsWrittenUpdates}
-                      onChange={(c) => setField("needsWrittenUpdates", c)}
-                      label="Written updates (for example: cannot hear announcements)"
-                    />
-                    <LeftCheckRow
-                      checked={formData.needsLargeText}
-                      onChange={(c) => setField("needsLargeText", c)}
-                      label="Large text / help reading"
-                    />
-                    <LeftCheckRow
-                      checked={formData.needsQuietSpace}
-                      onChange={(c) => setField("needsQuietSpace", c)}
-                      label="Quieter space"
-                    />
-                    <LeftCheckRow
-                      checked={formData.needsBSL}
-                      onChange={(c) => setField("needsBSL", c)}
-                      label="Interpreter (BSL)"
-                    />
-                    <LeftCheckRow
-                      checked={formData.needsHelpWithForms}
-                      onChange={(c) => setField("needsHelpWithForms", c)}
-                      label="Help completing forms"
-                    />
+                    <LeftCheckRow checked={formData.needsSeating} onChange={(c) => setField("needsSeating", c)} label="Seating (cannot stand for long)" />
+                    <LeftCheckRow checked={formData.needsWrittenUpdates} onChange={(c) => setField("needsWrittenUpdates", c)} label="Written updates (for example: cannot hear announcements)" />
+                    <LeftCheckRow checked={formData.needsLargeText} onChange={(c) => setField("needsLargeText", c)} label="Large text / help reading" />
+                    <LeftCheckRow checked={formData.needsQuietSpace} onChange={(c) => setField("needsQuietSpace", c)} label="Quieter space" />
+                    <LeftCheckRow checked={formData.needsBSL} onChange={(c) => setField("needsBSL", c)} label="Interpreter (BSL)" />
+                    <LeftCheckRow checked={formData.needsHelpWithForms} onChange={(c) => setField("needsHelpWithForms", c)} label="Help completing forms" />
 
                     <TextField
                       fullWidth

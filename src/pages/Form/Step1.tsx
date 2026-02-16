@@ -282,7 +282,13 @@ export default function Step1() {
                   disableFuture
                   openTo="year"
                   views={["year", "month", "day"]}
-                  onChange={(date: Dayjs | null) => setField("dob", date ? date.format("YYYY-MM-DD") : null)}
+                  onChange={(date: Dayjs | null) =>
+                    setFormData((prev) => ({
+                    ...prev,
+                      dob: date ? date.format("YYYY-MM-DD") : null,
+                      ageRange: date ? "" : prev.ageRange,
+                    }))
+                  }
                   slotProps={{
                     textField: {
                       fullWidth: true,

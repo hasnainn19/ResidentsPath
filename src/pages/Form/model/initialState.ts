@@ -44,6 +44,8 @@ export const initialFormData: FormData = {
   safeToContact: "prefer_not_to_say",
   safeContactNotes: "",
 
+  ageRange: "",
+
   urgent: "unsure",
   urgentReason: "",
   urgentOtherReason: "",

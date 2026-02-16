@@ -26,6 +26,7 @@ export default function Step3() {
   const submitToBackend = () => {
     const payload = {
       ...formData,
+      ageRange: formData.dob ? "" : formData.ageRange,
       childrenCount: formData.hasChildren ? formData.childrenCount : "0",
       disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
       urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
@@ -56,6 +57,7 @@ export default function Step3() {
     householdSize: "How many people are in your household?",
     hasDisabilityOrSensory: "I have a disability or sensory impairment",
     disabilityType: "Select a type...",
+    ageRange: "Age range",
     domesticAbuse: "I am a domestic abuse victim/survivor",
     safeToContact: "Is it safe for us to contact you?",
     safeContactNotes: "Safe contact notes",
@@ -119,6 +121,7 @@ export default function Step3() {
         "householdSize",
         "hasDisabilityOrSensory",
         "disabilityType",
+        "ageRange",
         "domesticAbuse",
         "safeToContact",
         "safeContactNotes",
@@ -211,6 +214,7 @@ export default function Step3() {
     safeContactNotes: (fd) => fd.domesticAbuse && fd.safeToContact === "no",
     urgentReason: (fd) => fd.urgent === "yes",
     urgentOtherReason: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
+    ageRange: (fd) => !fd.dob,
   };
 
   // Get the enquiry context which determines which questions were actually asked based on earlier answers

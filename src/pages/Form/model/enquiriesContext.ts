@@ -31,6 +31,7 @@ export function getEnquiryContext(data: FormData) {
   const showDisabilityQs = !!selectedEnquiry?.askVulnerabilityQs;
   const showHouseholdSize = !!selectedEnquiry?.askHouseholdSize;
   const showDomesticAbuseQs = !!selectedEnquiry?.askDomesticAbuseQs;
+  const showAgeRange = hasChosenEnquiry && !data.dob;
 
   return {
     isGeneralServices,
@@ -46,5 +47,6 @@ export function getEnquiryContext(data: FormData) {
     showDisabilityQs,
     showHouseholdSize,
     showDomesticAbuseQs,
+    showAgeRange,
   };
 }

@@ -54,6 +54,17 @@ export type LanguageOption = { code: string; label: string };
 
 export type YesNo = "yes" | "no";
 
+export type ageRange = 
+  | ""
+  | "Under 18"
+  | "18-24"
+  | "25-34"
+  | "35-44"
+  | "45-54"
+  | "55-64"
+  | "65+"
+  | "Prefer not to say";
+
 export type FormData = {
   language: string;
 
@@ -89,6 +100,8 @@ export type FormData = {
   domesticAbuse: boolean;
   safeToContact: SafeToContact;
   safeContactNotes: string;
+
+  ageRange: ageRange;
 
   urgent: Urgency;
   urgentReason: string;
