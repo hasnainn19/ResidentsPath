@@ -1,5 +1,5 @@
 /**
- * Step 3: review and submit.
+ * Review and submit
  *
  * Shows a summary of what has been entered so far, with links back to edit earlier steps.
  * Only relevant answers are shown (eg conditional questions that were actually asked, and values
@@ -17,9 +17,12 @@ import type { FormData } from "./model/types";
 import StepActions from "./components/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
 
+import dayjs from "dayjs";
+
+
 type EnquiryContext = ReturnType<typeof getEnquiryContext>;
 
-export default function Step3() {
+export default function ReviewAndSubmit() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
@@ -80,6 +83,9 @@ export default function Step3() {
 
     additionalInfo: "Anything else you want to tell us",
     proceed: "How would you like to proceed?",
+
+    appointmentDateIso: "Appointment date",
+    appointmentTime: "Appointment time",
   };
 
   const URGENCY_LABELS: Record<string, string> = {
@@ -98,7 +104,7 @@ export default function Step3() {
   const SECTIONS: Array<{
     title: string;
     keys: Array<keyof FormData>;
-    editTo: "/form/step-1" | "/form/step-2";
+    editTo: "/form/personal-details" | "/form/enquiry-selection" | "/form/actions";
   }> = [
     {
       title: "Your details",
@@ -115,17 +121,17 @@ export default function Step3() {
         "townOrCity",
         "postcode",
       ],
-      editTo: "/form/step-1",
+      editTo: "/form/personal-details",
     },
     {
       title: "Your request",
       keys: ["enquiryId", "specificDetailId", "otherEnquiryText", "proceed", "additionalInfo"],
-      editTo: "/form/step-2",
+      editTo: "/form/enquiry-selection",
     },
     {
       title: "Urgency",
       keys: ["urgent", "urgentReason", "urgentOtherReason"],
-      editTo: "/form/step-2",
+      editTo: "/form/enquiry-selection",
     },
     {
       title: "Additional questions",
@@ -140,7 +146,7 @@ export default function Step3() {
         "safeToContact",
         "safeContactNotes",
       ],
-      editTo: "/form/step-2",
+      editTo: "/form/enquiry-selection",
     },
     {
       title: "Support needs",
@@ -155,7 +161,12 @@ export default function Step3() {
         "needsHelpWithForms",
         "otherSupport",
       ],
-      editTo: "/form/step-2",
+      editTo: "/form/enquiry-selection",
+    },
+    {
+      title: "Appointment",
+      keys: ["appointmentDateIso", "appointmentTime"],
+      editTo: "/form/actions",
     },
   ];
 
@@ -232,6 +243,9 @@ export default function Step3() {
     urgentReason: (fd) => fd.urgent === "yes",
     urgentOtherReason: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
     ageRange: (fd) => !fd.dob,
+    appointmentDateIso: (fd) => fd.proceed === "Schedule appointment",
+    appointmentTime: (fd) => fd.proceed === "Schedule appointment",
+
   };
 
   // Get the enquiry context which determines which questions were actually asked based on earlier answers
@@ -312,6 +326,12 @@ export default function Step3() {
       val = SAFE_TO_CONTACT_LABELS[val] || val;
     }
 
+    if (key === "appointmentDateIso" && typeof val === "string") {
+      const d = dayjs(val);
+      val = d.isValid() ? d.format("D MMMM YYYY") : val;
+    }
+
+
     if (isEmptyForReview(key, val)) return null;
 
     return typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
@@ -336,18 +356,18 @@ export default function Step3() {
 
   return (
     <StepShell
-      step={3}
-      totalSteps={3}
+      step={4}
+      totalSteps={4}
       title="Council service request"
       subtitle="Please review and submit"
-      onBack={() => nav("/form/enquiry-selection")}
+      onBack={() => nav("/form/actions")}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
       <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
         <Typography fontWeight={800} sx={{ mb: 2 }}>
-          Step 3
+          Review and submit
         </Typography>
 
         <Typography variant="h6" sx={{ mb: 3 }}>
@@ -413,7 +433,7 @@ export default function Step3() {
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           showPrevious
-          onPrevious={() => nav("/form/enquiry-selection")}
+          onPrevious={() => nav("/form/actions")}
         />
       </Paper>
     </StepShell>

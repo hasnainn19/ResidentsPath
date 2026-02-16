@@ -5,7 +5,8 @@ import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
-import Step3 from "./pages/Form/ReviewAndSubmit";
+import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
+import Actions from "./pages/Form/Actions";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -17,7 +18,8 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/form/personal-details" replace /> },
       { path: "personal-details", element: <PersonalDetails /> },
       { path: "enquiry-selection", element: <EnquirySelection /> },
-      { path: "review-and-submit", element: <Step3 /> },
+       {path: "actions", element: <Actions /> },
+      { path: "review-and-submit", element: <ReviewAndSubmit /> },
     ],
   },
     {

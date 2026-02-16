@@ -1,11 +1,11 @@
 /**
- * Step 1: optional resident details.
+ * Personal Details: optional resident details.
  *
  * Starts by asking whether the resident wants to provide personal/contact details at all.
  * If they choose not to, the related fields are cleared so they do not appear later.
  *
  * If details are provided, this step collects basic info (eg name, DOB, email/phone, preferred
- * contact method) and then moves on to Step 2 for the actual request/triage.
+ * contact method) and then moves on to enquiry selection for the actual request/triage.
  */
 
 import { useState } from "react";
@@ -195,7 +195,7 @@ export default function PersonalDetails() {
   return (
     <StepShell
       step={1}
-      totalSteps={3}
+      totalSteps={4}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
       languageValue={formData.language}

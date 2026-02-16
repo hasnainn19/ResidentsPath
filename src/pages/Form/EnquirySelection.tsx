@@ -1,5 +1,5 @@
 /**
- * Step 2: select the service request and answer any relevant follow-up questions.
+ * Enquiry selection: select the service request and answer any relevant follow-up questions.
  *
  * Collects:
  * - Top-level service area
@@ -244,7 +244,7 @@ export default function EnquirySelection() {
   return (
     <StepShell
       step={2}
-      totalSteps={3}
+      totalSteps={4}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
       onBack={() => nav("/form/personal-details")}
@@ -259,7 +259,7 @@ export default function EnquirySelection() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!canGoNext) return;
-            nav("/form/review-and-submit");
+            nav("/form/actions");
           }}
         >
           <Stack spacing={4}>

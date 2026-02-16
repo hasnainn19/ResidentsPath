@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
-import { Card, CardContent, CardActions, Tooltip, Typography, Divider, Box, List, ListItem, ListItemButton, ListItemText, Button, Avatar, Chip} from '@mui/material';
+import { Card, CardContent, CardActions, Tooltip, Typography, Divider, Box, List, ListItem, ListItemButton, ListItemText, Button, Avatar, Chip, Dialog, DialogActions, DialogContent, DialogTitle} from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
@@ -9,10 +9,17 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import HistoryToggleOffOutlinedIcon from '@mui/icons-material/HistoryToggleOffOutlined';
 import TextToSpeechButton from '../components/TextToSpeechButton';
 
-const BookingPanel = () => {
+type Props = {
+  onConfirm?: (dateIso: string, time: string) => void;
+};
+
+export default function BookingPanel(props: Props) {
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
     const [selectedTime, setSelectedTime] = useState('');
     const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const prettyDate = selectedDate ? selectedDate.format("D MMMM YYYY") : "";
 
     // Generate 30-minute slots (9am–5pm)
     const generateTimes = () => {
@@ -72,7 +79,9 @@ const BookingPanel = () => {
     }, [selectedDate, unavailableTimes]);
 
     function handleConfirm() {
-        // navigate to next page
+        if (!selectedDate || !selectedTime) return;
+        props.onConfirm?.(selectedDate.toISOString(), selectedTime);
+        setConfirmOpen(true);
     }
 
     function handleClear() {
@@ -82,11 +91,6 @@ const BookingPanel = () => {
 
   return (
     <>
-    <Typography align="center" variant="h3" component="h1" gutterBottom sx={{ fontWeight: 700, mb: 5 }}>
-        Book your appointment here 
-        <TextToSpeechButton text='Book your appointment here'/>
-    </Typography>
-
     <Card variant="outlined" sx={{ borderWidth: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} >
         <CardContent sx={{ p: 3 }}>
 
@@ -154,8 +158,27 @@ const BookingPanel = () => {
             </Box>
         </CardContent>
     </Card>
+    <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        aria-labelledby="appointment-confirmed-title"
+        >
+        <DialogTitle id="appointment-confirmed-title">Appointment selection saved</DialogTitle>
+
+        <DialogContent dividers>
+            <Typography variant="body1">
+            {prettyDate} at {selectedTime}
+            </Typography>
+        </DialogContent>
+
+        <DialogActions>
+            <Button onClick={() => setConfirmOpen(false)} variant="contained">
+            OK
+            </Button>
+        </DialogActions>
+    </Dialog>
+
   </>
   );
 };
 
-export default BookingPanel;

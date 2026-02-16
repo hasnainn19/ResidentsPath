@@ -38,11 +38,14 @@ export type Department =
 
 export type SpecificOption = { value: string; label: string };
 
+export type SelfServiceLink = { label: string; href: string };
+
 export type EnquiryItem = {
   value: string;
   label: string;
   department: Department;
   specifics?: SpecificOption[];
+  selfServiceLinks?: SelfServiceLink[];
 
   askChildrenQs?: boolean;
   askVulnerabilityQs?: boolean;
@@ -125,4 +128,7 @@ export type FormData = {
   otherSupport: string;
 
   contactMethod: ContactMethod;
+
+  appointmentDateIso: string | null;
+  appointmentTime: string;
 };
