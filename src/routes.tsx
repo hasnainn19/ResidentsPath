@@ -3,9 +3,9 @@ import App from "./App";
 import BookingPage from "./pages/BookingPage";
 
 import FormLayout from "./pages/Form/FormLayout";
-import Step1 from "./pages/Form/Step1";
-import Step2 from "./pages/Form/Step2";
-import Step3 from "./pages/Form/Step3";
+import PersonalDetails from "./pages/Form/PersonalDetails";
+import EnquirySelection from "./pages/Form/EnquirySelection";
+import Step3 from "./pages/Form/ReviewAndSubmit";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -14,10 +14,10 @@ export const router = createBrowserRouter([
     path: "/form",
     element: <FormLayout />,
     children: [
-      { index: true, element: <Navigate to="/form/step-1" replace /> },
-      { path: "step-1", element: <Step1 /> },
-      { path: "step-2", element: <Step2 /> },
-      { path: "step-3", element: <Step3 /> },
+      { index: true, element: <Navigate to="/form/personal-details" replace /> },
+      { path: "personal-details", element: <PersonalDetails /> },
+      { path: "enquiry-selection", element: <EnquirySelection /> },
+      { path: "review-and-submit", element: <Step3 /> },
     ],
   },
     {

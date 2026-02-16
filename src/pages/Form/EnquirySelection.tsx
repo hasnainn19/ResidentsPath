@@ -1,4 +1,3 @@
-// src/pages/Form/Step2.tsx
 /**
  * Step 2: select the service request and answer any relevant follow-up questions.
  *
@@ -60,7 +59,7 @@ import type {
 import StepActions from "./components/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
 
-export default function Step2() {
+export default function EnquirySelection() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
@@ -248,7 +247,7 @@ export default function Step2() {
       totalSteps={3}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
-      onBack={() => nav("/form/step-1")}
+      onBack={() => nav("/form/personal-details")}
       languageValue={formData.language}
       onLanguageChange={(code) => setField("language", code)}
       languageOptions={LANGUAGE_OPTIONS}
@@ -260,7 +259,7 @@ export default function Step2() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!canGoNext) return;
-            nav("/form/step-3");
+            nav("/form/review-and-submit");
           }}
         >
           <Stack spacing={4}>
@@ -834,7 +833,7 @@ export default function Step2() {
               advanceLabel="Continue"
               advanceDisabled={!canGoNext}
               showPrevious
-              onPrevious={() => nav("/form/step-1")}
+              onPrevious={() => nav("/form/personal-details")}
             />
           </Stack>
         </Box>

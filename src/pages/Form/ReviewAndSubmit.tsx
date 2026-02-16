@@ -1,4 +1,3 @@
-// src/pages/Form/Step3.tsx
 /**
  * Step 3: review and submit.
  *
@@ -341,7 +340,7 @@ export default function Step3() {
       totalSteps={3}
       title="Council service request"
       subtitle="Please review and submit"
-      onBack={() => nav("/form/step-2")}
+      onBack={() => nav("/form/enquiry-selection")}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
@@ -414,7 +413,7 @@ export default function Step3() {
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           showPrevious
-          onPrevious={() => nav("/form/step-2")}
+          onPrevious={() => nav("/form/enquiry-selection")}
         />
       </Paper>
     </StepShell>

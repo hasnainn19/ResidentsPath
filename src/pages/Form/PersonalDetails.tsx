@@ -1,4 +1,3 @@
-// src/pages/Form/Step1.tsx
 /**
  * Step 1: optional resident details.
  *
@@ -64,7 +63,7 @@ function isValidUkPostcode(postCode: string) {
   return re.test(s);
 }
 
-export default function Step1() {
+export default function PersonalDetails() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
@@ -211,7 +210,7 @@ export default function Step1() {
             setPostcodeTouched(true);
             return;
           }
-          nav("/form/step-2");
+          nav("/form/enquiry-selection");
         }}
       >
         <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
