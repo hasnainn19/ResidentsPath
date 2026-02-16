@@ -21,12 +21,6 @@ export const DISABILITY_SUPPORT_RESET = {
   otherSupport: "",
 };
 
-export const ALL_SUPPORT_RESET = {
-  needsAccessibility: false,
-  needsLanguage: false,
-  ...DISABILITY_SUPPORT_RESET,
-};
-
 export function getEnquiryOptions(topLevel: string, choice: string): EnquiryItem[] {
   if (!topLevel) return [];
 

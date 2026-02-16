@@ -344,7 +344,6 @@ export default function Step1() {
                         >
                           <MenuItem value="">Select a contact method...</MenuItem>
                           <MenuItem value="Text message">Text message</MenuItem>
-                          <MenuItem value="Phone call">Phone call</MenuItem>
                           <MenuItem value="Email">Email</MenuItem>
                         </Select>
                       </FormControl>

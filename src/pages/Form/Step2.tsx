@@ -42,7 +42,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 
 import { GENERAL_SERVICES_CHOICE_OPTIONS, GENERAL_SERVICES_DIRECT_ITEMS, TOP_LEVEL } from "./data/enquiries";
 
-import { ALL_SUPPORT_RESET, DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/step2Logic";
+import { DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/step2Logic";
 
 import type {
   Count,
@@ -136,7 +136,7 @@ export default function Step2() {
 
       householdSize: "",
       hasChildren: false,
-      childrenCount: "1",
+      childrenCount: "0",
 
       hasDisabilityOrSensory: false,
       disabilityType: "",
@@ -160,7 +160,6 @@ export default function Step2() {
 
   function handleProceedChange(next: Proceed) {
     setFormData((prev) => {
-      if (next === "Request callback") return { ...prev, proceed: next, ...ALL_SUPPORT_RESET };
       return { ...prev, proceed: next };
     });
   }
@@ -312,7 +311,7 @@ export default function Step2() {
                         setFormData((prev) => ({
                           ...prev,
                           hasChildren: checked,
-                          childrenCount: "1",
+                          childrenCount: checked ? "1" : "0",
                         }))
                       }
                       label="I have dependent children"
@@ -610,7 +609,6 @@ export default function Step2() {
                   <MenuItem value="">Select an option...</MenuItem>
                   <MenuItem value="Join digital queue">Join the digital queue</MenuItem>
                   <MenuItem value="Schedule appointment">Book an appointment</MenuItem>
-                  <MenuItem value="Request callback">Request a callback</MenuItem>
                 </Select>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
