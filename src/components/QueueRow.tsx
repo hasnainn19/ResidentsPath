@@ -97,7 +97,7 @@ const QueueRow = ({
             variant="outlined"
             size="small"
             color="error"
-            onClick={() => navigate(`/staff/cases/`)}
+            onClick={() => navigate(`/staff/`)}
           >
             Cases
           </Button>
