@@ -28,6 +28,29 @@ amplify/
 └── README.md                # This file
 ```
 
+## Prerequisites
+
+Before working with the Amplify backend, you need:
+
+### 1. AWS CLI v2
+Install the AWS Command Line Interface version 2:
+- [Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+### 2. AWS Authentication
+Login to AWS:
+
+```bash
+aws login
+# Set region: eu-west-2
+```
+
+### 3. Node.js & npm
+Ensure you have Node.js 18+ installed (Amplify Gen2 requires Node.js 18.x or later):
+```bash
+node --version  # Should be v18.x or higher
+npm --version
+```
+
 ## Data Models
 
 ### Core Models
