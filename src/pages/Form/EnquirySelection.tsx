@@ -43,7 +43,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 
 import { GENERAL_SERVICES_CHOICE_OPTIONS, GENERAL_SERVICES_DIRECT_ITEMS, TOP_LEVEL } from "./data/enquiries";
 
-import { DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/step2Logic";
+import { DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/enquirySelectionLogic";
 
 import type {
   Count,

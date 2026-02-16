@@ -1,7 +1,7 @@
 /**
- * Helper rules used by Step 2.
+ * Helper rules used by the Enquiry Selection step.
  *
- * This keeps Step 2 readable by moving shared rules into one place:
+ * This keeps Enquiry Selection readable by moving shared rules into one place:
  * - Work out which enquiry options to show (including the General Services rules).
  * - Decide whether the user is allowed to continue.
  * - Clear answers that no longer make sense after changing an earlier choice, so old values do

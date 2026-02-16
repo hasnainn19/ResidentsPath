@@ -9,7 +9,7 @@
  */
 
 import type { FormData } from "./types";
-import { getEnquiryOptions } from "./step2Logic";
+import { getEnquiryOptions } from "./enquirySelectionLogic";
 
 // Determines which options and sections to show based on the current form data
 export function getEnquiryContext(data: FormData) {
