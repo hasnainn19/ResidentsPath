@@ -1,6 +1,6 @@
 import { Html5Qrcode } from "html5-qrcode";
 import { useRef, useState, useEffect } from "react";
-import { Container, Grid, Box, TextField, Button, styled, Card, CardContent, CardActions, Typography} from '@mui/material';
+import { Tooltip, Container, Grid, Box, TextField, Button, styled, Card, CardContent, CardActions, Typography} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -9,6 +9,7 @@ import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ButtonBase from '@mui/material/ButtonBase';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
+import TextToSpeechButton from "../components/TextToSpeechButton";
 
 
 const ReferencePage = () => {
@@ -76,6 +77,7 @@ const ReferencePage = () => {
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center'  }}>
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
                 Use one of the following methods to view your queue details
+                <TextToSpeechButton text='Use one of the following methods to view your queue details'/>
             </Typography>
             <Grid container spacing={3} sx={{ justifyContent: "center", }}>
                 <Grid sx={{ display: 'flex'}} size={6}>
@@ -90,14 +92,17 @@ const ReferencePage = () => {
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
                                 Enter your reference code here:
                             </Typography>
+                            <TextToSpeechButton text='For manual entry, enter your reference number in the text field and press the button to check your status.'/>
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4 }}>
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth id="outlined-search" label="Reference code" sx={{ mb: 3 }} value={refNo} />
-                                <Button variant="contained" onClick={handleCheckStatusClick} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
-                                    Check Status
-                                </Button>
+                                <Tooltip title="Check your status" placement="top">
+                                    <Button variant="contained" onClick={handleCheckStatusClick} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                        Check Status
+                                    </Button>
+                                </Tooltip>
                             </Box>
                         </CardActions>
                     </Card>
@@ -115,6 +120,8 @@ const ReferencePage = () => {
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
                                 Click to use the camera to scan the QR code:
                             </Typography>
+                            <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan the QR code.'/>
+
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4, justifyContent: 'center' }}>
@@ -123,9 +130,11 @@ const ReferencePage = () => {
                                     {scanning ? (
                                         <Box sx={{ width: '100%', height: '100%' }}>
                                         <div id="qr-reader" style={{ width: '100%', height: '100%' }} />
-                                        <Button size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); setScanning(false)}} sx={{ position: 'absolute', top: 4, right: 8, zIndex: 10, }}>
-                                            Cancel
-                                        </Button>
+                                        <Tooltip title="Cancel QR Scan" placement="top">
+                                            <Button size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); setScanning(false)}} sx={{ position: 'absolute', top: 4, right: 8, zIndex: 10, }}>
+                                                Cancel
+                                            </Button>
+                                        </Tooltip>
                                         </Box>
                                     ) : (
                                         <>
