@@ -11,6 +11,7 @@
 import type { FormData } from "./types";
 import { getEnquiryOptions } from "./step2Logic";
 
+// Determines which options and sections to show based on the current form data
 export function getEnquiryContext(data: FormData) {
   const isGeneralServices = data.topLevel === "GeneralServices";
   const generalServicesIsSection =

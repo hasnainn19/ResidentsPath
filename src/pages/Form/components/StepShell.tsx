@@ -47,10 +47,12 @@ type Props = {
 export default function StepShell(props: Props) {
   const percent = Math.round((props.step / props.totalSteps) * 100);
 
+  // Scroll to top when step changes so that user always starts at the top of the form
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
 
+  // Combine the title, subtitle, and step info into one string for TTS, filtering out any empty values
   const listenText = [props.title, props.subtitle, `Step ${props.step} of ${props.totalSteps}.`]
     .filter(Boolean)
     .join(". ");

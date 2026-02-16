@@ -14,6 +14,7 @@
 
 import type { EnquiryItem } from "../model/types";
 
+// Top level areas (mostly departments)
 export const TOP_LEVEL: { value: string; label: string }[] = [
   { value: "CouncilTax", label: "Council Tax" },
   { value: "Housing", label: "Housing" },
@@ -23,6 +24,7 @@ export const TOP_LEVEL: { value: string; label: string }[] = [
   { value: "GeneralServices", label: "Other council services" },
 ];
 
+// The General Services section is split into specific service areas, each with their own enquiries 
 export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
   { value: "EnvWaste", label: "Environment and waste" },
   { value: "RoadsParking", label: "Roads, parking and street issues" },
@@ -31,6 +33,8 @@ export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
   { value: "RegistrationCivic", label: "Registration and civic services" },
 ];
 
+// The actual enquiries, grouped by top-level area or General Services section. 
+// Each enquiry can optionally have "specifics" which are more detailed options shown if the user selects that enquiry
 export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
   CouncilTax: [
     {
@@ -129,6 +133,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
   ],
 };
 
+// The General Services section is split into specific service areas, each with their own enquiries
 export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]> = {
   EnvWaste: [
     { value: "environment", label: "Environment", department: "General customer services" },
@@ -181,6 +186,7 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
   ],
 };
 
+// Some enquiries don't fit into any sections but we still want to show them as options within General Services
 export const GENERAL_SERVICES_DIRECT_ITEMS: EnquiryItem[] = [
   { value: "floorwalker", label: "Floorwalker", department: "General customer services", askVulnerabilityQs: true },
   {

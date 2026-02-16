@@ -21,6 +21,11 @@ export const DISABILITY_SUPPORT_RESET = {
   otherSupport: "",
 };
 
+// Given the current FormData, this builds a simple context object used in multiple steps to decide:
+// - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
+// - Whether the current selection is complete enough to move forward.
+// - Which follow up sections should appear (children, disability/sensory, household size,
+//   domestic abuse).
 export function getEnquiryOptions(topLevel: string, choice: string): EnquiryItem[] {
   if (!topLevel) return [];
 

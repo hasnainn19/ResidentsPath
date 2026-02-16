@@ -8,7 +8,6 @@
  * contact method) and then moves on to Step 2 for the actual request/triage.
  */
 
-
 import { useNavigate } from "react-router-dom";
 import {
   Paper,
@@ -44,6 +43,7 @@ import StepActions from "./components/StepActions";
 
 type PhoneType = "" | "Mobile" | "Home phone";
 
+// Remove all non-digit characters from a string
 function digitsOnly(s: string) {
   return s.replace(/\D/g, "");
 }
@@ -57,9 +57,10 @@ export default function Step1() {
   }
 
   const provideDetails: YesNo = formData.provideDetails ?? "yes";
+  // Store DOB as an ISO string in state. Convert to Dayjs only for the DatePicker
   const dobValue = formData.dob ? dayjs(formData.dob) : null;
 
-  // If the user says no, wipe the personal fields
+  // If the user opts out, clear personal/contact fields to avoid carrying data forward
   function handleProvideDetailsChange(v: YesNo) {
     setFormData((prev) => {
       const next: FormData = { ...prev, provideDetails: v };
@@ -82,6 +83,7 @@ export default function Step1() {
     });
   }
 
+  // Build country + dial-code options and put GB first
   function buildDialOptions() {
     const regionNames = new Intl.DisplayNames(["en-GB"], { type: "region" });
 
@@ -105,11 +107,14 @@ export default function Step1() {
   const phoneCountry = (formData.phoneCountry || "GB") as CountryCode;
   const dialCode = "+" + getCountryCallingCode(phoneCountry);
 
+  // UI edits the national part, state stores the full number with dial code
   const nationalDigits =
     formData.phone && formData.phone.startsWith(dialCode) ? digitsOnly(formData.phone.slice(dialCode.length)) : "";
 
+  // Soft length cap to prevent very long inputs. Not full phone validation yet
   const maxNationalLen = phoneCountry === "GB" ? 10 : 15;
 
+  // Preserve the phone digits when changing country, then rebuild the stored value with the new dial code
   function handleCountryChange(nextCountry: CountryCode) {
     const nextDial = "+" + getCountryCallingCode(nextCountry);
 
@@ -123,10 +128,11 @@ export default function Step1() {
     }));
   }
 
+  // Normalise digits-only input
   function handleNationalPhoneChange(raw: string) {
     let d = digitsOnly(raw);
 
-    // UK: store without the leading 0 with +44
+    // UK: store without the leading 0, replace with +44
     if (phoneCountry === "GB") d = d.replace(/^0+/, "");
 
     d = d.slice(0, maxNationalLen);
@@ -374,10 +380,7 @@ export default function Step1() {
             <Divider />
 
             {/* Navigation Buttons */}
-            <StepActions
-              onSave={handleSave}
-              advanceLabel="Continue"
-            />
+            <StepActions onSave={handleSave} advanceLabel="Continue" />
           </Stack>
         </Paper>
       </Box>

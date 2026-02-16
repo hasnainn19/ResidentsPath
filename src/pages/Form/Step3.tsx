@@ -6,7 +6,6 @@
  * that apply based on earlier choices).
  */
 
-
 import { useNavigate } from "react-router-dom";
 import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
 import StepShell from "./components/StepShell";
@@ -35,6 +34,7 @@ export default function Step3() {
     alert("Submitted (mock)");
   };
 
+  // Labels which should appear on the review page. Note that not all fields will necessarily be shown
   const reviewLabels: Partial<Record<keyof FormData, string>> = {
     firstName: "First name",
     lastName: "Last name",
@@ -85,6 +85,7 @@ export default function Step3() {
     prefer_not_to_say: "Prefer not to say",
   };
 
+  // Sections to group the review information into, with links to edit the relevant earlier step.
   const SECTIONS: Array<{
     title: string;
     keys: Array<keyof FormData>;
@@ -136,6 +137,7 @@ export default function Step3() {
     },
   ];
 
+  // Two-column layout for review: label left, answer right
   function ReviewRow({ label, value }: { label: string; value: string }) {
     return (
       <Box
@@ -175,6 +177,8 @@ export default function Step3() {
     return x !== null && x !== undefined && x !== false;
   }
 
+  // For some fields, we only want to show them on the review page if they're true
+  // because false is implicit in them not being shown at all
   const SHOW_ONLY_WHEN_TRUE: ReadonlySet<keyof FormData> = new Set([
     "needsAccessibility",
     "needsLanguage",
@@ -186,6 +190,7 @@ export default function Step3() {
     "needsHelpWithForms",
   ]);
 
+  // Treat empty strings/nulls as "not answered" and omit them from the review.
   function isEmptyForReview(key: keyof FormData, val: unknown) {
     if (val === null || val === undefined) return true;
     if (typeof val === "string" && val.trim() === "") return true;
@@ -193,6 +198,7 @@ export default function Step3() {
     return false;
   }
 
+  // Only show dependent fields if the parent answer makes them relevant
   const DEPENDS_ON: Partial<Record<keyof FormData, (fd: FormData) => boolean>> = {
     childrenCount: (fd) => fd.hasChildren,
     disabilityType: (fd) => fd.hasDisabilityOrSensory,
@@ -202,11 +208,13 @@ export default function Step3() {
     urgentOtherReason: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
   };
 
+  // Get the enquiry context which determines which questions were actually asked based on earlier answers
   const enquiryContext = useMemo(
     () => getEnquiryContext(formData),
     [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
   );
 
+  // Only show questions that were displayed for the chosen enquiry
   const ASKED_IN_CONTEXT: Partial<Record<keyof FormData, (context: EnquiryContext) => boolean>> = {
     hasChildren: (context) => context.showChildrenQs,
     childrenCount: (context) => context.showChildrenQs,
@@ -230,23 +238,30 @@ export default function Step3() {
     "contactMethod",
   ]);
 
+  // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {
     const label = reviewLabels[key] || String(key);
 
+    // If this field was not asked based on the enquiry context, don't show it on the review page at all
     const wasAsked = ASKED_IN_CONTEXT[key];
     if (wasAsked && !wasAsked(enquiryContext)) return null;
 
+    // Only show the Step 1 fields if the user chose to provide details
     if (STEP1_KEYS.has(key) && formData.provideDetails !== "yes") return null;
 
+    // If this field has a dependency and that dependency is not satisfied, don't show it on the review page
     const dep = DEPENDS_ON[key];
     if (dep && !dep(formData)) return null;
 
     let val: unknown = formData[key];
 
+    // For some fields, we need to transform the stored value into a human-readable form for the review page
     if (key === "enquiryId") {
       val = enquiryContext.selectedEnquiry?.label || "";
     }
 
+    // For the specificDetailId, we need to look up the label of the selected option within the 
+    // currently selected enquiry's specifics to make it human-readable on the review page
     if (key === "specificDetailId") {
       val = enquiryContext.selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
     }
@@ -284,7 +299,7 @@ export default function Step3() {
         <Typography variant="h6" sx={{ mb: 3 }}>
           Please review your information before submitting:
         </Typography>
-
+        {/* Review items */}
         {SECTIONS.map((section) => {
           const items = section.keys.map((k) => renderReviewItem(k)).filter(isNotNull);
 
