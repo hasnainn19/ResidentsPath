@@ -26,9 +26,38 @@ const BookingPage = () => {
     };
     const allTimes = generateTimes();
 
-    // Filter out unavailable times for the selected date
-    const availableTimes = allTimes.filter(time => !unavailableTimes.includes(time));
+    // Filter out unavailable times and, for today, times that are in the past
+    const availableTimes = allTimes.filter((time) => {
+        // Always remove times explicitly marked as unavailable
+        if (unavailableTimes.includes(time)) {
+            return false;
+        }
 
+        // If no date is selected, keep the time (current behavior)
+        if (!selectedDate) {
+            return true;
+        }
+
+        const now = dayjs();
+
+        // If the selected date is today, filter out times earlier than or equal to "now"
+        if (selectedDate.isSame(now, 'day')) {
+            const [hourStr, minuteStr] = time.split(':');
+            const hour = parseInt(hourStr, 10);
+            const minute = parseInt(minuteStr, 10);
+
+            const slotDateTime = selectedDate
+                .hour(hour)
+                .minute(minute)
+                .second(0)
+                .millisecond(0);
+
+            return slotDateTime.isAfter(now);
+        }
+
+        // For non-today dates (e.g., future dates), keep all available times
+        return true;
+    });
     // If the selected time becomes unavailable (e.g., user changes date), clear the selection
     useEffect(() => {
         if (!availableTimes.includes(selectedTime)) {
