@@ -8,6 +8,6 @@ export const router = createBrowserRouter([
         path: "/", element: <App /> 
     },
     {
-        path: "/reference", element: <ReferencePage />
+        path: "/referencepage", element: <ReferencePage />
     },
 ]);

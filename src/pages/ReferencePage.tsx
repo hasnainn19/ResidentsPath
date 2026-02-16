@@ -1,122 +1,149 @@
-import {
-  Grid,
-  Box,
-  TextField,
-  Button,
-  styled,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-} from '@mui/material';
+import { Html5Qrcode } from "html5-qrcode";
+import { useRef, useState, useEffect } from "react";
+import { Container, Grid, Box, TextField, Button, styled, Card, CardContent, CardActions, Typography} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
-import EastRoundedIcon from '@mui/icons-material/EastRounded';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ButtonBase from '@mui/material/ButtonBase';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
+import Navbar from '../components/NavBar';
 
 
-export default function ReferencePage() {
+const ReferencePage = () => {
+    const scannerRef = useRef<Html5Qrcode | null>(null);
+    const [scanning, setScanning] = useState(false);
+    const [refNo, setRefNo] = useState('');
+    const [ qrScanError, setQrScanError] = useState('');
 
-// hounslow dark purple
-// #652F6C 
-// houslow light puple
-// #E0D4FD
 
-const ScanButton = styled(ButtonBase)(({ theme }) => ({
-  display: 'flex',
-  width: '100%',
-  minHeight: 180,
-  backgroundColor: '#e7dff9',
-  border: `2px dashed ${grey[600]}`,
-  borderRadius: theme.shape.borderRadius * 2,
-  alignItems: 'center',
-  justifyContent: 'center',
-  '&:hover': {
-    backgroundColor: '#e3d9faff',
-    borderColor: grey[900],
-  }
-}));
+    // Styled component for the QR scanner button
+    const ScanButton = styled(ButtonBase)(({ theme }) => ({
+        display: 'flex',
+        width: '100%',
+        height: 220,
+        backgroundColor: theme.palette.secondary.light,
+        border: `2px dashed ${grey[600]}`,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        '&:hover': {
+            backgroundColor: '#e3d9faff',
+            borderColor: grey[900],
+        }
+    }));
 
-return (
-    <div className="reference-page">
-        <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 }}>
-        Use one of the following methods to view your queue details
-        </Typography>
-        <Grid container spacing={3} sx={{ justifyContent: "center", }}>
-            <Grid item sx={{ display: 'flex'}} size={4}>
-            <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3, height: '100%' }}>
-                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <Avatar sx={{ bgcolor: '#E0D4FD', color: '#652F6C' }}>
-                    <SearchRoundedIcon />
-                </Avatar>
-                <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700}}>
-                Manual Entry
-                </Typography>
+    function handleQRScannerClick() {
+        setScanning(true);
+        setTimeout(() => {
+            const scanner = new Html5Qrcode("qr-reader");
+            scannerRef.current = scanner;
+            scanner.start(
+            { facingMode: "environment" }, // rear camera
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                setRefNo(decodedText)
+                console.log("Decoded QR code:", decodedText);
+                // process ref no.
+                stopScanner();
+            },
+            (error) => {
+                setQrScanError(error);
+            }
+            );
+    }, 300)};
 
-                <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                Enter your reference code here:
-                </Typography>
+    function stopScanner() {
+        if (scannerRef.current) {
+            scannerRef.current.stop().then(() => {
+            scannerRef.current?.clear();
+            scannerRef.current = null;
+            setScanning(false);
+            });
+        }
+    }
 
-                <Box sx={{ mt: 'auto', width: '100%', maxWidth: 480 }}>
-                    <TextField fullWidth placeholder="Reference code" sx={{ mb: 2 }} />
-                </Box>
-                </CardContent>
+    function handleCheckStatusClick() {
+        // process ref no. 
+        // navigate to next page
+    }
 
-                <CardActions sx={{ px: 3, pb: 3 }}>
-                <Box sx={{ width: '100%', maxWidth: 480}}>
-                        <Button
-                            variant="contained"
-                            endIcon={<ManageSearchOutlinedIcon />}
-                            sx={{
-                                backgroundColor: '#652F6C',
-                                width: '100%',
-                                '&:hover': { backgroundColor: '#502555' },
-                            }}
-                        >
-                            Check Status
-                        </Button>
-                </Box>
-                </CardActions>
-            </Card>
+    return (
+    <div>
+        <Navbar />
+        <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center'  }}>
+            <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
+                Use one of the following methods to view your queue details
+            </Typography>
+            <Grid container spacing={3} sx={{ justifyContent: "center", }}>
+                <Grid sx={{ display: 'flex'}} size={6}>
+                    <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3, height: '100%' }}>
+                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 4 }}>
+                            <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark' , mb: 2 }}>
+                                <SearchRoundedIcon />
+                            </Avatar>
+                            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700}}>
+                                Manual Entry
+                            </Typography>
+                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                                Enter your reference code here:
+                            </Typography>
+                        </CardContent>
+
+                        <CardActions sx={{ px: 4, pb: 4 }}>
+                            <Box sx={{ mt: 'auto', width: '100%' }}>
+                                <TextField fullWidth id="outlined-search" label="Reference code" sx={{ mb: 3 }} value={refNo} />
+                                <Button variant="contained" onClick={handleCheckStatusClick} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    Check Status
+                                </Button>
+                            </Box>
+                        </CardActions>
+                    </Card>
+                </Grid>
+
+                <Grid  sx={{ display: 'flex'}} size={6}>
+                    <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', borderRadius: 3 }}>
+                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' , p: 4 }}>
+                            <Avatar sx={{ bgcolor: 'primary.dark' , mb: 2 }}>
+                            <QrCode2OutlinedIcon />
+                            </Avatar>
+                            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
+                                Scan QR Code
+                            </Typography>
+                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                                Click to use the camera to scan the QR code:
+                            </Typography>
+                        </CardContent>
+
+                        <CardActions sx={{ px: 4, pb: 4, justifyContent: 'center' }}>
+                            <Box sx={{ width: '100%', mx: 'auto' }}>
+                                <ScanButton onClick={handleQRScannerClick} sx={{ flexDirection: 'column', py: 3 }}>
+                                    {scanning ? (
+                                        <Box sx={{ width: '100%', height: '100%' }}>
+                                        <div id="qr-reader" style={{ width: '100%', height: '100%' }} />
+                                        <Button size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); setScanning(false)}} sx={{ position: 'absolute', top: 4, right: 8, zIndex: 10, }}>
+                                            Cancel
+                                        </Button>
+                                        </Box>
+                                    ) : (
+                                        <>
+                                        <QrCodeScannerRoundedIcon fontSize="large" />
+                                        <Box component="span" sx={{ mt: 2, fontWeight: 600 }}>
+                                            Tap to open scanner
+                                        </Box>
+                                        </>
+                                    )}
+                                </ScanButton>
+                            </Box>
+                        </CardActions>
+                    </Card>
+                </Grid>
             </Grid>
-
-            <Grid item sx={{ display: 'flex'}} size={4}>
-                <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', borderRadius: 3 }}>
-                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Avatar sx={{ bgcolor: '#652F6C' }}>
-                    <QrCode2OutlinedIcon />
-                    </Avatar>
-                    <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-                    Scan QR Code
-                    </Typography>
-                    <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                    Click to use the camera to scan the QR code:
-                    </Typography>
-                </CardContent>
-
-                <CardActions sx={{ px: 3, pb: 3, justifyContent: 'center' }}>
-                    <Box sx={{ width: '100%', maxWidth: 560, mx: 'auto' }}>
-                    <ScanButton
-                        onClick={() => console.log('Start QR scanner')}
-                        aria-label="Start QR scanner"
-                        sx={{ flexDirection: 'column', py: 3}}
-                    >
-                        <QrCodeScannerRoundedIcon fontSize="large" />
-                        <Box component="span" sx={{ mt: 2, fontWeight: 600 }}>
-                        Tap to start camera
-                        </Box>
-                    </ScanButton>
-                    </Box>
-                </CardActions>
-                </Card>
-            </Grid>
-        </Grid>
-
+        </Container>
     </div>
-)
+    );
+};
 
-}
+export default ReferencePage;
