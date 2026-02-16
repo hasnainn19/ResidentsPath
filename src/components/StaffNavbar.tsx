@@ -67,18 +67,14 @@ const StaffNavbar = () => {
           <StaffNavItem
             icon={<QueueIcon />}
             label="Current Cases"
-            url="/staff/cases"
+            url="/staff"
           />
           <StaffNavItem
             icon={<EventIcon />}
             label="Current Staff"
-            url="/staff/directory"
+            url="/staff"
           />
-          <StaffNavItem
-            icon={<WorkIcon />}
-            label="My cases"
-            url="/staff/my-cases"
-          />
+          <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
           <StaffNavItem icon={<SettingsIcon />} label="Settings" url="/staff" />
         </Box>
         <Box sx={{}}>
