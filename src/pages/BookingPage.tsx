@@ -102,7 +102,7 @@ const BookingPage = () => {
                 <Box className="bookingpage-time-list" sx={{ border: 2, borderColor: 'primary.main', borderRadius: 1,  maxHeight: 300, overflowY: 'scroll' }}>
                         <List disablePadding>
                             {availableTimes.map(time => (
-                            <ListItem key={time}disablePadding>
+                            <ListItem key={time} disablePadding>
                                 <ListItemButton selected={selectedTime === time} className="bookingpage-time-list-item-btn" onClick={() => setSelectedTime(time)} sx={{ borderBottom: '1px solid #ddd' }}>
                                     <ListItemText primary={time} />
                                 </ListItemButton>
