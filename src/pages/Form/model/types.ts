@@ -89,6 +89,7 @@ export type FormData = {
   enquiryId: string;
   specificDetailId: string;
   routedDepartment: "" | Department;
+  otherEnquiryText: string;
 
   hasChildren: boolean;
   childrenCount: Count;

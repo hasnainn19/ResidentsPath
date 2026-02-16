@@ -22,6 +22,7 @@ export const TOP_LEVEL: { value: string; label: string }[] = [
   { value: "ChildrensDuty", label: "Children and families" },
   { value: "CommunityHub", label: "Community Hub and language support" },
   { value: "GeneralServices", label: "Other council services" },
+  { value: "Other", label: "Other" },
 ];
 
 // The General Services section is split into specific service areas, each with their own enquiries 

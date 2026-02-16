@@ -74,11 +74,18 @@ export default function Step2() {
   // Logic for which follow-up questions to show.
   const enquiryContex = useMemo(
     () => getEnquiryContext(formData),
-    [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
+    [
+      formData.topLevel,
+      formData.generalServicesChoice,
+      formData.enquiryId,
+      formData.specificDetailId,
+      formData.otherEnquiryText,
+    ],
   );
 
   const isGeneralServices = enquiryContex.isGeneralServices;
   const generalServicesIsSection = enquiryContex.generalServicesIsSection;
+  const isOther = enquiryContex.isOther;
 
   const enquiryOptions = enquiryContex.enquiryOptions;
 
@@ -107,6 +114,9 @@ export default function Step2() {
         topLevel: nextTopLevel,
         generalServicesChoice: "",
       });
+      if (nextTopLevel === "Other") {
+        return { ...next, routedDepartment: "General customer services" };
+      }
       return next;
     });
   }
@@ -186,6 +196,10 @@ export default function Step2() {
     if (isGeneralServices) {
       if (!formData.generalServicesChoice) {
         parts.push("Then choose a topic.");
+        return parts.join(" ");
+      }
+      if (isOther) {
+        parts.push("Then describe your enquiry.");
         return parts.join(" ");
       }
 
@@ -306,6 +320,7 @@ export default function Step2() {
             {
               // Show the enquiry dropdown when a top-level area is chosen
               formData.topLevel !== "" &&
+                !isOther &&
                 // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
                 (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
                   <WithTTS
@@ -335,6 +350,29 @@ export default function Step2() {
                   </WithTTS>
                 )
             }
+            
+            {isOther && formData.topLevel !== "" && (
+              <WithTTS
+                copy={{
+                  label: "Describe your enquiry",
+                  tts: "Describe your enquiry. Briefly tell us what you need help with.",
+                }}
+                required
+                sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+              >
+                <TextField
+                  fullWidth
+                  required
+                  multiline
+                  minRows={3}
+                  label="Describe your enquiry"
+                  placeholder="Tell us what you need help with"
+                  value={formData.otherEnquiryText}
+                  onChange={(e) => setField("otherEnquiryText", e.target.value)}
+                  helperText="Avoid sharing bank details or passwords."
+                />
+              </WithTTS>
+            )}
 
             {
               // Show the "more detail" dropdown when relevant

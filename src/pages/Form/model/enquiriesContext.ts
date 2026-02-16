@@ -19,13 +19,14 @@ export function getEnquiryContext(data: FormData) {
 
   const enquiryOptions = getEnquiryOptions(data.topLevel, data.generalServicesChoice);
   const selectedEnquiry = enquiryOptions.find((x) => x.value === data.enquiryId) || null;
+  const isOther = data.topLevel === "Other";
 
   const specificOptions = selectedEnquiry?.specifics || [];
   const showSpecificDropdown = !!selectedEnquiry && specificOptions.length > 0;
 
   const hasChosenEnquiry = data.enquiryId !== "";
   const hasSatisfiedSpecific = !showSpecificDropdown || data.specificDetailId !== "";
-  const hasEnoughToProceed = hasChosenEnquiry && hasSatisfiedSpecific;
+  const hasEnoughToProceed = isOther ? data.otherEnquiryText.trim() !== "" : hasChosenEnquiry && hasSatisfiedSpecific;
 
   const showChildrenQs = data.topLevel === "ChildrensDuty" || !!selectedEnquiry?.askChildrenQs;
   const showDisabilityQs = !!selectedEnquiry?.askVulnerabilityQs;
@@ -40,6 +41,7 @@ export function getEnquiryContext(data: FormData) {
     selectedEnquiry,
     specificOptions,
     showSpecificDropdown,
+    isOther,
     hasChosenEnquiry,
     hasSatisfiedSpecific,
     hasEnoughToProceed,

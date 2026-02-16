@@ -53,6 +53,7 @@ export default function Step3() {
 
     enquiryId: "Choose an enquiry",
     specificDetailId: "More detail",
+    otherEnquiryText: "Describe your enquiry",
 
     hasChildren: "I have dependent children",
     childrenCount: "How many children?",
@@ -119,7 +120,7 @@ export default function Step3() {
     },
     {
       title: "Your request",
-      keys: ["enquiryId", "specificDetailId", "proceed", "additionalInfo"],
+      keys: ["enquiryId", "specificDetailId", "otherEnquiryText", "proceed", "additionalInfo"],
       editTo: "/form/step-2",
     },
     {
@@ -222,6 +223,9 @@ export default function Step3() {
 
   // Only show dependent fields if the parent answer makes them relevant
   const DEPENDS_ON: Partial<Record<keyof FormData, (fd: FormData) => boolean>> = {
+    enquiryId: (fd) => fd.topLevel !== "Other",
+    specificDetailId: (fd) => fd.topLevel !== "Other",
+    otherEnquiryText: (fd) => fd.topLevel === "Other",
     childrenCount: (fd) => fd.hasChildren,
     disabilityType: (fd) => fd.hasDisabilityOrSensory,
     safeToContact: (fd) => fd.domesticAbuse,
@@ -234,7 +238,12 @@ export default function Step3() {
   // Get the enquiry context which determines which questions were actually asked based on earlier answers
   const enquiryContext = useMemo(
     () => getEnquiryContext(formData),
-    [formData.topLevel, formData.generalServicesChoice, formData.enquiryId, formData.specificDetailId],
+    [
+      formData.topLevel, 
+      formData.generalServicesChoice, 
+      formData.enquiryId, 
+      formData.specificDetailId, 
+      formData.otherEnquiryText],
   );
 
   // Only show questions that were displayed for the chosen enquiry

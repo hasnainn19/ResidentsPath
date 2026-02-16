@@ -62,6 +62,7 @@ export function resetFormInfo(prev: FormData): FormData {
     enquiryId: "",
     specificDetailId: "",
     routedDepartment: "",
+    otherEnquiryText: "",
 
     householdSize: "",
 

@@ -31,6 +31,7 @@ export const initialFormData: FormData = {
   enquiryId: "",
   specificDetailId: "",
   routedDepartment: "",
+  otherEnquiryText: "",
 
   hasChildren: false,
   childrenCount: "0",
