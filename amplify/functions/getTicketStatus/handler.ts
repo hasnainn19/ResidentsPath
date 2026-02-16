@@ -9,7 +9,7 @@ import { generateClient } from "aws-amplify/data";
  * fields to prevent exposing internal IDs or private case information.
  *
  * @param event.arguments.ticketNumber - The ticket number to look up
- * @returns Object containing ticketNumber, status, placement, and estimatedWaitTime, or null if not found
+ * @returns Object containing ticketNumber, status, placement, estimatedWaitTimeLower, and estimatedWaitTimeUpper, or null if not found
  */
 export const handler: Schema["getTicketStatus"]["functionHandler"] = async (event) => {
     const { ticketNumber } = event.arguments;
@@ -32,10 +32,11 @@ export const handler: Schema["getTicketStatus"]["functionHandler"] = async (even
     const ticket = tickets[0];
 
     // Return only safe, public fields
-    return { 
+    return {
         ticketNumber: ticket.ticketNumber,
         status: ticket.status,
         placement: ticket.placement,
-        estimatedWaitTime: ticket.estimatedWaitTime,
+        estimatedWaitTimeLower: ticket.estimatedWaitTimeLower,
+        estimatedWaitTimeUpper: ticket.estimatedWaitTimeUpper,
     };
 };
