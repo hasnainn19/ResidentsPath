@@ -41,7 +41,6 @@ const ReferencePage = () => {
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
                     setRefNo(decodedText);
-                    console.log("Decoded QR code:", decodedText);
                     stopScanner();
                 },
                 (error) => {
