@@ -91,9 +91,9 @@ const schema = a.schema({
 			// Queue information
 			urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
 			status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "LEFT"]),
-			placement: a.integer(),
-			estimatedWaitTimeLower: a.integer(), // Lower bound in minutes
-			estimatedWaitTimeUpper: a.integer(), // Upper bound in minutes
+			placement: a.integer().required(),
+			estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
+			estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
 
 			// Timestamps for queue tracking
 			calledAt: a.datetime(),
@@ -166,11 +166,11 @@ const schema = a.schema({
 			ticketNumber: a.string().required()
 		})
 		.returns(a.customType({
-			ticketNumber: a.string(),
-			status: a.string(),
-			placement: a.integer(),
-			estimatedWaitTimeLower: a.integer(),
-			estimatedWaitTimeUpper: a.integer(),
+			ticketNumber: a.string().required(),
+			status: a.string().required(),
+			placement: a.integer().required(),
+			estimatedWaitTimeLower: a.integer().required(),
+			estimatedWaitTimeUpper: a.integer().required(),
 		}))
 		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
 		.handler(a.handler.function(getTicketStatus)),

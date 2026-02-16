@@ -34,7 +34,7 @@ export const handler: Schema["getTicketStatus"]["functionHandler"] = async (even
     // Return only safe, public fields
     return {
         ticketNumber: ticket.ticketNumber,
-        status: ticket.status,
+        status: ticket.status as string, // Cast to string since it's an enum
         placement: ticket.placement,
         estimatedWaitTimeLower: ticket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: ticket.estimatedWaitTimeUpper,
