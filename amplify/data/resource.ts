@@ -90,7 +90,7 @@ const schema = a.schema({
 
 			// Queue information
 			urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-			status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "LEFT"]),
+			status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
 			placement: a.integer().required(),
 			estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
 			estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
