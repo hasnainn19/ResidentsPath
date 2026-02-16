@@ -123,7 +123,7 @@ const BookingPage = () => {
                             Confirm
                         </Button>
                     </Tooltip>
-                    <TextToSpeechButton text={ selectedTime? `Your selected appointment time is ${selectedTime}. Click the button on the left to cancel your appointment selection and click the button on the right to confirm your appointment selection.`: `You have not selected an appointment time. Once you have selected an appoitment time, click the button on the left to cancel your appointment selection and click the button on the right to confirm your appointment selection.`}/>
+                    <TextToSpeechButton text={ selectedTime? `Your selected appointment time is ${selectedTime}. Click the button on the left to cancel your appointment selection and click the button on the right to confirm your appointment selection.`: `You have not selected an appointment time. Once you have selected an appointment time, click the button on the left to cancel your appointment selection and click the button on the right to confirm your appointment selection.`}/>
                 </CardActions>
             </Box>
         </Box>
