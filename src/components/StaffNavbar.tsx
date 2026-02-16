@@ -24,12 +24,12 @@ const StaffNavbar = () => {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
+        [`& .MuiDrawer-paper`]: (theme) => ({
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#5C2D91",
-          color: "white",
-        },
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+        }),
       }}
     >
       <Toolbar>
@@ -40,10 +40,20 @@ const StaffNavbar = () => {
             alignItems: "center",
           }}
         >
-          <Typography variant="h6" fontWeight="bold">
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            sx={{ color: (theme) => theme.palette.primary.contrastText }}
+          >
             ResidentsPath
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              opacity: 0.8,
+              color: (theme) => theme.palette.primary.contrastText,
+            }}
+          >
             staff view
           </Typography>
         </Box>
@@ -77,11 +87,11 @@ const StaffNavbar = () => {
           <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
           <StaffNavItem icon={<SettingsIcon />} label="Settings" url="/staff" />
         </Box>
-        <Box sx={{}}>
+        <Box>
           <Accordion
             sx={{
               backgroundColor: "transparent",
-              color: "white",
+              color: (theme) => theme.palette.primary.contrastText,
               boxShadow: "none",
             }}
           >
@@ -93,6 +103,7 @@ const StaffNavbar = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
+                color: (theme) => theme.palette.primary.contrastText,
               }}
             >
               <Avatar
@@ -101,16 +112,36 @@ const StaffNavbar = () => {
                   width: 50,
                   height: 50,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  bgcolor: (theme) => theme.palette.secondary.main,
+                  color: (theme) => theme.palette.primary.contrastText,
                 }}
               />
               <Box sx={{ ml: 2 }}>
-                <Typography variant="body1" fontWeight={500} sx={{ mt: 1 }}>
+                <Typography
+                  variant="body1"
+                  fontWeight={500}
+                  sx={{
+                    mt: 1,
+                    color: (theme) => theme.palette.primary.contrastText,
+                  }}
+                >
                   Emily Rodriguez
                 </Typography>
-                <Typography color="text.primary">Council Services</Typography>
+                <Typography
+                  color="text.primary"
+                  sx={{ color: (theme) => theme.palette.primary.contrastText }}
+                >
+                  Council Services
+                </Typography>
               </Box>
             </AccordionSummary>
-            <Box sx={{ backgroundColor: "white", padding: 0, width: "100%" }}>
+            <Box
+              sx={{
+                backgroundColor: (theme) => theme.palette.background.paper,
+                padding: 0,
+                width: "100%",
+              }}
+            >
               <List>
                 <Typography
                   variant="body2"

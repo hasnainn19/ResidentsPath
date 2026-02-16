@@ -53,16 +53,28 @@ const QueueRow = ({
             label={`Urgent: ${priorityBreakdown.High}`}
             size="small"
             color="error"
+            sx={{
+              fontWeight: "bold",
+              bgcolor: (theme) => theme.palette.error.light,
+            }}
           />
           <Chip
             label={`Priority: ${priorityBreakdown.Medium}`}
             size="small"
-            color="warning"
+            color="success"
+            sx={{
+              fontWeight: "bold",
+              bgcolor: (theme) => theme.palette.success.light,
+            }}
           />
           <Chip
             label={`Standard: ${priorityBreakdown.Low}`}
             size="small"
-            color="success"
+            color="warning"
+            sx={{
+              fontWeight: "bold",
+              bgcolor: (theme) => theme.palette.warning.light,
+            }}
           />
         </Box>
       </TableCell>

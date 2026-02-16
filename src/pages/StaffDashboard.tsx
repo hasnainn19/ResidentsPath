@@ -10,11 +10,13 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+
 import {
-  People as PeopleIcon,
-  HowToReg as HowToRegIcon,
-  AccessTime as AccessTimeIcon,
-  TrendingUp as TrendingUpIcon,
+  Groups as GroupsIcon,
+  ExitToApp as ExitToAppIcon,
+  PriorityHigh as PriorityHighIcon,
+  SupervisorAccount as SupervisorAccountIcon,
+  HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
 
 import StatCard from "../components/StatCard";
@@ -22,42 +24,47 @@ import QueueRow from "../components/QueueRow";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
 const StaffDashboard = () => {
+  const lastUpdated = "2026-02-16 14:00";
   const stats = [
     {
-      icon: PeopleIcon,
+      icon: GroupsIcon,
       value: 67,
       label: "Waiting in reception",
       change: "+12%",
       isPositive: true,
+      lastUpdated,
     },
     {
-      icon: HowToRegIcon,
+      icon: ExitToAppIcon,
       value: 23,
       label: "Stepped Out",
       change: "+8%",
       isPositive: true,
+      lastUpdated,
     },
     {
-      icon: AccessTimeIcon,
+      icon: PriorityHighIcon,
       value: 13,
       label: "Urgent Cases",
       change: "-2%",
       isPositive: false,
+      lastUpdated,
     },
     {
-      icon: TrendingUpIcon,
+      icon: SupervisorAccountIcon,
       value: "2",
       label: "Available Staff",
       change: "+5%",
       isPositive: true,
+      lastUpdated,
     },
     {
-      icon: TrendingUpIcon,
+      icon: HourglassBottomIcon,
       value: "55m",
       label: "Longest Wait Time",
       change: "+5%",
       isPositive: true,
-      lastUpdated: "2024-06-01 14:30",
+      lastUpdated,
     },
   ];
 
@@ -109,13 +116,19 @@ const StaffDashboard = () => {
   return (
     <>
       <Box
-        sx={{
+        sx={(theme) => ({
           width: "100%",
           maxWidth: { sm: "100%", md: "100%" },
           p: 3,
-        }}
+          backgroundColor: theme.palette.background.default,
+          minHeight: "100vh",
+        })}
       >
-        <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          sx={{ mb: 3, color: (theme) => theme.palette.primary.main }}
+        >
           Overview
         </Typography>
         <Grid container spacing={2} columns={15} sx={{ mb: 4 }}>
@@ -125,10 +138,17 @@ const StaffDashboard = () => {
             </Grid>
           ))}
         </Grid>
-        <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          sx={{ mb: 3, color: (theme) => theme.palette.primary.main }}
+        >
           Current Queues
         </Typography>
-        <TableContainer component={Paper}>
+        <TableContainer
+          component={Paper}
+          sx={{ backgroundColor: (theme) => theme.palette.background.paper }}
+        >
           <Table>
             <TableHead>
               <TableRow>

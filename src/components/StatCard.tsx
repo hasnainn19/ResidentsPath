@@ -19,7 +19,13 @@ const StatCard = ({
   lastUpdated,
 }: StatCardProps) => {
   return (
-    <Card sx={{ borderRadius: 3, height: "100%" }}>
+    <Card
+      sx={{
+        borderRadius: 3,
+        height: "100%",
+        backgroundColor: (theme) => theme.palette.background.paper,
+      }}
+    >
       <CardContent>
         <Box
           sx={{
@@ -29,19 +35,34 @@ const StatCard = ({
             mb: 2,
           }}
         >
-          <Avatar sx={{ bgcolor: "#5E35B1", width: 48, height: 48 }}>
+          <Avatar
+            sx={{
+              bgcolor: (theme) => theme.palette.primary.main,
+              width: 48,
+              height: 48,
+            }}
+          >
             <Icon />
           </Avatar>
           <Typography
             variant="body2"
             fontWeight={600}
-            sx={{ color: isPositive ? "#388E3C" : "#D32F2F" }}
+            sx={{
+              color: (theme) =>
+                isPositive
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
+            }}
           >
             {change}
           </Typography>
         </Box>
 
-        <Typography variant="h4" fontWeight={600} sx={{ mb: 0.5 }}>
+        <Typography
+          variant="h4"
+          fontWeight={600}
+          sx={{ mb: 0.5, color: (theme) => theme.palette.text.primary }}
+        >
           {value}
         </Typography>
 
