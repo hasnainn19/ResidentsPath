@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
+
 import TextToSpeechButton from '../components/TextToSpeechButton';
-
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-
 import NavBar from '../components/NavBar';
+import theme from '../Constants/Theme';
 
 
 export default function UserDashboard() {
@@ -28,32 +24,29 @@ export default function UserDashboard() {
     const Item = styled(Paper)(({ theme }) => ({
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#f7f7f7',
+        backgroundColor: theme.palette.background.default,
         padding: theme.spacing(2),
         height: '100%',
         justifyContent: 'center',
         textAlign: 'center',
         border: "1px solid #bbb9bb",
-        color: (theme.vars ?? theme).palette.text.secondary,
+        color: theme.palette.text.secondary,
         boxSizing: "border-box",  
-        ...theme.applyStyles('dark', {
-        }),
     }));
 
     return (
         <>
             <NavBar />
-            <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}
-            >
-            <Box sx={{ width: '80vw', pt:6 }}>
+            <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
+                <Box sx={{ width: '80vw', pt:6 }}>
                     {alert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setAlert(false)}>You've stepped out. We've notified staff and you'll receive updated notifications about your estimated waiting time.</Alert>
                     )}
-                    <Paper variant='outlined' sx={{ p:5, width:'100%', border: '1px solid #bbb9bb'}}>
+                    <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
                         <Grid container sx={{alignItems: 'stretch', width: '100%' }} spacing={2}>
                             <Stack spacing={4} sx={{ width: '100%' }}>
                                 <Grid size={12}>
-                                    <Item sx={{backgroundColor:'#defbd3'}}>
+                                    <Item sx={{backgroundColor:theme.palette.success.main}}>
                                         <Typography variant='h4'>You are in the queue!
                                             <TextToSpeechButton text='You are currently in the queue!'/>
                                         </Typography>
@@ -63,7 +56,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>You are the </Typography>
-                                            <Typography variant='h5' sx={{color:'#6d3874'}}>Nth</Typography>
+                                            <Typography variant='h5' sx={{color:theme.palette.primary.main}}>Nth</Typography>
                                             <Typography variant='body1'>person in the queue</Typography>
                                             <TextToSpeechButton text='You are the Nth person in the queue'/>
                                         </Item>
@@ -71,7 +64,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>Estimated waiting time is:</Typography>
-                                            <Typography variant='h5' sx={{color:'#6d3874'}}>15-30 minutes</Typography>
+                                            <Typography variant='h5' sx={{color:theme.palette.primary.main}}>15-30 minutes</Typography>
                                             <TextToSpeechButton text='Estimated wait time is 15-30 minutes'/>
                                         </Item>
                                     </Grid>
@@ -84,22 +77,22 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button variant='contained' sx={{backgroundColor:'#6d3874', border: '1px solid #6d3874', borderRadius:3}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
-                                                <Button variant='contained' sx={{backgroundColor:'#6d3874', border: '1px solid #6d3874', borderRadius:3}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:theme.palette.primary.main}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:theme.palette.primary.main}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
                                 </Grid>
                                 <Grid size={12}>
-                                    <Item sx={{ textAlign: 'left', backgroundColor:'#fdfde9'}}>
-                                        <Stack direction='row' spacing={0.5}>
-                                            <Dangerous sx={{color:'red', pt:0.}}/>
+                                    <Item sx={{ textAlign: 'left', backgroundColor:theme.palette.warning.main}}>
+                                        <Stack direction='row' alignItems='left'>
+                                            <Dangerous sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>Please note
                                                 <TextToSpeechButton text='Please note, wait times are estimated and may vary. Urgent cases may be prioritised and seen before you. We appreciate your patience and understanding.' />
                                             </Typography>
                                         </Stack>
                                         <Typography variant='body1'>Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.</Typography>
-                                        <Typography variant='subtitle2' color='#d95a49' fontWeight={500}>We appreciate your patience and understanding.</Typography>
+                                        <Typography variant='subtitle2' color={theme.palette.error.main} fontWeight={500}>We appreciate your patience and understanding.</Typography>
                                     </Item>
                                 </Grid>
                             </Stack>
