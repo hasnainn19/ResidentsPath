@@ -11,7 +11,7 @@ import Navbar from '../components/NavBar'
 import TextToSpeechButton from '../components/TextToSpeechButton';
 
 const BookingPage = () => {
-    const [selectedDate, setselectedDate] = useState<Dayjs | null>(dayjs());
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
     const [selectedTime, setSelectedTime] = useState('');
     const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
 
