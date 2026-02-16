@@ -72,7 +72,7 @@ const ReferencePage = () => {
     }
 
     return (
-    <div>
+    <>
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center'  }}>
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
@@ -151,7 +151,7 @@ const ReferencePage = () => {
                 </Grid>
             </Grid>
         </Container>
-    </div>
+    </>
     );
 };
 
