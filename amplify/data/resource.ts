@@ -8,8 +8,7 @@ const schema = a.schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
-			// User type
-			isRegistered: a.boolean().default(false), // true = has account, false = walk-in
+			cognitoUserId: a.string(), // Authentication link (null for walk-ins)
 
 			// Name fields (required for all users)
 			title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
@@ -30,10 +29,10 @@ const schema = a.schema({
 
 			// Relationships
 			cases: a.hasMany("Case", "userId"),
+			appointments: a.hasMany("Appointment", "userId"),
 		})
 		.authorization((allow) => [
-			allow.owner(), // Registered users can access their own data
-			allow.groups(["Staff"]), // Staff can access all user data
+			allow.groups(["Staff"]), // Only staff can access user data directly
 		]),
 	
 	// Case - represents an issue or matter that a resident needs help with
@@ -55,10 +54,10 @@ const schema = a.schema({
 			user: a.belongsTo("User", "userId"),
 			department: a.belongsTo("Department", "departmentId"),
 			tickets: a.hasMany("Ticket", "caseId"),
+			appointments: a.hasMany("Appointment", "caseId"),
 		})
 		.authorization((allow) => [
-			allow.owner(), // Registered users can see their own cases
-			allow.groups(["Staff"]), // Staff can see all cases
+			allow.groups(["Staff"]), // Only staff can access cases directly
 		]),
 
 	// Department - service departments (Housing, Council Tax, etc)
@@ -72,6 +71,7 @@ const schema = a.schema({
 			cases: a.hasMany("Case", "departmentId"),
 			tickets: a.hasMany("Ticket", "departmentId"),
 			staff: a.hasMany("Staff", "departmentId"),
+			appointments: a.hasMany("Appointment", "departmentId"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all departments
@@ -129,6 +129,33 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can see staff information
+		]),
+
+	// Appointment - represents a scheduled appointment for a registered resident
+	Appointment: a
+		.model({
+			// Foreign keys
+			userId: a.id().required(),
+			departmentId: a.id().required(),
+			caseId: a.id().required(),
+
+			// Appointment scheduling
+			date: a.date().required(),
+			time: a.time().required(),
+
+			// Appointment status
+			status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
+
+			// Additional information
+			notes: a.string(),
+
+			// Relationships
+			user: a.belongsTo("User", "userId"),
+			department: a.belongsTo("Department", "departmentId"),
+			case: a.belongsTo("Case", "caseId"),
+		})
+		.authorization((allow) => [
+			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
 	
 	// Custom queries and mutations (lambdas defined in amplify/functions)
