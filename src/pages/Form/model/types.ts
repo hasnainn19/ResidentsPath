@@ -1,3 +1,14 @@
+/**
+ * Types used by the form.
+ *
+ * This defines FormData and the allowed values for key fields like urgency, proceed choice, and routing department. 
+ * This allows the same types to be shared across the form steps.
+ *
+ * If a field is added/removed, this file should usually be updated first, then initialState
+ * and any review/validation logic that depends on it.
+ */
+
+
 export type Urgency = "yes" | "no" | "unsure";
 export type SafeToContact = "yes" | "no" | "prefer_not_to_say";
 

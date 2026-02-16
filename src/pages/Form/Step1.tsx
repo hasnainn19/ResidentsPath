@@ -1,3 +1,14 @@
+/**
+ * Step 1: optional resident details.
+ *
+ * Starts by asking whether the resident wants to provide personal/contact details at all.
+ * If they choose not to, the related fields are cleared so they do not appear later.
+ *
+ * If details are provided, this step collects basic info (eg name, DOB, email/phone, preferred
+ * contact method) and then moves on to Step 2 for the actual request/triage.
+ */
+
+
 import { useNavigate } from "react-router-dom";
 import {
   Paper,

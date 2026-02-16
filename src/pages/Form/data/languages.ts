@@ -1,3 +1,7 @@
+/**
+ * Language dropdown options shown in the form header.
+ */
+
 import type { LanguageOption } from "../model/types";
 
 export const LANGUAGE_OPTIONS: LanguageOption[] = [

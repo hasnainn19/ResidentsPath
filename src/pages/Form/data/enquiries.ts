@@ -1,3 +1,17 @@
+/**
+ * The list of services and enquiries used by the triage step.
+ *
+ * This file drives what residents see in Step 2:
+ * - Top-level service areas.
+ * - The General Services split.
+ * - The actual enquiries and any extra "more detail" options.
+ *
+ * Enquiries can also carry flags saying which follow-up questions apply (eg children questions,
+ * household size, domestic abuse prompts). These flags are used in multiple steps to decide what to display.
+ *
+ * Changes here affect both the UI wording and the behaviour of the form.
+ */
+
 import type { EnquiryItem } from "../model/types";
 
 export const TOP_LEVEL: { value: string; label: string }[] = [

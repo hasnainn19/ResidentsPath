@@ -1,3 +1,12 @@
+/**
+ * Shared form state for the form.
+ *
+ * This holds the single FormData object used across all steps of the form.
+ * It exposes formData and setFormData so each step can update the same values.
+ *
+ * It also exposes shared actions used by the UI, such as saving progress.
+ */
+
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { FormData } from "../model/types";
 import { initialFormData } from "../model/initialState";

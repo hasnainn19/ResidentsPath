@@ -1,3 +1,13 @@
+/**
+ * Helper rules used by Step 2.
+ *
+ * This keeps Step 2 readable by moving shared rules into one place:
+ * - Work out which enquiry options to show (including the General Services rules).
+ * - Decide whether the user is allowed to continue.
+ * - Clear answers that no longer make sense after changing an earlier choice, so old values do
+ *   not carry over into a different path.
+ */
+
 import type { EnquiryItem, FormData } from "./types";
 import { ENQUIRIES_BY_GENERAL_SERVICES_SECTION, ENQUIRIES_BY_TOPLEVEL, GENERAL_SERVICES_DIRECT_ITEMS } from "../data/enquiries";
 

@@ -1,3 +1,12 @@
+/**
+ * Step 3: review and submit.
+ *
+ * Shows a summary of what has been entered so far, with links back to edit earlier steps.
+ * Only relevant answers are shown (eg conditional questions that were actually asked, and values
+ * that apply based on earlier choices).
+ */
+
+
 import { useNavigate } from "react-router-dom";
 import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
 import StepShell from "./components/StepShell";

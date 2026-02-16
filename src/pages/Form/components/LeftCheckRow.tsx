@@ -1,3 +1,11 @@
+/**
+ * Checkbox row with left-aligned label, with space for follow-up content underneath.
+ *
+ * Used for questions where ticking a box reveals extra inputs. It handles linking the label
+ * to the checkbox id.
+ */
+
+
 import { type ReactNode, useId } from "react";
 import { Box, Checkbox, Typography } from "@mui/material";
 

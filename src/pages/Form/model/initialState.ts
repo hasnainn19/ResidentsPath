@@ -1,3 +1,11 @@
+/**
+ * Default values for a new form.
+ *
+ * Exports the initial FormData object so every field has a predictable starting value
+ *
+ * Any new FormData field should get a default here.
+ */
+
 import type { FormData } from "./types";
 
 export const initialFormData: FormData = {

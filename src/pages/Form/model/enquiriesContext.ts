@@ -1,3 +1,13 @@
+/**
+ * Works out what options should be shown for the current selections.
+ *
+ * Given the current FormData, this builds a simple context object used in multiple steps to decide:
+ * - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
+ * - Whether the current selection is complete enough to move forward.
+ * - Which follow-up sections should appear (children, disability/sensory, household size,
+ *   domestic abuse).
+ */
+
 import type { FormData } from "./types";
 import { getEnquiryOptions } from "./step2Logic";
 

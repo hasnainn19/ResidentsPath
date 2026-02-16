@@ -1,3 +1,20 @@
+/**
+ * Step 2: select the service request and answer any relevant follow-up questions.
+ *
+ * Collects:
+ * - Top-level service area
+ * - General Services topic when relevant
+ * - The specific enquiry (and "more detail" choice when required)
+ *
+ * Depending on the enquiry, extra questions may appear (eg dependent children, disability/sensory
+ * needs, household size, domestic abuse prompts). These appear only when relevant to what was chosen.
+ *
+ * The step also asks what should happen next (queue, appointment, callback). Support needs are shown
+ * only for queue/appointment. The Continue button is enabled only when the required choices for the
+ * current path have been completed.
+ */
+
+
 import { useNavigate } from "react-router-dom";
 
 import {

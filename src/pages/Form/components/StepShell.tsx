@@ -1,3 +1,16 @@
+/**
+ * Layout used by each form page.
+ *
+ * Provides the shared header and structure across all steps, including:
+ * - Title/subtitle area
+ * - Step progress indicator
+ * - Language selector
+ * - TTS instructions action
+ * - Back button when not on Step 1
+ *
+ * Also scrolls to the top when a step loads.
+ */
+
 import type { ReactNode } from "react";
 import {
   Box,
@@ -55,8 +68,6 @@ export default function StepShell(props: Props) {
           ) : (
             <Box sx={{ width: 80 }} />
           )}
-
-
 
           <TextToSpeechButton text={listenText} />
           </Stack>
