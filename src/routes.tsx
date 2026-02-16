@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import App from "./App";
+import BookingPage from "./pages/BookingPage";
 
 import FormLayout from "./pages/Form/FormLayout";
 import Step1 from "./pages/Form/Step1";
@@ -19,4 +20,7 @@ export const router = createBrowserRouter([
       { path: "step-3", element: <Step3 /> },
     ],
   },
+    {
+        path: "/bookingpage", element: <BookingPage />
+    }
 ]);
