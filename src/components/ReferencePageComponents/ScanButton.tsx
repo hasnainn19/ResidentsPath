@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ButtonBase } from "@mui/material";
 import { grey } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
@@ -16,7 +16,7 @@ const StyledScanButton = styled(ButtonBase)(({ theme }) => ({
   justifyContent: 'center',
   overflow: 'hidden',
   '&:hover': {
-    backgroundColor: '#e3d9faff',
+    backgroundColor: theme.palette.secondary.main,
     borderColor: grey[900],
   },
 }));
