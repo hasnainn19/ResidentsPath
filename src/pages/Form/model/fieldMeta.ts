@@ -176,6 +176,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   ageRange: {
     label: "Age range",
     dependsOn: (fd) => !fd.dob,
+    askedInContext: (ctx) => ctx.showAgeRange,
   },
 
   urgent: {

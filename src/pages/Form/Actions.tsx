@@ -215,7 +215,7 @@ export default function Actions() {
 
     // TODO: Replace this with a backend call that schedules an SMS/email reminder
     setConfirmReminderOpen(false);
-    nav("/start");
+    handleSave();
   }
 
   function handleCancelReminder() {

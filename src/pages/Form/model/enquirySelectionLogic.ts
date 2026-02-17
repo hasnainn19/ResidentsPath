@@ -62,8 +62,13 @@ export function resetFormInfo(prev: FormData): FormData {
     hasDisabilityOrSensory: false,
     disabilityType: "",
 
+    ageRange: "",
+
     domesticAbuse: false,
     safeToContact: "prefer_not_to_say",
     safeContactNotes: "",
+
+    appointmentDateIso: "",
+    appointmentTime: "",
   };
 }
