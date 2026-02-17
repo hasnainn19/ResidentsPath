@@ -1,12 +1,19 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import UserDashboard from "./pages/UserDashboard";
+import ReferencePage from "./pages/ReferencePage";
+import BookingPage from "./pages/BookingPage";import UserDashboard from "./pages/UserDashboard";
 
 
 export const router = createBrowserRouter([
     {
         path: "/", element: <App /> 
     },
+    {
+        path: "/referencepage", element: <ReferencePage />
+    },
+    {
+        path: "/bookingpage", element: <BookingPage />
+    }
     {
         path: "/userdashboard", element: <UserDashboard /> 
     },
