@@ -68,6 +68,17 @@ export default function EnquirySelection() {
 
   const labelOptional = (key: keyof FormData) => FIELD_META[key].label + " (optional)";
 
+  const maxLenFor = (key: keyof FormData) => FIELD_META[key].maxLen ?? 0;
+
+  const countChars = (key: keyof FormData, value: string, extra?: string) => {
+    const max = maxLenFor(key);
+    if (!max) return extra;
+    const count = value.length;
+
+    if (extra) return `${count}/${max} characters. ${extra}`;
+    return `${count}/${max} characters.`;
+  };
+
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
@@ -372,7 +383,12 @@ export default function EnquirySelection() {
                   placeholder="Tell us what you need help with"
                   value={formData.otherEnquiryText}
                   onChange={(e) => setField("otherEnquiryText", e.target.value)}
-                  helperText="Avoid sharing bank details or passwords."
+                  helperText={countChars(
+                    "otherEnquiryText",
+                    formData.otherEnquiryText,
+                    "Avoid sharing bank details or passwords.",
+                  )}
+                  slotProps={{ htmlInput: { maxLength: FIELD_META.otherEnquiryText.maxLen } }}
                 />
               </WithTTS>
             )}
@@ -599,10 +615,13 @@ export default function EnquirySelection() {
                                   {formData.safeToContact === "no" && (
                                     <TextField
                                       fullWidth
+                                      multiline
                                       label={labelOptional("safeContactNotes")}
                                       placeholder="Safe time or method, or do not contact"
                                       value={formData.safeContactNotes}
                                       onChange={(e) => setField("safeContactNotes", e.target.value)}
+                                      helperText={countChars("safeContactNotes", formData.safeContactNotes)}
+                                      slotProps={{ htmlInput: { maxLength: FIELD_META.safeContactNotes.maxLen } }}
                                     />
                                   )}
                                 </Stack>
@@ -718,6 +737,8 @@ export default function EnquirySelection() {
                         placeholder="Briefly describe why you need support sooner today"
                         value={formData.urgentOtherReason}
                         onChange={(e) => setField("urgentOtherReason", e.target.value)}
+                        helperText={countChars("urgentOtherReason", formData.urgentOtherReason)}
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.urgentOtherReason.maxLen } }}
                       />
                     </Box>
                   )}
@@ -734,6 +755,8 @@ export default function EnquirySelection() {
                 placeholder="Add any details that might help us support you..."
                 value={formData.additionalInfo}
                 onChange={(e) => setField("additionalInfo", e.target.value)}
+                helperText={countChars("additionalInfo", formData.additionalInfo)}
+                slotProps={{ htmlInput: { maxLength: FIELD_META.additionalInfo.maxLen } }}
               />
 
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
@@ -834,6 +857,8 @@ export default function EnquirySelection() {
                       placeholder="Any other support that would help today"
                       value={formData.otherSupport}
                       onChange={(e) => setField("otherSupport", e.target.value)}
+                      helperText={countChars("otherSupport", formData.otherSupport)}
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.otherSupport.maxLen } }}
                     />
                   </Stack>
                 </Collapse>

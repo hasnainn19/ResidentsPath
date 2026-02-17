@@ -33,6 +33,12 @@ export type FieldMeta = {
 
   // Converts stored value into a review-friendly value
   format?: (fd: FormData, ctx: EnquiryContext) => unknown;
+
+  // Max text length allowed for input (for text fields)
+  maxLen?: number;
+
+  // Whether to allow new lines in the input (for text fields)
+  allowNewlines?: boolean;
 };
 
 const URGENCY_LABELS: Record<FormData["urgent"], string> = {
@@ -47,17 +53,24 @@ const SAFE_TO_CONTACT_LABELS: Record<FormData["safeToContact"], string> = {
   prefer_not_to_say: "Prefer not to say",
 };
 
+const LIMIT = {
+  SHORT: 70,
+  MEDIUM: 100,
+  LONG: 500,
+  XLONG: 1000,
+} as const;
+
 export const FIELD_META: Record<FieldKey, FieldMeta> = {
   language: { label: "Language" },
 
   provideDetails: { label: "Provide personal details?" },
 
-  firstName: { label: "First name", requiresDetails: true },
-  middleName: { label: "Middle name", requiresDetails: true },
-  lastName: { label: "Last name", requiresDetails: true },
-  preferredName: { label: "Preferred name", requiresDetails: true },
+  firstName: { label: "First name", requiresDetails: true, maxLen: LIMIT.SHORT },
+  middleName: { label: "Middle name", requiresDetails: true, maxLen: LIMIT.SHORT },
+  lastName: { label: "Last name", requiresDetails: true, maxLen: LIMIT.SHORT },
+  preferredName: { label: "Preferred name", requiresDetails: true, maxLen: LIMIT.SHORT },
 
-  email: { label: "Email", requiresDetails: true },
+  email: { label: "Email", requiresDetails: true, maxLen: LIMIT.MEDIUM },
   phoneCountry: { label: "Phone country", requiresDetails: true },
   phoneType: { label: "Phone type", requiresDetails: true },
   phone: { label: "Phone number", requiresDetails: true },
@@ -72,11 +85,11 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     },
   },
 
-  addressLine1: { label: "Address line 1", requiresDetails: true },
-  addressLine2: { label: "Address line 2", requiresDetails: true },
-  addressLine3: { label: "Address line 3", requiresDetails: true },
-  townOrCity: { label: "Town or city", requiresDetails: true },
-  postcode: { label: "Postcode", requiresDetails: true },
+  addressLine1: { label: "Address line 1", requiresDetails: true, maxLen: LIMIT.MEDIUM },
+  addressLine2: { label: "Address line 2", requiresDetails: true, maxLen: LIMIT.MEDIUM },
+  addressLine3: { label: "Address line 3", requiresDetails: true, maxLen: LIMIT.MEDIUM },
+  townOrCity: { label: "Town or city", requiresDetails: true, maxLen: LIMIT.SHORT },
+  postcode: { label: "Postcode", requiresDetails: true, maxLen: LIMIT.SHORT },
 
   pronouns: {
     label: "Pronouns",
@@ -88,6 +101,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     requiresDetails: true,
     reviewLabel: "Pronouns",
     dependsOn: (fd) => fd.pronouns === "Other",
+    maxLen: LIMIT.SHORT,
   },
 
   topLevel: { label: "Top level service area" },
@@ -112,6 +126,8 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   otherEnquiryText: {
     label: "Describe your enquiry",
     dependsOn: (fd) => fd.topLevel === "Other",
+    maxLen: LIMIT.XLONG,
+    allowNewlines: true,
   },
 
   hasChildren: {
@@ -153,6 +169,8 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     label: "Safe contact notes",
     askedInContext: (ctx) => ctx.showDomesticAbuseQs,
     dependsOn: (fd) => fd.domesticAbuse && fd.safeToContact === "no",
+    maxLen: LIMIT.XLONG,
+    allowNewlines: true,
   },
 
   ageRange: {
@@ -171,9 +189,11 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   urgentOtherReason: {
     label: "Please tell us why",
     dependsOn: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
+    maxLen: LIMIT.LONG,
+    allowNewlines: true,
   },
 
-  additionalInfo: { label: "Anything else you want to tell us" },
+  additionalInfo: { label: "Anything else you want to tell us", maxLen: LIMIT.XLONG, allowNewlines: true },
 
   proceed: { label: "How would you like to proceed?" },
 
@@ -185,7 +205,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   needsQuietSpace: { label: "Quieter space" },
   needsBSL: { label: "Interpreter (BSL)" },
   needsHelpWithForms: { label: "Help completing forms" },
-  otherSupport: { label: "Other support" },
+  otherSupport: { label: "Other support", maxLen: LIMIT.LONG },
 
   contactMethod: {
     label: "Preferred method of contact",
@@ -235,4 +255,12 @@ export function getReviewDisplayValue(key: FieldKey, fd: FormData, ctx: EnquiryC
   if (isEmptyForReview(key, raw)) return null;
 
   return typeof raw === "boolean" ? (raw ? "Yes" : "No") : String(raw);
+}
+
+export function getMaxLen(key: FieldKey, fallback = LIMIT.MEDIUM): number {
+  return FIELD_META[key].maxLen ?? fallback;
+}
+
+export function allowsNewlines(key: FieldKey): boolean {
+  return FIELD_META[key].allowNewlines ?? false;
 }

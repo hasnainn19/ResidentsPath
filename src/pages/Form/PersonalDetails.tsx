@@ -335,6 +335,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("preferredName", e.target.value)}
                         fullWidth
                         autoComplete="nickname"
+                        slotProps={{ htmlInput : { maxLength: FIELD_META.preferredName.maxLen } }}
                       />
 
                       <Collapse
@@ -348,6 +349,7 @@ export default function PersonalDetails() {
                           value={formData.pronounsOther ?? ""}
                           onChange={(e) => setField("pronounsOther", e.target.value)}
                           fullWidth
+                          slotProps ={{ htmlInput : { maxLength: FIELD_META.pronounsOther.maxLen } }}
                         />
                       </Collapse>
                     </Box>
@@ -366,6 +368,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("firstName", e.target.value)}
                         fullWidth
                         autoComplete="given-name"
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.firstName.maxLen } }}
                       />
 
                       <TextField
@@ -374,6 +377,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("middleName", e.target.value)}
                         fullWidth
                         autoComplete="additional-name"
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.middleName.maxLen } }}
                       />
 
                       <TextField
@@ -382,6 +386,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("lastName", e.target.value)}
                         fullWidth
                         autoComplete="family-name"
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.lastName.maxLen } }}
                       />
                     </Box>
 
@@ -422,7 +427,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("email", e.target.value)}
                       fullWidth
                       autoComplete="email"
-                      slotProps={{ input: { inputMode: "email" } }}
+                      slotProps={{ input: { inputMode: "email" }, htmlInput: { maxLength: FIELD_META.email.maxLen } }}
                     />
 
                     {/* Phone controls: type + country/dial + digits-only number */}
@@ -537,6 +542,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("addressLine1", e.target.value)}
                       fullWidth
                       autoComplete="address-line1"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.addressLine1.maxLen } }}
                     />
 
                     <TextField
@@ -545,6 +551,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("addressLine2", e.target.value)}
                       fullWidth
                       autoComplete="address-line2"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.addressLine2.maxLen } }}
                     />
 
                     <TextField
@@ -553,6 +560,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("addressLine3", e.target.value)}
                       fullWidth
                       autoComplete="address-line3"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.addressLine3.maxLen } }}
                     />
 
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
@@ -562,6 +570,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("townOrCity", e.target.value)}
                         fullWidth
                         autoComplete="address-level2"
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.townOrCity.maxLen } }}
                       />
 
                       <TextField
@@ -585,6 +594,7 @@ export default function PersonalDetails() {
                           htmlInput: {
                             autoCapitalize: "characters",
                             spellCheck: false,
+                            maxLength: FIELD_META.postcode.maxLen,
                           },
                         }}
                       />
