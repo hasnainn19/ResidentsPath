@@ -9,8 +9,8 @@
  * Depending on the enquiry, extra questions may appear (eg dependent children, disability/sensory
  * needs, household size, domestic abuse prompts). These appear only when relevant to what was chosen.
  *
- * The step also asks what should happen next (queue, appointment, callback). Support needs are shown
- * only for queue/appointment. The Continue button is enabled only when the required choices for the
+ * The step also asks what should happen next (queue or appointment).
+ * The Continue button is enabled only when the required choices for the
  * current path have been completed.
  */
 
@@ -201,6 +201,18 @@ export default function EnquirySelection() {
   // Keep the support section short unless "Show more" is opened
   const [showMoreSupport, setShowMoreSupport] = useState(false);
 
+  const showSupportNotes =
+    formData.needsAccessibility ||
+    formData.needsLanguage ||
+    formData.needsSeating ||
+    formData.needsWrittenUpdates ||
+    formData.needsLargeText ||
+    formData.needsQuietSpace ||
+    formData.needsBSL ||
+    formData.needsHelpWithForms ||
+    (formData.otherSupport ?? "").trim() !== "" ||
+    (formData.supportNotes ?? "").trim() !== "";
+
   // Build TTS strings for each section based on what is currently shown
   function buildServiceTts() {
     const parts: string[] = [];
@@ -254,7 +266,7 @@ export default function EnquirySelection() {
     "Anything else you want to tell us. This is optional. Add any details that might help. You can also use voice input.";
 
   const supportTts =
-    "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options.";
+    "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options, and add support notes.";
 
   return (
     <StepShell
@@ -862,6 +874,20 @@ export default function EnquirySelection() {
                     />
                   </Stack>
                 </Collapse>
+
+                {showSupportNotes && (
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    label={labelOptional("supportNotes")}
+                    placeholder="Anything staff should know to support you today"
+                    value={formData.supportNotes}
+                    onChange={(e) => setField("supportNotes", e.target.value)}
+                    helperText={countChars("supportNotes", formData.supportNotes)}
+                    slotProps={{ htmlInput: { maxLength: FIELD_META.supportNotes.maxLen } }}
+                  />
+                )}
               </Stack>
             </WithTTS>
 

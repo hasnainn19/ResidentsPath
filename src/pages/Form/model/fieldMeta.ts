@@ -205,6 +205,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   needsQuietSpace: { label: "Quieter space" },
   needsBSL: { label: "Interpreter (BSL)" },
   needsHelpWithForms: { label: "Help completing forms" },
+  supportNotes: { label: "Support notes", maxLen: LIMIT.LONG, allowNewlines: true },
   otherSupport: { label: "Other support", maxLen: LIMIT.LONG },
 
   contactMethod: {

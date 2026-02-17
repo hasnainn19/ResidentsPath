@@ -36,7 +36,7 @@ export function FormWizardProvider({ children }: { children: ReactNode }) {
 
   const handleSave = () => {
     saveDraft(localStorage, formData, location.pathname);
-    nav("/", { replace: true });
+    nav("/start", { replace: true });
   };
 
   const clearSavedDraft = () => {

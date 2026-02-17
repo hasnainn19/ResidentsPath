@@ -140,6 +140,7 @@ export type FormData = {
   needsQuietSpace: boolean;
   needsBSL: boolean;
   needsHelpWithForms: boolean;
+  supportNotes: string;
   otherSupport: string;
 
   contactMethod: ContactMethod;

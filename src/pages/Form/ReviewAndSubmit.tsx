@@ -36,7 +36,6 @@ export default function ReviewAndSubmit() {
     clearSavedDraft();
   };
 
-
   function isNotNull<T>(x: T | null | undefined | false): x is T {
     return x !== null && x !== undefined && x !== false;
   }
@@ -103,6 +102,7 @@ export default function ReviewAndSubmit() {
         "needsQuietSpace",
         "needsBSL",
         "needsHelpWithForms",
+        "supportNotes",
         "otherSupport",
       ],
       editTo: "/form/enquiry-selection",

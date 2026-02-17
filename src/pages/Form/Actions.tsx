@@ -178,6 +178,8 @@ export default function Actions() {
   const hasReminderContact =
     formData.provideDetails === "yes" && (formData.phone.trim() !== "" || formData.email.trim() !== "");
 
+  const bookingIncomplete = showBooking && (!formData.appointmentDateIso || formData.appointmentTime.trim() === "");
+
   // Compute the time for the reminder based on the user's selection
   const computedReminderAt = useMemo(() => {
     if (joinTiming !== "later") return null;
@@ -213,7 +215,7 @@ export default function Actions() {
 
     // TODO: Replace this with a backend call that schedules an SMS/email reminder
     setConfirmReminderOpen(false);
-    nav("/");
+    nav("/start");
   }
 
   function handleCancelReminder() {
@@ -467,7 +469,7 @@ export default function Actions() {
             advanceLabel="Continue"
             advanceType="button"
             onAdvanceClick={() => nav("/form/review-and-submit")}
-            advanceDisabled={showQueue && joinTiming === "later"}
+            advanceDisabled={(showQueue && joinTiming === "later") || bookingIncomplete}
             showPrevious
             onPrevious={() => nav("/form/enquiry-selection")}
           />

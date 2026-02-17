@@ -27,6 +27,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  FormHelperText,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -196,8 +197,19 @@ export default function PersonalDetails() {
   // Determine if the postcode field has been filled
   const [postcodeTouched, setPostcodeTouched] = useState(false);
 
+  const [contactMethodTouched, setContactMethodTouched] = useState(false);
+
   const postcodeRaw = formData.postcode ?? "";
   const postcodeInvalid = provideDetails === "yes" && postcodeRaw.trim() !== "" && !isValidUkPostcode(postcodeRaw);
+
+  const needsPhoneForContactMethod =
+    provideDetails === "yes" && formData.contactMethod === "Text message" && formData.phone.trim() === "";
+
+  const needsEmailForContactMethod =
+    provideDetails === "yes" && formData.contactMethod === "Email" && formData.email.trim() === "";
+
+  // If the user has touched the contact method field, validate that they have provided the necessary contact details for their chosen method
+  const contactMethodInvalid = needsPhoneForContactMethod || needsEmailForContactMethod;
 
   return (
     <StepShell
@@ -213,8 +225,9 @@ export default function PersonalDetails() {
         component="form"
         onSubmit={(e) => {
           e.preventDefault();
-          if (provideDetails === "yes" && postcodeInvalid) {
+          if (provideDetails === "yes" && (postcodeInvalid || contactMethodInvalid)) {
             setPostcodeTouched(true);
+            setContactMethodTouched(true);
             return;
           }
           nav("/form/enquiry-selection");
@@ -335,7 +348,7 @@ export default function PersonalDetails() {
                         onChange={(e) => setField("preferredName", e.target.value)}
                         fullWidth
                         autoComplete="nickname"
-                        slotProps={{ htmlInput : { maxLength: FIELD_META.preferredName.maxLen } }}
+                        slotProps={{ htmlInput: { maxLength: FIELD_META.preferredName.maxLen } }}
                       />
 
                       <Collapse
@@ -349,7 +362,7 @@ export default function PersonalDetails() {
                           value={formData.pronounsOther ?? ""}
                           onChange={(e) => setField("pronounsOther", e.target.value)}
                           fullWidth
-                          slotProps ={{ htmlInput : { maxLength: FIELD_META.pronounsOther.maxLen } }}
+                          slotProps={{ htmlInput: { maxLength: FIELD_META.pronounsOther.maxLen } }}
                         />
                       </Collapse>
                     </Box>
@@ -474,7 +487,7 @@ export default function PersonalDetails() {
                             maxLength: maxNationalLen,
                             pattern: "[0-9]*",
                           },
-                          input: { inputMode: "numeric" } 
+                          input: { inputMode: "numeric" },
                         }}
                       />
                     </Box>
@@ -487,18 +500,30 @@ export default function PersonalDetails() {
                     </Box>
                     <Stack direction="row" spacing={2} alignItems="flex-end">
                       <Box sx={{ flex: 1 }}>
-                        <FormControl fullWidth>
+                        <FormControl fullWidth error={contactMethodTouched && contactMethodInvalid}>
                           <InputLabel id="contact-label">{labelOptional("contactMethod")}</InputLabel>
                           <Select
                             labelId="contact-label"
                             label={labelOptional("contactMethod")}
                             value={formData.contactMethod ?? ""}
-                            onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
+                            onChange={(e) => {
+                              setField("contactMethod", String(e.target.value) as ContactMethod);
+                              setContactMethodTouched(true);
+                            }}
+                            onBlur={() => setContactMethodTouched(true)}
                           >
                             <MenuItem value="">Contact method (optional)</MenuItem>
                             <MenuItem value="Text message">Text message</MenuItem>
                             <MenuItem value="Email">Email</MenuItem>
                           </Select>
+
+                          <FormHelperText>
+                            {contactMethodTouched && contactMethodInvalid
+                              ? needsPhoneForContactMethod
+                                ? "To use Text message, add a phone number above."
+                                : "To use Email, add an email address above."
+                              : " "}
+                          </FormHelperText>
                         </FormControl>
                       </Box>
 
@@ -608,7 +633,7 @@ export default function PersonalDetails() {
             <StepActions
               onSave={handleSave}
               advanceLabel="Continue"
-              advanceDisabled={provideDetails === "yes" && postcodeInvalid}
+              advanceDisabled={provideDetails === "yes" && (postcodeInvalid || contactMethodInvalid)}
             />
           </Stack>
         </Paper>

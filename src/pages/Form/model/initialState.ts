@@ -70,6 +70,7 @@ export const initialFormData: FormData = {
   needsQuietSpace: false,
   needsBSL: false,
   needsHelpWithForms: false,
+  supportNotes: "",
   otherSupport: "",
 
   contactMethod: "",
