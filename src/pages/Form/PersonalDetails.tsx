@@ -41,7 +41,7 @@ import WithTTS from "./components/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
-import type { ContactMethod, YesNo, FormData } from "./model/types";
+import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/types";
 import StepActions from "./components/StepActions";
 import theme from "../../Constants/Theme";
 
@@ -79,7 +79,7 @@ export default function PersonalDetails() {
     },
     personalDetails: {
       label: "Personal details",
-      tts: "Personal details. First name, last name, and date of birth are optional.",
+      tts: "Personal details. Pronouns, preferred name, first name, middle name, last name, and date of birth are optional.",
     },
     contactDetails: {
       label: "Contact details",
@@ -108,7 +108,9 @@ export default function PersonalDetails() {
         return {
           ...next,
           firstName: "",
+          middleName: "",
           lastName: "",
+          preferredName: "",
           dob: null,
           email: "",
           phone: "",
@@ -120,6 +122,8 @@ export default function PersonalDetails() {
           addressLine3: "",
           townOrCity: "",
           postcode: "",
+          pronouns: "" as PronounsOption,
+          pronounsOther: "",
         };
       }
 
@@ -289,13 +293,85 @@ export default function PersonalDetails() {
               <Stack spacing={2}>
                 <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
                   <Stack spacing={2}>
-                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+                    {/* Pronouns + preferred name row */}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "260px 1fr",
+                        gap: 2,
+                        alignItems: "start",
+                      }}
+                    >
+                      <FormControl fullWidth>
+                        <InputLabel id="pronouns-label">Pronouns (optional)</InputLabel>
+                        <Select
+                          labelId="pronouns-label"
+                          label="Pronouns (optional)"
+                          value={(formData.pronouns ?? "") as PronounsOption}
+                          onChange={(e) => {
+                            const v = String(e.target.value) as PronounsOption;
+                            setFormData((prev) => ({
+                              ...prev,
+                              pronouns: v,
+                              pronounsOther: v === "Other" ? prev.pronounsOther : "",
+                            }));
+                          }}
+                        >
+                          <MenuItem value="">No selection</MenuItem>
+                          <MenuItem value="He/him">He/him</MenuItem>
+                          <MenuItem value="She/her">She/her</MenuItem>
+                          <MenuItem value="They/them">They/them</MenuItem>
+                          <MenuItem value="Use my name only">Use my name only</MenuItem>
+                          <MenuItem value="Other">Other (please specify)</MenuItem>
+                          <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        label="Preferred name (optional)"
+                        value={formData.preferredName ?? ""}
+                        onChange={(e) => setField("preferredName", e.target.value)}
+                        fullWidth
+                        autoComplete="nickname"
+                      />
+
+                      <Collapse
+                        in={formData.pronouns === "Other"}
+                        timeout={200}
+                        unmountOnExit
+                        sx={{ gridColumn: "1 / 2" }}
+                      >
+                        <TextField
+                          label="Pronouns (please specify)"
+                          value={formData.pronounsOther ?? ""}
+                          onChange={(e) => setField("pronounsOther", e.target.value)}
+                          fullWidth
+                        />
+                      </Collapse>
+                    </Box>
+
+                    {/* Names row */}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gap: 2,
+                      }}
+                    >
                       <TextField
                         label="First name (optional)"
                         value={formData.firstName ?? ""}
                         onChange={(e) => setField("firstName", e.target.value)}
                         fullWidth
                         autoComplete="given-name"
+                      />
+
+                      <TextField
+                        label="Middle name (optional)"
+                        value={formData.middleName ?? ""}
+                        onChange={(e) => setField("middleName", e.target.value)}
+                        fullWidth
+                        autoComplete="additional-name"
                       />
 
                       <TextField

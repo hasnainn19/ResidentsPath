@@ -19,7 +19,6 @@ import { getEnquiryContext } from "./model/enquiriesContext";
 
 import dayjs from "dayjs";
 
-
 type EnquiryContext = ReturnType<typeof getEnquiryContext>;
 
 export default function ReviewAndSubmit() {
@@ -42,16 +41,22 @@ export default function ReviewAndSubmit() {
   // Labels which should appear on the review page. Note that not all fields will necessarily be shown
   const reviewLabels: Partial<Record<keyof FormData, string>> = {
     firstName: "First name",
+    middleName: "Middle name",
     lastName: "Last name",
+    preferredName: "Preferred name",
     email: "Email",
     phone: "Phone number",
     dob: "Date of birth",
     contactMethod: "Preferred method of contact",
+
     addressLine1: "Address line 1",
     addressLine2: "Address line 2",
     addressLine3: "Address line 3",
     townOrCity: "Town or city",
     postcode: "Postcode",
+
+    pronouns: "Pronouns",
+    pronounsOther: "Pronouns",
 
     enquiryId: "Choose an enquiry",
     specificDetailId: "More detail",
@@ -109,8 +114,12 @@ export default function ReviewAndSubmit() {
     {
       title: "Your details",
       keys: [
+        "pronouns",
+        "pronounsOther",
         "firstName",
+        "middleName",
         "lastName",
+        "preferredName",
         "dob",
         "email",
         "phone",
@@ -245,18 +254,19 @@ export default function ReviewAndSubmit() {
     ageRange: (fd) => !fd.dob,
     appointmentDateIso: (fd) => fd.proceed === "Schedule appointment",
     appointmentTime: (fd) => fd.proceed === "Schedule appointment",
-
+    pronounsOther: (fd) => fd.pronouns === "Other",
   };
 
   // Get the enquiry context which determines which questions were actually asked based on earlier answers
   const enquiryContext = useMemo(
     () => getEnquiryContext(formData),
     [
-      formData.topLevel, 
-      formData.generalServicesChoice, 
-      formData.enquiryId, 
-      formData.specificDetailId, 
-      formData.otherEnquiryText],
+      formData.topLevel,
+      formData.generalServicesChoice,
+      formData.enquiryId,
+      formData.specificDetailId,
+      formData.otherEnquiryText,
+    ],
   );
 
   // Only show questions that were displayed for the chosen enquiry
@@ -276,7 +286,9 @@ export default function ReviewAndSubmit() {
 
   const STEP1_KEYS: ReadonlySet<keyof FormData> = new Set([
     "firstName",
+    "middleName",
     "lastName",
+    "preferredName",
     "email",
     "phone",
     "dob",
@@ -286,6 +298,8 @@ export default function ReviewAndSubmit() {
     "addressLine3",
     "townOrCity",
     "postcode",
+    "pronouns",
+    "pronounsOther",
   ]);
 
   function getReviewLabel(key: keyof FormData) {
@@ -331,6 +345,8 @@ export default function ReviewAndSubmit() {
       val = d.isValid() ? d.format("D MMMM YYYY") : val;
     }
 
+    if (key === "pronouns" && formData.pronouns === "Other" && (formData.pronounsOther ?? "").trim() !== "")
+      return null;
 
     if (isEmptyForReview(key, val)) return null;
 

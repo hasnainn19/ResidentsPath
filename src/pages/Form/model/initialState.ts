@@ -13,17 +13,23 @@ export const initialFormData: FormData = {
 
   provideDetails: "yes",
   firstName: "",
+  middleName: "",
   lastName: "",
+  preferredName: "",
   email: "",
   phoneCountry: "GB",
   phoneType: "",
   phone: "",
   dob: null,
+
   addressLine1: "",
   addressLine2: "",
   addressLine3: "",
   townOrCity: "",
   postcode: "",
+
+  pronouns: "",
+  pronounsOther: "",
 
   topLevel: "",
   generalServicesChoice: "",

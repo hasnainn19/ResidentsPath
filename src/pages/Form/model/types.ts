@@ -69,22 +69,37 @@ export type ageRange =
   | "65+"
   | "Prefer not to say";
 
+export type PronounsOption =
+  | ""
+  | "He/him"
+  | "She/her"
+  | "They/them"
+  | "Use my name only"
+  | "Other"
+  | "Prefer not to say";
+
 export type FormData = {
   language: string;
 
   provideDetails: YesNo;
   firstName: string;
+  middleName: string;
   lastName: string;
+  preferredName: string;
   email: string;
   phoneCountry: string;
   phoneType: "" | "Mobile" | "Home phone";
   phone: string;
   dob: string | null;
+
   addressLine1: string;
   addressLine2: string;
   addressLine3: string;
   townOrCity: string;
   postcode: string;
+
+  pronouns: PronounsOption;
+  pronounsOther: string;
 
   topLevel: string;
   generalServicesChoice: string;
