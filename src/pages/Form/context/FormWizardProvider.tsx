@@ -8,24 +8,47 @@
  */
 
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import type { FormData } from "../model/types";
 import { initialFormData } from "../model/initialState";
+import { clearDraft, loadDraft, saveDraft } from "../model/draftStorage";
 
 type FormWizardCtx = {
   formData: FormData;
   setFormData: (next: FormData | ((prev: FormData) => FormData)) => void;
 
   handleSave: () => void;
+
+  clearSavedDraft: () => void;
 };
 
 const Ctx = createContext<FormWizardCtx | null>(null);
 
 export function FormWizardProvider({ children }: { children: ReactNode }) {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const location = useLocation();
+  const nav = useNavigate();
 
-  const handleSave = () => alert("Saved (mock)");
+  const [formData, setFormData] = useState<FormData>(() => {
+    const draft = loadDraft(localStorage);
+    return draft?.data ?? initialFormData;
+  });
 
-  return <Ctx.Provider value={{ formData, setFormData, handleSave }}>{children}</Ctx.Provider>;
+  const handleSave = () => {
+    saveDraft(localStorage, formData, location.pathname);
+    nav("/", { replace: true });
+  };
+
+  const clearSavedDraft = () => {
+    clearDraft(localStorage);
+    setFormData(initialFormData);
+  };
+
+  return (
+    <Ctx.Provider value={{ formData, setFormData, handleSave, clearSavedDraft }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function useFormWizard() {

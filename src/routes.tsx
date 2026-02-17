@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import BookingPage from "./pages/BookingPage";
 
@@ -8,6 +8,7 @@ import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./pages/Form/components/RequireFormSteps";
+import ResumeFromSave from "./pages/Form/components/ResumeFromSave";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
     path: "/form",
     element: <FormLayout />,
     children: [
-      { index: true, element: <Navigate to="/form/personal-details" replace /> },
+      { index: true, element: <ResumeFromSave /> },
       { path: "personal-details", element: <PersonalDetails /> },
       {
         path: "enquiry-selection",

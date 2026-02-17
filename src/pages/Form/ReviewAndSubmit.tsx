@@ -23,7 +23,7 @@ type EnquiryContext = ReturnType<typeof getEnquiryContext>;
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
-  const { formData, setFormData, handleSave } = useFormWizard();
+  const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
   // TODO(BACKEND)
   const submitToBackend = () => {
@@ -36,6 +36,7 @@ export default function ReviewAndSubmit() {
     };
     console.log(payload);
     alert("Submitted (mock)");
+    clearSavedDraft();
   };
 
   // Labels which should appear on the review page. Note that not all fields will necessarily be shown
