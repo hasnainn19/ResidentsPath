@@ -18,20 +18,20 @@ type FormWizardCtx = {
   handleSave: () => void;
 };
 
-const Ctx = createContext<FormWizardCtx>({
-  formData: initialFormData,
-  setFormData: () => {},
-  handleSave: () => {},
-});
+const Ctx = createContext<FormWizardCtx | null>(null);
 
 export function FormWizardProvider({ children }: { children: ReactNode }) {
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
   const handleSave = () => alert("Saved (mock)");
 
-  return <Ctx.Provider value={{ formData, setFormData, handleSave}}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ formData, setFormData, handleSave }}>{children}</Ctx.Provider>;
 }
 
 export function useFormWizard() {
-  return useContext(Ctx);
+  const ctx = useContext(Ctx);
+  if (!ctx) {
+    throw new Error("useFormWizard must be used within a FormWizardProvider");
+  }
+  return ctx;
 }
