@@ -58,7 +58,7 @@ export type LanguageOption = { code: string; label: string };
 
 export type YesNo = "yes" | "no";
 
-export type ageRange = 
+export type AgeRange = 
   | ""
   | "Under 18"
   | "18-24"
@@ -121,7 +121,7 @@ export type FormData = {
   safeToContact: SafeToContact;
   safeContactNotes: string;
 
-  ageRange: ageRange;
+  ageRange: AgeRange;
 
   urgent: Urgency;
   urgentReason: string;

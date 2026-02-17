@@ -56,7 +56,7 @@ import type {
   Proceed,
   SafeToContact,
   Urgency,
-  ageRange,
+  AgeRange,
 } from "./model/types";
 import StepActions from "./components/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
@@ -194,17 +194,15 @@ export default function EnquirySelection() {
 
     if (!formData.topLevel) return parts.join(" ");
 
+    if (isOther) {
+      parts.push("Then describe your enquiry.");
+      return parts.join(" ");
+    }
+
     if (isGeneralServices) {
       if (!formData.generalServicesChoice) {
         parts.push("Then choose a topic.");
         return parts.join(" ");
-      }
-      if (isOther) {
-        parts.push("Then describe your enquiry.");
-        return parts.join(" ");
-      }
-
-      if (!formData.generalServicesChoice.startsWith("direct:")) {
       }
       parts.push("Then choose an enquiry.");
     } else {
@@ -536,7 +534,7 @@ export default function EnquirySelection() {
                                 labelId="age-range-label"
                                 label="Select an age range... (optional)"
                                 value={formData.ageRange}
-                                onChange={(e) => setField("ageRange", String(e.target.value) as ageRange)}
+                                onChange={(e) => setField("ageRange", String(e.target.value) as AgeRange)}
                               >
                                 <MenuItem value="">Select...</MenuItem>
                                 <MenuItem value="Under 18">Under 18</MenuItem>

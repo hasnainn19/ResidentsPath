@@ -7,6 +7,7 @@ import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
 import Actions from "./pages/Form/Actions";
+import RequireFormSteps from "./pages/Form/components/RequireFormSteps";
 
 export const router = createBrowserRouter([
   { path: "/", element: <App /> },
@@ -17,12 +18,34 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/form/personal-details" replace /> },
       { path: "personal-details", element: <PersonalDetails /> },
-      { path: "enquiry-selection", element: <EnquirySelection /> },
-       {path: "actions", element: <Actions /> },
-      { path: "review-and-submit", element: <ReviewAndSubmit /> },
+      {
+        path: "enquiry-selection",
+        element: (
+          <RequireFormSteps step="enquiry-selection">
+            <EnquirySelection />
+          </RequireFormSteps>
+        ),
+      },
+      {
+        path: "actions",
+        element: (
+          <RequireFormSteps step="actions">
+            <Actions />
+          </RequireFormSteps>
+        ),
+      },
+      {
+        path: "review-and-submit",
+        element: (
+          <RequireFormSteps step="review-and-submit">
+            <ReviewAndSubmit />
+          </RequireFormSteps>
+        ),
+      },
     ],
   },
-    {
-        path: "/bookingpage", element: <BookingPage />
-    }
+  {
+    path: "/bookingpage",
+    element: <BookingPage />,
+  },
 ]);

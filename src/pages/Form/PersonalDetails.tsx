@@ -43,7 +43,6 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/types";
 import StepActions from "./components/StepActions";
-import theme from "../../Constants/Theme";
 
 type PhoneType = "" | "Mobile" | "Home phone";
 
@@ -497,23 +496,26 @@ export default function PersonalDetails() {
 
                       {/* Small help box */}
                       <Box
-                        sx={{
-                          bgcolor: alpha(theme.palette.primary.main, 0.08),
-                          border: "1px solid",
-                          borderColor: theme.palette.primary.main,
-                          borderRadius: 1,
-                          px: 2,
-                          py: 1.5,
-                          maxWidth: 320,
+                        sx={(theme) => {
+                          const accent = theme.palette.primary.main;
+                          return {
+                            bgcolor: alpha(accent, 0.08),
+                            border: "1px solid",
+                            borderColor: accent,
+                            borderRadius: 1,
+                            px: 2,
+                            py: 1.5,
+                            maxWidth: 320,
+                          };
                         }}
                       >
-                        <Typography variant="body2" color={theme.palette.primary.main}>
+                        <Typography variant="body2" sx={{ color: "primary.main" }}>
                           <InfoOutlinedIcon
                             sx={{
                               fontSize: 16,
                               mr: 1,
                               verticalAlign: "text-bottom",
-                              color: theme.palette.primary.main,
+                              color: "primary.main",
                             }}
                           />
                           We will use this to update you on your request
