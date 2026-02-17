@@ -78,7 +78,7 @@ const ReferencePage = () => {
             </Typography>
             <Typography variant="h4" component="h2"  gutterBottom sx={{ fontWeight: 700 , mb: 4 }}>
                 Check your queue details OR check in for an appointment
-                <TextToSpeechButton text='Use one of the following methods to either check yout queue details or check in for an appointment'/>
+                <TextToSpeechButton text='Use one of the following methods to either check your queue details or check in for an appointment'/>
             </Typography>
             <Grid container spacing={3} sx={{ justifyContent: "center", height: '80%' }}>
                 <Grid sx={{ display: 'flex', height: '100%'}} size={5.5}>
