@@ -16,10 +16,7 @@ import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
 import StepActions from "./components/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
-
-import dayjs from "dayjs";
-
-type EnquiryContext = ReturnType<typeof getEnquiryContext>;
+import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -39,74 +36,11 @@ export default function ReviewAndSubmit() {
     clearSavedDraft();
   };
 
-  // Labels which should appear on the review page. Note that not all fields will necessarily be shown
-  const reviewLabels: Partial<Record<keyof FormData, string>> = {
-    firstName: "First name",
-    middleName: "Middle name",
-    lastName: "Last name",
-    preferredName: "Preferred name",
-    email: "Email",
-    phone: "Phone number",
-    dob: "Date of birth",
-    contactMethod: "Preferred method of contact",
 
-    addressLine1: "Address line 1",
-    addressLine2: "Address line 2",
-    addressLine3: "Address line 3",
-    townOrCity: "Town or city",
-    postcode: "Postcode",
+  function isNotNull<T>(x: T | null | undefined | false): x is T {
+    return x !== null && x !== undefined && x !== false;
+  }
 
-    pronouns: "Pronouns",
-    pronounsOther: "Pronouns",
-
-    enquiryId: "Choose an enquiry",
-    specificDetailId: "More detail",
-    otherEnquiryText: "Describe your enquiry",
-
-    hasChildren: "I have dependent children",
-    childrenCount: "How many children?",
-    householdSize: "How many people are in your household?",
-    hasDisabilityOrSensory: "I have a disability or sensory impairment",
-    disabilityType: "Select a type...",
-    ageRange: "Age range",
-    domesticAbuse: "I am a domestic abuse victim/survivor",
-    safeToContact: "Is it safe for us to contact you?",
-    safeContactNotes: "Safe contact notes",
-
-    urgent: "Do you need support sooner today?",
-    urgentReason: "What best describes why?",
-    urgentOtherReason: "Please tell us why",
-
-    needsAccessibility: "Accessibility support (for example: step-free access, hearing loop)",
-    needsLanguage: "Language support / interpretation",
-    needsSeating: "Seating (cannot stand for long)",
-    needsWrittenUpdates: "Written updates (for example: cannot hear announcements)",
-    needsLargeText: "Large text / help reading",
-    needsQuietSpace: "Quieter space",
-    needsBSL: "Interpreter (BSL)",
-    needsHelpWithForms: "Help completing forms",
-    otherSupport: "Other support",
-
-    additionalInfo: "Anything else you want to tell us",
-    proceed: "How would you like to proceed?",
-
-    appointmentDateIso: "Appointment date",
-    appointmentTime: "Appointment time",
-  };
-
-  const URGENCY_LABELS: Record<string, string> = {
-    yes: "Yes",
-    no: "No",
-    unsure: "Unsure",
-  };
-
-  const SAFE_TO_CONTACT_LABELS: Record<string, string> = {
-    yes: "Yes",
-    no: "No",
-    prefer_not_to_say: "Prefer not to say",
-  };
-
-  // Sections to group the review information into, with links to edit the relevant earlier step.
   const SECTIONS: Array<{
     title: string;
     keys: Array<keyof FormData>;
@@ -179,7 +113,6 @@ export default function ReviewAndSubmit() {
       editTo: "/form/actions",
     },
   ];
-
   // Two-column layout for review: label left, answer right
   function ReviewRow({ label, value }: { label: string; value: string }) {
     return (
@@ -216,48 +149,6 @@ export default function ReviewAndSubmit() {
     );
   }
 
-  function isNotNull<T>(x: T | null | undefined | false): x is T {
-    return x !== null && x !== undefined && x !== false;
-  }
-
-  // For some fields, we only want to show them on the review page if they're true
-  // because false is implicit in them not being shown at all
-  const SHOW_ONLY_WHEN_TRUE: ReadonlySet<keyof FormData> = new Set([
-    "needsAccessibility",
-    "needsLanguage",
-    "needsSeating",
-    "needsWrittenUpdates",
-    "needsLargeText",
-    "needsQuietSpace",
-    "needsBSL",
-    "needsHelpWithForms",
-  ]);
-
-  // Treat empty strings/nulls as "not answered" and omit them from the review.
-  function isEmptyForReview(key: keyof FormData, val: unknown) {
-    if (val === null || val === undefined) return true;
-    if (typeof val === "string" && val.trim() === "") return true;
-    if (typeof val === "boolean" && SHOW_ONLY_WHEN_TRUE.has(key) && val === false) return true;
-    return false;
-  }
-
-  // Only show dependent fields if the parent answer makes them relevant
-  const DEPENDS_ON: Partial<Record<keyof FormData, (fd: FormData) => boolean>> = {
-    enquiryId: (fd) => fd.topLevel !== "Other",
-    specificDetailId: (fd) => fd.topLevel !== "Other",
-    otherEnquiryText: (fd) => fd.topLevel === "Other",
-    childrenCount: (fd) => fd.hasChildren,
-    disabilityType: (fd) => fd.hasDisabilityOrSensory,
-    safeToContact: (fd) => fd.domesticAbuse,
-    safeContactNotes: (fd) => fd.domesticAbuse && fd.safeToContact === "no",
-    urgentReason: (fd) => fd.urgent === "yes",
-    urgentOtherReason: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
-    ageRange: (fd) => !fd.dob,
-    appointmentDateIso: (fd) => fd.proceed === "Schedule appointment",
-    appointmentTime: (fd) => fd.proceed === "Schedule appointment",
-    pronounsOther: (fd) => fd.pronouns === "Other",
-  };
-
   // Get the enquiry context which determines which questions were actually asked based on earlier answers
   const enquiryContext = useMemo(
     () => getEnquiryContext(formData),
@@ -270,94 +161,10 @@ export default function ReviewAndSubmit() {
     ],
   );
 
-  // Only show questions that were displayed for the chosen enquiry
-  const ASKED_IN_CONTEXT: Partial<Record<keyof FormData, (context: EnquiryContext) => boolean>> = {
-    hasChildren: (context) => context.showChildrenQs,
-    childrenCount: (context) => context.showChildrenQs,
-
-    hasDisabilityOrSensory: (context) => context.showDisabilityQs,
-    disabilityType: (context) => context.showDisabilityQs,
-
-    householdSize: (context) => context.showHouseholdSize,
-
-    domesticAbuse: (context) => context.showDomesticAbuseQs,
-    safeToContact: (context) => context.showDomesticAbuseQs,
-    safeContactNotes: (context) => context.showDomesticAbuseQs,
-  };
-
-  const STEP1_KEYS: ReadonlySet<keyof FormData> = new Set([
-    "firstName",
-    "middleName",
-    "lastName",
-    "preferredName",
-    "email",
-    "phone",
-    "dob",
-    "contactMethod",
-    "addressLine1",
-    "addressLine2",
-    "addressLine3",
-    "townOrCity",
-    "postcode",
-    "pronouns",
-    "pronounsOther",
-  ]);
-
-  function getReviewLabel(key: keyof FormData) {
-    return reviewLabels[key] || String(key);
-  }
-
-  // For each field, determine if it should be shown on the review page, and if so return its display value
-  function getDisplayValueForReview(key: keyof FormData): string | null {
-    // If this field was not asked based on the enquiry context, don't show it on the review page at all
-    const wasAsked = ASKED_IN_CONTEXT[key];
-    if (wasAsked && !wasAsked(enquiryContext)) return null;
-
-    // Only show the Step 1 fields if the user chose to provide details
-    if (STEP1_KEYS.has(key) && formData.provideDetails !== "yes") return null;
-
-    // If this field has a dependency and that dependency is not satisfied, don't show it on the review page
-    const dep = DEPENDS_ON[key];
-    if (dep && !dep(formData)) return null;
-
-    let val: unknown = formData[key];
-
-    // For some fields, we need to transform the stored value into a human-readable form for the review page
-    if (key === "enquiryId") {
-      val = enquiryContext.selectedEnquiry?.label || "";
-    }
-
-    // For the specificDetailId, we need to look up the label of the selected option within the
-    // currently selected enquiry's specifics to make it human-readable on the review page
-    if (key === "specificDetailId") {
-      val = enquiryContext.selectedEnquiry?.specifics?.find((d) => d.value === formData.specificDetailId)?.label || "";
-    }
-
-    if (key === "urgent" && typeof val === "string") {
-      val = URGENCY_LABELS[val] || val;
-    }
-
-    if (key === "safeToContact" && typeof val === "string") {
-      val = SAFE_TO_CONTACT_LABELS[val] || val;
-    }
-
-    if (key === "appointmentDateIso" && typeof val === "string") {
-      const d = dayjs(val);
-      val = d.isValid() ? d.format("D MMMM YYYY") : val;
-    }
-
-    if (key === "pronouns" && formData.pronouns === "Other" && (formData.pronounsOther ?? "").trim() !== "")
-      return null;
-
-    if (isEmptyForReview(key, val)) return null;
-
-    return typeof val === "boolean" ? (val ? "Yes" : "No") : String(val);
-  }
-
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {
     const label = getReviewLabel(key);
-    const value = getDisplayValueForReview(key);
+    const value = getReviewDisplayValue(key, formData, enquiryContext);
     if (value === null) return null;
     return <ReviewRow key={String(key)} label={label} value={value} />;
   }
@@ -395,7 +202,7 @@ export default function ReviewAndSubmit() {
         {SECTIONS.map((section) => {
           const pairs = section.keys
             .map((k) => {
-              const value = getDisplayValueForReview(k);
+              const value = getReviewDisplayValue(k, formData, enquiryContext);
               if (value === null) return null;
               return { label: getReviewLabel(k), value };
             })

@@ -43,6 +43,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/types";
 import StepActions from "./components/StepActions";
+import { FIELD_META } from "./model/fieldMeta";
 
 type PhoneType = "" | "Mobile" | "Home phone";
 
@@ -66,6 +67,8 @@ function isValidUkPostcode(postCode: string) {
 export default function PersonalDetails() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
+
+  const labelOptional = (key: keyof FormData) => FIELD_META[key].label + " (optional)";
 
   const COPY = {
     info: {
@@ -302,10 +305,10 @@ export default function PersonalDetails() {
                       }}
                     >
                       <FormControl fullWidth>
-                        <InputLabel id="pronouns-label">Pronouns (optional)</InputLabel>
+                        <InputLabel id="pronouns-label">{labelOptional("pronouns")}</InputLabel>
                         <Select
                           labelId="pronouns-label"
-                          label="Pronouns (optional)"
+                          label={labelOptional("pronouns")}
                           value={(formData.pronouns ?? "") as PronounsOption}
                           onChange={(e) => {
                             const v = String(e.target.value) as PronounsOption;
@@ -327,7 +330,7 @@ export default function PersonalDetails() {
                       </FormControl>
 
                       <TextField
-                        label="Preferred name (optional)"
+                        label={labelOptional("preferredName")}
                         value={formData.preferredName ?? ""}
                         onChange={(e) => setField("preferredName", e.target.value)}
                         fullWidth
@@ -358,7 +361,7 @@ export default function PersonalDetails() {
                       }}
                     >
                       <TextField
-                        label="First name (optional)"
+                        label={labelOptional("firstName")}
                         value={formData.firstName ?? ""}
                         onChange={(e) => setField("firstName", e.target.value)}
                         fullWidth
@@ -366,7 +369,7 @@ export default function PersonalDetails() {
                       />
 
                       <TextField
-                        label="Middle name (optional)"
+                        label={labelOptional("middleName")}
                         value={formData.middleName ?? ""}
                         onChange={(e) => setField("middleName", e.target.value)}
                         fullWidth
@@ -374,7 +377,7 @@ export default function PersonalDetails() {
                       />
 
                       <TextField
-                        label="Last name (optional)"
+                        label={labelOptional("lastName")}
                         value={formData.lastName ?? ""}
                         onChange={(e) => setField("lastName", e.target.value)}
                         fullWidth
@@ -384,7 +387,7 @@ export default function PersonalDetails() {
 
                     {/* DOB */}
                     <DatePicker
-                      label="Date of birth (optional)"
+                      label={labelOptional("dob")}
                       value={dobValue}
                       disableFuture
                       openTo="year"
@@ -413,7 +416,7 @@ export default function PersonalDetails() {
                   <Stack spacing={2}>
                     {/* Email */}
                     <TextField
-                      label="Email (optional)"
+                      label={labelOptional("email")}
                       type="email"
                       value={formData.email ?? ""}
                       onChange={(e) => setField("email", e.target.value)}
@@ -425,10 +428,10 @@ export default function PersonalDetails() {
                     {/* Phone controls: type + country/dial + digits-only number */}
                     <Box sx={{ display: "grid", gridTemplateColumns: "220px 1fr 1fr", gap: 2 }}>
                       <FormControl fullWidth>
-                        <InputLabel id="phone-type-label">Phone type (optional)</InputLabel>
+                        <InputLabel id="phone-type-label">{labelOptional("phoneType")}</InputLabel>
                         <Select
                           labelId="phone-type-label"
-                          label="Phone type (optional)"
+                          label={labelOptional("phoneType")}
                           value={(formData.phoneType ?? "") as PhoneType}
                           onChange={(e) => setField("phoneType", String(e.target.value) as FormData["phoneType"])}
                         >
@@ -455,7 +458,7 @@ export default function PersonalDetails() {
                       </FormControl>
 
                       <TextField
-                        label="Phone number (optional)"
+                        label={labelOptional("phone")}
                         value={nationalDigits}
                         onChange={(e) => handleNationalPhoneChange(e.target.value)}
                         fullWidth
@@ -474,16 +477,16 @@ export default function PersonalDetails() {
                     {/* Preferred contact method */}
                     <Box>
                       <Typography fontWeight={700} sx={{ mb: 1 }}>
-                        Preferred method of contact (optional)
+                        {labelOptional("contactMethod")}
                       </Typography>
                     </Box>
                     <Stack direction="row" spacing={2} alignItems="flex-end">
                       <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth>
-                          <InputLabel id="contact-label">Contact method (optional)</InputLabel>
+                          <InputLabel id="contact-label">{labelOptional("contactMethod")}</InputLabel>
                           <Select
                             labelId="contact-label"
-                            label="Contact method (optional)"
+                            label={labelOptional("contactMethod")}
                             value={formData.contactMethod ?? ""}
                             onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
                           >
@@ -529,7 +532,7 @@ export default function PersonalDetails() {
                 <WithTTS copy={COPY.address} titleVariant="subtitle1">
                   <Stack spacing={2}>
                     <TextField
-                      label="Address line 1 (optional)"
+                      label={labelOptional("addressLine1")}
                       value={formData.addressLine1 ?? ""}
                       onChange={(e) => setField("addressLine1", e.target.value)}
                       fullWidth
@@ -537,7 +540,7 @@ export default function PersonalDetails() {
                     />
 
                     <TextField
-                      label="Address line 2 (optional)"
+                      label={labelOptional("addressLine2")}
                       value={formData.addressLine2 ?? ""}
                       onChange={(e) => setField("addressLine2", e.target.value)}
                       fullWidth
@@ -545,7 +548,7 @@ export default function PersonalDetails() {
                     />
 
                     <TextField
-                      label="Address line 3 (optional)"
+                      label={labelOptional("addressLine3")}
                       value={formData.addressLine3 ?? ""}
                       onChange={(e) => setField("addressLine3", e.target.value)}
                       fullWidth
@@ -554,7 +557,7 @@ export default function PersonalDetails() {
 
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
                       <TextField
-                        label="Town or city (optional)"
+                        label={labelOptional("townOrCity")}
                         value={formData.townOrCity ?? ""}
                         onChange={(e) => setField("townOrCity", e.target.value)}
                         fullWidth
@@ -562,7 +565,7 @@ export default function PersonalDetails() {
                       />
 
                       <TextField
-                        label="Postcode (optional)"
+                        label={labelOptional("postcode")}
                         value={formData.postcode ?? ""}
                         onChange={(e) => setField("postcode", e.target.value)}
                         onBlur={() => {

@@ -60,10 +60,13 @@ import type {
 } from "./model/types";
 import StepActions from "./components/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
+import { FIELD_META } from "./model/fieldMeta";
 
 export default function EnquirySelection() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
+
+  const labelOptional = (key: keyof FormData) => FIELD_META[key].label + " (optional)";
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -230,7 +233,8 @@ export default function EnquirySelection() {
     return parts.join(" ");
   }
 
-  const urgencyTts = "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason. If you choose other, type a short explanation."; 
+  const urgencyTts =
+    "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason. If you choose other, type a short explanation.";
 
   const proceedTts =
     "How would you like to proceed? Select join the digital queue or book an appointment. We may suggest a quicker online or self-service option if available.";
@@ -324,7 +328,7 @@ export default function EnquirySelection() {
                 (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
                   <WithTTS
                     copy={{
-                      label: "Choose an enquiry",
+                      label: FIELD_META.enquiryId.label,
                       tts: "Choose an enquiry. This tells us what you need help with.",
                     }}
                     required
@@ -349,11 +353,11 @@ export default function EnquirySelection() {
                   </WithTTS>
                 )
             }
-            
+
             {isOther && formData.topLevel !== "" && (
               <WithTTS
                 copy={{
-                  label: "Describe your enquiry",
+                  label: FIELD_META.otherEnquiryText.label,
                   tts: "Describe your enquiry. Briefly tell us what you need help with.",
                 }}
                 required
@@ -364,7 +368,7 @@ export default function EnquirySelection() {
                   required
                   multiline
                   minRows={3}
-                  label="Describe your enquiry"
+                  label={FIELD_META.otherEnquiryText.label}
                   placeholder="Tell us what you need help with"
                   value={formData.otherEnquiryText}
                   onChange={(e) => setField("otherEnquiryText", e.target.value)}
@@ -378,7 +382,7 @@ export default function EnquirySelection() {
               hasChosenEnquiry && showSpecificDropdown && (
                 <WithTTS
                   copy={{
-                    label: "More detail",
+                    label: FIELD_META.specificDetailId.label,
                     tts: "More detail. Choose the option that best matches your situation.",
                   }}
                   required
@@ -425,7 +429,7 @@ export default function EnquirySelection() {
                                 childrenCount: checked ? "1" : "0",
                               }))
                             }
-                            label="I have dependent children"
+                            label={FIELD_META.hasChildren.label}
                           >
                             <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
                               (Children who usually live with you and are financially dependent on you.)
@@ -434,10 +438,10 @@ export default function EnquirySelection() {
                             {formData.hasChildren && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
-                                  <InputLabel id="children-count-label">How many children?</InputLabel>
+                                  <InputLabel id="children-count-label">{FIELD_META.childrenCount.label}</InputLabel>
                                   <Select
                                     labelId="children-count-label"
-                                    label="How many children?"
+                                    label={FIELD_META.childrenCount.label}
                                     value={formData.childrenCount}
                                     onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
                                   >
@@ -472,15 +476,15 @@ export default function EnquirySelection() {
                                     },
                               )
                             }
-                            label="I have a disability or sensory impairment"
+                            label={FIELD_META.hasDisabilityOrSensory.label}
                           >
                             {formData.hasDisabilityOrSensory && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
-                                  <InputLabel id="disability-type-label">Select a type...</InputLabel>
+                                  <InputLabel id="disability-type-label">{FIELD_META.disabilityType.label}</InputLabel>
                                   <Select
                                     labelId="disability-type-label"
-                                    label="Select a type..."
+                                    label={FIELD_META.disabilityType.label}
                                     value={formData.disabilityType}
                                     onChange={(e) =>
                                       setField("disabilityType", String(e.target.value) as DisabilityType)
@@ -505,10 +509,10 @@ export default function EnquirySelection() {
                       {showHouseholdSize && (
                         <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                           <FormControl fullWidth>
-                            <InputLabel id="household-label">How many people are in your household?</InputLabel>
+                            <InputLabel id="household-label">{FIELD_META.householdSize.label}</InputLabel>
                             <Select
                               labelId="household-label"
-                              label="How many people are in your household?"
+                              label={FIELD_META.householdSize.label}
                               value={formData.householdSize}
                               onChange={(e) => setField("householdSize", String(e.target.value) as HouseholdSize)}
                             >
@@ -571,16 +575,16 @@ export default function EnquirySelection() {
                                     },
                               )
                             }
-                            label="I am a domestic abuse victim/survivor"
+                            label={FIELD_META.domesticAbuse.label}
                           >
                             {formData.domesticAbuse && (
                               <Box sx={{ mt: 1.5 }}>
                                 <Stack spacing={2}>
                                   <FormControl fullWidth>
-                                    <InputLabel id="safe-contact-label">Is it safe for us to contact you?</InputLabel>
+                                    <InputLabel id="safe-contact-label">{FIELD_META.safeToContact.label}</InputLabel>
                                     <Select
                                       labelId="safe-contact-label"
-                                      label="Is it safe for us to contact you?"
+                                      label={FIELD_META.safeToContact.label}
                                       value={formData.safeToContact}
                                       onChange={(e) =>
                                         setField("safeToContact", String(e.target.value) as SafeToContact)
@@ -595,7 +599,7 @@ export default function EnquirySelection() {
                                   {formData.safeToContact === "no" && (
                                     <TextField
                                       fullWidth
-                                      label="Safe contact notes (optional)"
+                                      label={labelOptional("safeContactNotes")}
                                       placeholder="Safe time or method, or do not contact"
                                       value={formData.safeContactNotes}
                                       onChange={(e) => setField("safeContactNotes", e.target.value)}
@@ -613,10 +617,7 @@ export default function EnquirySelection() {
             }
 
             {/* Urgency */}
-            <WithTTS
-              copy={{ label: "Do you need support sooner today?", tts: urgencyTts }}
-              titleVariant="subtitle1"
-            >
+            <WithTTS copy={{ label: FIELD_META.urgent.label, tts: urgencyTts }} titleVariant="subtitle1">
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                 For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something
                 time-limited today.
@@ -674,7 +675,7 @@ export default function EnquirySelection() {
               {needsUrgentReason && (
                 <Box sx={{ mt: 2, borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                   <Typography fontWeight={700} sx={{ mb: 1 }}>
-                    What best describes why?{" "}
+                    {FIELD_META.urgentReason.label}{" "}
                     <Typography component="span" color="error">
                       *
                     </Typography>
@@ -713,7 +714,7 @@ export default function EnquirySelection() {
                         required
                         multiline
                         minRows={3}
-                        label="Please tell us why"
+                        label={FIELD_META.urgentOtherReason.label}
                         placeholder="Briefly describe why you need support sooner today"
                         value={formData.urgentOtherReason}
                         onChange={(e) => setField("urgentOtherReason", e.target.value)}
@@ -725,10 +726,7 @@ export default function EnquirySelection() {
             </WithTTS>
 
             {/* Additional info */}
-            <WithTTS
-              copy={{ label: "Anything else you want to tell us (optional)", tts: additionalInfoTts }}
-              titleVariant="subtitle1"
-            >
+            <WithTTS copy={{ label: labelOptional("additionalInfo"), tts: additionalInfoTts }} titleVariant="subtitle1">
               <TextField
                 fullWidth
                 multiline
@@ -741,7 +739,7 @@ export default function EnquirySelection() {
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
                 <MicIcon fontSize="small" />
                 <Button type="button" size="small" onClick={handleVoiceInput} sx={{ textTransform: "none" }}>
-                  Voice input (mock)
+                  Voice input
                 </Button>
               </Stack>
             </WithTTS>
@@ -750,11 +748,7 @@ export default function EnquirySelection() {
             <Box sx={{ pt: 2 }}>
               <Divider sx={{ mb: 3 }} />
 
-              <WithTTS
-                copy={{ label: "How would you like to proceed?", tts: proceedTts }}
-                required
-                titleVariant="subtitle1"
-              >
+              <WithTTS copy={{ label: FIELD_META.proceed.label, tts: proceedTts }} required titleVariant="subtitle1">
                 <FormControl fullWidth required>
                   <InputLabel id="proceed-label">Select an option...</InputLabel>
                   <Select
@@ -785,12 +779,12 @@ export default function EnquirySelection() {
                 <LeftCheckRow
                   checked={formData.needsAccessibility}
                   onChange={(checked) => setField("needsAccessibility", checked)}
-                  label="Accessibility support (for example: step-free access, hearing loop)"
+                  label={FIELD_META.needsAccessibility.label}
                 />
                 <LeftCheckRow
                   checked={formData.needsLanguage}
                   onChange={(checked) => setField("needsLanguage", checked)}
-                  label="Language support / interpretation"
+                  label={FIELD_META.needsLanguage.label}
                 />
                 <Button
                   type="button"
@@ -806,37 +800,37 @@ export default function EnquirySelection() {
                     <LeftCheckRow
                       checked={formData.needsSeating}
                       onChange={(c) => setField("needsSeating", c)}
-                      label="Seating (cannot stand for long)"
+                      label={FIELD_META.needsSeating.label}
                     />
                     <LeftCheckRow
                       checked={formData.needsWrittenUpdates}
                       onChange={(c) => setField("needsWrittenUpdates", c)}
-                      label="Written updates (for example: cannot hear announcements)"
+                      label={FIELD_META.needsWrittenUpdates.label}
                     />
                     <LeftCheckRow
                       checked={formData.needsLargeText}
                       onChange={(c) => setField("needsLargeText", c)}
-                      label="Large text / help reading"
+                      label={FIELD_META.needsLargeText.label}
                     />
                     <LeftCheckRow
                       checked={formData.needsQuietSpace}
                       onChange={(c) => setField("needsQuietSpace", c)}
-                      label="Quieter space"
+                      label={FIELD_META.needsQuietSpace.label}
                     />
                     <LeftCheckRow
                       checked={formData.needsBSL}
                       onChange={(c) => setField("needsBSL", c)}
-                      label="Interpreter (BSL)"
+                      label={FIELD_META.needsBSL.label}
                     />
                     <LeftCheckRow
                       checked={formData.needsHelpWithForms}
                       onChange={(c) => setField("needsHelpWithForms", c)}
-                      label="Help completing forms"
+                      label={FIELD_META.needsHelpWithForms.label}
                     />
 
                     <TextField
                       fullWidth
-                      label="Other support (optional)"
+                      label={labelOptional("otherSupport")}
                       placeholder="Any other support that would help today"
                       value={formData.otherSupport}
                       onChange={(e) => setField("otherSupport", e.target.value)}
