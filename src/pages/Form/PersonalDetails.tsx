@@ -43,6 +43,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData } from "./model/types";
 import StepActions from "./components/StepActions";
+import theme from "../../Constants/Theme";
 
 type PhoneType = "" | "Mobile" | "Home phone";
 
@@ -330,7 +331,6 @@ export default function PersonalDetails() {
                   </Stack>
                 </WithTTS>
 
-
                 <Divider />
 
                 {/* Contact details */}
@@ -423,17 +423,24 @@ export default function PersonalDetails() {
                       {/* Small help box */}
                       <Box
                         sx={{
-                          bgcolor: "grey.100",
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
                           border: "1px solid",
-                          borderColor: "grey.300",
+                          borderColor: theme.palette.primary.main,
                           borderRadius: 1,
                           px: 2,
                           py: 1.5,
                           maxWidth: 320,
                         }}
                       >
-                        <Typography variant="body2" color="text.secondary">
-                          <InfoOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: "text-bottom" }} />
+                        <Typography variant="body2" color={theme.palette.primary.main}>
+                          <InfoOutlinedIcon
+                            sx={{
+                              fontSize: 16,
+                              mr: 1,
+                              verticalAlign: "text-bottom",
+                              color: theme.palette.primary.main,
+                            }}
+                          />
                           We will use this to update you on your request
                         </Typography>
                       </Box>
