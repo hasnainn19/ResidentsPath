@@ -1,12 +1,10 @@
 import { Html5Qrcode } from "html5-qrcode";
 import { useRef, useState, useEffect } from "react";
-import { Tooltip, Container, Grid, Box, TextField, Button, styled, Card, CardContent, CardActions, Typography} from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Tooltip, Container, Grid, Box, TextField, Button, Card, CardContent, CardActions, Typography} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
-import ButtonBase from '@mui/material/ButtonBase';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
