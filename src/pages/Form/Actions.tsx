@@ -9,7 +9,7 @@
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert, Box, Button, Divider, List, ListItem, Paper, Stack, Typography } from "@mui/material";
+import { Alert, alpha, Box, Button, Divider, List, ListItem, Paper, Stack, Typography } from "@mui/material";
 
 import StepShell from "./components/StepShell";
 import StepActions from "./components/StepActions";
@@ -89,7 +89,22 @@ export default function Actions() {
                 ))}
               </List>
             ) : (
-              <Alert severity="info" variant="outlined">
+              <Alert
+                severity="info"
+                variant="outlined"
+                sx={(theme) => {
+                  const accent = theme.palette.primary.main;
+                  return {
+                    borderRadius: 2,
+                    py: 1.5,
+                    borderColor: accent,
+                    bgcolor: alpha(accent, 0.08),
+                    "& .MuiAlert-message": { width: "100%" },
+                    "& svg": { color: accent },
+                    color: theme.palette.primary.main,
+                  };
+                }}
+              >
                 No online options are listed for this enquiry yet.
               </Alert>
             )}
