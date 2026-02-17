@@ -42,15 +42,23 @@ export function loadDraft(storage: Storage): FormDraftV1 | null {
 }
 
 export function saveDraft(storage: Storage, data: FormData, lastPath: string) {
-  const draft: FormDraftV1 = {
-    version: 1,
-    updatedAt: Date.now(),
-    lastPath,
-    data,
-  };
-  storage.setItem(KEY, JSON.stringify(draft));
+  try {
+    const draft: FormDraftV1 = {
+      version: 1,
+      updatedAt: Date.now(),
+      lastPath,
+      data,
+    };
+    storage.setItem(KEY, JSON.stringify(draft));
+  } catch {
+    // Ignore storage errors to avoid crashing when storage is unavailable or restricted
+  }
 }
 
 export function clearDraft(storage: Storage) {
-  storage.removeItem(KEY);
+  try {
+    storage.removeItem(KEY);
+  } catch {
+    // Ignore storage errors to avoid crashing when storage is unavailable or restricted
+  }
 }
