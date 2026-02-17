@@ -419,7 +419,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("email", e.target.value)}
                       fullWidth
                       autoComplete="email"
-                      inputMode="email"
+                      slotProps={{ input: { inputMode: "email" } }}
                     />
 
                     {/* Phone controls: type + country/dial + digits-only number */}
@@ -460,13 +460,13 @@ export default function PersonalDetails() {
                         onChange={(e) => handleNationalPhoneChange(e.target.value)}
                         fullWidth
                         autoComplete="tel-national"
-                        inputMode="numeric"
                         placeholder={phoneCountry === "GB" ? "e.g. 7912345678" : "Digits only"}
                         slotProps={{
                           htmlInput: {
                             maxLength: maxNationalLen,
                             pattern: "[0-9]*",
                           },
+                          input: { inputMode: "numeric" } 
                         }}
                       />
                     </Box>
@@ -480,14 +480,14 @@ export default function PersonalDetails() {
                     <Stack direction="row" spacing={2} alignItems="flex-end">
                       <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth>
-                          <InputLabel id="contact-label">Select a contact method...</InputLabel>
+                          <InputLabel id="contact-label">Contact method (optional)</InputLabel>
                           <Select
                             labelId="contact-label"
-                            label="Select a contact method..."
+                            label="Contact method (optional)"
                             value={formData.contactMethod ?? ""}
                             onChange={(e) => setField("contactMethod", String(e.target.value) as ContactMethod)}
                           >
-                            <MenuItem value="">Select a contact method...</MenuItem>
+                            <MenuItem value="">Contact method (optional)</MenuItem>
                             <MenuItem value="Text message">Text message</MenuItem>
                             <MenuItem value="Email">Email</MenuItem>
                           </Select>

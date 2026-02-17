@@ -409,7 +409,7 @@ export default function EnquirySelection() {
               hasEnoughToProceed &&
                 (showChildrenQs || showDisabilityQs || showHouseholdSize || showDomesticAbuseQs || showAgeRange) && (
                   <WithTTS
-                    copy={{ label: "Additional questions", tts: buildAdditionalQuestionsTts() }}
+                    copy={{ label: "Additional questions (optional)", tts: buildAdditionalQuestionsTts() }}
                     titleVariant="subtitle2"
                   >
                     <Stack spacing={3}>
@@ -427,6 +427,10 @@ export default function EnquirySelection() {
                             }
                             label="I have dependent children"
                           >
+                            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                              (Children who usually live with you and are financially dependent on you.)
+                            </Typography>
+
                             {formData.hasChildren && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
@@ -473,7 +477,7 @@ export default function EnquirySelection() {
                             {formData.hasDisabilityOrSensory && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
-                                  <InputLabel id="disability-type-label">Select a type</InputLabel>
+                                  <InputLabel id="disability-type-label">Select a type...</InputLabel>
                                   <Select
                                     labelId="disability-type-label"
                                     label="Select a type..."
@@ -529,10 +533,10 @@ export default function EnquirySelection() {
                         showAgeRange && (
                           <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                             <FormControl fullWidth>
-                              <InputLabel id="age-range-label">Select an age range (optional)</InputLabel>
+                              <InputLabel id="age-range-label">Select an age range...</InputLabel>
                               <Select
                                 labelId="age-range-label"
-                                label="Select an age range... (optional)"
+                                label="Select an age range..."
                                 value={formData.ageRange}
                                 onChange={(e) => setField("ageRange", String(e.target.value) as AgeRange)}
                               >
