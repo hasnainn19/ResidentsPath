@@ -32,7 +32,6 @@ export default function ReviewAndSubmit() {
       urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
     };
     console.log(payload);
-    alert("Submitted (mock)");
     clearSavedDraft();
   };
 

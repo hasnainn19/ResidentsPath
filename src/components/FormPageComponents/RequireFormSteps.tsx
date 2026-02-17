@@ -49,7 +49,6 @@ export default function RequireFormSteps(props: { step: StepKey; children: React
   const maxAllowed = useMemo(() => getMaxAllowedStep(formData), [formData]);
   const wantIndex = STEP_ORDER.indexOf(props.step);
   const maxIndex = STEP_ORDER.indexOf(maxAllowed);
-
   if (wantIndex > maxIndex) {
     return <Navigate to={`/form/${maxAllowed}`} replace />;
   }
