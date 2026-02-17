@@ -13,7 +13,6 @@ import TextToSpeechButton from '../components/TextToSpeechButton';
 const BookingPage = () => {
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
     const [selectedTime, setSelectedTime] = useState('');
-    const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
 
     // Generate 30-minute slots (9am–5pm)
     const generateTimes = () => {
@@ -26,51 +25,6 @@ const BookingPage = () => {
     };
     const allTimes = generateTimes();
 
-    // Filter out unavailable times and, for today, times that are in the past
-    const availableTimes = allTimes.filter((time) => {
-        // Always remove times explicitly marked as unavailable
-        if (unavailableTimes.includes(time)) {
-            return false;
-        }
-
-        // If no date is selected, keep the time (current behavior)
-        if (!selectedDate) {
-            return true;
-        }
-
-        const now = dayjs();
-
-        // If the selected date is today, filter out times earlier than or equal to "now"
-        if (selectedDate.isSame(now, 'day')) {
-            const [hourStr, minuteStr] = time.split(':');
-            const hour = parseInt(hourStr, 10);
-            const minute = parseInt(minuteStr, 10);
-
-            const slotDateTime = selectedDate
-                .hour(hour)
-                .minute(minute)
-                .second(0)
-                .millisecond(0);
-
-            return slotDateTime.isAfter(now);
-        }
-
-        // For non-today dates (e.g., future dates), keep all available times
-        return true;
-    });
-    // If the selected time becomes unavailable (e.g., user changes date), clear the selection
-    useEffect(() => {
-        if (!availableTimes.includes(selectedTime)) {
-            setSelectedTime('');
-        }
-    }, [availableTimes]);
-
-    // When selected date changes, filter unavailable times
-    useEffect(() => {
-        if (unavailableTimes) {
-            allTimes.filter(time => !unavailableTimes.includes(time))
-        }
-    }, [selectedDate, unavailableTimes]);
 
     function handleConfirm() {
         // navigate to next page
@@ -128,15 +82,15 @@ const BookingPage = () => {
                         </Box>
                         
                         <Box className="bookingpage-time-list" sx={{ border: 2, borderColor: 'primary.main', borderRadius: 1,  maxHeight: 300, overflowY: 'scroll' }}>
-                                <List disablePadding>
-                                    {availableTimes.map(time => (
-                                    <ListItem key={time} disablePadding>
-                                        <ListItemButton selected={selectedTime === time} className="bookingpage-time-list-item-btn" onClick={() => setSelectedTime(time)} sx={{ borderBottom: '1px solid #ddd' }}>
-                                            <ListItemText primary={time} />
-                                        </ListItemButton>
-                                    </ListItem>
-                                    ))}
-                                </List>
+                            <List disablePadding>
+                                {allTimes.map(time => (
+                                <ListItem key={time} disablePadding>
+                                    <ListItemButton selected={selectedTime === time} className="bookingpage-time-list-item-btn" onClick={() => setSelectedTime(time)} sx={{ borderBottom: '1px solid #ddd' }}>
+                                        <ListItemText primary={time} /> 
+                                    </ListItemButton>
+                                </ListItem>
+                                ))}
+                            </List>
                         </Box>
                         <Chip icon={<HistoryToggleOffOutlinedIcon />} color= "primary" label={selectedTime || '--:--'} variant="outlined" sx={{ fontWeight: 700, bgcolor: 'primary.light', color: 'primary.dark', height: 40 }} />
                         <TextToSpeechButton text={ selectedTime? `Your selected appointment time is ${selectedTime}.`: "No appointment time selected." } />
