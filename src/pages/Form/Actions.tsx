@@ -33,9 +33,9 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-import StepShell from "./components/StepShell";
-import StepActions from "./components/StepActions";
-import WithTTS from "./components/WithTTS";
+import StepShell from "../../components/FormPageComponents/StepShell";
+import StepActions from "../../components/FormPageComponents/StepActions";
+import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import { getEnquiryContext } from "./model/enquiriesContext";

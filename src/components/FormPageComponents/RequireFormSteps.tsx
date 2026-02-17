@@ -9,10 +9,10 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Navigate } from "react-router-dom";
 
-import { useFormWizard } from "../context/FormWizardProvider";
-import { getEnquiryContext } from "../model/enquiriesContext";
-import { computeCanGoNext } from "../model/enquirySelectionLogic";
-import type { FormData } from "../model/types";
+import { useFormWizard } from "../../pages/Form/context/FormWizardProvider";
+import { getEnquiryContext } from "../../pages/Form/model/enquiriesContext";
+import { computeCanGoNext } from "../../pages/Form/model/enquirySelectionLogic";
+import type { FormData } from "../../pages/Form/model/types";
 
 type StepKey = "personal-details" | "enquiry-selection" | "actions" | "review-and-submit";
 

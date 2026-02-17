@@ -9,8 +9,8 @@ import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
 import Actions from "./pages/Form/Actions";
-import RequireFormSteps from "./pages/Form/components/RequireFormSteps";
-import ResumeFromSave from "./pages/Form/components/ResumeFromSave";
+import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
+import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 
 export const router = createBrowserRouter([
   {

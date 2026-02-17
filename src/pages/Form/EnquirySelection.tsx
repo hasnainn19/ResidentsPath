@@ -37,9 +37,9 @@ import {
 
 import MicIcon from "@mui/icons-material/Mic";
 
-import StepShell from "./components/StepShell";
-import WithTTS from "./components/WithTTS";
-import LeftCheckRow from "./components/LeftCheckRow";
+import StepShell from "../../components/FormPageComponents/StepShell";
+import WithTTS from "../../components/FormPageComponents/WithTTS";
+import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import { useFormWizard } from "./context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
@@ -58,7 +58,7 @@ import type {
   Urgency,
   AgeRange,
 } from "./model/types";
-import StepActions from "./components/StepActions";
+import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquiryContext } from "./model/enquiriesContext";
 import { FIELD_META } from "./model/fieldMeta";
 

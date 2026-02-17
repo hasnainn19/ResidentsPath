@@ -25,9 +25,9 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import type { LanguageOption } from "../model/types";
+import type { LanguageOption } from "../../pages/Form/model/types";
 import { useEffect } from "react";
-import TextToSpeechButton from "../../../components/TextToSpeechButton";
+import TextToSpeechButton from "../TextToSpeechButton";
 
 type Props = {
   step: number;

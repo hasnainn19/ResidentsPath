@@ -37,13 +37,13 @@ import dayjs, { type Dayjs } from "dayjs";
 
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 
-import StepShell from "./components/StepShell";
-import WithTTS from "./components/WithTTS";
+import StepShell from "../../components/FormPageComponents/StepShell";
+import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/types";
-import StepActions from "./components/StepActions";
+import StepActions from "../../components/FormPageComponents/StepActions";
 import { FIELD_META } from "./model/fieldMeta";
 
 type PhoneType = "" | "Mobile" | "Home phone";

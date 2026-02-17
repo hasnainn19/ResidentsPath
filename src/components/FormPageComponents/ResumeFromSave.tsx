@@ -3,7 +3,7 @@
  */
 
 import { Navigate } from "react-router-dom";
-import { loadDraft } from "../model/draftStorage";
+import { loadDraft } from "../../pages/Form/model/draftStorage";
 
 export default function ResumeFromSave() {
   const draft = loadDraft(localStorage);

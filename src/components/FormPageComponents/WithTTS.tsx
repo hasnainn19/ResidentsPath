@@ -12,7 +12,7 @@
 
 import type { ReactNode } from "react";
 import { Box, Stack, Typography, type SxProps, type Theme } from "@mui/material";
-import TextToSpeechButton from "../../../components/TextToSpeechButton";
+import TextToSpeechButton from "../TextToSpeechButton";
 
 export type TtsCopy = {
   label: string;
