@@ -68,7 +68,7 @@ export function resetFormInfo(prev: FormData): FormData {
     safeToContact: "prefer_not_to_say",
     safeContactNotes: "",
 
-    appointmentDateIso: "",
+    appointmentDateIso: null,
     appointmentTime: "",
   };
 }
