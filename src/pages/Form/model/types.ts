@@ -12,7 +12,7 @@
 export type Urgency = "yes" | "no" | "unsure";
 export type SafeToContact = "yes" | "no" | "prefer_not_to_say";
 
-export type Proceed = "" | "Join digital queue" | "Schedule appointment" | "Request callback";
+export type Proceed = "" | "Join digital queue" | "Schedule appointment";
 export type ContactMethod = "" | "Text message" | "Phone call" | "Email" | "Letter";
 
 export type Count = "0" | "1" | "2" | "3" | "4" | "5" | "6+";

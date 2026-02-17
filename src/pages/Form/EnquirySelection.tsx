@@ -23,10 +23,12 @@ import {
   Collapse,
   Divider,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Paper,
   Radio,
+  RadioGroup,
   Select,
   Stack,
   TextField,
@@ -618,39 +620,54 @@ export default function EnquirySelection() {
                 time-limited today.
               </Typography>
 
-              <Stack spacing={1}>
-                {(
-                  [
-                    ["yes", "Yes"],
-                    ["no", "No"],
-                    ["unsure", "Not sure"],
-                  ] as const
-                ).map(([value, label]) => {
-                  const checked = formData.urgent === value;
-                  return (
-                    <Paper
-                      key={value}
-                      variant="outlined"
-                      sx={{ p: 1.25, borderRadius: 1 }}
-                      onClick={() => setUrgency(value)}
-                      role="radio"
-                      aria-checked={checked}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setUrgency(value);
-                        }
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Radio checked={checked} onChange={() => setUrgency(value)} sx={{ p: 0.5 }} />
-                        <Typography sx={{ ml: 1 }}>{label}</Typography>
-                      </Box>
-                    </Paper>
-                  );
-                })}
-              </Stack>
+              <FormControl component="fieldset" sx={{ width: "100%" }}>
+                <RadioGroup
+                  value={formData.urgent}
+                  onChange={(e) => setUrgency(e.target.value as Urgency)}
+                  sx={{ gap: 1 }}
+                >
+                  {(
+                    [
+                      ["yes", "Yes"],
+                      ["no", "No"],
+                      ["unsure", "Not sure"],
+                    ] as const
+                  ).map(([value, label]) => {
+                    const checked = formData.urgent === value;
+
+                    return (
+                      <FormControlLabel
+                        key={value}
+                        value={value}
+                        control={<Radio sx={{ p: 0.75 }} />}
+                        label={label}
+                        sx={{
+                          m: 0,
+                          width: "100%",
+                          px: 2,
+                          py: 1.25,
+                          borderRadius: 2,
+                          border: "1px solid",
+                          borderColor: checked ? "primary.main" : "divider",
+                          bgcolor: checked ? "action.selected" : "background.paper",
+                          cursor: "pointer",
+                          transition: "background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease",
+                          "&:hover": {
+                            bgcolor: checked ? "action.selected" : "action.hover",
+                          },
+                          "&:focus-within": {
+                            boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}`,
+                          },
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: 16,
+                            lineHeight: 1.3,
+                          },
+                        }}
+                      />
+                    );
+                  })}
+                </RadioGroup>
+              </FormControl>
 
               {needsUrgentReason && (
                 <Box sx={{ mt: 2, borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>

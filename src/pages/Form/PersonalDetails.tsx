@@ -8,7 +8,7 @@
  * contact method) and then moves on to enquiry selection for the actual request/triage.
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Paper,
@@ -150,7 +150,7 @@ export default function PersonalDetails() {
     return options;
   }
 
-  const dialOptions = buildDialOptions();
+  const dialOptions = useMemo(() => buildDialOptions(), []);
 
   const phoneCountry = (formData.phoneCountry || "GB") as CountryCode;
   const dialCode = "+" + getCountryCallingCode(phoneCountry);
