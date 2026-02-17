@@ -4,7 +4,6 @@ import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
 
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
-import theme from '../Constants/Theme';
 
 
 export default function UserDashboard() {
@@ -24,13 +23,13 @@ export default function UserDashboard() {
     const Item = styled(Paper)(({ theme }) => ({
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: 'background.default',
         padding: theme.spacing(2),
         height: '100%',
         justifyContent: 'center',
         textAlign: 'center',
         border: "1px solid #bbb9bb",
-        color: theme.palette.text.secondary,
+        color: 'text.secondary',
         boxSizing: "border-box",  
     }));
 
@@ -46,7 +45,7 @@ export default function UserDashboard() {
                         <Grid container sx={{alignItems: 'stretch', width: '100%' }} spacing={2}>
                             <Stack spacing={4} sx={{ width: '100%' }}>
                                 <Grid size={12}>
-                                    <Item sx={{backgroundColor:theme.palette.success.main}}>
+                                    <Item sx={{backgroundColor:'success.main'}}>
                                         <Typography variant='h4'>You are in the queue!
                                             <TextToSpeechButton text='You are currently in the queue!'/>
                                         </Typography>
@@ -56,7 +55,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>You are the </Typography>
-                                            <Typography variant='h5' sx={{color:theme.palette.primary.main}}>Nth</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>Nth</Typography>
                                             <Typography variant='body1'>person in the queue</Typography>
                                             <TextToSpeechButton text='You are the Nth person in the queue'/>
                                         </Item>
@@ -64,7 +63,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>Estimated waiting time is:</Typography>
-                                            <Typography variant='h5' sx={{color:theme.palette.primary.main}}>15-30 minutes</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>15-30 minutes</Typography>
                                             <TextToSpeechButton text='Estimated wait time is 15-30 minutes'/>
                                         </Item>
                                     </Grid>
@@ -77,14 +76,14 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:theme.palette.primary.main}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:theme.palette.primary.main}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
                                 </Grid>
                                 <Grid size={12}>
-                                    <Item sx={{ textAlign: 'left', backgroundColor:theme.palette.warning.main}}>
+                                    <Item sx={{ textAlign: 'left', backgroundColor:'warning.main'}}>
                                         <Stack direction='row' alignItems='left'>
                                             <Dangerous sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>Please note
@@ -92,7 +91,7 @@ export default function UserDashboard() {
                                             </Typography>
                                         </Stack>
                                         <Typography variant='body1'>Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.</Typography>
-                                        <Typography variant='subtitle2' color={theme.palette.error.main} fontWeight={500}>We appreciate your patience and understanding.</Typography>
+                                        <Typography variant='subtitle2' color={'error.main'} fontWeight={500}>We appreciate your patience and understanding.</Typography>
                                     </Item>
                                 </Grid>
                             </Stack>
