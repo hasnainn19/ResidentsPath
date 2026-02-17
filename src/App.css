@@ -31,4 +31,10 @@ scrollbar-color: #6d3874 #f0f0f0;
   background-color: #C2B8DB;
 }
 
+/* Reference Page */
+
+.referencepage-check-status-btn:hover {
+    background-color: #502555
+}
+
 

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
+import ReferencePage from "./pages/ReferencePage";
 import BookingPage from "./pages/BookingPage";
-
 import FormLayout from "./pages/Form/FormLayout";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
           </RequireFormSteps>
         ),
       },
-      {
+    {
         path: "actions",
         element: (
           <RequireFormSteps step="actions">
@@ -48,5 +48,8 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <BookingPage />,
+  },
+  {
+    path: "/referencepage", element: <ReferencePage />
   },
 ]);
