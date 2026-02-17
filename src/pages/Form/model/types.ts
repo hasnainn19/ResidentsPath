@@ -147,3 +147,19 @@ export type FormData = {
   appointmentDateIso: string | null;
   appointmentTime: string;
 };
+
+
+export type BusyLevel = "quiet" | "average" | "busy" | "veryBusy";
+
+export type QueueStatus = {
+  typicalWaitMin: number;
+  typicalWaitMax: number;
+  updatedAtIso: string;
+};
+
+export type OptionTileProps = {
+  title: string;
+  description: string;
+  selected: boolean;
+  onClick: () => void;
+};
