@@ -9,7 +9,8 @@
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert, alpha, Box, Button, Divider, List, ListItem, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, List, ListItem, Paper, Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 import StepShell from "./components/StepShell";
 import StepActions from "./components/StepActions";

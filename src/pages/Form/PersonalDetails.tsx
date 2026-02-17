@@ -410,7 +410,7 @@ export default function PersonalDetails() {
                 <Divider />
 
                 {/* Contact details */}
-                <WithTTS copy={COPY.contactDetails} titleVariant="subtitle2">
+                <WithTTS copy={COPY.contactDetails} titleVariant="subtitle1">
                   <Stack spacing={2}>
                     {/* Email */}
                     <TextField
@@ -471,14 +471,13 @@ export default function PersonalDetails() {
                         }}
                       />
                     </Box>
-
+                    <Divider />
                     {/* Preferred contact method */}
                     <Box>
                       <Typography fontWeight={700} sx={{ mb: 1 }}>
                         Preferred method of contact (optional)
                       </Typography>
                     </Box>
-
                     <Stack direction="row" spacing={2} alignItems="flex-end">
                       <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth>
@@ -523,78 +522,72 @@ export default function PersonalDetails() {
                     </Stack>
                   </Stack>
                 </WithTTS>
+                <Divider />
+                {/* Address */}
+                <WithTTS copy={COPY.address} titleVariant="subtitle1">
+                  <Stack spacing={2}>
+                    <TextField
+                      label="Address line 1 (optional)"
+                      value={formData.addressLine1 ?? ""}
+                      onChange={(e) => setField("addressLine1", e.target.value)}
+                      fullWidth
+                      autoComplete="address-line1"
+                    />
+
+                    <TextField
+                      label="Address line 2 (optional)"
+                      value={formData.addressLine2 ?? ""}
+                      onChange={(e) => setField("addressLine2", e.target.value)}
+                      fullWidth
+                      autoComplete="address-line2"
+                    />
+
+                    <TextField
+                      label="Address line 3 (optional)"
+                      value={formData.addressLine3 ?? ""}
+                      onChange={(e) => setField("addressLine3", e.target.value)}
+                      fullWidth
+                      autoComplete="address-line3"
+                    />
+
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
+                      <TextField
+                        label="Town or city (optional)"
+                        value={formData.townOrCity ?? ""}
+                        onChange={(e) => setField("townOrCity", e.target.value)}
+                        fullWidth
+                        autoComplete="address-level2"
+                      />
+
+                      <TextField
+                        label="Postcode (optional)"
+                        value={formData.postcode ?? ""}
+                        onChange={(e) => setField("postcode", e.target.value)}
+                        onBlur={() => {
+                          setPostcodeTouched(true);
+                          setField("postcode", normaliseUkPostcode(formData.postcode ?? ""));
+                        }}
+                        error={postcodeTouched && postcodeInvalid}
+                        helperText={
+                          postcodeTouched && postcodeInvalid
+                            ? "Enter a valid UK postcode (e.g. TW3 1JL) or leave blank."
+                            : " "
+                        }
+                        fullWidth
+                        autoComplete="postal-code"
+                        placeholder="e.g. TW3 1JL"
+                        slotProps={{
+                          htmlInput: {
+                            autoCapitalize: "characters",
+                            spellCheck: false,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Stack>
+                </WithTTS>
               </Stack>
             </Collapse>
-
-            <Divider />
-
-            {/* Address */}
-            <WithTTS copy={COPY.address} titleVariant="subtitle2">
-              <Stack spacing={2}>
-                <TextField
-                  label="Address line 1 (optional)"
-                  value={formData.addressLine1 ?? ""}
-                  onChange={(e) => setField("addressLine1", e.target.value)}
-                  fullWidth
-                  autoComplete="address-line1"
-                />
-
-                <TextField
-                  label="Address line 2 (optional)"
-                  value={formData.addressLine2 ?? ""}
-                  onChange={(e) => setField("addressLine2", e.target.value)}
-                  fullWidth
-                  autoComplete="address-line2"
-                />
-
-                <TextField
-                  label="Address line 3 (optional)"
-                  value={formData.addressLine3 ?? ""}
-                  onChange={(e) => setField("addressLine3", e.target.value)}
-                  fullWidth
-                  autoComplete="address-line3"
-                />
-
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
-                  <TextField
-                    label="Town or city (optional)"
-                    value={formData.townOrCity ?? ""}
-                    onChange={(e) => setField("townOrCity", e.target.value)}
-                    fullWidth
-                    autoComplete="address-level2"
-                  />
-
-                  <TextField
-                    label="Postcode (optional)"
-                    value={formData.postcode ?? ""}
-                    onChange={(e) => setField("postcode", e.target.value)}
-                    onBlur={() => {
-                      setPostcodeTouched(true);
-                      setField("postcode", normaliseUkPostcode(formData.postcode ?? ""));
-                    }}
-                    error={postcodeTouched && postcodeInvalid}
-                    helperText={
-                      postcodeTouched && postcodeInvalid
-                        ? "Enter a valid UK postcode (e.g. TW3 1JL) or leave blank."
-                        : " "
-                    }
-                    fullWidth
-                    autoComplete="postal-code"
-                    placeholder="e.g. TW3 1JL"
-                    slotProps={{
-                      htmlInput: {
-                        autoCapitalize: "characters",
-                        spellCheck: false,
-                      },
-                    }}
-                  />
-                </Box>
-              </Stack>
-            </WithTTS>
-
-            <Divider />
-
-            <Divider />
 
             {/* Navigation Buttons */}
             <StepActions
