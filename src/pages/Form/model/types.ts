@@ -13,7 +13,7 @@ export type Urgency = "yes" | "no" | "unsure";
 export type SafeToContact = "yes" | "no" | "prefer_not_to_say";
 
 export type Proceed = "" | "Join digital queue" | "Schedule appointment";
-export type ContactMethod = "" | "Text message" | "Phone call" | "Email" | "Letter";
+export type ContactMethod = "" | "Text message" | "Email" ;
 
 export type Count = "0" | "1" | "2" | "3" | "4" | "5" | "6+";
 export type HouseholdSize = "" | "1" | "2" | "3" | "4" | "5" | "6+" | "Prefer not to say";

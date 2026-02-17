@@ -440,7 +440,7 @@ export default function PersonalDetails() {
                       onChange={(e) => setField("email", e.target.value)}
                       fullWidth
                       autoComplete="email"
-                      slotProps={{ input: { inputMode: "email" }, htmlInput: { maxLength: FIELD_META.email.maxLen } }}
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.email.maxLen, inputMode: "email" } }}
                     />
 
                     {/* Phone controls: type + country/dial + digits-only number */}
@@ -486,8 +486,8 @@ export default function PersonalDetails() {
                           htmlInput: {
                             maxLength: maxNationalLen,
                             pattern: "[0-9]*",
+                            inputMode: "numeric"
                           },
-                          input: { inputMode: "numeric" },
                         }}
                       />
                     </Box>

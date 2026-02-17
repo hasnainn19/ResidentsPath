@@ -11,16 +11,6 @@
 import type { EnquiryItem, FormData } from "./types";
 import { ENQUIRIES_BY_GENERAL_SERVICES_SECTION, ENQUIRIES_BY_TOPLEVEL, GENERAL_SERVICES_DIRECT_ITEMS } from "../data/enquiries";
 
-export const DISABILITY_SUPPORT_RESET = {
-  needsSeating: false,
-  needsWrittenUpdates: false,
-  needsLargeText: false,
-  needsQuietSpace: false,
-  needsBSL: false,
-  needsHelpWithForms: false,
-  otherSupport: "",
-};
-
 // Given the current FormData, this builds a simple context object used in multiple steps to decide:
 // - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
 // - Whether the current selection is complete enough to move forward.
@@ -75,7 +65,5 @@ export function resetFormInfo(prev: FormData): FormData {
     domesticAbuse: false,
     safeToContact: "prefer_not_to_say",
     safeContactNotes: "",
-
-    ...DISABILITY_SUPPORT_RESET,
   };
 }

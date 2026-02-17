@@ -256,9 +256,11 @@ export default function ReviewAndSubmit() {
           onSave={handleSave}
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
+          advanceType="button"
           showPrevious
           onPrevious={() => nav("/form/actions")}
         />
+
       </Paper>
     </StepShell>
   );

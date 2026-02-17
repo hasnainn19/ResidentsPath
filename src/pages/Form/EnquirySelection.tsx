@@ -45,7 +45,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 
 import { GENERAL_SERVICES_CHOICE_OPTIONS, GENERAL_SERVICES_DIRECT_ITEMS, TOP_LEVEL } from "./data/enquiries";
 
-import { DISABILITY_SUPPORT_RESET, computeCanGoNext, resetFormInfo } from "./model/enquirySelectionLogic";
+import { computeCanGoNext, resetFormInfo } from "./model/enquirySelectionLogic";
 
 import type {
   Count,
@@ -177,8 +177,6 @@ export default function EnquirySelection() {
       domesticAbuse: false,
       safeToContact: "prefer_not_to_say",
       safeContactNotes: "",
-
-      ...DISABILITY_SUPPORT_RESET,
     }));
   }
 
@@ -500,7 +498,6 @@ export default function EnquirySelection() {
                                       ...prev,
                                       hasDisabilityOrSensory: false,
                                       disabilityType: "",
-                                      ...DISABILITY_SUPPORT_RESET,
                                     },
                               )
                             }
