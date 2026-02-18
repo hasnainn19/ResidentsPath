@@ -121,7 +121,7 @@ export default function PersonalDetails() {
           middleName: "",
           lastName: "",
           preferredName: "",
-          dob: null,
+          dob: "",
           email: "",
           phone: "",
           phoneCountry: "GB",
@@ -431,7 +431,7 @@ export default function PersonalDetails() {
                       onChange={(date: Dayjs | null) =>
                         setFormData((prev) => ({
                           ...prev,
-                          dob: date ? date.format("YYYY-MM-DD") : null,
+                          dob: date ? date.format("YYYY-MM-DD") : "",
                           ageRange: date ? "" : prev.ageRange,
                         }))
                       }

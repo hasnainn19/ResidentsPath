@@ -18,6 +18,35 @@ function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;
 }
 
+
+function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
+  const out: FormData = { ...initialFormData };
+
+  for (const key of Object.keys(initialFormData) as Array<keyof FormData>) {
+    const v = dataRaw[key as unknown as string];
+    if (v === undefined) continue;
+
+    const def = initialFormData[key];
+
+    if (typeof def === "string") {
+      if (typeof v === "string") (out as any)[key] = v;
+      continue;
+    }
+
+    if (typeof def === "boolean") {
+      if (typeof v === "boolean") (out as any)[key] = v;
+      continue;
+    }
+
+    if (typeof def === "number") {
+      if (typeof v === "number" && Number.isFinite(v)) (out as any)[key] = v;
+      continue;
+    }
+  }
+
+  return out;
+}
+
 export function loadDraft(storage: Storage): FormDraftV1 | null {
   try {
     const raw = storage.getItem(KEY);
@@ -33,7 +62,7 @@ export function loadDraft(storage: Storage): FormDraftV1 | null {
     const dataRaw = (parsed as any).data;
     if (!isObject(dataRaw)) return null;
 
-    const data: FormData = { ...initialFormData, ...(dataRaw as any) };
+    const data = sanitiseLoadedFormData(dataRaw);
 
     return { version: 1, updatedAt, lastPath, data };
   } catch {

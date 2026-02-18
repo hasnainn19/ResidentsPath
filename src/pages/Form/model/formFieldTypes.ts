@@ -145,7 +145,7 @@ export type FormData = {
 
   contactMethod: ContactMethod;
 
-  appointmentDateIso: string | null;
+  appointmentDateIso: string;
   appointmentTime: string;
 };
 

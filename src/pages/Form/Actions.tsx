@@ -170,7 +170,7 @@ export default function Actions() {
   const hasReminderContact =
     formData.provideDetails === "yes" && (formData.phone.trim() !== "" || formData.email.trim() !== "");
 
-  const bookingIncomplete = showBooking && (!formData.appointmentDateIso || formData.appointmentTime.trim() === "");
+  const bookingIncomplete = showBooking && (formData.appointmentTime.trim() === "" || formData.appointmentTime.trim() === "");
 
   // Compute the time for the reminder based on the user's selection
   const computedReminderAt = useMemo(() => {

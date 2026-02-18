@@ -75,6 +75,6 @@ export const initialFormData: FormData = {
 
   contactMethod: "",
 
-  appointmentDateIso: null,
+  appointmentDateIso: "",
   appointmentTime: "",
 };
