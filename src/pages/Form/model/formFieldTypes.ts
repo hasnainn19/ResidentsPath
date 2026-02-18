@@ -90,7 +90,7 @@ export type FormData = {
   phoneCountry: string;
   phoneType: "" | "Mobile" | "Home phone";
   phone: string;
-  dob: string | null;
+  dob: string;
 
   addressLine1: string;
   addressLine2: string;

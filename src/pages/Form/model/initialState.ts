@@ -20,7 +20,7 @@ export const initialFormData: FormData = {
   phoneCountry: "GB",
   phoneType: "",
   phone: "",
-  dob: null,
+  dob: "",
 
   addressLine1: "",
   addressLine2: "",
