@@ -31,7 +31,6 @@ export default function ReviewAndSubmit() {
       disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
       urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
     };
-    console.log(payload);
     clearSavedDraft();
   };
 
