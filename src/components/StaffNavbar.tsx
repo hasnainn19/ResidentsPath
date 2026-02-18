@@ -9,9 +9,9 @@ import {
   AccordionSummary,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import GroupsIcon from "@mui/icons-material/Groups";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import EventIcon from "@mui/icons-material/Event";
-import SettingsIcon from "@mui/icons-material/Settings";
 import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
 const drawerWidth = 240;
@@ -80,12 +80,11 @@ const StaffNavbar = () => {
             url="/staff"
           />
           <StaffNavItem
-            icon={<EventIcon />}
+            icon={<GroupsIcon />}
             label="Current Staff"
             url="/staff"
           />
           <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
-          <StaffNavItem icon={<SettingsIcon />} label="Settings" url="/staff" />
         </Box>
         <Box>
           <Accordion

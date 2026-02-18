@@ -11,15 +11,15 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 type PriorityBreakdown = {
-  Low: number;
-  Medium: number;
-  High: number;
+  Standard: number;
+  Priority: number;
+  Urgent: number;
 };
 
 interface QueueRowProps {
   service: string;
   waiting: number;
-  longestWaitTime: string;
+  longestWaitTime: number | null;
   priorityBreakdown: PriorityBreakdown;
   steppedOut: number;
   availableStaff: number;
@@ -45,12 +45,14 @@ const QueueRow = ({
 
       <TableCell>{waiting}</TableCell>
 
-      <TableCell>{longestWaitTime}</TableCell>
+      <TableCell>
+        {longestWaitTime ? `${longestWaitTime} mins` : "--"}
+      </TableCell>
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Chip
-            label={`Urgent: ${priorityBreakdown.High}`}
+            label={`Urgent: ${priorityBreakdown.Urgent}`}
             size="small"
             color="error"
             sx={{
@@ -59,7 +61,7 @@ const QueueRow = ({
             }}
           />
           <Chip
-            label={`Priority: ${priorityBreakdown.Medium}`}
+            label={`Priority: ${priorityBreakdown.Priority}`}
             size="small"
             color="success"
             sx={{
@@ -68,7 +70,7 @@ const QueueRow = ({
             }}
           />
           <Chip
-            label={`Standard: ${priorityBreakdown.Low}`}
+            label={`Standard: ${priorityBreakdown.Standard}`}
             size="small"
             color="warning"
             sx={{
@@ -85,7 +87,10 @@ const QueueRow = ({
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button variant="outlined" size="small" onClick={handleOpen}>
+          {/* <Button variant="outlined" size="small" onClick={handleOpen}>
+            Adjust
+          </Button> */}
+          <Button variant="outlined" size="small">
             Adjust
           </Button>
           <ServiceQueueModal
