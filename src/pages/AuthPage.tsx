@@ -74,6 +74,8 @@ export default function AuthPage() {
 				</Button>
 			</Box>
 
+			{/* Amplify Authenticator component handles sign-in/sign-up flows */}
+			{/* Tied with the Cognito auth configuration in amplify/auth/resource.ts */}
 			<Authenticator
 				signUpAttributes={['email', 'given_name', 'family_name']}
 				loginMechanisms={['email']}
