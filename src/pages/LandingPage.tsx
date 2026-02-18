@@ -39,33 +39,23 @@ export default function LandingPage() {
 					</CardContent>
 				</Card>
 
-				{/* Option 2 & 3: Login and Register */}
+				{/* Option 2: Sign In / Create Account */}
 				<Card sx={{ width: '100%', maxWidth: 500 }}>
 					<CardContent sx={{ p: 4 }}>
 						<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-							Have an Account?
+							Sign In or Create Account
 						</Typography>
 						<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-							Sign in to book appointments or create a new account.
+							Access your account to book appointments and track your past visits.
 						</Typography>
-						<Stack direction="row" spacing={2}>
-							<Button
-								variant="outlined"
-								fullWidth
-								size="large"
-								onClick={() => navigate('/login')}
-							>
-								Login
-							</Button>
-							<Button
-								variant="outlined"
-								fullWidth
-								size="large"
-								onClick={() => navigate('/signup')}
-							>
-								Register
-							</Button>
-						</Stack>
+						<Button
+							variant="outlined"
+							fullWidth
+							size="large"
+							onClick={() => navigate('/auth')}
+						>
+							Sign In / Register
+						</Button>
 					</CardContent>
 				</Card>
 			</Stack>

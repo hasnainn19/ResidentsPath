@@ -6,7 +6,8 @@ import { router } from './routes'
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Constants/Theme';
 import { CssBaseline } from '@mui/material'
-import { Authenticator } from '@aws-amplify/ui-react'
+import { Authenticator, ThemeProvider as AmplifyThemeProvider } from '@aws-amplify/ui-react'
+import { amplifyComponentsTheme } from './Constants/AmplifyTheme'
 
 import { Amplify } from 'aws-amplify'
 import outputs from '../amplify_outputs.json'
@@ -16,9 +17,11 @@ createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<Authenticator.Provider>
-				<RouterProvider router={router} />
-			</Authenticator.Provider>
+			<AmplifyThemeProvider theme={amplifyComponentsTheme}>
+				<Authenticator.Provider>
+					<RouterProvider router={router} />
+				</Authenticator.Provider>
+			</AmplifyThemeProvider>
 		</ThemeProvider>
 	</StrictMode>
 )
