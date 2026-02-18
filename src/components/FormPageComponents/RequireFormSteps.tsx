@@ -31,7 +31,12 @@ function isStep2Complete(data: FormData) {
 function isStep3Complete(data: FormData) {
   // Step 3 completion depends on proceed choice.
   if (data.proceed === "Schedule appointment") {
-    return !!data.appointmentDateIso && data.appointmentTime.trim() !== "";
+     const hasAppointmentDate =  
+      typeof data.appointmentDateIso === "string" && data.appointmentDateIso.trim() !== "";  
+    const hasAppointmentTime =  
+      typeof data.appointmentTime === "string" && data.appointmentTime.trim() !== "";  
+
+    return hasAppointmentDate && hasAppointmentTime;
   }
   return true;
 }
