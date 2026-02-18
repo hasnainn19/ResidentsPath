@@ -84,7 +84,7 @@ export default function UserDashboard() {
                                 </Grid>
                                 <Grid size={12}>
                                     <Item sx={{ textAlign: 'left', backgroundColor:'warning.main'}}>
-                                        <Stack direction='row' alignItems='left'>
+                                        <Stack direction='row' alignItems='flex-start'>
                                             <Dangerous sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>Please note
                                                 <TextToSpeechButton text='Please note, wait times are estimated and may vary. Urgent cases may be prioritised and seen before you. We appreciate your patience and understanding.' />
