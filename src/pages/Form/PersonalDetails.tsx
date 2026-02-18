@@ -54,16 +54,23 @@ function digitsOnly(s: string) {
 }
 
 function normaliseUkPostcode(postCode: string) {
-  return postCode.toUpperCase().replace(/\s+/g, " ").trim();
+  const compact = postCode.toUpperCase().replace(/\s+/g, "").trim();
+  if (!compact) return "";
+
+  // If it's too short to be a full postcode, just return the compact form
+  if (compact.length <= 3) return compact;
+
+  // Insert a space before the final 3 characters to normalise the format
+  return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
 }
 
 function isValidUkPostcode(postCode: string) {
   const s = normaliseUkPostcode(postCode);
   if (!s) return true;
-
-  const re = /^(GIR 0AA|[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2})$/;
+  const re = /^(GIR\s?0AA|[A-Z]{1,2}\d{1,2}[A-Z]?\s\d[A-Z]{2})$/;
   return re.test(s);
 }
+
 
 export default function PersonalDetails() {
   const nav = useNavigate();
