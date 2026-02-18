@@ -33,7 +33,7 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-import StepShell from "../../components/FormPageComponents/StepShell";
+import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -215,7 +215,7 @@ export default function Actions() {
   }
 
   return (
-    <StepShell
+    <FormStepLayout
       step={3}
       totalSteps={4}
       title="Council service request"
@@ -467,6 +467,6 @@ export default function Actions() {
           />
         </Stack>
       </Paper>
-    </StepShell>
+    </FormStepLayout>
   );
 }

@@ -37,7 +37,7 @@ import dayjs, { type Dayjs } from "dayjs";
 
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 
-import StepShell from "../../components/FormPageComponents/StepShell";
+import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -219,7 +219,7 @@ export default function PersonalDetails() {
   const contactMethodInvalid = needsPhoneForContactMethod || needsEmailForContactMethod;
 
   return (
-    <StepShell
+    <FormStepLayout
       step={1}
       totalSteps={4}
       title="Council service request"
@@ -656,6 +656,6 @@ export default function PersonalDetails() {
           </Stack>
         </Paper>
       </Box>
-    </StepShell>
+    </FormStepLayout>
   );
 }

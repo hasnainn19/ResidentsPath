@@ -45,7 +45,7 @@ type Props = {
   children: ReactNode;
 };
 
-export default function StepShell(props: Props) {
+export default function FormStepLayout(props: Props) {
   const percent = Math.round((props.step / props.totalSteps) * 100);
 
   // Scroll to top when step changes so that user always starts at the top of the form

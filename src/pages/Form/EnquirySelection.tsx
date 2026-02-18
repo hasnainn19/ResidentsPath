@@ -37,7 +37,7 @@ import {
 
 import MicIcon from "@mui/icons-material/Mic";
 
-import StepShell from "../../components/FormPageComponents/StepShell";
+import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -207,7 +207,7 @@ export default function EnquirySelection() {
     "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options, and add support notes.";
 
   return (
-    <StepShell
+    <FormStepLayout
       step={2}
       totalSteps={4}
       title="Council service request"
@@ -839,6 +839,6 @@ export default function EnquirySelection() {
           </Stack>
         </Box>
       </Paper>
-    </StepShell>
+    </FormStepLayout>
   );
 }

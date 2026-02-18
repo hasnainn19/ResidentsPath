@@ -9,7 +9,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
-import StepShell from "../../components/FormPageComponents/StepShell";
+import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -169,7 +169,7 @@ export default function ReviewAndSubmit() {
   }
 
   return (
-    <StepShell
+    <FormStepLayout
       step={4}
       totalSteps={4}
       title="Council service request"
@@ -252,6 +252,6 @@ export default function ReviewAndSubmit() {
         />
 
       </Paper>
-    </StepShell>
+    </FormStepLayout>
   );
 }
