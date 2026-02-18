@@ -226,3 +226,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,visualstudiocode,react,pycharm
+
+# amplify
+node_modules
+.amplify
+amplify_outputs*
+amplifyconfiguration*
