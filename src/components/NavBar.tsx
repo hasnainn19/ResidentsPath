@@ -1,6 +1,6 @@
 import React from 'react';
 import {AppBar, Box, Toolbar, Typography, Button, Menu, MenuItem, Tooltip, Stack} from '@mui/material';
-
+import { useNavigate } from "react-router-dom";
 
 export default function NavBar() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -13,6 +13,8 @@ export default function NavBar() {
     setAnchorElUser(null);
   };
 
+  const nav = useNavigate();
+
   return (
       <AppBar position="static">
         <Toolbar>
@@ -24,7 +26,7 @@ export default function NavBar() {
               <Button color="inherit">Queue</Button>
             </Tooltip>
             <Tooltip title="Create your case">
-              <Button color="inherit">Form</Button>
+              <Button color="inherit" onClick={() => nav("/form")}>Form</Button>
             </Tooltip>
             <Box>
               <Tooltip title="Open user settings">
