@@ -232,11 +232,22 @@ export default function PersonalDetails() {
         component="form"
         onSubmit={(e) => {
           e.preventDefault();
-          if (provideDetails === "yes" && (postcodeInvalid || contactMethodInvalid)) {
+
+          const mostRecentPostcode = normaliseUkPostcode(formData.postcode ?? "");
+          const postcodeInvalidNow =
+            provideDetails === "yes" && mostRecentPostcode.trim() !== "" && !isValidUkPostcode(mostRecentPostcode);
+
+          if (provideDetails === "yes" && (postcodeInvalidNow || contactMethodInvalid)) {
             setPostcodeTouched(true);
             setContactMethodTouched(true);
             return;
           }
+
+          // Ensure consistent formatting even if the user never blurs the field
+          if (mostRecentPostcode !== (formData.postcode ?? "")) {
+            setFormData((prev) => ({ ...prev, postcode: mostRecentPostcode }));
+          }
+
           nav("/form/enquiry-selection");
         }}
       >

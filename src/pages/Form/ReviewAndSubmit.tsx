@@ -147,7 +147,7 @@ export default function ReviewAndSubmit() {
     );
   }
 
-  // Get the enquiry context which determines which questions were actually asked based on earlier answers
+  // Get the enquiry selection state which determines which questions were actually asked based on earlier answers
   const enquirySelectionState = useMemo(
     () => getEnquirySelectionState(formData),
     [
