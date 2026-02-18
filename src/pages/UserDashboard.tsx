@@ -5,41 +5,41 @@ import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
 
+const Item = styled(Paper)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: 'background.default',
+    padding: theme.spacing(2),
+    height: '100%',
+    justifyContent: 'center',
+    textAlign: 'center',
+    border: "1px solid #bbb9bb",
+    color: 'text.secondary',
+    boxSizing: "border-box",  
+}));
+
 
 export default function UserDashboard() {
-    const[alert, setAlert]=useState(false);
-    const[showStepOutAlert, setshowStepOutAlert]=useState(false);
+    const[showStepOutAlert, setShowStepOutAlert]=useState(false);
+    const[stepOut, setStepOut]=useState(false);
 
     const handleStepOut = () => {
-        setshowStepOutAlert(true);
-        setAlert(true);
+        setStepOut(true);
+        setShowStepOutAlert(true);
     };
 
     const handleReturned = () => {
-        setshowStepOutAlert(false);
-        setAlert(false);
+        setStepOut(false);
+        setShowStepOutAlert(false);
     };
-
-    const Item = styled(Paper)(({ theme }) => ({
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'background.default',
-        padding: theme.spacing(2),
-        height: '100%',
-        justifyContent: 'center',
-        textAlign: 'center',
-        border: "1px solid #bbb9bb",
-        color: 'text.secondary',
-        boxSizing: "border-box",  
-    }));
 
     return (
         <>
             <NavBar />
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
-                    {alert && (
-                        <Alert severity="info" sx={{mb:2}} onClose={() => setAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
+                    {showStepOutAlert && (
+                        <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
                         <Grid container sx={{alignItems: 'stretch', width: '100%' }} spacing={2}>
@@ -76,8 +76,8 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={showStepOutAlert}>I'm stepping out</Button>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!showStepOutAlert} >I've returned - stop updates</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
