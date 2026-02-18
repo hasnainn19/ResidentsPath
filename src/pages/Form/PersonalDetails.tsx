@@ -516,7 +516,7 @@ export default function PersonalDetails() {
                         {labelOptional("contactMethod")}
                       </Typography>
                     </Box>
-                    <Stack direction="row" spacing={2} alignItems="flex-end">
+                    <Stack direction="row" spacing={2} alignItems="flex-start">
                       <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth error={contactMethodTouched && contactMethodInvalid}>
                           <InputLabel id="contact-label">{labelOptional("contactMethod")}</InputLabel>
