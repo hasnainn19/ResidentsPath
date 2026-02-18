@@ -43,13 +43,21 @@ import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
-import { GENERAL_SERVICES_CHOICE_OPTIONS, GENERAL_SERVICES_DIRECT_ITEMS, TOP_LEVEL } from "./data/enquiries";
+import { GENERAL_SERVICES_CHOICE_OPTIONS, TOP_LEVEL } from "./data/enquiries";
 
-import { computeCanGoNext, resetFormInfo } from "./model/enquirySelectionLogic";
+import {
+  computeCanGoNext,
+  applyTopLevelChange,
+  applyGeneralServicesChoiceChange,
+  applyEnquiryChange,
+  applyUrgencyChange,
+  applyProceedChange,
+  shouldShowSupportNotes,
+} from "./model/enquirySelectionLogic";
+
 
 import type {
   Count,
-  Department,
   DisabilityType,
   FormData,
   HouseholdSize,
@@ -89,119 +97,59 @@ export default function EnquirySelection() {
   // Logic for which follow-up questions to show.
   const enquirySelectionState = useMemo(
     () => getEnquirySelectionState(formData), [formData]);
+    
+  const {
+    isGeneralServices,
+    generalServicesIsSection,
+    isOther,
+    enquiryOptions,
+    specificOptions,
+    showSpecificDropdown,
+    hasChosenEnquiry,
+    hasEnoughToProceed,
+    showChildrenQs,
+    showDisabilityQs,
+    showHouseholdSize,
+    showDomesticAbuseQs,
+    showAgeRange,
+  } = enquirySelectionState;
 
-  const isGeneralServices = enquirySelectionState.isGeneralServices;
-  const generalServicesIsSection = enquirySelectionState.generalServicesIsSection;
-  const isOther = enquirySelectionState.isOther;
-
-  const enquiryOptions = enquirySelectionState.enquiryOptions;
-
-  const specificOptions = enquirySelectionState.specificOptions;
-  const showSpecificDropdown = enquirySelectionState.showSpecificDropdown;
-
-  const hasChosenEnquiry = enquirySelectionState.hasChosenEnquiry;
-  const hasEnoughToProceed = enquirySelectionState.hasEnoughToProceed;
-
-  const showChildrenQs = enquirySelectionState.showChildrenQs;
-  const showDisabilityQs = enquirySelectionState.showDisabilityQs;
-  const showHouseholdSize = enquirySelectionState.showHouseholdSize;
-  const showDomesticAbuseQs = enquirySelectionState.showDomesticAbuseQs;
-  const showAgeRange = enquirySelectionState.showAgeRange;
 
   const needsUrgentReason = formData.urgent === "yes";
 
   // Whether the continue button should be enabled, based on whether required fields are filled in
   const canGoNext = computeCanGoNext(formData, hasEnoughToProceed, needsUrgentReason);
 
-  // Changing the top level area invalidates any lower down enquiry selections, so reset them
   function handleTopLevelChange(nextTopLevel: string) {
-    setFormData((prev) => {
-      const next = resetFormInfo({
-        ...prev,
-        topLevel: nextTopLevel,
-        generalServicesChoice: "",
-      });
-      if (nextTopLevel === "Other") {
-        return { ...next, routedDepartment: "General customer services" };
-      }
-      return next;
-    });
+    setFormData((prev) => applyTopLevelChange(prev, nextTopLevel));
   }
 
-  // Handle changes to the General Services choice, which can affect which enquiries are shown
+
   function handleGeneralServicesChoiceChange(nextChoice: string) {
-    setFormData((prev): FormData => {
-      const nextState = resetFormInfo({ ...prev, generalServicesChoice: nextChoice });
-
-      // "direct:" options map straight to an enquiry (skip the extra enquiry dropdown)
-      if (nextChoice.startsWith("direct:")) {
-        const id = nextChoice.replace("direct:", "");
-        const match = GENERAL_SERVICES_DIRECT_ITEMS.find((x) => x.value === id);
-
-        return {
-          ...nextState,
-          enquiryId: id,
-          routedDepartment: (match?.department ?? "") as "" | Department,
-        };
-      }
-      // Section choices do not map directly to an enquiry, so just reset the enquiry fields and show the dropdown
-      return nextState;
-    });
+    setFormData((prev) => applyGeneralServicesChoiceChange(prev, nextChoice));
   }
 
-  // Wipe follow up answers when enquiry changes
+
   function handleEnquiryChange(nextId: string) {
-    const match = enquiryOptions.find((x) => x.value === nextId) || null;
-
-    setFormData((prev) => ({
-      ...prev,
-      enquiryId: nextId,
-      specificDetailId: "",
-      routedDepartment: match?.department ?? "",
-
-      householdSize: "",
-      hasChildren: false,
-      childrenCount: "0",
-
-      hasDisabilityOrSensory: false,
-      disabilityType: "",
-
-      domesticAbuse: false,
-      safeToContact: "prefer_not_to_say",
-      safeContactNotes: "",
-    }));
+    setFormData((prev) => applyEnquiryChange(prev, nextId, enquiryOptions));
   }
 
-  // Clear urgent details when urgency is not "yes"
+
   function setUrgency(value: Urgency) {
-    setFormData((prev) => ({
-      ...prev,
-      urgent: value,
-      urgentReason: value === "yes" ? prev.urgentReason : "",
-      urgentOtherReason: value === "yes" ? prev.urgentOtherReason : "",
-    }));
+    setFormData((prev) => applyUrgencyChange(prev, value));
   }
+
 
   function handleProceedChange(next: Proceed) {
-    setFormData((prev) => {
-      return { ...prev, proceed: next };
-    });
+    setFormData((prev) => applyProceedChange(prev, next));
   }
+
 
   // Keep the support section short unless "Show more" is opened
   const [showMoreSupport, setShowMoreSupport] = useState(false);
 
-  const showSupportNotes =
-    formData.needsAccessibility ||
-    formData.needsLanguage ||
-    formData.needsSeating ||
-    formData.needsWrittenUpdates ||
-    formData.needsLargeText ||
-    formData.needsQuietSpace ||
-    formData.needsBSL ||
-    formData.needsHelpWithForms ||
-    (formData.otherSupport ?? "").trim() !== "" ||
-    (formData.supportNotes ?? "").trim() !== "";
+  const showSupportNotes = shouldShowSupportNotes(formData);
+
 
   // Build TTS strings for each section based on what is currently shown
   function buildServiceTts() {

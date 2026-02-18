@@ -8,8 +8,12 @@
  *   not carry over into a different path.
  */
 
-import type { EnquiryItem, FormData } from "./formFieldTypes";
-import { ENQUIRIES_BY_GENERAL_SERVICES_SECTION, ENQUIRIES_BY_TOPLEVEL, GENERAL_SERVICES_DIRECT_ITEMS } from "../data/enquiries";
+import type { EnquiryItem, FormData, Proceed, Urgency } from "./formFieldTypes";
+import {
+  ENQUIRIES_BY_GENERAL_SERVICES_SECTION,
+  ENQUIRIES_BY_TOPLEVEL,
+  GENERAL_SERVICES_DIRECT_ITEMS,
+} from "../data/enquiries";
 
 // Given the current FormData, this builds a simple context object used in multiple steps to decide:
 // - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
@@ -71,4 +75,95 @@ export function resetFormInfo(prev: FormData): FormData {
     appointmentDateIso: "",
     appointmentTime: "",
   };
+}
+
+export function applyTopLevelChange(prev: FormData, nextTopLevel: string): FormData {
+  const next = resetFormInfo({
+    ...prev,
+    topLevel: nextTopLevel,
+    generalServicesChoice: "",
+  });
+
+  if (nextTopLevel === "Other") {
+    return { ...next, routedDepartment: "General customer services" };
+  }
+
+  return next;
+}
+
+export function applyGeneralServicesChoiceChange(prev: FormData, nextChoice: string): FormData {
+  const nextState = resetFormInfo({ ...prev, generalServicesChoice: nextChoice });
+
+  // "direct:" options map straight to an enquiry (skip the extra enquiry dropdown)
+  if (nextChoice.startsWith("direct:")) {
+    const id = nextChoice.replace("direct:", "");
+    const match = GENERAL_SERVICES_DIRECT_ITEMS.find((x) => x.value === id);
+
+    return {
+      ...nextState,
+      enquiryId: id,
+      routedDepartment: match?.department ?? "",
+    };
+  }
+
+  // Section choices do not map directly to an enquiry, so just reset the enquiry fields and show the dropdown
+  return nextState;
+}
+
+// Wipe follow up answers when enquiry changes
+export function applyEnquiryChange(prev: FormData, nextId: string, enquiryOptions: EnquiryItem[]): FormData {
+  const match = enquiryOptions.find((x) => x.value === nextId) || null;
+
+  return {
+    ...prev,
+    enquiryId: nextId,
+    specificDetailId: "",
+    routedDepartment: match?.department ?? "",
+
+    householdSize: "",
+
+    hasChildren: false,
+    childrenCount: "0",
+
+    hasDisabilityOrSensory: false,
+    disabilityType: "",
+
+    ageRange: "",
+
+    domesticAbuse: false,
+    safeToContact: "prefer_not_to_say",
+    safeContactNotes: "",
+
+    appointmentDateIso: "",
+    appointmentTime: "",
+  };
+}
+
+// Clear urgent details when urgency is not "yes"
+export function applyUrgencyChange(prev: FormData, value: Urgency): FormData {
+  return {
+    ...prev,
+    urgent: value,
+    urgentReason: value === "yes" ? prev.urgentReason : "",
+    urgentOtherReason: value === "yes" ? prev.urgentOtherReason : "",
+  };
+}
+
+export function applyProceedChange(prev: FormData, next: Proceed): FormData {
+  return { ...prev, proceed: next };
+}
+
+export function shouldShowSupportNotes(data: FormData) {
+  return (
+    data.needsAccessibility ||
+    data.needsLanguage ||
+    data.needsSeating ||
+    data.needsWrittenUpdates ||
+    data.needsLargeText ||
+    data.needsQuietSpace ||
+    data.needsBSL ||
+    data.needsHelpWithForms ||
+    (data.otherSupport ?? "").trim() !== "" ||
+    (data.supportNotes ?? "").trim() !== ""
+  );
 }
