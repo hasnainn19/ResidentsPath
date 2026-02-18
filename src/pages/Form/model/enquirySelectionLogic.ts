@@ -150,7 +150,7 @@ export function applyUrgencyChange(prev: FormData, value: Urgency): FormData {
 }
 
 export function applyProceedChange(prev: FormData, next: Proceed): FormData {
-  return { ...prev, proceed: next };
+  return { ...prev, proceed: next, appointmentDateIso: "", appointmentTime: "" };
 }
 
 export function shouldShowSupportNotes(data: FormData) {
