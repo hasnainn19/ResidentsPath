@@ -18,7 +18,6 @@ export const initialFormData: FormData = {
   preferredName: "",
   email: "",
   phoneCountry: "GB",
-  phoneType: "",
   phone: "",
   dob: "",
 

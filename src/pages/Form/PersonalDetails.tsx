@@ -46,8 +46,6 @@ import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/for
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { FIELD_META } from "./model/fieldMeta";
 
-type PhoneType = "" | "Mobile" | "Home phone";
-
 // Remove all non-digit characters from a string
 function digitsOnly(s: string) {
   return s.replace(/\D/g, "");
@@ -125,7 +123,6 @@ export default function PersonalDetails() {
           email: "",
           phone: "",
           phoneCountry: "GB",
-          phoneType: "" as PhoneType,
           contactMethod: "" as "" | ContactMethod,
           addressLine1: "",
           addressLine2: "",
@@ -461,22 +458,8 @@ export default function PersonalDetails() {
                       slotProps={{ htmlInput: { maxLength: FIELD_META.email.maxLen, inputMode: "email" } }}
                     />
 
-                    {/* Phone controls: type + country/dial + digits-only number */}
-                    <Box sx={{ display: "grid", gridTemplateColumns: "220px 1fr 1fr", gap: 2 }}>
-                      <FormControl fullWidth>
-                        <InputLabel id="phone-type-label">{labelOptional("phoneType")}</InputLabel>
-                        <Select
-                          labelId="phone-type-label"
-                          label={labelOptional("phoneType")}
-                          value={(formData.phoneType ?? "") as PhoneType}
-                          onChange={(e) => setField("phoneType", String(e.target.value) as FormData["phoneType"])}
-                        >
-                          <MenuItem value="">No selection</MenuItem>
-                          <MenuItem value="Mobile">Mobile</MenuItem>
-                          <MenuItem value="Home phone">Home phone</MenuItem>
-                        </Select>
-                      </FormControl>
-
+                    {/* Phone controls: country/dial + digits-only number */}
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
                       <FormControl fullWidth>
                         <InputLabel id="phone-country-label">Country / dial code</InputLabel>
                         <Select

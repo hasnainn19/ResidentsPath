@@ -88,7 +88,6 @@ export type FormData = {
   preferredName: string;
   email: string;
   phoneCountry: string;
-  phoneType: "" | "Mobile" | "Home phone";
   phone: string;
   dob: string;
 

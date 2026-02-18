@@ -72,7 +72,6 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
 
   email: { label: "Email", requiresDetails: true, maxLen: LIMIT.MEDIUM },
   phoneCountry: { label: "Phone country", requiresDetails: true },
-  phoneType: { label: "Phone type", requiresDetails: true },
   phone: { label: "Phone number", requiresDetails: true },
 
   dob: {
