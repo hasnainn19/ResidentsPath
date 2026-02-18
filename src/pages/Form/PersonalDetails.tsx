@@ -265,21 +265,21 @@ export default function PersonalDetails() {
 
               <Stack component="ul" spacing={1} sx={{ m: 0, p: 0, listStyle: "none" }}>
                 <Stack component="li" direction="row" spacing={1} alignItems="flex-start">
-                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} />
+                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} aria-hidden />
                   <Typography variant="body2" color="text.secondary">
                     Only council staff can view the information you provide.
                   </Typography>
                 </Stack>
 
                 <Stack component="li" direction="row" spacing={1} alignItems="flex-start">
-                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} />
+                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} aria-hidden />
                   <Typography variant="body2" color="text.secondary">
                     You can continue without providing details.
                   </Typography>
                 </Stack>
 
                 <Stack component="li" direction="row" spacing={1} alignItems="flex-start">
-                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} />
+                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} aria-hidden />
                   <Typography variant="body2" color="text.secondary">
                     If you want updates, add at least one contact method.
                   </Typography>
