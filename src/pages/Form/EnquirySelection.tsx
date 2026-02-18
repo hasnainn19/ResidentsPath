@@ -59,7 +59,7 @@ import type {
   AgeRange,
 } from "./model/types";
 import StepActions from "../../components/FormPageComponents/StepActions";
-import { getEnquiryContext } from "./model/enquiriesContext";
+import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { FIELD_META } from "./model/fieldMeta";
 
 export default function EnquirySelection() {
@@ -88,7 +88,7 @@ export default function EnquirySelection() {
 
   // Logic for which follow-up questions to show.
   const enquiryContex = useMemo(
-    () => getEnquiryContext(formData),
+    () => getEnquirySelectionState(formData),
     [
       formData.topLevel,
       formData.generalServicesChoice,

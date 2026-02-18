@@ -38,7 +38,7 @@ import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
-import { getEnquiryContext } from "./model/enquiriesContext";
+import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import BookingPanel from "../../components/BookingPanel";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/types";
 
@@ -149,8 +149,8 @@ export default function Actions() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
-  const enquiryContext = useMemo(
-    () => getEnquiryContext(formData),
+  const enquirySelectionState = useMemo(
+    () => getEnquirySelectionState(formData),
     [
       formData.topLevel,
       formData.generalServicesChoice,
@@ -160,7 +160,7 @@ export default function Actions() {
     ],
   );
 
-  const selectedEnquiry = enquiryContext.selectedEnquiry;
+  const selectedEnquiry = enquirySelectionState.selectedEnquiry;
   const selfServiceLinks = selectedEnquiry?.selfServiceLinks || [];
 
   const showQueue = formData.proceed === "Join digital queue";

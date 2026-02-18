@@ -15,7 +15,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import type { FormData } from "./model/types";
 import StepActions from "../../components/FormPageComponents/StepActions";
-import { getEnquiryContext } from "./model/enquiriesContext";
+import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
 
 export default function ReviewAndSubmit() {
@@ -149,8 +149,8 @@ export default function ReviewAndSubmit() {
   }
 
   // Get the enquiry context which determines which questions were actually asked based on earlier answers
-  const enquiryContext = useMemo(
-    () => getEnquiryContext(formData),
+  const enquirySelectionState = useMemo(
+    () => getEnquirySelectionState(formData),
     [
       formData.topLevel,
       formData.generalServicesChoice,
@@ -163,7 +163,7 @@ export default function ReviewAndSubmit() {
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {
     const label = getReviewLabel(key);
-    const value = getReviewDisplayValue(key, formData, enquiryContext);
+    const value = getReviewDisplayValue(key, formData, enquirySelectionState);
     if (value === null) return null;
     return <ReviewRow key={String(key)} label={label} value={value} />;
   }
@@ -201,7 +201,7 @@ export default function ReviewAndSubmit() {
         {SECTIONS.map((section) => {
           const pairs = section.keys
             .map((k) => {
-              const value = getReviewDisplayValue(k, formData, enquiryContext);
+              const value = getReviewDisplayValue(k, formData, enquirySelectionState);
               if (value === null) return null;
               return { label: getReviewLabel(k), value };
             })

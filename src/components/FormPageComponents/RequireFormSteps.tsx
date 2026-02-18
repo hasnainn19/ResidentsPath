@@ -10,7 +10,7 @@ import { useMemo } from "react";
 import { Navigate } from "react-router-dom";
 
 import { useFormWizard } from "../../pages/Form/context/FormWizardProvider";
-import { getEnquiryContext } from "../../pages/Form/model/enquiriesContext";
+import { getEnquirySelectionState } from "../../pages/Form/model/getEnquirySelectionState";
 import { computeCanGoNext } from "../../pages/Form/model/enquirySelectionLogic";
 import type { FormData } from "../../pages/Form/model/types";
 
@@ -23,7 +23,7 @@ function isStep1Complete() {
 }
 
 function isStep2Complete(data: FormData) {
-  const ctx = getEnquiryContext(data);
+  const ctx = getEnquirySelectionState(data);
   const needsUrgentReason = data.urgent === "yes";
   return computeCanGoNext(data, ctx.hasEnoughToProceed, needsUrgentReason);
 }

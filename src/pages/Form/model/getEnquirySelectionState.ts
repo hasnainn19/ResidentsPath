@@ -12,7 +12,7 @@ import type { FormData } from "./types";
 import { getEnquiryOptions } from "./enquirySelectionLogic";
 
 // Determines which options and sections to show based on the current form data
-export function getEnquiryContext(data: FormData) {
+export function getEnquirySelectionState(data: FormData) {
   const isGeneralServices = data.topLevel === "GeneralServices";
   const generalServicesIsSection =
     isGeneralServices && data.generalServicesChoice !== "" && data.generalServicesChoice.startsWith("section:");

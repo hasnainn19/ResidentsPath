@@ -4,10 +4,10 @@
  */
 
 import dayjs from "dayjs";
-import { getEnquiryContext } from "./enquiriesContext";
+import { getEnquirySelectionState } from "./getEnquirySelectionState";
 import type { FormData } from "./types";
 
-export type EnquiryContext = ReturnType<typeof getEnquiryContext>;
+export type EnquiryContext = ReturnType<typeof getEnquirySelectionState>;
 export type FieldKey = keyof FormData;
 
 export type FieldMeta = {
