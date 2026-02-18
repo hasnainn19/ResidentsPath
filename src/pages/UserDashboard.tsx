@@ -39,7 +39,7 @@ export default function UserDashboard() {
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {alert && (
-                        <Alert severity="info" sx={{mb:2}} onClose={() => setAlert(false)}>You've stepped out. We've notified staff and you'll receive updated notifications about your estimated waiting time.</Alert>
+                        <Alert severity="info" sx={{mb:2}} onClose={() => setAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
                         <Grid container sx={{alignItems: 'stretch', width: '100%' }} spacing={2}>
