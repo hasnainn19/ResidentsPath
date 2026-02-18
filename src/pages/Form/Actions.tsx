@@ -150,15 +150,7 @@ export default function Actions() {
   const { formData, setFormData, handleSave } = useFormWizard();
 
   const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData),
-    [
-      formData.topLevel,
-      formData.generalServicesChoice,
-      formData.enquiryId,
-      formData.specificDetailId,
-      formData.otherEnquiryText,
-    ],
-  );
+    () => getEnquirySelectionState(formData), [formData]);
 
   const selectedEnquiry = enquirySelectionState.selectedEnquiry;
   const selfServiceLinks = selectedEnquiry?.selfServiceLinks || [];

@@ -149,15 +149,7 @@ export default function ReviewAndSubmit() {
 
   // Get the enquiry selection state which determines which questions were actually asked based on earlier answers
   const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData),
-    [
-      formData.topLevel,
-      formData.generalServicesChoice,
-      formData.enquiryId,
-      formData.specificDetailId,
-      formData.otherEnquiryText,
-    ],
-  );
+    () => getEnquirySelectionState(formData), [formData]);
 
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {

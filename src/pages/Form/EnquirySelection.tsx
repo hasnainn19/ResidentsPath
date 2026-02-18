@@ -88,15 +88,7 @@ export default function EnquirySelection() {
 
   // Logic for which follow-up questions to show.
   const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData),
-    [
-      formData.topLevel,
-      formData.generalServicesChoice,
-      formData.enquiryId,
-      formData.specificDetailId,
-      formData.otherEnquiryText,
-    ],
-  );
+    () => getEnquirySelectionState(formData), [formData]);
 
   const isGeneralServices = enquirySelectionState.isGeneralServices;
   const generalServicesIsSection = enquirySelectionState.generalServicesIsSection;
