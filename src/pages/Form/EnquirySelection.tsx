@@ -87,7 +87,7 @@ export default function EnquirySelection() {
   const handleVoiceInput = () => alert("Voice input started (mock)");
 
   // Logic for which follow-up questions to show.
-  const enquiryContex = useMemo(
+  const enquirySelectionState = useMemo(
     () => getEnquirySelectionState(formData),
     [
       formData.topLevel,
@@ -98,23 +98,23 @@ export default function EnquirySelection() {
     ],
   );
 
-  const isGeneralServices = enquiryContex.isGeneralServices;
-  const generalServicesIsSection = enquiryContex.generalServicesIsSection;
-  const isOther = enquiryContex.isOther;
+  const isGeneralServices = enquirySelectionState.isGeneralServices;
+  const generalServicesIsSection = enquirySelectionState.generalServicesIsSection;
+  const isOther = enquirySelectionState.isOther;
 
-  const enquiryOptions = enquiryContex.enquiryOptions;
+  const enquiryOptions = enquirySelectionState.enquiryOptions;
 
-  const specificOptions = enquiryContex.specificOptions;
-  const showSpecificDropdown = enquiryContex.showSpecificDropdown;
+  const specificOptions = enquirySelectionState.specificOptions;
+  const showSpecificDropdown = enquirySelectionState.showSpecificDropdown;
 
-  const hasChosenEnquiry = enquiryContex.hasChosenEnquiry;
-  const hasEnoughToProceed = enquiryContex.hasEnoughToProceed;
+  const hasChosenEnquiry = enquirySelectionState.hasChosenEnquiry;
+  const hasEnoughToProceed = enquirySelectionState.hasEnoughToProceed;
 
-  const showChildrenQs = enquiryContex.showChildrenQs;
-  const showDisabilityQs = enquiryContex.showDisabilityQs;
-  const showHouseholdSize = enquiryContex.showHouseholdSize;
-  const showDomesticAbuseQs = enquiryContex.showDomesticAbuseQs;
-  const showAgeRange = enquiryContex.showAgeRange;
+  const showChildrenQs = enquirySelectionState.showChildrenQs;
+  const showDisabilityQs = enquirySelectionState.showDisabilityQs;
+  const showHouseholdSize = enquirySelectionState.showHouseholdSize;
+  const showDomesticAbuseQs = enquirySelectionState.showDomesticAbuseQs;
+  const showAgeRange = enquirySelectionState.showAgeRange;
 
   const needsUrgentReason = formData.urgent === "yes";
 
