@@ -6,7 +6,7 @@
  * Any new FormData field should get a default here.
  */
 
-import type { FormData } from "./types";
+import type { FormData } from "./formFieldTypes";
 
 export const initialFormData: FormData = {
   language: "en",

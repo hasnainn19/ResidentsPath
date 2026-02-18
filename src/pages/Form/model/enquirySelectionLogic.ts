@@ -8,7 +8,7 @@
  *   not carry over into a different path.
  */
 
-import type { EnquiryItem, FormData } from "./types";
+import type { EnquiryItem, FormData } from "./formFieldTypes";
 import { ENQUIRIES_BY_GENERAL_SERVICES_SECTION, ENQUIRIES_BY_TOPLEVEL, GENERAL_SERVICES_DIRECT_ITEMS } from "../data/enquiries";
 
 // Given the current FormData, this builds a simple context object used in multiple steps to decide:

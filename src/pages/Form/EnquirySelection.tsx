@@ -57,7 +57,7 @@ import type {
   SafeToContact,
   Urgency,
   AgeRange,
-} from "./model/types";
+} from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { FIELD_META } from "./model/fieldMeta";

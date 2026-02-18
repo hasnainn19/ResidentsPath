@@ -12,7 +12,7 @@
  * Changes here affect both the UI wording and the behaviour of the form.
  */
 
-import type { EnquiryItem } from "../model/types";
+import type { EnquiryItem } from "../model/formFieldTypes";
 
 // Top level areas (mostly departments)
 export const TOP_LEVEL: { value: string; label: string }[] = [

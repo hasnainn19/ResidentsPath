@@ -2,7 +2,7 @@
  * Handles saving/loading the form draft to localStorage.
  */
 
-import type { FormData } from "./types";
+import type { FormData } from "./formFieldTypes";
 import { initialFormData } from "./initialState";
 
 export type FormDraftV1 = {

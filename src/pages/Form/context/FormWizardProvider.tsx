@@ -10,7 +10,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import type { FormData } from "../model/types";
+import type { FormData } from "../model/formFieldTypes";
 import { initialFormData } from "../model/initialState";
 import { clearDraft, loadDraft, saveDraft } from "../model/draftStorage";
 

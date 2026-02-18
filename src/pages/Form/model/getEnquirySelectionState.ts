@@ -8,7 +8,7 @@
  *   domestic abuse).
  */
 
-import type { FormData } from "./types";
+import type { FormData } from "./formFieldTypes";
 import { getEnquiryOptions } from "./enquirySelectionLogic";
 
 // Determines which options and sections to show based on the current form data

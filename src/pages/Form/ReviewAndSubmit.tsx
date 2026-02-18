@@ -13,7 +13,7 @@ import StepShell from "../../components/FormPageComponents/StepShell";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
-import type { FormData } from "./model/types";
+import type { FormData } from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";

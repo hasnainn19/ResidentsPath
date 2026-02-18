@@ -2,7 +2,7 @@
  * Language dropdown options shown in the form header.
  */
 
-import type { LanguageOption } from "../model/types";
+import type { LanguageOption } from "../model/formFieldTypes";
 
 export const LANGUAGE_OPTIONS: LanguageOption[] = [
   { code: "en", label: "English" },

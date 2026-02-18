@@ -40,7 +40,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "./context/FormWizardProvider";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import BookingPanel from "../../components/BookingPanel";
-import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/types";
+import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
 
 function clampInt(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.trunc(n)));

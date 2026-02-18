@@ -12,7 +12,7 @@ import { Navigate } from "react-router-dom";
 import { useFormWizard } from "../../pages/Form/context/FormWizardProvider";
 import { getEnquirySelectionState } from "../../pages/Form/model/getEnquirySelectionState";
 import { computeCanGoNext } from "../../pages/Form/model/enquirySelectionLogic";
-import type { FormData } from "../../pages/Form/model/types";
+import type { FormData } from "../../pages/Form/model/formFieldTypes";
 
 type StepKey = "personal-details" | "enquiry-selection" | "actions" | "review-and-submit";
 
