@@ -8,15 +8,15 @@ import NavBar from '../components/NavBar';
 
 export default function UserDashboard() {
     const[alert, setAlert]=useState(false);
-    const[stepOut, setStepOut]=useState(false);
+    const[showStepOutAlert, setshowStepOutAlert]=useState(false);
 
     const handleStepOut = () => {
-        setStepOut(true);
+        setshowStepOutAlert(true);
         setAlert(true);
     };
 
     const handleReturned = () => {
-        setStepOut(false);
+        setshowStepOutAlert(false);
         setAlert(false);
     };
 
@@ -76,8 +76,8 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={showStepOutAlert}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!showStepOutAlert} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
