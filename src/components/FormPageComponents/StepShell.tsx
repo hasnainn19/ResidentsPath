@@ -25,6 +25,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import type { LanguageOption } from "../../pages/Form/model/types";
 import { useEffect } from "react";
 import TextToSpeechButton from "../TextToSpeechButton";
@@ -65,7 +66,8 @@ export default function StepShell(props: Props) {
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           {props.step > 1 && props.onBack ? (
             <Button type="button" variant="text" onClick={props.onBack} sx={{ textTransform: "none" }}>
-              {"<-"} Previous
+              <ArrowBackIcon sx={{ mr: 1 }} />
+              Previous
             </Button>
           ) : (
             <Box sx={{ width: 80 }} />

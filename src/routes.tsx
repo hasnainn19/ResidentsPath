@@ -14,19 +14,24 @@ import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 
 export const router = createBrowserRouter([
   {
-      path: "/", element:  <LandingPage />
+    path: "/",
+    element: <LandingPage />,
   },
   {
-      path: "/auth", element: <AuthPage />
+    path: "/auth",
+    element: <AuthPage />,
   },
   {
-      path: "/start", element: <App />
+    path: "/start",
+    element: <App />,
   },
   {
-      path: "/referencepage", element: <ReferencePage />
+    path: "/referencepage",
+    element: <ReferencePage />,
   },
   {
-      path: "/bookingpage", element: <BookingPage />
+    path: "/bookingpage",
+    element: <BookingPage />,
   },
   { path: "/", element: <App /> },
 
@@ -35,7 +40,14 @@ export const router = createBrowserRouter([
     element: <FormLayout />,
     children: [
       { index: true, element: <ResumeFromSave /> },
-      { path: "personal-details", element: <PersonalDetails /> },
+      {
+        path: "personal-details",
+        element: (
+          <RequireFormSteps step="personal-details">
+            <PersonalDetails />
+          </RequireFormSteps>
+        ),
+      },
       {
         path: "enquiry-selection",
         element: (
@@ -44,7 +56,7 @@ export const router = createBrowserRouter([
           </RequireFormSteps>
         ),
       },
-    {
+      {
         path: "actions",
         element: (
           <RequireFormSteps step="actions">

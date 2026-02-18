@@ -10,6 +10,7 @@
  */
 
 import { Box, Button, Divider, Stack } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 type StepActionsProps = {
   onSave: () => void;
@@ -21,7 +22,6 @@ type StepActionsProps = {
 
   showPrevious?: boolean;
   onPrevious?: () => void;
-  previousLabel?: string;
 };
 
 export default function StepActions(props: StepActionsProps) {
@@ -33,7 +33,6 @@ export default function StepActions(props: StepActionsProps) {
     advanceDisabled: advanceDisabled = false,
     showPrevious = false,
     onPrevious,
-    previousLabel = "<- Previous",
   } = props;
 
   return (
@@ -60,7 +59,7 @@ export default function StepActions(props: StepActionsProps) {
       {showPrevious && (
         <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
           <Button type="button" onClick={onPrevious} sx={{ textTransform: "none" }}>
-            {previousLabel}
+            <ArrowBackIcon sx={{ mr: 1 }} /> Previous
           </Button>
           <Box />
         </Stack>
