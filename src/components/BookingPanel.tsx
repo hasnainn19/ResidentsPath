@@ -21,8 +21,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
@@ -89,19 +87,17 @@ export default function BookingPanel(props: Props) {
               </Box>
 
               <Box sx={{ minWidth: 320 }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <StaticDatePicker
-                    displayStaticWrapperAs="desktop"
-                    value={selectedDate}
-                    onChange={(newValue) => setSelectedDate(newValue)}
-                    minDate={dayjs()}
-                    sx={{ color: "primary.main" }}
-                    slotProps={{
-                      toolbar: { toolbarFormat: "ddd DD MMMM", hidden: false },
-                      actionBar: { actions: [] },
-                    }}
-                  />
-                </LocalizationProvider>
+                <StaticDatePicker
+                  displayStaticWrapperAs="desktop"
+                  value={selectedDate}
+                  onChange={(newValue) => setSelectedDate(newValue)}
+                  minDate={dayjs()}
+                  sx={{ color: "primary.main" }}
+                  slotProps={{
+                    toolbar: { toolbarFormat: "ddd DD MMMM", hidden: false },
+                    actionBar: { actions: [] },
+                  }}
+                />
               </Box>
             </Box>
 
