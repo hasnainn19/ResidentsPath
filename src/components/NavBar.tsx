@@ -1,16 +1,38 @@
 import React from 'react';
 import {AppBar, Box, Toolbar, Typography, Button, Menu, MenuItem, Tooltip, Stack} from '@mui/material';
+import { signOut } from 'aws-amplify/auth';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function NavBar() {
+  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const  userSettings= ['Account', 'Login/signup', 'Logout'];
 
   const handleOpenUserMenu = (event:any) => {
     setAnchorElUser(event.currentTarget);
   };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleMenuItemClick = async (setting: string) => {
+    handleCloseUserMenu();
+
+    if (setting === 'Logout') {
+      await handleLogout();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } 
+    catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -47,7 +69,7 @@ export default function NavBar() {
                 sx={{mt:4}}
               >
                 {userSettings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <MenuItem key={setting} onClick={() => handleMenuItemClick(setting)}>
                     <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                   </MenuItem>
                 ))}
