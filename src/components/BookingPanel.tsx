@@ -1,6 +1,6 @@
 // BookingPanel.tsx
-import { useState } from 'react';
-import dayjs, { Dayjs } from 'dayjs';
+import { useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import {
   Card,
   CardContent,
@@ -20,14 +20,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
-import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import HistoryToggleOffOutlinedIcon from '@mui/icons-material/HistoryToggleOffOutlined';
-import TextToSpeechButton from '../components/TextToSpeechButton';
+} from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import HistoryToggleOffOutlinedIcon from "@mui/icons-material/HistoryToggleOffOutlined";
+import TextToSpeechButton from "../components/TextToSpeechButton";
 
 type Props = {
   onConfirm?: (dateIso: string, time: string) => void;
@@ -35,17 +35,17 @@ type Props = {
 
 export default function BookingPanel(props: Props) {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTime, setSelectedTime] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const prettyDate = selectedDate ? selectedDate.format('D MMMM YYYY') : '';
+  const prettyDate = selectedDate ? selectedDate.format("D MMMM YYYY") : "";
 
   // Generate 30-minute slots (9am–5pm)
   const generateTimes = () => {
     const times: string[] = [];
     for (let hour = 9; hour < 17; hour++) {
-      times.push(`${hour.toString().padStart(2, '0')}:00`);
-      times.push(`${hour.toString().padStart(2, '0')}:30`);
+      times.push(`${hour.toString().padStart(2, "0")}:00`);
+      times.push(`${hour.toString().padStart(2, "0")}:30`);
     }
     return times;
   };
@@ -58,28 +58,28 @@ export default function BookingPanel(props: Props) {
   }
 
   function handleClear() {
-    setSelectedTime('');
+    setSelectedTime("");
     setSelectedDate(dayjs());
   }
 
   return (
     <>
-      <Card variant="outlined" sx={{ borderWidth: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+      <Card variant="outlined" sx={{ borderWidth: 2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 3, flexDirection: 'row' }}>
+          <Box sx={{ display: "flex", alignItems: "stretch", gap: 3, flexDirection: "row" }}>
             {/* Left Side */}
             <Box
               sx={{
                 flex: 1,
-                height: '100%',
+                height: "100%",
                 minWidth: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark', width: 36, height: 36 }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+                <Avatar sx={{ bgcolor: "primary.light", color: "primary.dark", width: 36, height: 36 }}>
                   <CalendarMonthOutlinedIcon />
                 </Avatar>
                 <Typography variant="h5" color="text.primary" sx={{ ml: 3, fontWeight: 700 }}>
@@ -95,9 +95,9 @@ export default function BookingPanel(props: Props) {
                     value={selectedDate}
                     onChange={(newValue) => setSelectedDate(newValue)}
                     minDate={dayjs()}
-                    sx={{ color: 'primary.main' }}
+                    sx={{ color: "primary.main" }}
                     slotProps={{
-                      toolbar: { toolbarFormat: 'ddd DD MMMM', hidden: false },
+                      toolbar: { toolbarFormat: "ddd DD MMMM", hidden: false },
                       actionBar: { actions: [] },
                     }}
                   />
@@ -108,9 +108,9 @@ export default function BookingPanel(props: Props) {
             <Divider orientation="vertical" flexItem aria-hidden="true" sx={{ borderWidth: 1 }} />
 
             {/* Right Side */}
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark', width: 36, height: 36 }}>
+            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+                <Avatar sx={{ bgcolor: "primary.light", color: "primary.dark", width: 36, height: 36 }}>
                   <ScheduleOutlinedIcon />
                 </Avatar>
                 <Typography variant="h5" color="text.primary" sx={{ fontWeight: 700 }}>
@@ -123,10 +123,10 @@ export default function BookingPanel(props: Props) {
                 className="bookingpage-time-list"
                 sx={{
                   border: 2,
-                  borderColor: 'primary.main',
+                  borderColor: "primary.main",
                   borderRadius: 1,
                   maxHeight: 300,
-                  overflowY: 'scroll',
+                  overflowY: "scroll",
                 }}
               >
                 <List disablePadding>
@@ -136,7 +136,7 @@ export default function BookingPanel(props: Props) {
                         selected={selectedTime === time}
                         className="bookingpage-time-list-item-btn"
                         onClick={() => setSelectedTime(time)}
-                        sx={{ borderBottom: '1px solid #ddd' }}
+                        sx={{ borderBottom: "1px solid #ddd" }}
                       >
                         <ListItemText primary={time} />
                       </ListItemButton>
@@ -148,13 +148,15 @@ export default function BookingPanel(props: Props) {
               <Chip
                 icon={<HistoryToggleOffOutlinedIcon />}
                 color="primary"
-                label={selectedTime || '--:--'}
+                label={selectedTime || "--:--"}
                 variant="outlined"
-                sx={{ fontWeight: 700, bgcolor: 'primary.light', color: 'primary.dark', height: 40 }}
+                sx={{ fontWeight: 700, bgcolor: "primary.light", color: "primary.dark", height: 40 }}
               />
 
               <TextToSpeechButton
-                text={selectedTime ? `Your selected appointment time is ${selectedTime}.` : 'No appointment time selected.'}
+                text={
+                  selectedTime ? `Your selected appointment time is ${selectedTime}.` : "No appointment time selected."
+                }
               />
 
               <CardActions>
@@ -165,7 +167,12 @@ export default function BookingPanel(props: Props) {
                 </Tooltip>
 
                 <Tooltip title="Confirm your appointment" placement="top">
-                  <Button variant="contained" disabled={!selectedTime} onClick={handleConfirm} sx={{ bgColor: 'secondary' }}>
+                  <Button
+                    variant="contained"
+                    disabled={!selectedTime}
+                    onClick={handleConfirm}
+                    sx={{ bgColor: "secondary" }}
+                  >
                     Confirm
                   </Button>
                 </Tooltip>
