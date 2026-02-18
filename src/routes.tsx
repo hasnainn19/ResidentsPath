@@ -4,6 +4,8 @@ import AuthPage from "./pages/AuthPage";
 import App from "./App";
 import ReferencePage from "./pages/ReferencePage";
 import BookingPage from "./pages/BookingPage";
+import UserDashboard from "./pages/UserDashboard";
+
 
 export const router = createBrowserRouter([
     {
@@ -20,5 +22,8 @@ export const router = createBrowserRouter([
     },
     {
         path: "/bookingpage", element: <BookingPage />
-    }
+    },
+    {
+        path: "/userdashboard", element: <UserDashboard /> 
+    },
 ]);

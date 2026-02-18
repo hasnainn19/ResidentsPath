@@ -1,3 +1,9 @@
+/*UserDashboard Page */
+.dashboardBtn.MuiButton-root {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 15px;
+}
 /*BookingPage */
 .bookingpage-time-list::-webkit-scrollbar {
   width: 8px;
