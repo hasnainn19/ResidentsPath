@@ -18,7 +18,6 @@ function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;
 }
 
-
 function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
   const out: FormData = { ...initialFormData };
 

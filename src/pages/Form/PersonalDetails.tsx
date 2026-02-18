@@ -41,7 +41,7 @@ import StepShell from "../../components/FormPageComponents/StepShell";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
-import { useFormWizard } from "./context/FormWizardProvider";
+import { useFormWizard } from "../../context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { FIELD_META } from "./model/fieldMeta";

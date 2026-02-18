@@ -8,7 +8,7 @@
 
 
 import { Outlet, useLocation } from "react-router-dom";
-import { FormWizardProvider } from "./context/FormWizardProvider";
+import { FormWizardProvider } from "../../context/FormWizardProvider";
 import NavBar from "../../components/NavBar";
 import { useEffect } from "react";
 

@@ -10,9 +10,9 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import type { FormData } from "../model/formFieldTypes";
-import { initialFormData } from "../model/initialState";
-import { clearDraft, loadDraft, saveDraft } from "../model/draftStorage";
+import type { FormData } from "../pages/Form/model/formFieldTypes";
+import { initialFormData } from "../pages/Form/model/initialState";
+import { clearDraft, loadDraft, saveDraft } from "../pages/Form/model/draftStorage";
 
 type FormWizardCtx = {
   formData: FormData;

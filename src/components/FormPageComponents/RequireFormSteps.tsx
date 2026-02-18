@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { Navigate } from "react-router-dom";
 
-import { useFormWizard } from "../../pages/Form/context/FormWizardProvider";
+import { useFormWizard } from "../../context/FormWizardProvider";
 import { getEnquirySelectionState } from "../../pages/Form/model/getEnquirySelectionState";
 import { computeCanGoNext } from "../../pages/Form/model/enquirySelectionLogic";
 import type { FormData } from "../../pages/Form/model/formFieldTypes";

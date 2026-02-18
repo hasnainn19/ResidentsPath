@@ -37,7 +37,7 @@ import StepShell from "../../components/FormPageComponents/StepShell";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
-import { useFormWizard } from "./context/FormWizardProvider";
+import { useFormWizard } from "../../context/FormWizardProvider";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import BookingPanel from "../../components/BookingPanel";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
