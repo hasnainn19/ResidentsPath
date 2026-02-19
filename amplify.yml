@@ -1,12 +1,9 @@
 version: 1
 backend:
     phases:
-        preBuild:
-            commands:
-                - npm config set build-from-source false
         build:
             commands:
-                - npm ci --cache .npm --prefer-offline
+                - npm_config_build_from_source=false npm ci --cache .npm --prefer-offline
                 - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 
 frontend:
