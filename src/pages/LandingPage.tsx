@@ -32,7 +32,7 @@ export default function LandingPage() {
 							variant="contained"
 							fullWidth
 							size="large"
-							onClick={() => navigate('/start')}
+							onClick={() => navigate('/referencepage')}
 						>
 							Continue as Visitor
 						</Button>
