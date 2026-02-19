@@ -1,6 +1,9 @@
 version: 1
 backend:
     phases:
+        preBuild:
+            commands:
+                - yum install -y libatomic
         build:
             commands:
                 - npm ci --cache .npm --prefer-offline
