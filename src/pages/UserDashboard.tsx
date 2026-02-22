@@ -22,6 +22,8 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
+    const [queuePosition, setQueuePosition] = useState(null); 
+    const [estWaitTime, setEstWaitTime] = useState(null);
 
     const handleStepOut = () => {
         setStepOut(true);
@@ -55,7 +57,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>You are the </Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>Nth</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>{queuePosition}</Typography>
                                             <Typography variant='body1'>person in the queue</Typography>
                                             <TextToSpeechButton text='You are the Nth person in the queue'/>
                                         </Item>
@@ -63,7 +65,7 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>Estimated waiting time is:</Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>15-30 minutes</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>{estWaitTime}</Typography>
                                             <TextToSpeechButton text='Estimated wait time is 15-30 minutes'/>
                                         </Item>
                                     </Grid>
