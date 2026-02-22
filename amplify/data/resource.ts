@@ -1,180 +1,301 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
-import { getTicketStatus } from '../functions/getTicketStatus/resource';
+import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { getTicketStatus } from "../functions/getTicketStatus/resource";
+import { submitEnquiry } from "../functions/submitEnquiry/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
 const schema = a.schema({
-	// User (Resident) - supports both registered users and walk-ins
-	User: a
-		.model({
-			cognitoUserId: a.string(), // Authentication link (null for walk-ins)
+  // User (Resident) - supports both registered users and walk-ins
+  User: a
+    .model({
+      cognitoUserId: a.string(), // Authentication link (null for walk-ins)
 
-			// Name fields (required for all users)
-			title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
-			firstName: a.string().required(),
-			lastName: a.string().required(),
-			middleNames: a.string(),
-			preferredName: a.string(),
+      // Name fields
+      title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
+      firstName: a.string(),
+      lastName: a.string(),
+      middleNames: a.string(),
+      preferredName: a.string(),
 
-			// Contact info (optional - walk-ins may not provide)
-			email: a.string(),
-			phoneNumber: a.string(),
+      // Contact info (optional - walk-ins may not provide)
+      email: a.string(),
+      phoneNumber: a.string(),
 
-			// Address fields (optional - may not have for walk-ins or homeless)
-			addressLine1: a.string(),
-			addressLine2: a.string(),
-			city: a.string(),
-			postcode: a.string(),
+      // Address fields (optional - may not have for walk-ins or homeless)
+      addressLine1: a.string(),
+      addressLine2: a.string(),
+      city: a.string(),
+      postcode: a.string(),
 
-			// Relationships
-			cases: a.hasMany("Case", "userId"),
-			appointments: a.hasMany("Appointment", "userId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can access user data directly
+      // Relationships
+      cases: a.hasMany("Case", "userId"),
+      appointments: a.hasMany("Appointment", "userId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Only staff can access user data directly
+    ]),
+
+  // Case - represents an issue or matter that a resident needs help with
+  Case: a
+    .model({
+      // Foreign keys
+      userId: a.id().required(),
+      departmentId: a.id().required(),
+
+      // Case information
+      referenceNumber: a.string().required(),
+      description: a.string(),
+      status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
+      priority: a.boolean().default(false),
+      flag: a.string(), // "SAFEGUARDING, VULNERABLE, URGENT"
+      notes: a.string(),
+
+      // Relationships
+      user: a.belongsTo("User", "userId"),
+      department: a.belongsTo("Department", "departmentId"),
+      tickets: a.hasMany("Ticket", "caseId"),
+      appointments: a.hasMany("Appointment", "caseId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Only staff can access cases directly
+    ]),
+
+  // Department - service departments (Housing, Council Tax, etc)
+  Department: a
+    .model({
+      // Department information
+      name: a.string().required(),
+      isActive: a.boolean().default(false), // Is this department currently operating?
+
+      // Relationships
+      cases: a.hasMany("Case", "departmentId"),
+      staff: a.hasMany("Staff", "departmentId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Staff can see all departments
+    ]),
+
+  // Ticket - represents a queue entry for a resident's visit
+  Ticket: a
+    .model({
+      // Foreign keys
+      caseId: a.id().required(),
+
+      // Display information
+      ticketNumber: a.string().required(),
+      // displayName: a.string().required(),
+
+      // Queue information
+      urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
+      placement: a.integer().required(),
+      estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
+      estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
+
+      // Timestamps for queue tracking
+      calledAt: a.datetime(),
+      completedAt: a.datetime(),
+
+      // Visit notes
+      notes: a.string(),
+
+      // Relationships
+      case: a.belongsTo("Case", "caseId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Staff can see all tickets
+    ]),
+
+  // Staff - represents a staff member at Hounslow
+  Staff: a
+    .model({
+      // Foreign keys
+      departmentId: a.id().required(),
+
+      // Staff information
+      cognitoUserId: a.string().required(), // Link to Cognito user for authentication
+      name: a.string().required(),
+      role: a.string().required(), // e.g "Receptionist"
+
+      // Current status
+      isAvailable: a.boolean().default(false),
+
+      // Relationships
+      department: a.belongsTo("Department", "departmentId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Only staff can see staff information
+    ]),
+
+  // Appointment - represents a scheduled appointment for a registered resident
+  Appointment: a
+    .model({
+      // Foreign keys
+      userId: a.id().required(),
+      caseId: a.id().required(),
+
+      // Appointment scheduling
+      date: a.date().required(),
+      time: a.time().required(),
+
+      // Appointment status
+      status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
+
+      // Additional information
+      notes: a.string(),
+
+      // Relationships
+      user: a.belongsTo("User", "userId"),
+      case: a.belongsTo("Case", "caseId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Only staff can access appointments directly
+    ]),
+
+  // Custom queries and mutations (lambdas defined in amplify/functions)
+  getTicketStatus: a
+    .query()
+    .arguments({
+      ticketNumber: a.string().required(),
+    })
+    .returns(
+      a.customType({
+        ticketNumber: a.string().required(),
+        status: a.string().required(),
+        placement: a.integer().required(),
+        estimatedWaitTimeLower: a.integer().required(),
+        estimatedWaitTimeUpper: a.integer().required(),
+      }),
+    )
+    .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
+    .handler(a.handler.function(getTicketStatus)),
+
+  submitEnquiry: a
+    .mutation()
+    .arguments({
+      input: a.customType({
+		DepartmentEnum: a.enum([
+			"Council Tax or Housing Benefit Help",
+			"Homelessness",
+			"Adults duty",
+			"Childrens duty",
+			"Community Hub Advisor",
+			"General customer services",
 		]),
-	
-	// Case - represents an issue or matter that a resident needs help with
-	Case: a
-		.model({
-			// Foreign keys
-			userId: a.id().required(),
-			departmentId: a.id().required(),
+		department: a.ref("DepartmentEnum").required(),
 
-			// Case information
-			referenceNumber: a.string().required(), 
-			description: a.string(),
-			status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
-			priority: a.boolean().default(false),
-			flag: a.string(), // "SAFEGUARDING, VULNERABLE, URGENT"
-			notes: a.string(),
+		firstName: a.string(),
+		middleName: a.string(),
+		lastName: a.string(),
+		preferredName: a.string(),
+		email: a.string(),
+		phoneCountry: a.string(),
+		phone: a.string(),
+		dob: a.string(),
 
-			// Relationships
-			user: a.belongsTo("User", "userId"),
-			department: a.belongsTo("Department", "departmentId"),
-			tickets: a.hasMany("Ticket", "caseId"),
-			appointments: a.hasMany("Appointment", "caseId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can access cases directly
+		addressLine1: a.string(),
+		addressLine2: a.string(),
+		addressLine3: a.string(),
+		townOrCity: a.string(),
+		postcode: a.string(),
+
+		pronouns: a.enum(["", "He/him", "She/her", "They/them", "Other", "Prefer not to say"]),
+		pronounsOther: a.string(),
+
+		enquiryId: a.string().required(),
+		specificDetailId: a.string(),
+
+		childrenCount: a.enum(["0", "1", "2", "3", "4", "5", "6+"]),
+
+		hasDisabilityOrSensory: a.boolean().required(),
+		disabilityType: a.enum([
+			"",
+			"Mobility impairment",
+			"Visual impairment",
+			"Hearing impairment",
+			"Cognitive / learning",
+			"Mental health",
+			"Other",
+			"Prefer not to say",
 		]),
 
-	// Department - service departments (Housing, Council Tax, etc)
-	Department: a
-		.model({
-			// Department information
-			name: a.string().required(),
-			isActive: a.boolean().default(false), // Is this department currently operating?
+		householdSize: a.enum(["", "1", "2", "3", "4", "5", "6+", "Prefer not to say"]),
 
-			// Relationships
-			cases: a.hasMany("Case", "departmentId"),
-			staff: a.hasMany("Staff", "departmentId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Staff can see all departments
+		domesticAbuse: a.boolean(),
+		safeToContact: a.enum(["yes", "no", "prefer_not_to_say"]),
+		safeContactNotes: a.string(),
+
+		ageRange: a.enum([
+			"",
+			"Under 18",
+			"18-24",
+			"25-34",
+			"35-44",
+			"45-54",
+			"55-64",
+			"65+",
+			"Prefer not to say",
 		]),
 
-	// Ticket - represents a queue entry for a resident's visit
-	Ticket: a
-		.model({
-			// Foreign keys
-			caseId: a.id().required(),
-
-			// Display information
-			ticketNumber: a.string().required(),
-			// displayName: a.string().required(),
-
-			// Queue information
-			urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-			status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
-			placement: a.integer().required(),
-			estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
-			estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
-
-			// Timestamps for queue tracking
-			calledAt: a.datetime(),
-			completedAt: a.datetime(),
-
-			// Visit notes
-			notes: a.string(),
-
-			// Relationships
-			case: a.belongsTo("Case", "caseId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Staff can see all tickets
+		urgent: a.enum(["yes", "no", "unsure"]),
+		urgentReason: a.enum([
+			"Safety concern",
+			"No safe place to stay tonight",
+			"Health or mobility",
+			"Time-limited today",
 		]),
+		urgentOtherReason: a.string(),
 
-	// Staff - represents a staff member at Hounslow
-	Staff: a
-		.model({
-			// Foreign keys
-			departmentId: a.id().required(),
+		additionalInfo: a.string(),
 
-			// Staff information
-			cognitoUserId: a.string().required(), // Link to Cognito user for authentication
-			name: a.string().required(),
-			role: a.string().required(), // e.g "Receptionist"
+		procedEnum: a.enum(["", "Book appointment", "Join digital queue"]),
+		proceed: a.ref("procedEnum").required(),
 
-			// Current status
-			isAvailable: a.boolean().default(false),
+		supportNeeds: a
+			.enum([
+			"ACCESSIBILITY",
+			"LANGUAGE",
+			"INTERPRETER",
+			"SEATING",
+			"WRITTEN_UPDATES",
+			"LARGE_TEXT",
+			"QUIET_SPACE",
+			"BSL",
+			"HELP_WITH_FORMS",
+			]),
 
-			// Relationships
-			department: a.belongsTo("Department", "departmentId"),
+		supportNotes: a.string(),
+		otherSupport: a.string(),
 
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can see staff information
-		]),
+		contactMethod: a.enum(["", "Text message", "Email"]),
 
-	// Appointment - represents a scheduled appointment for a registered resident
-	Appointment: a
-		.model({
-			// Foreign keys
-			userId: a.id().required(),
-			caseId: a.id().required(),
+		appointmentDateIso: a.string(),
+		appointmentTime: a.string(),
+        }),
+    })
+    .returns(
+      a.customType({
+		outcomeEnum: a.enum(["TICKET", "APPOINTMENT", "OTHER"]),
+        outcome: a.ref("outcomeEnum").required(),
+        referenceNumber: a.string().required(),
 
-			// Appointment scheduling
-			date: a.date().required(),
-			time: a.time().required(),
-
-			// Appointment status
-			status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
-
-			// Additional information
-			notes: a.string(),
-
-			// Relationships
-			user: a.belongsTo("User", "userId"),
-			case: a.belongsTo("Case", "caseId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can access appointments directly
-		]),
-	
-	// Custom queries and mutations (lambdas defined in amplify/functions)
-	getTicketStatus: a
-		.query()
-		.arguments({
-			ticketNumber: a.string().required()
-		})
-		.returns(a.customType({
-			ticketNumber: a.string().required(),
-			status: a.string().required(),
-			placement: a.integer().required(),
-			estimatedWaitTimeLower: a.integer().required(),
-			estimatedWaitTimeUpper: a.integer().required(),
-		}))
-		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
-		.handler(a.handler.function(getTicketStatus)),
-});
+        appointmentId: a.id().required(),
+      }),
+    )
+    .authorization((allow) => [allow.guest()])
+    .handler(a.handler.function(submitEnquiry)),
+})
+.authorization((allow) => [
+	allow.resource(submitEnquiry),
+	allow.resource(getTicketStatus),
+]);
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
-	schema,
-	authorizationModes: {
-		defaultAuthorizationMode: 'identityPool',
-	},
+  schema,
+  authorizationModes: {
+    defaultAuthorizationMode: "identityPool",
+  },
 });
