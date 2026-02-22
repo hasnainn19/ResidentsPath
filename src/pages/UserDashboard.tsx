@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
+import type { Schema } from '../../amplify/data/resource';
 
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
@@ -18,12 +20,14 @@ const Item = styled(Paper)(({ theme }) => ({
     boxSizing: "border-box",  
 }));
 
+const client = generateClient<Schema>();
 
 export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
     const [queuePosition, setQueuePosition] = useState(null); 
     const [estWaitTime, setEstWaitTime] = useState(null);
+    const [tickets, setTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
 
     const handleStepOut = () => {
         setStepOut(true);
@@ -34,6 +38,51 @@ export default function UserDashboard() {
         setStepOut(false);
         setShowStepOutAlert(false);
     };
+
+    useEffect(() => {
+    // async function fetchDailyTickets() {
+    //   try {
+    //     const { data, errors } = await client.queries.getDailyTickets();
+
+    //     if (errors) {
+    //       console.error(errors);
+    //       return;
+    //     }
+
+    //     setTickets(data ?? []);
+    //   } catch (err) {
+    //     console.error("Failed to fetch tickets:", err);
+    //   }
+    // }
+
+    async function fetchDailyTickets() {
+      try {
+        const { data, errors } = await client.queries.getDailyTickets();
+
+        if (errors) {
+          console.error(errors);
+          return;
+        }
+
+        // Ensure we only pass non-null items to setTickets
+        const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
+        const filtered = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
+
+        setTickets(filtered);
+      } catch (err) {
+        console.error("Failed to fetch tickets:", err);
+      }
+    }
+
+    fetchDailyTickets();
+  }, []);
+
+    
+    function calculateWaitTime () {
+
+    }
+
+    
 
     return (
         <>
