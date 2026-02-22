@@ -8,6 +8,10 @@ import { CssBaseline } from '@mui/material'
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
+import { Amplify } from 'aws-amplify'
+import outputs from '../amplify_outputs.json'
+Amplify.configure(outputs);
+
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
