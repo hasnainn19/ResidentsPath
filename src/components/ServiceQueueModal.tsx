@@ -92,11 +92,11 @@ const ServiceQueueModal = ({
   const handleConfirmationClose = () => setConfirmationModalOpen(false);
 
   const handleDragStart = (event: any) => {
-    console.log("Drag started:", event);
+    console.log("Drag started:", event); //Dummy function until logic is implemented
   };
 
   const handleDragOver = (event: any) => {
-    console.log("Drag over:", event);
+    console.log("Drag over:", event); //Dummy function until logic is implemented
   };
 
   const handleDragEnd = (event: any) => {
