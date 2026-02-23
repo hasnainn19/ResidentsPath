@@ -53,7 +53,7 @@ const schema = a.schema({
       notes: a.string(),
 
       // What is being requested
-      enquiry: a.string().required(), 
+      enquiry: a.string().required(),
 
       // Prioritisation criteria
       childrenCount: a.string(),
@@ -69,15 +69,15 @@ const schema = a.schema({
 
       urgent: a.enum(["yes", "no", "unsure"]),
       urgentReason: a.enum([
-        "Safety concern",
-        "No safe place to stay tonight",
-        "Health or mobility",
-        "Time-limited today",
+        "SAFETY_CONCERN",
+        "NO_SAFE_PLACE_TO_STAY_TONIGHT",
+        "HEALTH_OR_MOBILITY",
+        "TIME_LIMITED_TODAY",
       ]),
       urgentOtherReason: a.string(),
 
       // Support needs
-      supportNeedsJson: a.string(), 
+      supportNeedsJson: a.string(),
       supportNotes: a.string(),
       otherSupport: a.string(),
 
@@ -202,20 +202,12 @@ const schema = a.schema({
     )
     .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
     .handler(a.handler.function(getTicketStatus)),
-
+    
   submitEnquiry: a
     .mutation()
     .arguments({
       input: a.customType({
-		DepartmentEnum: a.enum([
-			"Council Tax or Housing Benefit Help",
-			"Homelessness",
-			"Adults duty",
-			"Childrens duty",
-			"Community Hub Advisor",
-			"General customer services",
-		]),
-		department: a.ref("DepartmentEnum").required(),
+		department: a.string().required(),
 
 		firstName: a.string(),
 		middleName: a.string(),
@@ -232,75 +224,39 @@ const schema = a.schema({
 		townOrCity: a.string(),
 		postcode: a.string(),
 
-		pronouns: a.enum(["", "He/him", "She/her", "They/them", "Other", "Prefer not to say"]),
+		pronouns: a.string(),
 		pronounsOther: a.string(),
 
 		enquiry: a.string().required(),
 		specificDetailId: a.string(),
 
-		childrenCount: a.enum(["0", "1", "2", "3", "4", "5", "6+"]),
+		childrenCount: a.string(),
 
 		hasDisabilityOrSensory: a.boolean(),
-		disabilityType: a.enum([
-			"",
-			"Mobility impairment",
-			"Visual impairment",
-			"Hearing impairment",
-			"Cognitive / learning",
-			"Mental health",
-			"Other",
-			"Prefer not to say",
-		]),
+		disabilityType: a.string(),
 
-		householdSize: a.enum(["", "1", "2", "3", "4", "5", "6+", "Prefer not to say"]),
+		householdSize: a.string(),
 
 		domesticAbuse: a.boolean(),
-		safeToContact: a.enum(["yes", "no", "prefer_not_to_say"]),
+		safeToContact: a.string(),
 		safeContactNotes: a.string(),
 
-		ageRange: a.enum([
-			"",
-			"Under 18",
-			"18-24",
-			"25-34",
-			"35-44",
-			"45-54",
-			"55-64",
-			"65+",
-			"Prefer not to say",
-		]),
+		ageRange: a.string(),
 
-		urgent: a.enum(["yes", "no", "unsure"]),
-		urgentReason: a.enum([
-			"Safety concern",
-			"No safe place to stay tonight",
-			"Health or mobility",
-			"Time-limited today",
-		]),
-		urgentOtherReason: a.string(),
+		urgent: a.string(),
+		urgentReason: a.string(),
 
 		additionalInfo: a.string(),
 
-		procedEnum: a.enum(["", "Book appointment", "Join digital queue"]),
-		proceed: a.ref("procedEnum").required(),
+		procedEnum: a.string(),
+		proceed: a.string().required(),
 
-		supportNeeds: a
-			.enum([
-			"ACCESSIBILITY",
-			"LANGUAGE",
-			"INTERPRETER",
-			"SEATING",
-			"WRITTEN_UPDATES",
-			"LARGE_TEXT",
-			"QUIET_SPACE",
-			"BSL",
-			"HELP_WITH_FORMS",
-			]),
+		supportNeeds: a.string().array(),
 
 		supportNotes: a.string(),
 		otherSupport: a.string(),
 
-		contactMethod: a.enum(["", "Text message", "Email"]),
+		contactMethod: a.string(),
 
 		appointmentDateIso: a.string(),
 		appointmentTime: a.string(),

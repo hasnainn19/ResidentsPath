@@ -17,22 +17,25 @@ import type { FormData } from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../../amplify/data/resource";
+import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
+
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
-  // TODO(BACKEND)
-  const submitToBackend = () => {
-    const payload = {
-      ...formData,
-      ageRange: formData.dob ? "" : formData.ageRange,
-      childrenCount: formData.hasChildren ? formData.childrenCount : "0",
-      disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
-      urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
-    };
+  
+  const client = useMemo(() => generateClient<Schema>(), []);
+
+  const submitToBackend = async () => {
+    const payload = buildSubmitEnquiryPayload(formData);
+    const response = await client.mutations.submitEnquiry({ input: payload });
+    console.log("Backend response:", response);
     clearSavedDraft();
   };
+
 
   function isNotNull<T>(x: T | null | undefined | false): x is T {
     return x !== null && x !== undefined && x !== false;

@@ -1,57 +1,69 @@
 import { randomBytes } from "crypto";
 import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
-import { ref } from "process";
+import { Amplify } from "aws-amplify";
+import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+import { env } from "$amplify/env/submitEnquiry";
+
+let configured = false;
+
+async function ensureAmplifyConfigured() {
+  if (configured) return;
+  const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
+  Amplify.configure(resourceConfig, libraryOptions);
+  configured = true;
+}
 
 const DEPARTMENTS = [
-  "Council Tax or Housing Benefit Help",
-  "Homelessness",
-  "Adults duty",
-  "Childrens duty",
-  "Community Hub Advisor",
-  "General customer services",
+  "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
+  "HOMELESSNESS",
+  "ADULTS_DUTY",
+  "CHILDRENS_DUTY",
+  "COMMUNITY_HUB_ADVISOR",
+  "GENERAL_CUSTOMER_SERVICES",
 ] as const;
 
-const PROCEED = ["Book appointment", "Join digital queue"] as const;
+const PROCEED = ["BOOK_APPOINTMENT", "JOIN_DIGITAL_QUEUE"] as const;
 
-const CONTACT_METHOD = ["Text message", "Email"] as const;
+const CONTACT_METHOD = ["TEXT_MESSAGE", "EMAIL"] as const;
 
 const SAFE_TO_CONTACT = ["yes", "no", "prefer_not_to_say"] as const;
 
-const PRONOUNS = ["He/him", "She/her", "They/them", "Other", "Prefer not to say"] as const;
+const PRONOUNS = ["", "HE_HIM", "SHE_HER", "THEY_THEM", "OTHER", "PREFER_NOT_TO_SAY"] as const;
 
 const URGENT = ["yes", "no", "unsure"] as const;
 
 const URGENT_REASON = [
-  "Safety concern",
-  "No safe place to stay tonight",
-  "Health or mobility",
-  "Time-limited today",
+  "SAFETY_CONCERN",
+  "NO_SAFE_PLACE_TO_STAY_TONIGHT",
+  "HEALTH_OR_MOBILITY",
+  "TIME_LIMITED_TODAY",
 ] as const;
 
 const CHILDREN_COUNT = ["0", "1", "2", "3", "4", "5", "6+"] as const;
 
 const DISABILITY_TYPE = [
-  "Mobility impairment",
-  "Visual impairment",
-  "Hearing impairment",
-  "Cognitive / learning",
-  "Mental health",
-  "Other",
-  "Prefer not to say",
+  "MOBILITY_IMPAIRMENT",
+  "VISUAL_IMPAIRMENT",
+  "HEARING_IMPAIRMENT",
+  "COGNITIVE_LEARNING",
+  "MENTAL_HEALTH",
+  "OTHER",
+  "PREFER_NOT_TO_SAY",
 ] as const;
 
-const HOUSEHOLD_SIZE = ["1", "2", "3", "4", "5", "6+", "Prefer not to say"] as const;
+const HOUSEHOLD_SIZE = ["1", "2", "3", "4", "5", "6+", "PREFER_NOT_TO_SAY"] as const;
+
 
 const AGE_RANGE = [
-  "Under 18",
-  "18-24",
-  "25-34",
-  "35-44",
-  "45-54",
-  "55-64",
-  "65+",
-  "Prefer not to say",
+  "UNDER_18",
+  "AGE_18_24",
+  "AGE_25_34",
+  "AGE_35_44",
+  "AGE_45_54",
+  "AGE_55_64",
+  "AGE_65_PLUS",
+  "PREFER_NOT_TO_SAY",
 ] as const;
 
 const SUPPORT_NEEDS = [
@@ -79,56 +91,67 @@ const HYGIENE = {
   PHONE_COUNTRY_MAX: 50,
 } as const;
 
+const LABEL = {
+  DEPARTMENT: "Department",
+  ENQUIRY: "Enquiry",
+  PROCEED: "Proceed",
+  APPOINTMENT_DATE: "appointmentDateIso",
+  APPOINTMENT_TIME: "appointmentTime",
+  PRONOUNS: "Pronouns",
+  PRONOUNS_OTHER: "pronounsOther",
+  DOMESTIC_ABUSE: "domesticAbuse",
+  SAFE_TO_CONTACT: "safeToContact",
+  SAFE_CONTACT_NOTES: "safeContactNotes",
+  URGENT: "urgent",
+  URGENT_REASON: "urgentReason",
+  URGENT_OTHER_REASON: "urgentOtherReason",
+  CONTACT_METHOD: "contactMethod",
+  EMAIL: "Email",
+  PHONE: "Phone",
+  PHONE_COUNTRY: "Phone country",
+  POSTCODE: "Postcode",
+  SUPPORT_NEEDS: "supportNeeds",
+} as const;
+
 const ALLOWED_KEYS = new Set([
   "department",
   "enquiry",
-
   "proceed",
   "appointmentDateIso",
   "appointmentTime",
-
   "firstName",
   "middleName",
   "lastName",
   "preferredName",
   "pronouns",
   "pronounsOther",
-
   "addressLine1",
   "addressLine2",
   "addressLine3",
   "townOrCity",
   "postcode",
-
   "contactMethod",
   "email",
   "phone",
   "phoneCountry",
-
   "childrenCount",
   "householdSize",
   "ageRange",
-
   "hasDisabilityOrSensory",
   "disabilityType",
-
   "domesticAbuse",
   "safeToContact",
   "safeContactNotes",
-
   "urgent",
   "urgentReason",
   "urgentOtherReason",
-
   "supportNeeds",
   "supportNotes",
   "otherSupport",
-
   "otherEnquiryText",
   "additionalInfo",
 ]);
 
-// Remove fields that are null, undefined, empty strings, or empty arrays/objects after cleaning
 export function removeIrrelevantFields<T>(value: T): T | undefined {
   if (value === null || value === undefined) return undefined;
 
@@ -141,7 +164,6 @@ export function removeIrrelevantFields<T>(value: T): T | undefined {
     const filtered = value
       .map((item) => removeIrrelevantFields(item))
       .filter((item) => item !== undefined) as any;
-
     return filtered.length === 0 ? undefined : filtered;
   }
 
@@ -176,7 +198,6 @@ function assertOptionalStringMaxLen(value: unknown, maxLen: number, label: strin
   assertMaxLen(value, maxLen, label);
 }
 
-// Assert that value is one of the allowed strings (enums)
 function assertOneOf<T extends readonly string[]>(
   value: unknown,
   allowed: T,
@@ -186,15 +207,14 @@ function assertOneOf<T extends readonly string[]>(
   assert(allowed.includes(value), `${label} is invalid`);
 }
 
-// Assert every item in the array is one of the allowed strings (enums)
 function assertArrayOfOneOf<T extends readonly string[]>(
   value: unknown,
   allowed: T,
   label: string,
 ): asserts value is Array<T[number]> {
   assert(Array.isArray(value), `${label} must be an array`);
-  for (const item of value) {
-    assertOneOf(item, allowed, `${label} item`);
+  for (let i = 0; i < value.length; i++) {
+    assertOneOf(value[i], allowed, `${label}[${i}]`);
   }
 }
 
@@ -212,8 +232,7 @@ function assertIsoDate(value: unknown, label: string): asserts value is string {
   const m = Number(value.slice(5, 7));
   const d = Number(value.slice(8, 10));
   const dt = new Date(Date.UTC(y, m - 1, d));
-  const isValid =
-    dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  const isValid = dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
 
   assert(isValid, `${label} must be a real date`);
 }
@@ -243,25 +262,22 @@ function assertUniqueStrings(arr: string[], label: string) {
   assert(set.size === arr.length, `${label} must not contain duplicates`);
 }
 
-
 function assertEnquiryName(value: unknown) {
-  assertNonEmptyString(value, "Enquiry");
-  assertMaxLen(value, HYGIENE.ENQUIRY_ID_MAX, "Enquiry");
+  assertNonEmptyString(value, LABEL.ENQUIRY);
+  assertMaxLen(value, HYGIENE.ENQUIRY_ID_MAX, LABEL.ENQUIRY);
   assert(!/[\u0000-\u001F\u007F]/.test(value), "Enquiry contains invalid control characters");
   assert(!/[<>]/.test(value), "Enquiry contains invalid characters");
 }
 
 function validateProceed(cleanedInput: any) {
-  assertOneOf(cleanedInput.proceed, PROCEED, "Proceed");
+  assertOneOf(cleanedInput.proceed, PROCEED, LABEL.PROCEED);
 
-  // If booking an appointment, date and time are required and must be valid
   if (cleanedInput.proceed === "Book appointment") {
-    assertIsoDate(cleanedInput.appointmentDateIso, "appointmentDateIso");
-    assertTimeHHmm(cleanedInput.appointmentTime, "appointmentTime");
+    assertIsoDate(cleanedInput.appointmentDateIso, LABEL.APPOINTMENT_DATE);
+    assertTimeHHmm(cleanedInput.appointmentTime, LABEL.APPOINTMENT_TIME);
     return;
   }
 
-  // If joining the queue, date and time must not be provided
   assert(cleanedInput.appointmentDateIso === undefined, "appointmentDateIso must not be provided for queue");
   assert(cleanedInput.appointmentTime === undefined, "appointmentTime must not be provided for queue");
 }
@@ -275,24 +291,30 @@ function validatePronouns(cleanedInput: any) {
     return;
   }
 
-  assertOneOf(cleanedInput.pronouns, PRONOUNS, "Pronouns");
+  assertOneOf(cleanedInput.pronouns, PRONOUNS, LABEL.PRONOUNS);
 
   if (cleanedInput.pronouns === "Other") {
-    assertNonEmptyString(cleanedInput.pronounsOther, "pronounsOther");
-    assertMaxLen(cleanedInput.pronounsOther, LIMIT.SHORT, "pronounsOther");
+    assertNonEmptyString(cleanedInput.pronounsOther, LABEL.PRONOUNS_OTHER);
+    assertMaxLen(cleanedInput.pronounsOther, LIMIT.SHORT, LABEL.PRONOUNS_OTHER);
     return;
   }
 
-  assert(cleanedInput.pronounsOther === undefined, "pronounsOther must not be provided unless pronouns is Other");
+  assert(
+    cleanedInput.pronounsOther === undefined,
+    "pronounsOther must not be provided unless pronouns is Other",
+  );
 }
 
 function validateDomesticAbuse(cleanedInput: any) {
   if (cleanedInput.domesticAbuse !== undefined) {
-    assert(typeof cleanedInput.domesticAbuse === "boolean", "domesticAbuse must be a boolean");
+    assert(typeof cleanedInput.domesticAbuse === "boolean", `${LABEL.DOMESTIC_ABUSE} must be a boolean`);
   }
 
   if (cleanedInput.domesticAbuse !== true) {
-    assert(cleanedInput.safeToContact === undefined, "safeToContact must not be provided unless domesticAbuse is true");
+    assert(
+      cleanedInput.safeToContact === undefined,
+      "safeToContact must not be provided unless domesticAbuse is true",
+    );
     assert(
       cleanedInput.safeContactNotes === undefined,
       "safeContactNotes must not be provided unless domesticAbuse is true",
@@ -300,11 +322,11 @@ function validateDomesticAbuse(cleanedInput: any) {
     return;
   }
 
-  assertOneOf(cleanedInput.safeToContact, SAFE_TO_CONTACT, "safeToContact");
+  assertOneOf(cleanedInput.safeToContact, SAFE_TO_CONTACT, LABEL.SAFE_TO_CONTACT);
 
   if (cleanedInput.safeToContact === "no") {
-    assertNonEmptyString(cleanedInput.safeContactNotes, "safeContactNotes");
-    assertMaxLen(cleanedInput.safeContactNotes, LIMIT.XLONG, "safeContactNotes");
+    assertNonEmptyString(cleanedInput.safeContactNotes, LABEL.SAFE_CONTACT_NOTES);
+    assertMaxLen(cleanedInput.safeContactNotes, LIMIT.XLONG, LABEL.SAFE_CONTACT_NOTES);
     return;
   }
 
@@ -317,14 +339,11 @@ function validateDomesticAbuse(cleanedInput: any) {
 function validateUrgent(cleanedInput: any) {
   if (cleanedInput.urgent === undefined) return;
 
-  assertOneOf(cleanedInput.urgent, URGENT, "urgent");
+  assertOneOf(cleanedInput.urgent, URGENT, LABEL.URGENT);
 
   if (cleanedInput.urgent !== "yes") {
     assert(cleanedInput.urgentReason === undefined, "urgentReason must not be provided unless urgent is yes");
-    assert(
-      cleanedInput.urgentOtherReason === undefined,
-      "urgentOtherReason must not be provided unless urgent is yes",
-    );
+    assert(cleanedInput.urgentOtherReason === undefined, "urgentOtherReason must not be provided unless urgent is yes");
     return;
   }
 
@@ -333,14 +352,22 @@ function validateUrgent(cleanedInput: any) {
 
   assert(hasReason || hasOther, "urgentReason or urgentOtherReason is required when urgent is yes");
 
-  if (hasReason) assertOneOf(cleanedInput.urgentReason, URGENT_REASON, "urgentReason");
+  if (hasReason) assertOneOf(cleanedInput.urgentReason, URGENT_REASON, LABEL.URGENT_REASON);
   if (hasOther) {
-    assertNonEmptyString(cleanedInput.urgentOtherReason, "urgentOtherReason");
-    assertMaxLen(cleanedInput.urgentOtherReason, LIMIT.LONG, "urgentOtherReason");
+    assertNonEmptyString(cleanedInput.urgentOtherReason, LABEL.URGENT_OTHER_REASON);
+    assertMaxLen(cleanedInput.urgentOtherReason, LIMIT.LONG, LABEL.URGENT_OTHER_REASON);
   }
 }
 
 function validateDisability(cleanedInput: any) {
+  if (cleanedInput.hasDisabilityOrSensory === undefined) {
+    assert(
+      cleanedInput.disabilityType === undefined,
+      "disabilityType must not be provided when hasDisabilityOrSensory is missing",
+    );
+    return;
+  }
+
   assert(typeof cleanedInput.hasDisabilityOrSensory === "boolean", "hasDisabilityOrSensory must be a boolean");
 
   if (cleanedInput.hasDisabilityOrSensory === true && cleanedInput.disabilityType !== undefined) {
@@ -370,9 +397,40 @@ function normaliseUkPostcode(value: string): string {
 
 function assertUkPostcodeFormat(value: string, label: string) {
   const compact = value.replace(/\s+/g, "").toUpperCase();
-  const re =
-    /^(GIR0AA|[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2})$/;
+  const re = /^(GIR0AA|[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2})$/;
   assert(re.test(compact), `${label} format is invalid`);
+}
+
+function normaliseInput(cleanedInput: any) {
+  const out = { ...cleanedInput };
+
+  if (out.email !== undefined) {
+    assert(typeof out.email === "string", `${LABEL.EMAIL} must be a string`);
+    out.email = normaliseEmail(out.email);
+  }
+
+  if (out.phone !== undefined) {
+    assert(typeof out.phone === "string", `${LABEL.PHONE} must be a string`);
+    out.phone = normalisePhone(out.phone);
+  }
+
+  if (out.phoneCountry !== undefined) {
+    assert(typeof out.phoneCountry === "string", `${LABEL.PHONE_COUNTRY} must be a string`);
+    out.phoneCountry = out.phoneCountry.trim();
+  }
+
+  if (out.postcode !== undefined) {
+    assert(typeof out.postcode === "string", `${LABEL.POSTCODE} must be a string`);
+    out.postcode = normaliseUkPostcode(out.postcode);
+  }
+
+  return out;
+}
+
+function getSupportNeedsJson(cleanedInput: any): string | undefined {
+  if (cleanedInput.supportNeeds === undefined) return undefined;
+  assertArrayOfOneOf(cleanedInput.supportNeeds, SUPPORT_NEEDS, LABEL.SUPPORT_NEEDS);
+  return JSON.stringify(cleanedInput.supportNeeds);
 }
 
 function validateOptionals(cleanedInput: any) {
@@ -386,82 +444,63 @@ function validateOptionals(cleanedInput: any) {
   assertOptionalStringMaxLen(cleanedInput.townOrCity, LIMIT.SHORT, "Town or city");
 
   if (cleanedInput.postcode !== undefined) {
-    assert(typeof cleanedInput.postcode === "string", "Postcode must be a string");
-    cleanedInput.postcode = normaliseUkPostcode(cleanedInput.postcode);
-    assertMaxLen(cleanedInput.postcode, LIMIT.SHORT, "Postcode");
-    assertUkPostcodeFormat(cleanedInput.postcode, "Postcode");
+    assertMaxLen(cleanedInput.postcode, LIMIT.SHORT, LABEL.POSTCODE);
+    assertUkPostcodeFormat(cleanedInput.postcode, LABEL.POSTCODE);
   }
 
   assertOptionalStringMaxLen(cleanedInput.otherEnquiryText, LIMIT.XLONG, "Describe your enquiry");
-  assertOptionalStringMaxLen(cleanedInput.urgentOtherReason, LIMIT.LONG, "urgentOtherReason");
+  assertOptionalStringMaxLen(cleanedInput.urgentOtherReason, LIMIT.LONG, LABEL.URGENT_OTHER_REASON);
   assertOptionalStringMaxLen(cleanedInput.additionalInfo, LIMIT.XLONG, "additionalInfo");
   assertOptionalStringMaxLen(cleanedInput.supportNotes, LIMIT.LONG, "supportNotes");
   assertOptionalStringMaxLen(cleanedInput.otherSupport, LIMIT.LONG, "otherSupport");
 
-  if (cleanedInput.childrenCount !== undefined) assertOneOf(cleanedInput.childrenCount, CHILDREN_COUNT, "childrenCount");
-  if (cleanedInput.householdSize !== undefined) assertOneOf(cleanedInput.householdSize, HOUSEHOLD_SIZE, "householdSize");
-  if (cleanedInput.ageRange !== undefined) assertOneOf(cleanedInput.ageRange, AGE_RANGE, "ageRange");
+  if (cleanedInput.childrenCount !== undefined) {
+    assertOneOf(cleanedInput.childrenCount, CHILDREN_COUNT, "childrenCount");
+  }
+  if (cleanedInput.householdSize !== undefined) {
+    assertOneOf(cleanedInput.householdSize, HOUSEHOLD_SIZE, "householdSize");
+  }
+  if (cleanedInput.ageRange !== undefined) {
+    assertOneOf(cleanedInput.ageRange, AGE_RANGE, "ageRange");
+  }
 
   if (cleanedInput.supportNeeds !== undefined) {
-    let arr: string[];
-    if (Array.isArray(cleanedInput.supportNeeds)) {
-      assertArrayOfOneOf(cleanedInput.supportNeeds, SUPPORT_NEEDS, "supportNeeds");
-      assert(cleanedInput.supportNeeds.length <= 6, "supportNeeds has too many items");
-      assertUniqueStrings(cleanedInput.supportNeeds, "supportNeeds");
-      arr = cleanedInput.supportNeeds;
-    } else {
-      assertOneOf(cleanedInput.supportNeeds, SUPPORT_NEEDS, "supportNeeds");
-      arr = [cleanedInput.supportNeeds];
-    }
-    cleanedInput.supportNeedsJson = JSON.stringify(arr);
-  } else {
-    cleanedInput.supportNeedsJson = undefined;
+    assertArrayOfOneOf(cleanedInput.supportNeeds, SUPPORT_NEEDS, LABEL.SUPPORT_NEEDS);
+    assert(cleanedInput.supportNeeds.length <= 6, "supportNeeds has too many items");
+    assertUniqueStrings(cleanedInput.supportNeeds, LABEL.SUPPORT_NEEDS);
   }
 }
 
 function validateContact(cleanedInput: any) {
-  if (cleanedInput.email !== undefined) {
-    assert(typeof cleanedInput.email === "string", "Email must be a string");
-    cleanedInput.email = normaliseEmail(cleanedInput.email);
-  }
-  if (cleanedInput.phone !== undefined) {
-    assert(typeof cleanedInput.phone === "string", "phone must be a string");
-    cleanedInput.phone = normalisePhone(cleanedInput.phone);
-  }
-  if (cleanedInput.phoneCountry !== undefined) {
-    assert(typeof cleanedInput.phoneCountry === "string", "phoneCountry must be a string");
-    cleanedInput.phoneCountry = cleanedInput.phoneCountry.trim();
-  }
-
   if (cleanedInput.contactMethod === undefined) {
-    if (cleanedInput.email !== undefined) assertEmail(cleanedInput.email, "Email");
-    if (cleanedInput.phone !== undefined) assertPhone(cleanedInput.phone, "phone");
+    if (cleanedInput.email !== undefined) assertEmail(cleanedInput.email, LABEL.EMAIL);
+    if (cleanedInput.phone !== undefined) assertPhone(cleanedInput.phone, LABEL.PHONE);
     if (cleanedInput.phoneCountry !== undefined) {
-      assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, "phoneCountry");
+      assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, LABEL.PHONE_COUNTRY);
     }
     return;
   }
 
-  assertOneOf(cleanedInput.contactMethod, CONTACT_METHOD, "contactMethod");
+  assertOneOf(cleanedInput.contactMethod, CONTACT_METHOD, LABEL.CONTACT_METHOD);
 
   if (cleanedInput.contactMethod === "Email") {
-    assertEmail(cleanedInput.email, "Email");
-    if (cleanedInput.phone !== undefined) assertPhone(cleanedInput.phone, "phone");
+    assertEmail(cleanedInput.email, LABEL.EMAIL);
+    if (cleanedInput.phone !== undefined) assertPhone(cleanedInput.phone, LABEL.PHONE);
     if (cleanedInput.phoneCountry !== undefined) {
-      assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, "phoneCountry");
+      assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, LABEL.PHONE_COUNTRY);
     }
     return;
   }
 
-  assertNonEmptyString(cleanedInput.phoneCountry, "phoneCountry");
-  assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, "phoneCountry");
-  assertPhone(cleanedInput.phone, "phone");
+  assertNonEmptyString(cleanedInput.phoneCountry, LABEL.PHONE_COUNTRY);
+  assertMaxLen(cleanedInput.phoneCountry, HYGIENE.PHONE_COUNTRY_MAX, LABEL.PHONE_COUNTRY);
+  assertPhone(cleanedInput.phone, LABEL.PHONE);
 
-  if (cleanedInput.email !== undefined) assertEmail(cleanedInput.email, "Email");
+  if (cleanedInput.email !== undefined) assertEmail(cleanedInput.email, LABEL.EMAIL);
 }
 
 function validateRequired(cleanedInput: any) {
-  assertOneOf(cleanedInput.department, DEPARTMENTS, "Department");
+  assertOneOf(cleanedInput.department, DEPARTMENTS, LABEL.DEPARTMENT);
   assertEnquiryName(cleanedInput.enquiry);
 }
 
@@ -497,10 +536,13 @@ export function generateReferenceNumber(): string {
 
 export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event) => {
   const { input } = event.arguments;
-  const cleanedInput = removeIrrelevantFields(input) as any;
+  const cleanedRaw = removeIrrelevantFields(input) as any;
 
-  assert(cleanedInput, "Input cannot be empty or only contain irrelevant fields");
-  assertNoUnknownKeys(cleanedInput);
+  assert(cleanedRaw, "Input cannot be empty or only contain irrelevant fields");
+  assertNoUnknownKeys(cleanedRaw);
+
+  const cleanedInput = normaliseInput(cleanedRaw);
+  const supportNeedsJson = getSupportNeedsJson(cleanedInput);
 
   validateRequired(cleanedInput);
   validateDisability(cleanedInput);
@@ -511,16 +553,12 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   validateOptionals(cleanedInput);
   validateContact(cleanedInput);
 
-  const client = generateClient<Schema>({
-    authMode: "iam",
-  });
+  await ensureAmplifyConfigured();
+  const client = generateClient<Schema>({ authMode: "iam" });
 
   const identity = event.identity;
-
   const sub =
-    identity && typeof identity === "object" && "sub" in identity
-      ? (identity.sub as string)
-      : null;
+    identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
 
   let userId: string | null = null;
   let createdGuestUserId: string | null = null;
@@ -545,7 +583,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       cognitoUserId: sub ?? undefined,
 
       firstName: cleanedInput.firstName,
-      middleNames: cleanedInput.middleNames,
+      middleNames: cleanedInput.middleName,
       lastName: cleanedInput.lastName,
       preferredName: cleanedInput.preferredName,
 
@@ -559,8 +597,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       postcode: cleanedInput.postcode,
     }) as any;
 
-    const { data: guestUserData, errors: guestUserErrors } =
-      await client.models.User.create(userCreateInput);
+    const { data: guestUserData, errors: guestUserErrors } = await client.models.User.create(userCreateInput);
 
     if (guestUserErrors?.length || !guestUserData?.id) {
       logModelErrors("submitEnquiry: User.create failed", guestUserErrors);
@@ -599,15 +636,14 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       urgentReason: cleanedInput.urgentReason,
       urgentOtherReason: cleanedInput.urgentOtherReason,
 
-      supportNeedsJson: cleanedInput.supportNeedsJson,
+      supportNeedsJson,
       supportNotes: cleanedInput.supportNotes,
       otherSupport: cleanedInput.otherSupport,
 
       additionalInfo: cleanedInput.additionalInfo,
     }) as any;
 
-    const { data: caseData, errors: caseErrors } =
-      await client.models.Case.create(caseCreateInput);
+    const { data: caseData, errors: caseErrors } = await client.models.Case.create(caseCreateInput);
 
     if (caseErrors?.length || !caseData?.id) {
       logModelErrors("submitEnquiry: Case.create failed", caseErrors);
@@ -617,15 +653,14 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     createdCaseId = caseData.id;
 
     if (cleanedInput.proceed === "Book appointment") {
-      const { data: apptData, errors: appointmentErrors } =
-        await client.models.Appointment.create({
-          caseId: createdCaseId,
-          userId,
-          date: cleanedInput.appointmentDateIso,
-          time: cleanedInput.appointmentTime,
-          status: "SCHEDULED",
-          notes: null,
-        });
+      const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
+        caseId: createdCaseId,
+        userId,
+        date: cleanedInput.appointmentDateIso,
+        time: cleanedInput.appointmentTime,
+        status: "SCHEDULED",
+        notes: null,
+      });
 
       if (appointmentErrors?.length || !apptData?.id) {
         logModelErrors("submitEnquiry: Appointment.create failed", appointmentErrors);
@@ -633,7 +668,6 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       }
 
       createdAppointmentId = apptData.id;
-
       return { referenceNumber };
     }
 
@@ -651,7 +685,6 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     createdTicketId = ticketData.id;
-
     return { referenceNumber };
   } catch (e) {
     try {
