@@ -1,3 +1,9 @@
+/*UserDashboard Page */
+.dashboardBtn.MuiButton-root {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 15px;
+}
 /*BookingPage */
 .bookingpage-time-list::-webkit-scrollbar {
   width: 8px;
@@ -29,6 +35,12 @@ scrollbar-color: #6d3874 #f0f0f0;
 
 .bookingpage-time-list .bookingpage-time-list-item-btn.Mui-selected:hover {
   background-color: #C2B8DB;
+}
+
+/* Reference Page */
+
+.referencepage-check-status-btn:hover {
+    background-color: #502555
 }
 
 

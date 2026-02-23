@@ -46,7 +46,7 @@ export default function NavBar() {
               <Button color="inherit">Queue</Button>
             </Tooltip>
             <Tooltip title="Create your case">
-              <Button color="inherit">Form</Button>
+              <Button color="inherit" onClick={() => navigate("/form")}>Form</Button>
             </Tooltip>
             <Box>
               <Tooltip title="Open user settings">
