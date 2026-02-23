@@ -11,7 +11,6 @@ import {
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupsIcon from "@mui/icons-material/Groups";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
-import EventIcon from "@mui/icons-material/Event";
 import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
 const drawerWidth = 240;
@@ -86,7 +85,7 @@ const StaffNavbar = () => {
           />
           <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
         </Box>
-        <Box>
+        <Box sx={{ mb: 2, padding: 2 }}>
           <Accordion
             sx={{
               backgroundColor: "transparent",
@@ -126,39 +125,34 @@ const StaffNavbar = () => {
                 >
                   Emily Rodriguez
                 </Typography>
-                <Typography
-                  color="text.primary"
-                  sx={{ color: (theme) => theme.palette.primary.contrastText }}
-                >
-                  Council Services
-                </Typography>
+                <Typography color="text.primary">Council Services</Typography>
               </Box>
             </AccordionSummary>
             <Box
               sx={{
-                backgroundColor: (theme) => theme.palette.background.paper,
+                backgroundColor: "primary.main",
                 padding: 0,
                 width: "100%",
               }}
             >
-              <List>
+              <List sx={{ padding: 2 }}>
                 <Typography
                   variant="body2"
-                  color="text.secondary"
+                  color="text.primary"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   View Profile
                 </Typography>
                 <Typography
                   variant="body2"
-                  color="text.secondary"
+                  color="text.primary"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   View Audit Logs
                 </Typography>
                 <Typography
                   variant="body2"
-                  color="text.secondary"
+                  color="text.primary"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   Logout
