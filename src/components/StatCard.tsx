@@ -5,7 +5,7 @@ interface StatCardProps {
   icon: SvgIconComponent;
   value: string | number;
   label: string;
-  change: string;
+  change: number;
   isPositive: boolean;
   lastUpdated?: string;
 }
@@ -44,18 +44,34 @@ const StatCard = ({
           >
             <Icon />
           </Avatar>
-          <Typography
-            variant="body2"
-            fontWeight={600}
+          <Box
             sx={{
-              color: (theme) =>
-                isPositive
-                  ? theme.palette.success.main
-                  : theme.palette.error.main,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
             }}
           >
-            {change}
-          </Typography>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{
+                color: (theme) =>
+                  isPositive
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+              }}
+            >
+              {change > 0 ? "+" : ""}
+              {change}%
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontSize: "0.7rem" }}
+            >
+              last 1hr
+            </Typography>
+          </Box>
         </Box>
 
         <Typography
