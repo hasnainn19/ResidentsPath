@@ -25,6 +25,7 @@ const schema = a.schema({
       // Address fields (optional - may not have for walk-ins or homeless)
       addressLine1: a.string(),
       addressLine2: a.string(),
+      addressLine3: a.string(),
       city: a.string(),
       postcode: a.string(),
 
@@ -50,6 +51,37 @@ const schema = a.schema({
       priority: a.boolean().default(false),
       flag: a.string(), // "SAFEGUARDING, VULNERABLE, URGENT"
       notes: a.string(),
+
+      // What is being requested
+      enquiry: a.string().required(), 
+
+      // Prioritisation criteria
+      childrenCount: a.string(),
+      householdSize: a.string(),
+      ageRange: a.string(),
+      hasDisabilityOrSensory: a.boolean(),
+      disabilityType: a.string(),
+
+      // Safeguarding / urgency
+      domesticAbuse: a.boolean(),
+      safeToContact: a.enum(["yes", "no", "prefer_not_to_say"]),
+      safeContactNotes: a.string(),
+
+      urgent: a.enum(["yes", "no", "unsure"]),
+      urgentReason: a.enum([
+        "Safety concern",
+        "No safe place to stay tonight",
+        "Health or mobility",
+        "Time-limited today",
+      ]),
+      urgentOtherReason: a.string(),
+
+      // Support needs
+      supportNeedsJson: a.string(), 
+      supportNotes: a.string(),
+      otherSupport: a.string(),
+
+      additionalInfo: a.string(),
 
       // Relationships
       user: a.belongsTo("User", "userId"),
@@ -203,12 +235,12 @@ const schema = a.schema({
 		pronouns: a.enum(["", "He/him", "She/her", "They/them", "Other", "Prefer not to say"]),
 		pronounsOther: a.string(),
 
-		enquiryId: a.string().required(),
+		enquiry: a.string().required(),
 		specificDetailId: a.string(),
 
 		childrenCount: a.enum(["0", "1", "2", "3", "4", "5", "6+"]),
 
-		hasDisabilityOrSensory: a.boolean().required(),
+		hasDisabilityOrSensory: a.boolean(),
 		disabilityType: a.enum([
 			"",
 			"Mobility impairment",
@@ -276,11 +308,7 @@ const schema = a.schema({
     })
     .returns(
       a.customType({
-		outcomeEnum: a.enum(["TICKET", "APPOINTMENT", "OTHER"]),
-        outcome: a.ref("outcomeEnum").required(),
-        referenceNumber: a.string().required(),
-
-        appointmentId: a.id().required(),
+        referenceNumber: a.string(),
       }),
     )
     .authorization((allow) => [allow.guest()])
