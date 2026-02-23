@@ -24,8 +24,6 @@ const CaseQueueRow = ({
     index: queuePosition - 1,
   });
 
-  // console.log(`CaseQueueRow ${id} rendering with position:`, queuePosition);
-
   return (
     <li ref={ref} style={{ listStyle: "none" }}>
       <Box
