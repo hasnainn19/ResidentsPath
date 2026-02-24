@@ -25,10 +25,10 @@ const cognitoClient = new CognitoIdentityProviderClient({
  */
 export const handler: PostConfirmationTriggerHandler = async (event) => {
 
-    // const cognitoUserId = event.request.userAttributes.sub;
-    // const email = event.request.userAttributes.email;
-    // const givenName = event.request.userAttributes.given_name; 
-    // const familyName = event.request.userAttributes.family_name; 
+    const cognitoUserId = event.request.userAttributes.sub;
+    const email = event.request.userAttributes.email;
+    const givenName = event.request.userAttributes.given_name; 
+    const familyName = event.request.userAttributes.family_name; 
 
     // Add the new user to the "Residents" group in Cognito
     try {
@@ -47,23 +47,23 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     }
 
     // Create a corresponding User record in DynamoDB
-    // try {
-    //     const client = generateClient<Schema>({
-    //         authMode: "identityPool",
-    //     });
+    try {
+        const client = generateClient<Schema>({
+            authMode: "identityPool",
+        });
 
-    //     const result = await client.models.User.create({
-    //         cognitoUserId: cognitoUserId,
-    //         email: email,
-    //         firstName: givenName,
-    //         lastName: familyName,
-    //     });
+        const result = await client.models.User.create({
+            cognitoUserId: cognitoUserId,
+            email: email,
+            firstName: givenName,
+            lastName: familyName,
+        });
 
-    //     console.log(`Successfully created User record for ${email} with ID ${result.data?.id}`);
-    // }
-    // catch (error) {
-    //     console.error("Failed to create User record:", error);
-    // }
+        console.log(`Successfully created User record for ${email} with ID ${result.data?.id}`);
+    }
+    catch (error) {
+        console.error("Failed to create User record:", error);
+    }
 
     // Return the event object as required by Cognito triggers
     return event;
