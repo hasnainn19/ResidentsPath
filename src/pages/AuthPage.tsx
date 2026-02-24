@@ -13,7 +13,7 @@ export default function AuthPage() {
 	/**
 	 * Watch the auth status and redirect based on user's Cognito group.
 	 * Staff users -> /staff/dashboard
-	 * Resident users -> /resident/dashboard
+	 * Resident users -> /referencepage
 	 *
 	 * For new signups, the post-confirmation Lambda adds the user to "Residents" group.
 	 * We force a token refresh to ensure we have the latest group membership.
@@ -31,8 +31,8 @@ export default function AuthPage() {
 						navigate('/staff/dashboard');
 					}
 					else {
-						// Default to resident dashboard for residents or users with no group
-						navigate('/resident/dashboard');
+						// Default to reference page for residents or users with no group
+						navigate('/referencepage');
 					}
 				}
 				catch (error) {

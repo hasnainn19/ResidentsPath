@@ -23,6 +23,10 @@ export default function NavBar() {
     if (setting === 'Logout') {
       await handleLogout();
     }
+
+    if (setting === 'Login/signup') {
+      navigate('/auth');
+    }
   };
 
   const handleLogout = async () => {
