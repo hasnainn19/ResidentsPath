@@ -98,12 +98,7 @@ const QueueRow = ({
             open={modalOpen}
             handleClose={handleClose}
           />
-          <Button
-            variant="outlined"
-            size="small"
-            color="error"
-            onClick={() => navigate(`/staff/`)}
-          >
+          <Button variant="outlined" size="small" color="error">
             Cases
           </Button>
         </Box>
