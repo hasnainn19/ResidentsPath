@@ -9,7 +9,7 @@ const StaffLayout = () => {
       sx={{
         width: "100%",
         display: "flex",
-        backgroundColor: (theme) => theme.palette.background.default,
+        backgroundColor: "background.default",
         minHeight: "100vh",
       }}
     >

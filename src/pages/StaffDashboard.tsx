@@ -228,14 +228,14 @@ const StaffDashboard = () => {
           width: "100%",
           maxWidth: { sm: "100%", md: "100%" },
           p: 3,
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: "background.default",
           minHeight: "100vh",
         })}
       >
         <Typography
           variant="h4"
           fontWeight="bold"
-          sx={{ mb: 3, color: (theme) => theme.palette.primary.main }}
+          sx={{ mb: 3, color: "primary.main" }}
         >
           Overview
         </Typography>
@@ -249,13 +249,13 @@ const StaffDashboard = () => {
         <Typography
           variant="h4"
           fontWeight="bold"
-          sx={{ mb: 3, color: (theme) => theme.palette.primary.main }}
+          sx={{ mb: 3, color: "primary.main" }}
         >
           Current Queues
         </Typography>
         <TableContainer
           component={Paper}
-          sx={{ backgroundColor: (theme) => theme.palette.background.paper }}
+          sx={{ backgroundColor: "background.paper" }}
         >
           <Table>
             <TableHead>
@@ -268,9 +268,7 @@ const StaffDashboard = () => {
                     whiteSpace: "nowrap",
                     fontWeight: sortColumn === "service" ? "bold" : "normal",
                     color:
-                      sortColumn === "service"
-                        ? (theme: any) => theme.palette.primary.main
-                        : "inherit",
+                      sortColumn === "service" ? "primary.main" : "inherit",
                   }}
                 >
                   Service
@@ -283,9 +281,7 @@ const StaffDashboard = () => {
                     whiteSpace: "nowrap",
                     fontWeight: sortColumn === "waiting" ? "bold" : "normal",
                     color:
-                      sortColumn === "waiting"
-                        ? (theme: any) => theme.palette.primary.main
-                        : "inherit",
+                      sortColumn === "waiting" ? "primary.main" : "inherit",
                   }}
                 >
                   Waiting
@@ -300,7 +296,7 @@ const StaffDashboard = () => {
                       sortColumn === "longestWaitTime" ? "bold" : "normal",
                     color:
                       sortColumn === "longestWaitTime"
-                        ? (theme: any) => theme.palette.primary.main
+                        ? "primary.main"
                         : "inherit",
                   }}
                 >
@@ -315,9 +311,7 @@ const StaffDashboard = () => {
                     whiteSpace: "nowrap",
                     fontWeight: sortColumn === "steppedOut" ? "bold" : "normal",
                     color:
-                      sortColumn === "steppedOut"
-                        ? (theme: any) => theme.palette.primary.main
-                        : "inherit",
+                      sortColumn === "steppedOut" ? "primary.main" : "inherit",
                   }}
                 >
                   Stepped Out

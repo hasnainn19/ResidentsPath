@@ -26,8 +26,8 @@ const StaffNavbar = () => {
         [`& .MuiDrawer-paper`]: (theme) => ({
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
+          backgroundColor: "primary.main",
+          color: "primary.contrastText",
         }),
       }}
     >
@@ -42,7 +42,7 @@ const StaffNavbar = () => {
           <Typography
             variant="h6"
             fontWeight="bold"
-            sx={{ color: (theme) => theme.palette.primary.contrastText }}
+            sx={{ color: "primary.contrastText" }}
           >
             ResidentsPath
           </Typography>
@@ -50,7 +50,7 @@ const StaffNavbar = () => {
             variant="body2"
             sx={{
               opacity: 0.8,
-              color: (theme) => theme.palette.primary.contrastText,
+              color: "primary.contrastText",
             }}
           >
             staff view
@@ -89,7 +89,7 @@ const StaffNavbar = () => {
           <Accordion
             sx={{
               backgroundColor: "transparent",
-              color: (theme) => theme.palette.primary.contrastText,
+              color: "primary.contrastText",
               boxShadow: "none",
             }}
           >
@@ -101,7 +101,7 @@ const StaffNavbar = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                color: (theme) => theme.palette.primary.contrastText,
+                color: "primary.contrastText",
               }}
             >
               <Avatar
@@ -110,8 +110,8 @@ const StaffNavbar = () => {
                   width: 50,
                   height: 50,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  bgcolor: (theme) => theme.palette.secondary.main,
-                  color: (theme) => theme.palette.primary.contrastText,
+                  bgcolor: "secondary.main",
+                  color: "primary.contrastText",
                 }}
               />
               <Box sx={{ ml: 2 }}>
@@ -120,12 +120,14 @@ const StaffNavbar = () => {
                   fontWeight={500}
                   sx={{
                     mt: 1,
-                    color: (theme) => theme.palette.primary.contrastText,
+                    color: "primary.contrastText",
                   }}
                 >
                   Emily Rodriguez
                 </Typography>
-                <Typography color="text.primary">Council Services</Typography>
+                <Typography color="text.contrastText">
+                  Council Services
+                </Typography>
               </Box>
             </AccordionSummary>
             <Box
@@ -138,21 +140,21 @@ const StaffNavbar = () => {
               <List sx={{ padding: 2 }}>
                 <Typography
                   variant="body2"
-                  color="text.primary"
+                  color="text.contrastText"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   View Profile
                 </Typography>
                 <Typography
                   variant="body2"
-                  color="text.primary"
+                  color="text.contrastText"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   View Audit Logs
                 </Typography>
                 <Typography
                   variant="body2"
-                  color="text.primary"
+                  color="text.contrastText"
                   sx={{ mt: 0.5, fontStyle: "italic" }}
                 >
                   Logout
