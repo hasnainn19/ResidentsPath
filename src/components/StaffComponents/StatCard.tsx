@@ -10,14 +10,7 @@ interface StatCardProps {
   lastUpdated?: string;
 }
 // This component represents a single statistic card on the staff dashboard, displaying an icon, a key metric value, a label, and the change from the previous period. It also shows the last updated time for the data. The card is styled to visually indicate whether the change is positive or negative.
-const StatCard = ({
-  icon: Icon,
-  value,
-  label,
-  change,
-  isPositive,
-  lastUpdated,
-}: StatCardProps) => {
+const StatCard = ({ icon: Icon, value, label }: StatCardProps) => {
   return (
     <Card
       sx={{
@@ -50,25 +43,7 @@ const StatCard = ({
               flexDirection: "column",
               alignItems: "flex-end",
             }}
-          >
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              sx={{
-                color: (theme) => (isPositive ? "success.dark" : "error.main"),
-              }}
-            >
-              {change > 0 ? "+" : ""}
-              {change}%
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontSize: "0.7rem" }}
-            >
-              last 1hr
-            </Typography>
-          </Box>
+          ></Box>
         </Box>
 
         <Typography
@@ -81,9 +56,6 @@ const StatCard = ({
 
         <Typography variant="body2" color="text.secondary">
           {label}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-          Last updated: {lastUpdated ? lastUpdated : "--:--"}
         </Typography>
       </CardContent>
     </Card>
