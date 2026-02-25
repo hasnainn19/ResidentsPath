@@ -23,7 +23,7 @@ const StatCard = ({
       sx={{
         borderRadius: 3,
         height: "100%",
-        backgroundColor: (theme) => theme.palette.background.paper,
+        backgroundColor: "background.paper",
       }}
     >
       <CardContent>
@@ -37,7 +37,7 @@ const StatCard = ({
         >
           <Avatar
             sx={{
-              bgcolor: (theme) => theme.palette.primary.main,
+              bgcolor: "primary.main",
               width: 48,
               height: 48,
             }}
@@ -55,10 +55,7 @@ const StatCard = ({
               variant="body2"
               fontWeight={600}
               sx={{
-                color: (theme) =>
-                  isPositive
-                    ? theme.palette.success.main
-                    : theme.palette.error.main,
+                color: (theme) => (isPositive ? "success.dark" : "error.main"),
               }}
             >
               {change > 0 ? "+" : ""}
@@ -77,7 +74,7 @@ const StatCard = ({
         <Typography
           variant="h4"
           fontWeight={600}
-          sx={{ mb: 0.5, color: (theme) => theme.palette.text.primary }}
+          sx={{ mb: 0.5, color: "text.primary" }}
         >
           {value}
         </Typography>

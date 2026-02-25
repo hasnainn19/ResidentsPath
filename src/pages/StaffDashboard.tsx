@@ -286,7 +286,7 @@ const StaffDashboard = () => {
                       sortColumn === "service" ? "secondary.main" : "inherit",
                     fontWeight: sortColumn === "service" ? "bold" : "normal",
                     color:
-                      sortColumn === "service" ? "common.white" : "inherit",
+                      sortColumn === "service" ? "primary.main" : "inherit",
                   }}
                 >
                   Service
@@ -301,7 +301,7 @@ const StaffDashboard = () => {
                       sortColumn === "waiting" ? "secondary.main" : "inherit",
                     fontWeight: sortColumn === "waiting" ? "bold" : "normal",
                     color:
-                      sortColumn === "waiting" ? "common.white" : "inherit",
+                      sortColumn === "waiting" ? "primary.main" : "inherit",
                   }}
                 >
                   Waiting
@@ -320,7 +320,7 @@ const StaffDashboard = () => {
                       sortColumn === "longestWaitTime" ? "bold" : "normal",
                     color:
                       sortColumn === "longestWaitTime"
-                        ? "common.white"
+                        ? "primary.main"
                         : "inherit",
                   }}
                 >
@@ -339,7 +339,7 @@ const StaffDashboard = () => {
                         : "inherit",
                     fontWeight: sortColumn === "steppedOut" ? "bold" : "normal",
                     color:
-                      sortColumn === "steppedOut" ? "common.white" : "inherit",
+                      sortColumn === "steppedOut" ? "primary.main" : "inherit",
                   }}
                 >
                   Stepped Out

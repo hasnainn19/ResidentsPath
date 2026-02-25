@@ -16,15 +16,11 @@ const StaffNavItem = ({ icon, label, url }: StaffNavItemProps) => {
         mx: 1,
         borderRadius: 2,
         "&:hover": {
-          backgroundColor: (theme) => theme.palette.primary.light,
+          backgroundColor: "primary.light",
         },
       }}
     >
-      <ListItemIcon
-        sx={{ color: (theme) => theme.palette.primary.contrastText }}
-      >
-        {icon}
-      </ListItemIcon>
+      <ListItemIcon sx={{ color: "primary.contrastText" }}>{icon}</ListItemIcon>
       <Link to={url} style={{ textDecoration: "none", color: "inherit" }}>
         <ListItemText primary={label} />
       </Link>
