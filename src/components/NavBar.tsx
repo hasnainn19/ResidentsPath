@@ -23,7 +23,7 @@ export default function NavBar() {
           </Typography>
           <Stack direction='row' spacing={2}>
             <Tooltip title="Show queue information">
-              <Button color="inherit">Queue</Button>
+              <Button color="inherit" onClick={() => nav("/userdashboard")}>Queue</Button>
             </Tooltip>
             <Tooltip title="Create your case">
               <Button color="inherit" onClick={() => nav("/form")}>Form</Button>
