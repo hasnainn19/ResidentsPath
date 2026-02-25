@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
-import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
-import type { Schema } from '../../amplify/data/resource';
+import DangerousIcon from '@mui/icons-material/Dangerous';
+import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
-import TextToSpeechButton from '../components/TextToSpeechButton';
-import NavBar from '../components/NavBar';
+
+import TextToSpeechButton from '../../components/TextToSpeechButton';
+import NavBar from '../../components/NavBar';
+import type { Schema } from '../../../amplify/data/resource';
 
 const Item = styled(Paper)(({ theme }) => ({
     display: 'flex',
@@ -127,8 +130,8 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalk/>} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabled />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalkIcon />} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabledIcon />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
@@ -136,7 +139,7 @@ export default function UserDashboard() {
                                 <Grid size={12}>
                                     <Item sx={{ textAlign: 'left', backgroundColor:'warning.main'}}>
                                         <Stack direction='row' alignItems='flex-start'>
-                                            <Dangerous sx={{color:'red', m:0.6}}/>
+                                            <DangerousIcon sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>Please note
                                                 <TextToSpeechButton text='Please note, wait times are estimated and may vary. Urgent cases may be prioritised and seen before you. We appreciate your patience and understanding.' />
                                             </Typography>
