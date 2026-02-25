@@ -2,9 +2,10 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 
 interface StaffNavItemProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   url: string;
 }
