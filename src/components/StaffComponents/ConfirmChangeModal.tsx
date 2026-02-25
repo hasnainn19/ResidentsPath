@@ -1,4 +1,11 @@
-import { Box, Button, Input, Modal, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Input,
+  Modal,
+  TextField,
+  Typography,
+} from "@mui/material";
 interface ConfirmChangeModalProps {
   open: boolean;
   handleClose: () => void;
@@ -30,7 +37,11 @@ const ConfirmChangeModal = ({ open, handleClose }: ConfirmChangeModalProps) => {
             Confirm Change
           </Typography>
         </Box>
-        <Input placeholder="Type your password to confirm changes" fullWidth />
+        <TextField
+          type="password"
+          placeholder="Type your password to confirm changes"
+          fullWidth
+        />
         <Button
           variant="contained"
           color="primary"

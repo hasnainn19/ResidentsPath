@@ -8,7 +8,7 @@ interface CaseQueueRowProps {
   title: string;
   description: string;
   queuePosition: number;
-  priority: "Urgent" | "Priority" | "Standard";
+  priority: "Priority" | "Standard";
 }
 
 // This component represents a single case in the service queue modal, designed to be draggable for reordering.
@@ -49,13 +49,7 @@ const CaseQueueRow = ({
             <Chip
               label={priority}
               size="small"
-              color={
-                priority === "Urgent"
-                  ? "error"
-                  : priority === "Priority"
-                    ? "warning"
-                    : "success"
-              }
+              color={priority === "Priority" ? "error" : "success"}
               sx={{ ml: 1 }}
             />
           </Box>
