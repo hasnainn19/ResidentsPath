@@ -1,5 +1,6 @@
 // ServiceQueueModal.tsx
 import { Box, Modal, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
 import CaseQueueRow from "./CaseQueueRow";
 import { DragDropProvider } from "@dnd-kit/react";
@@ -11,20 +12,27 @@ interface ServiceQueueModalProps {
   handleClose: () => void;
 }
 
-const style = {
+const ModalContainer = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: "75%",
   height: "80%",
-  bgcolor: "background.paper",
+  backgroundColor: theme.palette.background.paper,
   border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
+  boxShadow: theme.shadows[24],
+  padding: theme.spacing(4),
   overflow: "scroll",
   scrollbarWidth: "thin",
-};
+}));
+
+const ModalHeader = styled(Box)({});
+
+const CaseList = styled("ul")({
+  padding: 0,
+  marginTop: 16,
+});
 
 const initialServiceCases = [
   {
@@ -119,28 +127,28 @@ const ServiceQueueModal = ({
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <Box sx={style}>
-        <Box>
+      <ModalContainer>
+        <ModalHeader>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             {serviceName} Service Queue
           </Typography>
-        </Box>
+        </ModalHeader>
         <DragDropProvider
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <ul className="list" style={{ padding: 0, marginTop: 16 }}>
+          <CaseList className="list">
             {serviceCases.map((c) => (
               <CaseQueueRow key={c.id} {...c} />
             ))}
-          </ul>
+          </CaseList>
         </DragDropProvider>
         <ConfirmChangeModal
           open={confirmationModalOpen}
           handleClose={handleConfirmationClose}
         />
-      </Box>
+      </ModalContainer>
     </Modal>
   );
 };
