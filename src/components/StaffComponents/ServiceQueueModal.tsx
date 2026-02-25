@@ -32,7 +32,7 @@ const initialServiceCases = [
     title: "Case 1",
     description: "Description for case 1",
     queuePosition: 1,
-    priority: "Urgent" as const,
+    priority: "Priority" as const,
   },
   {
     id: 2,
