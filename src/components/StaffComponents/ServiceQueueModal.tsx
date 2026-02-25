@@ -91,27 +91,17 @@ const ServiceQueueModal = ({
   const handleConfirmationOpen = () => setConfirmationModalOpen(true);
   const handleConfirmationClose = () => setConfirmationModalOpen(false);
 
-  const handleDragStart = (event: any) => {
-    console.log("Drag started:", event); //Dummy function until logic is implemented
-  };
+  const handleDragStart = (event: any) => {};
 
-  const handleDragOver = (event: any) => {
-    console.log("Drag over:", event); //Dummy function until logic is implemented
-  };
+  const handleDragOver = (event: any) => {};
 
   const handleDragEnd = (event: any) => {
-    console.log("Drag ended:", event);
     const { active, over } = event;
-
-    console.log("Active:", active, "Over:", over);
     handleConfirmationOpen(); // Incomplete Logic - This will open the confirmation modal, but we need to handle the actual position update after confirmation and password validation.
     if (over && active.id !== over.id) {
-      console.log("Updating positions...");
       setServiceCases((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-
-        console.log("Old index:", oldIndex, "New index:", newIndex);
 
         const newItems = [...items];
         const [movedItem] = newItems.splice(oldIndex, 1);
@@ -122,7 +112,6 @@ const ServiceQueueModal = ({
           queuePosition: index + 1,
         }));
 
-        console.log("Updated items:", updatedItems);
         return updatedItems;
       });
     }
