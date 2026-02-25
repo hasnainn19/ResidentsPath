@@ -23,12 +23,12 @@ const StaffNavbar = () => {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: (theme) => ({
+        [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
           boxSizing: "border-box",
           backgroundColor: "primary.main",
           color: "primary.contrastText",
-        }),
+        },
       }}
     >
       <Toolbar>

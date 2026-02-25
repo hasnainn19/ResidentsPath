@@ -6,14 +6,10 @@ import {
   Box,
   Chip,
 } from "@mui/material";
-import ServiceQueueModal from "./ServiceQueueModal";
-import React from "react";
-import { useNavigate } from "react-router";
 
 type PriorityBreakdown = {
   Standard: number;
   Priority: number;
-  Urgent: number;
 };
 
 interface QueueRowProps {
@@ -33,10 +29,6 @@ const QueueRow = ({
   steppedOut,
   availableStaff,
 }: QueueRowProps) => {
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const handleOpen = () => setModalOpen(true);
-  const handleClose = () => setModalOpen(false);
-  const navigate = useNavigate();
   return (
     <TableRow hover>
       <TableCell>
@@ -52,21 +44,12 @@ const QueueRow = ({
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Chip
-            label={`Urgent: ${priorityBreakdown.Urgent}`}
+            label={`Priority: ${priorityBreakdown.Priority}`}
             size="small"
             color="error"
             sx={{
               fontWeight: "bold",
-              bgcolor: (theme) => theme.palette.error.light,
-            }}
-          />
-          <Chip
-            label={`Priority: ${priorityBreakdown.Priority}`}
-            size="small"
-            color="success"
-            sx={{
-              fontWeight: "bold",
-              bgcolor: (theme) => theme.palette.success.light,
+              bgcolor: "error.light",
             }}
           />
           <Chip
@@ -75,7 +58,7 @@ const QueueRow = ({
             color="warning"
             sx={{
               fontWeight: "bold",
-              bgcolor: (theme) => theme.palette.warning.light,
+              bgcolor: "warning.light",
             }}
           />
         </Box>
@@ -87,19 +70,8 @@ const QueueRow = ({
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
-          {/* <Button variant="outlined" size="small" onClick={handleOpen}>
-            Adjust
-          </Button> */}
           <Button variant="outlined" size="small">
             Adjust
-          </Button>
-          <ServiceQueueModal
-            serviceName={service}
-            open={modalOpen}
-            handleClose={handleClose}
-          />
-          <Button variant="outlined" size="small" color="error">
-            Cases
           </Button>
         </Box>
       </TableCell>

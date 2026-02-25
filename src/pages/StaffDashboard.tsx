@@ -76,113 +76,129 @@ const StaffDashboard = () => {
       service: "Benefits and financial support",
       waiting: 12,
       longestWaitTime: 15,
-      priorityBreakdown: { Standard: 2, Priority: 5, Urgent: 5 },
+      priorityBreakdown: { Standard: 2, Priority: 5 },
       steppedOut: 3,
+      availableStaff: 1,
     },
     {
       service: "Births, deaths and ceremonies",
       waiting: 0,
       longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0, Urgent: 0 },
+      priorityBreakdown: { Standard: 0, Priority: 0 },
       steppedOut: 0,
+      availableStaff: 2,
     },
     {
       service: "Business and licensing",
       waiting: 5,
       longestWaitTime: 25,
-      priorityBreakdown: { Standard: 3, Priority: 1, Urgent: 1 },
+      priorityBreakdown: { Standard: 3, Priority: 1 },
       steppedOut: 2,
+      availableStaff: 3,
     },
     {
       service: "Community hub and libraries",
       waiting: 18,
       longestWaitTime: 10,
-      priorityBreakdown: { Standard: 5, Priority: 8, Urgent: 5 },
+      priorityBreakdown: { Standard: 5, Priority: 8 },
       steppedOut: 4,
+      availableStaff: 4,
     },
     {
       service: "Community safety and support",
       waiting: 7,
       longestWaitTime: 8,
-      priorityBreakdown: { Standard: 1, Priority: 3, Urgent: 3 },
+      priorityBreakdown: { Standard: 1, Priority: 3 },
       steppedOut: 1,
+      availableStaff: 5,
     },
     {
       service: "Council and elections",
       waiting: 0,
       longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0, Urgent: 0 },
+      priorityBreakdown: { Standard: 0, Priority: 0 },
       steppedOut: 0,
+      availableStaff: 6,
     },
     {
       service: "Council Tax",
       waiting: 14,
       longestWaitTime: 20,
-      priorityBreakdown: { Standard: 4, Priority: 6, Urgent: 4 },
+      priorityBreakdown: { Standard: 4, Priority: 6 },
       steppedOut: 2,
+      availableStaff: 7,
     },
     {
       service: "Environment",
       waiting: 3,
       longestWaitTime: 5,
-      priorityBreakdown: { Standard: 2, Priority: 1, Urgent: 0 },
+      priorityBreakdown: { Standard: 2, Priority: 1 },
       steppedOut: 1,
+      availableStaff: 8,
     },
     {
       service: "Housing",
       waiting: 9,
       longestWaitTime: 12,
-      priorityBreakdown: { Standard: 2, Priority: 4, Urgent: 3 },
+      priorityBreakdown: { Standard: 2, Priority: 4 },
       steppedOut: 2,
+      availableStaff: 9,
     },
     {
       service: "Jobs, careers and adult education",
       waiting: 0,
       longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0, Urgent: 0 },
+      priorityBreakdown: { Standard: 0, Priority: 0 },
       steppedOut: 0,
+      availableStaff: 10,
     },
     {
       service: "Leisure, parks and sports",
       waiting: 4,
       longestWaitTime: 6,
-      priorityBreakdown: { Standard: 3, Priority: 1, Urgent: 0 },
+      priorityBreakdown: { Standard: 3, Priority: 1 },
       steppedOut: 1,
+      availableStaff: 11,
     },
     {
       service: "Parking, transport and streets",
       waiting: 11,
       longestWaitTime: 18,
-      priorityBreakdown: { Standard: 5, Priority: 4, Urgent: 2 },
+      priorityBreakdown: { Standard: 5, Priority: 4 },
       steppedOut: 3,
+      availableStaff: 12,
     },
     {
       service: "Planning and building",
       waiting: 6,
       longestWaitTime: 14,
-      priorityBreakdown: { Standard: 2, Priority: 2, Urgent: 2 },
+      priorityBreakdown: { Standard: 2, Priority: 2 },
       steppedOut: 1,
+      availableStaff: 1,
     },
     {
       service: "Schools, nurseries and education",
       waiting: 2,
       longestWaitTime: 3,
-      priorityBreakdown: { Standard: 1, Priority: 1, Urgent: 0 },
+      priorityBreakdown: { Standard: 1, Priority: 1 },
       steppedOut: 0,
+      availableStaff: 2,
     },
     {
       service: "Social care and health",
       waiting: 16,
       longestWaitTime: 22,
-      priorityBreakdown: { Standard: 3, Priority: 6, Urgent: 7 },
+      priorityBreakdown: { Standard: 3, Priority: 6 },
       steppedOut: 4,
+      availableStaff: 3,
     },
     {
       service: "Waste and recycling",
       waiting: 0,
       longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0, Urgent: 0 },
+      priorityBreakdown: { Standard: 0, Priority: 0 },
       steppedOut: 0,
+      availableStaff: 4,
     },
   ];
 
@@ -224,13 +240,13 @@ const StaffDashboard = () => {
   return (
     <>
       <Box
-        sx={(theme) => ({
+        sx={{
           width: "100%",
           maxWidth: { sm: "100%", md: "100%" },
           p: 3,
           backgroundColor: "background.default",
           minHeight: "100vh",
-        })}
+        }}
       >
         <Typography
           variant="h4"
@@ -266,9 +282,11 @@ const StaffDashboard = () => {
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "service" ? "secondary.main" : "inherit",
                     fontWeight: sortColumn === "service" ? "bold" : "normal",
                     color:
-                      sortColumn === "service" ? "primary.main" : "inherit",
+                      sortColumn === "service" ? "common.white" : "inherit",
                   }}
                 >
                   Service
@@ -279,9 +297,11 @@ const StaffDashboard = () => {
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "waiting" ? "secondary.main" : "inherit",
                     fontWeight: sortColumn === "waiting" ? "bold" : "normal",
                     color:
-                      sortColumn === "waiting" ? "primary.main" : "inherit",
+                      sortColumn === "waiting" ? "common.white" : "inherit",
                   }}
                 >
                   Waiting
@@ -292,11 +312,15 @@ const StaffDashboard = () => {
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "longestWaitTime"
+                        ? "secondary.main"
+                        : "inherit",
                     fontWeight:
                       sortColumn === "longestWaitTime" ? "bold" : "normal",
                     color:
                       sortColumn === "longestWaitTime"
-                        ? "primary.main"
+                        ? "common.white"
                         : "inherit",
                   }}
                 >
@@ -309,9 +333,13 @@ const StaffDashboard = () => {
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "steppedOut"
+                        ? "secondary.main"
+                        : "inherit",
                     fontWeight: sortColumn === "steppedOut" ? "bold" : "normal",
                     color:
-                      sortColumn === "steppedOut" ? "primary.main" : "inherit",
+                      sortColumn === "steppedOut" ? "common.white" : "inherit",
                   }}
                 >
                   Stepped Out
@@ -325,7 +353,7 @@ const StaffDashboard = () => {
 
             <TableBody>
               {getSortedQueues().map((queue) => (
-                <QueueRow availableStaff={0} key={queue.service} {...queue} />
+                <QueueRow key={queue.service} {...queue} />
               ))}
             </TableBody>
           </Table>
