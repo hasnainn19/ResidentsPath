@@ -1,4 +1,4 @@
-import StaffNavbar from "../components/StaffNavbar";
+import StaffNavbar from "../components/StaffComponents/StaffNavbar";
 import Box from "@mui/material/Box";
 import { Outlet } from "react-router";
 
