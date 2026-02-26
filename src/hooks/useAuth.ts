@@ -2,6 +2,14 @@ import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useState, useEffect } from "react";
 import { fetchAuthSession } from "aws-amplify/auth";
 
+/**
+ * Custom hook that provides authentication state and user information from AWS Cognito.
+ * 
+ * This hook centralizes all authentication logic, including:
+ * - Checking if the user is authenticated
+ * - Fetching the user's Cognito groups (e.g. "Staff", "Residents")
+ * - Managing loading states during auth checks
+ */
 export function useAuth() {
     const { authStatus } = useAuthenticator((context) => [context.authStatus]);
     const [groups, setGroups] = useState<string[] | null | undefined>(undefined);
