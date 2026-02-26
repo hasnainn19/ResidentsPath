@@ -113,7 +113,6 @@ export const UI_OPTIONS = {
   supportNeeds: [
     { value: "ACCESSIBILITY", label: "Accessibility" },
     { value: "LANGUAGE", label: "Language" },
-    { value: "INTERPRETER", label: "Interpreter" },
     { value: "SEATING", label: "Seating" },
     { value: "WRITTEN_UPDATES", label: "Written updates" },
     { value: "LARGE_TEXT", label: "Large text" },
