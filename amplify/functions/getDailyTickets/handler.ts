@@ -1,12 +1,19 @@
 // lambda/getDailyTickets.ts
 import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
+import { Amplify } from 'aws-amplify'
+
+import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
+import { env } from '$amplify/env/getDailyTickets'; 
+
+const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
+
+Amplify.configure(resourceConfig, libraryOptions);
+
+const client = generateClient<Schema>();
+
 
 export const handler: Schema["getDailyTickets"]["functionHandler"] = async () => {
-    const client = generateClient<Schema>({
-        authMode: "identityPool",
-    });
-
     const now = new Date();
 
     // Get start and end of today
@@ -27,7 +34,7 @@ export const handler: Schema["getDailyTickets"]["functionHandler"] = async () =>
         return [];
     }
 
-    // Return only safe fields
+
     return tickets.map(ticket => ({
         caseId: ticket.caseId,
         ticketNumber: ticket.ticketNumber,

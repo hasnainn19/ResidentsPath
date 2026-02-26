@@ -1,11 +1,16 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import {
+  a,
+  defineData,
+  type ClientSchema
+} from '@aws-amplify/backend';
 import { getTicketStatus } from '../functions/getTicketStatus/resource';
 import { getDailyTickets } from '../functions/getDailyTickets/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
-const schema = a.schema({
+const schema = a.
+	schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
@@ -170,21 +175,6 @@ const schema = a.schema({
 		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
 		.handler(a.handler.function(getTicketStatus)),
 
-
-	// getDailyTickets: a
-	// 	.query()
-	// 	.returns(a.customType({
-	// 		caseId: a.id().required(),
-	// 		ticketNumber: a.string().required(),
-	// 		status: a.string().required(),
-	// 		placement: a.integer().required(),
-	// 		estimatedWaitTimeLower: a.integer().required(),
-	// 		estimatedWaitTimeUpper: a.integer().required(),
-	// 		createdAt:a.datetime()
-	// 	}))
-	// 	.authorization((allow) => [allow.guest()])
-	// 	.handler(a.handler.function(getDailyTickets)),
-
     
 	// Named custom type for daily ticket list responses
 	DailyTicket: a.customType({
@@ -199,13 +189,13 @@ const schema = a.schema({
 
 	getDailyTickets: a
 		.query()
-		.returns(
-			// return a list/array of the named custom type `DailyTicket`
-			a.ref('DailyTicket').array()
-		)
-        .authorization((allow) => [allow.guest()])
-	    .handler(a.handler.function(getDailyTickets)),
-});
+		.returns(a.ref("DailyTicket").array())
+		.authorization((allow) => [allow.guest()]) 
+		.handler(a.handler.function(getDailyTickets)),
+	})
+	.authorization(allow => [
+    allow.resource(getDailyTickets).to(['query', 'listen'])
+  ]);
 
 export type Schema = ClientSchema<typeof schema>;
 
@@ -215,3 +205,7 @@ export const data = defineData({
 		defaultAuthorizationMode: 'identityPool',
 	},
 });
+function authorization(arg0: (allow: any) => any[]) {
+	throw new Error('Function not implemented.');
+}
+

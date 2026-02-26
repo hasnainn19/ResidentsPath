@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { Schema } from '../../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
@@ -8,7 +9,7 @@ import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
 import TextToSpeechButton from '../../components/TextToSpeechButton';
 import NavBar from '../../components/NavBar';
-import type { Schema } from '../../../amplify/data/resource';
+
 
 const Item = styled(Paper)(({ theme }) => ({
     display: 'flex',
@@ -22,6 +23,7 @@ const Item = styled(Paper)(({ theme }) => ({
     color: 'text.secondary',
     boxSizing: "border-box",  
 }));
+
 
 const client = generateClient<Schema>();
 
@@ -67,6 +69,7 @@ export default function UserDashboard() {
           return;
         }
 
+        console.log(data);
         // Ensure we only pass non-null items to setTickets
         const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
         const filtered = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
