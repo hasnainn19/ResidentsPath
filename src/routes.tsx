@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import App from "./App";
 import StaffDashboard from "./pages/StaffDashboard";
+import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
 import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
@@ -13,7 +14,6 @@ import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard";
-
 
 export const router = createBrowserRouter([
   {
@@ -37,8 +37,14 @@ export const router = createBrowserRouter([
     element: <BookingPage />,
   },
   {
-    path: "/staff/dashboard",
-    element: <StaffDashboard />,
+    path: "/staff",
+    element: <StaffLayout />,
+    children: [
+      {
+        index: true,
+        element: <StaffDashboard />,
+      },
+    ],
   },
   {
       path: "/userdashboard", element: <UserDashboard /> 
