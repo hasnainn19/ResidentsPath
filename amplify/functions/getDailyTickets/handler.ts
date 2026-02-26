@@ -24,6 +24,9 @@ export const handler: Schema["getDailyTickets"]["functionHandler"] = async () =>
 
     const { data: tickets } = await client.models.Ticket.list({
         filter: {
+            status:{
+                ne: "COMPLETED",
+            },
             createdAt: {
                 between: [startOfDay.toISOString(), endOfDay.toISOString()],
             },

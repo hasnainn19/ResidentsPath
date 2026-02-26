@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import type { Schema } from '../../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
-
+import { useNavigate } from "react-router-dom";
 
 import TextToSpeechButton from '../../components/TextToSpeechButton';
 import NavBar from '../../components/NavBar';
+import { useParams } from 'react-router-dom';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -28,9 +29,11 @@ const Item = styled(Paper)(({ theme }) => ({
 const client = generateClient<Schema>();
 
 export default function UserDashboard() {
+    const { caseId } = useParams<{ caseId: string }>();
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
-    const [queuePosition, setQueuePosition] = useState(null); 
+    const[errors, setErrors] = useState('');
+    const [queuePosition, setQueuePosition] = useState(0); 
     const [estWaitTime, setEstWaitTime] = useState(null);
     const [tickets, setTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
 
@@ -45,47 +48,62 @@ export default function UserDashboard() {
     };
 
     useEffect(() => {
-    // async function fetchDailyTickets() {
-    //   try {
-    //     const { data, errors } = await client.queries.getDailyTickets();
+        fetchDailyTickets();
+    }, []);
 
-    //     if (errors) {
-    //       console.error(errors);
-    //       return;
-    //     }
-
-    //     setTickets(data ?? []);
-    //   } catch (err) {
-    //     console.error("Failed to fetch tickets:", err);
-    //   }
-    // }
+    useEffect(() => {
+        if (tickets.length > 0) {
+            calculatePosition();
+            calculateWaitTime();
+        }
+    }, [tickets]);
 
     async function fetchDailyTickets() {
-      try {
-        const { data, errors } = await client.queries.getDailyTickets();
+        try {
+            const { data, errors } = await client.queries.getDailyTickets();
 
-        if (errors) {
-          console.error(errors);
-          return;
+            if (errors) {
+            console.error(errors);
+            return;
+            }
+
+            // console.log(data);
+            // Ensure we only pass non-null items to setTickets
+            const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
+            const filtered = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
+
+            filtered.sort((a, b) => {
+                const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return timeA - timeB; // ascending
+            });
+
+            console.log(filtered);
+            setTickets(filtered);
+        } catch (err) {
+            console.error("Failed to fetch tickets:", err);
         }
-
-        console.log(data);
-        // Ensure we only pass non-null items to setTickets
-        const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
-        const filtered = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
-
-        setTickets(filtered);
-      } catch (err) {
-        console.error("Failed to fetch tickets:", err);
-      }
     }
 
-    fetchDailyTickets();
-  }, []);
-
     
-    function calculateWaitTime () {
+    function calculateWaitTime(){
 
+    }
+
+    function calculatePosition () {
+        let position = 0; 
+       for(const ticket of tickets) {
+            if(ticket.caseId == caseId) {
+                setQueuePosition(position)
+                return;
+            }
+            else {
+                position++;
+                setQueuePosition(position)
+            }
+        }
+        setErrors("The case ID is not in the queue!");
+        setQueuePosition(-1);
     }
 
     
@@ -111,9 +129,9 @@ export default function UserDashboard() {
                                 <Stack direction='row' spacing={2}>
                                     <Grid size={6}>
                                         <Item>
-                                            <Typography variant='body1'>You are the </Typography>
+                                            <Typography variant='body1'>There are </Typography>
                                             <Typography variant='h5' sx={{color:'primary.main'}}>{queuePosition}</Typography>
-                                            <Typography variant='body1'>person in the queue</Typography>
+                                            <Typography variant='body1'>people ahead of you</Typography>
                                             <TextToSpeechButton text='You are the Nth person in the queue'/>
                                         </Item>
                                     </Grid>
