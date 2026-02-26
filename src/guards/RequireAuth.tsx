@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 
 interface RequireAuthProps {
@@ -17,8 +18,7 @@ export default function RequireAuth({ children }: RequireAuthProps) {
 
     // Show loading state while checking authentication
     if (isLoading) {
-        // return loading spinner
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
     }
 
     // Not authenticated - redirect to /auth with the current location in state for post-login redirect
