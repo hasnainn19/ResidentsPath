@@ -15,6 +15,10 @@ import {
   GENERAL_SERVICES_DIRECT_ITEMS,
 } from "../data/enquiries";
 
+function stripPrefix(value: string, prefix: string): string {
+  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+}
+
 // Given the current FormData, this builds a simple context object used in multiple steps to decide:
 // - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
 // - Whether the current selection is complete enough to move forward.
@@ -30,23 +34,33 @@ export function getEnquiryOptions(topLevel: string, choice: string): EnquiryItem
   if (!choice) return [];
 
   if (choice.startsWith("section:")) {
-    const sectionId = choice.replace("section:", "");
+    const sectionId = stripPrefix(choice, "section:");
     return ENQUIRIES_BY_GENERAL_SERVICES_SECTION[sectionId] || [];
   }
 
   if (choice.startsWith("direct:")) {
-    const id = choice.replace("direct:", "");
+    const id = stripPrefix(choice, "direct:");
     return GENERAL_SERVICES_DIRECT_ITEMS.filter((x) => x.value === id);
   }
 
   return [];
 }
 
-export function computeCanGoNext(data: FormData, hasEnoughToProceed: boolean, needsUrgentReason: boolean) {
+export function computeCanGoNext(
+  data: FormData,
+  hasEnoughToProceed: boolean,
+  needsUrgentReason: boolean,
+) {
   if (!hasEnoughToProceed) return false;
   if (data.proceed === "") return false;
-  if (needsUrgentReason && data.urgentReason === "") return false;
-  if (needsUrgentReason && data.urgentReason === "Other" && data.urgentOtherReason.trim() === "") return false;
+  if (needsUrgentReason) {
+    const r = data.urgentReason;
+    if (r === "") return false;
+    if (r === "OTHER") {
+      const details = (data.urgentReasonOtherText || "").trim();
+      if (!details) return false;
+    }
+  }
   return true;
 }
 
@@ -85,7 +99,7 @@ export function applyTopLevelChange(prev: FormData, nextTopLevel: string): FormD
   });
 
   if (nextTopLevel === "Other") {
-    return { ...next, routedDepartment: "General customer services" };
+    return { ...next, routedDepartment: "GENERAL_CUSTOMER_SERVICES" };
   }
 
   return next;
@@ -96,7 +110,7 @@ export function applyGeneralServicesChoiceChange(prev: FormData, nextChoice: str
 
   // "direct:" options map straight to an enquiry (skip the extra enquiry dropdown)
   if (nextChoice.startsWith("direct:")) {
-    const id = nextChoice.replace("direct:", "");
+    const id = stripPrefix(nextChoice, "direct:");
     const match = GENERAL_SERVICES_DIRECT_ITEMS.find((x) => x.value === id);
 
     return {
@@ -111,7 +125,11 @@ export function applyGeneralServicesChoiceChange(prev: FormData, nextChoice: str
 }
 
 // Wipe follow up answers when enquiry changes
-export function applyEnquiryChange(prev: FormData, nextId: string, enquiryOptions: EnquiryItem[]): FormData {
+export function applyEnquiryChange(
+  prev: FormData,
+  nextId: string,
+  enquiryOptions: EnquiryItem[],
+): FormData {
   const match = enquiryOptions.find((x) => x.value === nextId) || null;
 
   return {
@@ -145,7 +163,7 @@ export function applyUrgencyChange(prev: FormData, value: Urgency): FormData {
     ...prev,
     urgent: value,
     urgentReason: value === "yes" ? prev.urgentReason : "",
-    urgentOtherReason: value === "yes" ? prev.urgentOtherReason : "",
+    urgentReasonOtherText: value === "yes" ? prev.urgentReasonOtherText : "",
   };
 }
 

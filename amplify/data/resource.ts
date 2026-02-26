@@ -17,6 +17,8 @@ const schema = a.schema({
       lastName: a.string(),
       middleNames: a.string(),
       preferredName: a.string(),
+      pronouns: a.string(),
+      pronounsOtherText: a.string(),
 
       // Contact info (optional - walk-ins may not provide)
       email: a.string(),
@@ -68,13 +70,8 @@ const schema = a.schema({
       safeContactNotes: a.string(),
 
       urgent: a.enum(["yes", "no", "unsure"]),
-      urgentReason: a.enum([
-        "SAFETY_CONCERN",
-        "NO_SAFE_PLACE_TO_STAY_TONIGHT",
-        "HEALTH_OR_MOBILITY",
-        "TIME_LIMITED_TODAY",
-      ]),
-      urgentOtherReason: a.string(),
+      urgentReason: a.string(),
+      urgentReasonOtherText: a.string(),
 
       // Support needs
       supportNeedsJson: a.string(),
@@ -207,7 +204,7 @@ const schema = a.schema({
     .mutation()
     .arguments({
       input: a.customType({
-		department: a.string().required(),
+		departmentId: a.id().required(),
 
 		firstName: a.string(),
 		middleName: a.string(),
@@ -225,7 +222,7 @@ const schema = a.schema({
 		postcode: a.string(),
 
 		pronouns: a.string(),
-		pronounsOther: a.string(),
+		pronounsOtherText: a.string(),
 
 		enquiry: a.string().required(),
 		specificDetailId: a.string(),
@@ -245,10 +242,10 @@ const schema = a.schema({
 
 		urgent: a.string(),
 		urgentReason: a.string(),
+		urgentReasonOtherText: a.string(),
 
 		additionalInfo: a.string(),
 
-		procedEnum: a.string(),
 		proceed: a.string().required(),
 
 		supportNeeds: a.string().array(),

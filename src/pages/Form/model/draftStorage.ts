@@ -55,8 +55,12 @@ export function loadDraft(storage: Storage): FormDraftV1 | null {
     if (!isObject(parsed)) return null;
     if ((parsed as any).version !== 1) return null;
 
-    const lastPath = typeof (parsed as any).lastPath === "string" ? (parsed as any).lastPath : "/form/personal-details";
-    const updatedAt = typeof (parsed as any).updatedAt === "number" ? (parsed as any).updatedAt : Date.now();
+    const lastPath =
+      typeof (parsed as any).lastPath === "string"
+        ? (parsed as any).lastPath
+        : "/form/personal-details";
+    const updatedAt =
+      typeof (parsed as any).updatedAt === "number" ? (parsed as any).updatedAt : Date.now();
 
     const dataRaw = (parsed as any).data;
     if (!isObject(dataRaw)) return null;

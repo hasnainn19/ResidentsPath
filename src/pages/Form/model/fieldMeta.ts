@@ -6,6 +6,11 @@
 import dayjs from "dayjs";
 import { getEnquirySelectionState } from "./getEnquirySelectionState";
 import type { FormData } from "./formFieldTypes";
+import {
+  DepartmentLabelById,
+  FIELD_TEXT_CONSTRAINTS,
+  UI_OPTIONS,
+} from "../../../../shared/formSchema";
 
 export type EnquiryContext = ReturnType<typeof getEnquirySelectionState>;
 export type FieldKey = keyof FormData;
@@ -53,24 +58,42 @@ const SAFE_TO_CONTACT_LABELS: Record<FormData["safeToContact"], string> = {
   prefer_not_to_say: "Prefer not to say",
 };
 
-const LIMIT = {
-  SHORT: 70,
-  MEDIUM: 100,
-  LONG: 500,
-  XLONG: 1000,
-} as const;
+type OptionList = ReadonlyArray<{ value: string; label: string }>;
+
+function optionLabel(opts: OptionList, value: unknown) {
+  if (typeof value !== "string") return value;
+  if (value.trim() === "") return value;
+  const found = opts.find((o) => o.value === value);
+  return found ? found.label : value;
+}
 
 export const FIELD_META: Record<FieldKey, FieldMeta> = {
   language: { label: "Language" },
 
   provideDetails: { label: "Provide personal details?" },
 
-  firstName: { label: "First name", requiresDetails: true, maxLen: LIMIT.SHORT },
-  middleName: { label: "Middle name", requiresDetails: true, maxLen: LIMIT.SHORT },
-  lastName: { label: "Last name", requiresDetails: true, maxLen: LIMIT.SHORT },
-  preferredName: { label: "Preferred name", requiresDetails: true, maxLen: LIMIT.SHORT },
+  firstName: {
+    label: "First name",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.firstName.maxLen,
+  },
+  middleName: {
+    label: "Middle name",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.middleName.maxLen,
+  },
+  lastName: {
+    label: "Last name",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.lastName.maxLen,
+  },
+  preferredName: {
+    label: "Preferred name",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.preferredName.maxLen,
+  },
 
-  email: { label: "Email", requiresDetails: true, maxLen: LIMIT.MEDIUM },
+  email: { label: "Email", requiresDetails: true, maxLen: FIELD_TEXT_CONSTRAINTS.email.maxLen },
   phoneCountry: { label: "Phone country", requiresDetails: true },
   phone: { label: "Phone number", requiresDetails: true },
 
@@ -84,23 +107,50 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     },
   },
 
-  addressLine1: { label: "Address line 1", requiresDetails: true, maxLen: LIMIT.MEDIUM },
-  addressLine2: { label: "Address line 2", requiresDetails: true, maxLen: LIMIT.MEDIUM },
-  addressLine3: { label: "Address line 3", requiresDetails: true, maxLen: LIMIT.MEDIUM },
-  townOrCity: { label: "Town or city", requiresDetails: true, maxLen: LIMIT.SHORT },
-  postcode: { label: "Postcode", requiresDetails: true, maxLen: LIMIT.SHORT },
+  addressLine1: {
+    label: "Address line 1",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.addressLine1.maxLen,
+  },
+  addressLine2: {
+    label: "Address line 2",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.addressLine2.maxLen,
+  },
+  addressLine3: {
+    label: "Address line 3",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.addressLine3.maxLen,
+  },
+  townOrCity: {
+    label: "Town or city",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.townOrCity.maxLen,
+  },
+  postcode: {
+    label: "Postcode",
+    requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.postcode.maxLen,
+  },
 
   pronouns: {
     label: "Pronouns",
     requiresDetails: true,
-    omitWhen: (fd) => fd.pronouns === "Other" && (fd.pronounsOther ?? "").trim() !== "",
+    format: (fd) => {
+      const p = fd.pronouns;
+      if (p === "OTHER") {
+        const details = (fd.pronounsOtherText ?? "").trim();
+        return details ? `${details}` : "Other";
+      }
+      return optionLabel(UI_OPTIONS.pronouns, p);
+    },
   },
-  pronounsOther: {
+
+  // Stored separately but displayed as part of Pronouns on review
+  pronounsOtherText: {
     label: "Pronouns (other)",
     requiresDetails: true,
-    reviewLabel: "Pronouns",
-    dependsOn: (fd) => fd.pronouns === "Other",
-    maxLen: LIMIT.SHORT,
+    omitWhen: () => true,
   },
 
   topLevel: { label: "Top level service area" },
@@ -116,17 +166,25 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     label: "More detail",
     dependsOn: (fd) => fd.topLevel !== "Other",
     format: (fd, ctx) => {
-      return ctx.selectedEnquiry?.specifics?.find((d) => d.value === fd.specificDetailId)?.label || "";
+      return (
+        ctx.selectedEnquiry?.specifics?.find((d) => d.value === fd.specificDetailId)?.label || ""
+      );
     },
   },
 
-  routedDepartment: { label: "Routed department" },
+  routedDepartment: {
+    label: "Routed department",
+    format: (fd) =>
+      fd.routedDepartment
+        ? (DepartmentLabelById[fd.routedDepartment] ?? fd.routedDepartment)
+        : null,
+  },
 
   otherEnquiryText: {
     label: "Describe your enquiry",
     dependsOn: (fd) => fd.topLevel === "Other",
-    maxLen: LIMIT.XLONG,
-    allowNewlines: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.otherEnquiryText.maxLen,
+    allowNewlines: FIELD_TEXT_CONSTRAINTS.otherEnquiryText.allowNewlines,
   },
 
   hasChildren: {
@@ -147,11 +205,13 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     label: "Select a type...",
     askedInContext: (ctx) => ctx.showDisabilityQs,
     dependsOn: (fd) => fd.hasDisabilityOrSensory,
+    format: (fd) => optionLabel(UI_OPTIONS.disabilityType, fd.disabilityType),
   },
 
   householdSize: {
     label: "How many people are in your household?",
     askedInContext: (ctx) => ctx.showHouseholdSize,
+    format: (fd) => optionLabel(UI_OPTIONS.householdSize, fd.householdSize),
   },
 
   domesticAbuse: {
@@ -168,14 +228,15 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     label: "Safe contact notes",
     askedInContext: (ctx) => ctx.showDomesticAbuseQs,
     dependsOn: (fd) => fd.domesticAbuse && fd.safeToContact === "no",
-    maxLen: LIMIT.XLONG,
-    allowNewlines: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.safeContactNotes.maxLen,
+    allowNewlines: FIELD_TEXT_CONSTRAINTS.safeContactNotes.allowNewlines,
   },
 
   ageRange: {
     label: "Age range",
     dependsOn: (fd) => !fd.dob,
     askedInContext: (ctx) => ctx.showAgeRange,
+    format: (fd) => optionLabel(UI_OPTIONS.ageRange, fd.ageRange),
   },
 
   urgent: {
@@ -185,37 +246,59 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   urgentReason: {
     label: "What best describes why?",
     dependsOn: (fd) => fd.urgent === "yes",
+    format: (fd) => {
+      const r = fd.urgentReason;
+      if (r === "OTHER") {
+        const details = (fd.urgentReasonOtherText ?? "").trim();
+        return details ? `${details}` : "Other";
+      }
+      return optionLabel(UI_OPTIONS.urgentReason, r);
+    },
   },
-  urgentOtherReason: {
-    label: "Please tell us why",
-    dependsOn: (fd) => fd.urgent === "yes" && fd.urgentReason === "Other",
-    maxLen: LIMIT.LONG,
-    allowNewlines: true,
+
+  // Stored separately but displayed as part of urgent reason on review.
+  urgentReasonOtherText: {
+    label: "Urgent reason (other)",
+    omitWhen: () => true,
   },
 
-  additionalInfo: { label: "Anything else you want to tell us", maxLen: LIMIT.XLONG, allowNewlines: true },
+  additionalInfo: {
+    label: "Anything else you want to tell us",
+    maxLen: FIELD_TEXT_CONSTRAINTS.additionalInfo.maxLen,
+    allowNewlines: FIELD_TEXT_CONSTRAINTS.additionalInfo.allowNewlines,
+  },
 
-  proceed: { label: "How would you like to proceed?" },
+  proceed: {
+    label: "How would you like to proceed?",
+    format: (fd) => optionLabel(UI_OPTIONS.proceed, fd.proceed),
+  },
 
-  needsAccessibility: { label: "Accessibility support (for example: step-free access, hearing loop)" },
-  needsLanguage: { label: "Language support / interpretation" },
+  needsAccessibility: {
+    label: "Accessibility support (for example: step-free access, hearing loop)",
+  },
+  needsLanguage: { label: "Language support" },
   needsSeating: { label: "Seating (cannot stand for long)" },
   needsWrittenUpdates: { label: "Written updates (for example: cannot hear announcements)" },
   needsLargeText: { label: "Large text / help reading" },
   needsQuietSpace: { label: "Quieter space" },
   needsBSL: { label: "Interpreter (BSL)" },
   needsHelpWithForms: { label: "Help completing forms" },
-  supportNotes: { label: "Support notes", maxLen: LIMIT.LONG, allowNewlines: true },
-  otherSupport: { label: "Other support", maxLen: LIMIT.LONG },
+  supportNotes: {
+    label: "Support notes",
+    maxLen: FIELD_TEXT_CONSTRAINTS.supportNotes.maxLen,
+    allowNewlines: FIELD_TEXT_CONSTRAINTS.supportNotes.allowNewlines,
+  },
+  otherSupport: { label: "Other support", maxLen: FIELD_TEXT_CONSTRAINTS.otherSupport.maxLen },
 
   contactMethod: {
     label: "Preferred method of contact",
     requiresDetails: true,
+    format: (fd) => optionLabel(UI_OPTIONS.contactMethod, fd.contactMethod),
   },
 
   appointmentDateIso: {
     label: "Appointment date",
-    dependsOn: (fd) => fd.proceed === "Schedule appointment",
+    dependsOn: (fd) => fd.proceed === "BOOK_APPOINTMENT",
     format: (fd) => {
       if (!fd.appointmentDateIso) return null;
       const d = dayjs(fd.appointmentDateIso);
@@ -224,7 +307,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   },
   appointmentTime: {
     label: "Appointment time",
-    dependsOn: (fd) => fd.proceed === "Schedule appointment",
+    dependsOn: (fd) => fd.proceed === "BOOK_APPOINTMENT",
   },
 };
 
@@ -244,7 +327,11 @@ function isEmptyForReview(key: FieldKey, val: unknown): boolean {
   return false;
 }
 
-export function getReviewDisplayValue(key: FieldKey, fd: FormData, ctx: EnquiryContext): string | null {
+export function getReviewDisplayValue(
+  key: FieldKey,
+  fd: FormData,
+  ctx: EnquiryContext,
+): string | null {
   const meta = FIELD_META[key];
 
   if (meta.requiresDetails && fd.provideDetails !== "yes") return null;
@@ -256,12 +343,4 @@ export function getReviewDisplayValue(key: FieldKey, fd: FormData, ctx: EnquiryC
   if (isEmptyForReview(key, raw)) return null;
 
   return typeof raw === "boolean" ? (raw ? "Yes" : "No") : String(raw);
-}
-
-export function getMaxLen(key: FieldKey, fallback = LIMIT.MEDIUM): number {
-  return FIELD_META[key].maxLen ?? fallback;
-}
-
-export function allowsNewlines(key: FieldKey): boolean {
-  return FIELD_META[key].allowNewlines ?? false;
 }

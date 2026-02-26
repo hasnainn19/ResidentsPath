@@ -30,7 +30,7 @@ function isStep2Complete(data: FormData) {
 
 function isStep3Complete(data: FormData) {
   // Step 3 completion depends on proceed choice.
-  if (data.proceed === "Schedule appointment") {
+  if (data.proceed === "BOOK_APPOINTMENT") {
      const hasAppointmentDate =  
       typeof data.appointmentDateIso === "string" && data.appointmentDateIso.trim() !== "";  
     const hasAppointmentTime =  

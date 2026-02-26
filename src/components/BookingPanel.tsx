@@ -51,7 +51,7 @@ export default function BookingPanel(props: Props) {
 
   function handleConfirm() {
     if (!selectedDate || !selectedTime) return;
-    props.onConfirm?.(selectedDate.toISOString(), selectedTime);
+    props.onConfirm?.(selectedDate.format("YYYY-MM-DD"), selectedTime);
     setConfirmOpen(true);
   }
 

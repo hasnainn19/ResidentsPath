@@ -21,21 +21,23 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
 
-
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
-  
   const client = useMemo(() => generateClient<Schema>(), []);
 
   const submitToBackend = async () => {
+    // Build the payload based on the form data, using the shape expected by the backend
     const payload = buildSubmitEnquiryPayload(formData);
     const response = await client.mutations.submitEnquiry({ input: payload });
-    console.log("Backend response:", response);
-    clearSavedDraft();
+    console.log("Submit response", response);
+    if (response?.data?.referenceNumber) {
+      // If successful, navigate to the confirmation page with the reference number
+      nav("/start");
+      clearSavedDraft();
+    }
   };
-
 
   function isNotNull<T>(x: T | null | undefined | false): x is T {
     return x !== null && x !== undefined && x !== false;
@@ -50,7 +52,6 @@ export default function ReviewAndSubmit() {
       title: "Your details",
       keys: [
         "pronouns",
-        "pronounsOther",
         "firstName",
         "middleName",
         "lastName",
@@ -74,7 +75,7 @@ export default function ReviewAndSubmit() {
     },
     {
       title: "Urgency",
-      keys: ["urgent", "urgentReason", "urgentOtherReason"],
+      keys: ["urgent", "urgentReason"],
       editTo: "/form/enquiry-selection",
     },
     {
@@ -151,8 +152,7 @@ export default function ReviewAndSubmit() {
   }
 
   // Get the enquiry selection state which determines which questions were actually asked based on earlier answers
-  const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData), [formData]);
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {
@@ -207,7 +207,12 @@ export default function ReviewAndSubmit() {
           const items = section.keys.map((k) => renderReviewItem(k)).filter(isNotNull);
 
           return (
-            <WithTTS key={section.title} copy={{ label: section.title, tts: ttsText }} titleVariant="h6" sx={{ mb: 3 }}>
+            <WithTTS
+              key={section.title}
+              copy={{ label: section.title, tts: ttsText }}
+              titleVariant="h6"
+              sx={{ mb: 3 }}
+            >
               <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
                 <Button
                   type="button"
@@ -253,7 +258,6 @@ export default function ReviewAndSubmit() {
           showPrevious
           onPrevious={() => nav("/form/actions")}
         />
-
       </Paper>
     </FormStepLayout>
   );

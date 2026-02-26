@@ -13,26 +13,31 @@ import { getEnquiryOptions } from "./enquirySelectionLogic";
 
 // Determines which options and sections to show based on the current form data
 export function getEnquirySelectionState(data: FormData) {
-  const isGeneralServices = data.topLevel === "GeneralServices";
+  const topLevel = data.topLevel;
+
+  const isGeneralServices = topLevel === "GeneralServices";
   const generalServicesIsSection =
-    isGeneralServices && data.generalServicesChoice !== "" && data.generalServicesChoice.startsWith("section:");
+    isGeneralServices && data.generalServicesChoice.startsWith("section:");
 
-  const enquiryOptions = getEnquiryOptions(data.topLevel, data.generalServicesChoice);
+  const enquiryOptions = getEnquiryOptions(topLevel, data.generalServicesChoice);
   const selectedEnquiry = enquiryOptions.find((x) => x.value === data.enquiryId) || null;
-  const isOther = data.topLevel === "Other";
 
-  const specificOptions = selectedEnquiry?.specifics || [];
-  const showSpecificDropdown = !!selectedEnquiry && specificOptions.length > 0;
-
+  const isOther = topLevel === "Other";
   const hasChosenEnquiry = data.enquiryId !== "";
-  const hasSatisfiedSpecific = !showSpecificDropdown || data.specificDetailId !== "";
-  const hasEnoughToProceed = isOther ? data.otherEnquiryText.trim() !== "" : hasChosenEnquiry && hasSatisfiedSpecific;
 
-  const showChildrenQs = data.topLevel === "ChildrensDuty" || !!selectedEnquiry?.askChildrenQs;
-  const showDisabilityQs = !!selectedEnquiry?.askVulnerabilityQs;
-  const showHouseholdSize = !!selectedEnquiry?.askHouseholdSize;
-  const showDomesticAbuseQs = !!selectedEnquiry?.askDomesticAbuseQs;
-  const showAgeRange = hasChosenEnquiry && !data.dob && !!selectedEnquiry?.askAgeQs;
+  const specificOptions = selectedEnquiry?.specifics ?? [];
+  const showSpecificDropdown = specificOptions.length > 0;
+
+  const hasSatisfiedSpecific = !showSpecificDropdown || data.specificDetailId !== "";
+  const hasEnoughToProceed = isOther
+    ? data.otherEnquiryText.trim() !== ""
+    : hasChosenEnquiry && hasSatisfiedSpecific;
+
+  const showChildrenQs = topLevel === "ChildrensDuty" || selectedEnquiry?.askChildrenQs === true;
+  const showDisabilityQs = selectedEnquiry?.askVulnerabilityQs === true;
+  const showHouseholdSize = selectedEnquiry?.askHouseholdSize === true;
+  const showDomesticAbuseQs = selectedEnquiry?.askDomesticAbuseQs === true;
+  const showAgeRange = hasChosenEnquiry && !data.dob && selectedEnquiry?.askAgeQs === true;
 
   return {
     isGeneralServices,
