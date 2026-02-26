@@ -12,7 +12,7 @@ export default function AuthPage() {
 
 	/**
 	 * Watch the auth status and redirect based on user's Cognito group.
-	 * Staff users -> /staff/dashboard
+	 * Staff users -> /staff
 	 * Resident users -> /referencepage
 	 *
 	 * For new signups, the post-confirmation Lambda adds the user to "Residents" group.
@@ -28,7 +28,7 @@ export default function AuthPage() {
 
 					// Check if user is staff
 					if (groups?.includes('Staff')) {
-						navigate('/staff/dashboard');
+						navigate('/staff');
 					}
 					else {
 						// Default to reference page for residents or users with no group
