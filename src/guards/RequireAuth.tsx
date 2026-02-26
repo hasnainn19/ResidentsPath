@@ -10,7 +10,12 @@ interface RequireAuthProps {
 
 /**
  * Route guard that requires the user to be authenticated to access the wrapped component.
+ * 
  * If the user is not authenticated, they will be redirected to the /auth page.
+ * If the user is authenticated, the wrapped component will be rendered.
+ * 
+ * @param children - The component(s) to render if the user is authenticated
+ * @return The wrapped component if authenticated, otherwise a redirect to the login page
  */
 export default function RequireAuth({ children }: RequireAuthProps) {
     const { isAuthenticated, isLoading } = useAuth();

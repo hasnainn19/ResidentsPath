@@ -1,16 +1,27 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import AccessDenied from "../pages/AccessDenied";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
 
 interface RequireRoleProps {
-    allowedGroups: string[]; // e,g ["Staff", "Residents"]
+    allowedGroups: string[];
     children: ReactNode;
 }
 
+/**
+ * Route guard that requires the user to be authenticated AND have one of the specified Cognito groups.
+ *
+ * If the user is not authenticated, they will be redirected to the /auth page.
+ * If the user is authenticated but does not have the required role, they will see an Access Denied page.
+ * 
+ * @param allowedGroups - An array of Cognito group names that are allowed to access the wrapped component (e.g. ["Staff", "Residents"])
+ * @param children - The component(s) to render if the user is authenticated and has the required role
+ * @returns The wrapped component if access is granted, otherwise a redirect to /auth or shown an Access Denied page
+ */
 export default function RequireRole({ allowedGroups, children }: RequireRoleProps) {
     const { isAuthenticated, isLoading, groups } = useAuth();
+    const location = useLocation();
 
     // Show loading state while checking authentication
     if (isLoading) {
@@ -32,7 +43,4 @@ export default function RequireRole({ allowedGroups, children }: RequireRoleProp
 
     // Authenticated and has required role - render the protected page
     return <>{children}</>;
-
-    
 }
-
