@@ -51,7 +51,7 @@ const schema = a.schema({
       description: a.string(),
       status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
       priority: a.boolean().default(false),
-      flag: a.string(), // "SAFEGUARDING, VULNERABLE, URGENT"
+      flag: a.boolean().default(false),
       notes: a.string(),
 
       // What is being requested

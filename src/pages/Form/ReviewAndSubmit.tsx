@@ -31,7 +31,6 @@ export default function ReviewAndSubmit() {
     // Build the payload based on the form data, using the shape expected by the backend
     const payload = buildSubmitEnquiryPayload(formData);
     const response = await client.mutations.submitEnquiry({ input: payload });
-    console.log("Submit response", response);
     if (response?.data?.referenceNumber) {
       // If successful, navigate to the confirmation page with the reference number
       nav("/start");
