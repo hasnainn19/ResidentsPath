@@ -603,6 +603,25 @@ export const formSchema = z
         });
       }
     }
+
+    if (v.enquiry === "OTHER") {
+      if (!v.otherEnquiryText) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["otherEnquiryText"],
+          message: "Details are required when Other is selected",
+        });
+      }
+    }
+    else {
+      if (v.otherEnquiryText) {
+        ctx.addIssue({
+          code: "custom", 
+          path: ["otherEnquiryText"],
+          message: "otherEnquiryText must only be provided when enquiry is OTHER",
+        });
+      }
+    }
   });
 
 export type formInput = z.infer<typeof formSchema>;
