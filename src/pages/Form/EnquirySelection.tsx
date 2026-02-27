@@ -713,6 +713,8 @@ export default function EnquirySelection() {
                       label="Briefly describe why you need support sooner today"
                       value={formData.urgentReasonOtherText}
                       onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen }}}
+                      helperText={countChars("additionalInfo", formData.additionalInfo)}
                     />
                   )}
                 </Box>
