@@ -115,9 +115,5 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     contactMethod,
   };
 
-  for (const k of Object.keys(payload) as Array<keyof formInput>) {
-    if (payload[k] === undefined) delete payload[k];
-  }
-
   return payload;
 }
