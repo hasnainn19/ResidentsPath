@@ -205,10 +205,6 @@ function trimToUndef(value: unknown) {
   return t.length ? t : undefined;
 }
 
-function normaliseEmail(value: string) {
-  return value.trim().toLowerCase();
-}
-
 function normalisePhone(value: string) {
   return value.trim();
 }
@@ -363,11 +359,9 @@ export const formSchema = z
     contactMethod: z.preprocess(trimToUndef, ContactMethodEnum.optional()),
     email: z
       .preprocess(
-        trimToUndef,
+        (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
         z.string().email().max(FIELD_TEXT_CONSTRAINTS.email.maxLen).optional(),
-      )
-      .transform((v) => (v ? normaliseEmail(v) : v))
-      .refine((v) => (v ? isValidEmail(v) : true), "Email format is invalid"),
+      ),
     phoneCountry: z.preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_COUNTRY_MAX).optional()),
     phone: z
       .preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_MAX_CHARS).optional())
