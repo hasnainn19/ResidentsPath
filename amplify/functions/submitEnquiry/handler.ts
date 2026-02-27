@@ -110,23 +110,6 @@ function updateUserInfo(
   }) as Partial<UserCreateInput>;
 }
 
-// Ensure the department exists in the database, creating it if it doesn't
-async function ensureDepartmentExists(client: DataClient, departmentId: string) {
-  const { data: existing } = await client.models.Department.get({ id: departmentId });
-  if (existing?.id) return;
-
-  const name =
-    DepartmentLabelById[departmentId as keyof typeof DepartmentLabelById] ?? departmentId;
-
-  const createInput: DepartmentCreateInput = { id: departmentId, name } as DepartmentCreateInput;
-  const { data: created, errors } = await client.models.Department.create(createInput);
-
-  if (created?.id && !errors?.length) return;
-
-  logModelErrors("submitEnquiry: Department.create failed", errors);
-  throw new Error("Failed to create department");
-}
-
 // Delete created records in case of failure
 async function tryDelete(label: string, fn: () => Promise<unknown>) {
   try {
@@ -227,8 +210,6 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   // Create a new case with the enquiry details, linked to the user and department
   try {
     const referenceNumber = generateReferenceNumber();
-
-    await ensureDepartmentExists(client, validated.departmentId);
 
     const caseCreateInput = removeIrrelevantValues({
       userId,
