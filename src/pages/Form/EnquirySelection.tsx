@@ -468,7 +468,7 @@ export default function EnquirySelection() {
                                   >
                                     <MenuItem value="">Select...</MenuItem>
                                     {UI_OPTIONS.disabilityType.map((opt) => (
-                                      <MenuItem key={opt.value} value={opt.label}>
+                                      <MenuItem key={opt.value} value={opt.value}>
                                         {opt.label}
                                       </MenuItem>
                                     ))}
@@ -496,7 +496,7 @@ export default function EnquirySelection() {
                             >
                               <MenuItem value="">Select...</MenuItem>
                               {UI_OPTIONS.householdSize.map((opt) => (
-                                <MenuItem key={opt.value} value={opt.label}>
+                                <MenuItem key={opt.value} value={opt.value}>
                                   {opt.label}
                                 </MenuItem>
                               ))}
