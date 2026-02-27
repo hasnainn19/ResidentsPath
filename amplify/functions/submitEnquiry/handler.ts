@@ -87,11 +87,31 @@ export function generateReferenceNumber(): string {
   return `${prefix}-${suffix}`;
 }
 
+// Update existing user details with new information from the form
+function updateUserInfo(
+  validated: ReturnType<typeof formSchema.parse>,
+): Partial<UserCreateInput> {
+  return removeIrrelevantValues({
+    firstName: validated.firstName,
+    middleNames: validated.middleName,
+    lastName: validated.lastName,
+    preferredName: validated.preferredName,
+    pronouns: validated.pronouns,
+    pronounsOtherText: validated.pronounsOtherText,
+
+    email: validated.email,
+    phoneNumber: validated.phone,
+
+    addressLine1: validated.addressLine1,
+    addressLine2: validated.addressLine2,
+    addressLine3: validated.addressLine3,
+    city: validated.townOrCity,
+    postcode: validated.postcode,
+  }) as Partial<UserCreateInput>;
+}
+
 // Ensure the department exists in the database, creating it if it doesn't
-async function ensureDepartmentExists(
-  client: ReturnType<typeof generateClient<Schema>>,
-  departmentId: string,
-) {
+async function ensureDepartmentExists(client: DataClient, departmentId: string) {
   const { data: existing } = await client.models.Department.get({ id: departmentId });
   if (existing?.id) return;
 
@@ -146,6 +166,19 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
       if (!errors?.length && users && users[0]?.id) {
         userId = users[0].id;
+
+        // Overwrite saved details with any new information provided
+        const new_info = updateUserInfo(validated);
+        if (Object.keys(new_info).length) {
+          const { errors: updateErrors } = await client.models.User.update({
+            id: userId,
+            ...new_info,
+          } as any);
+
+          if (updateErrors?.length) {
+            logModelErrors("submitEnquiry: User.update failed", updateErrors);
+          }
+        }
       }
     } catch (e) {
       console.error("submitEnquiry: user lookup failed", e);
