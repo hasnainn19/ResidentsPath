@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import App from "./App";
+import StaffDashboard from "./pages/StaffDashboard";
+import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
 import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
@@ -13,10 +15,12 @@ import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard";
 
-
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: <App />,
+  },
+  {
     element: <LandingPage />,
   },
   {
@@ -34,6 +38,16 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <BookingPage />,
+  },
+  {
+    path: "/staff",
+    element: <StaffLayout />,
+    children: [
+      {
+        index: true,
+        element: <StaffDashboard />,
+      },
+    ],
   },
   {
       path: "/userdashboard", element: <UserDashboard /> 

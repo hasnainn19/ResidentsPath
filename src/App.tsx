@@ -1,15 +1,17 @@
-import {Box, Typography} from '@mui/material';
-import './App.css'
-import NavBar from './components/NavBar'
+import { Box, Typography } from "@mui/material";
+import "./App.css";
+import NavBar from "./components/NavBar";
 
 function App() {
-
   return (
-    <Box sx={{ width: '100%', height:'100vh' }}>
+    <Box sx={{ width: "100%", height: "100vh" }}>
       <NavBar />
-      <Typography variant='h1' align='center'> Start page</Typography>
+      <Typography variant="h1" align="center">
+        {" "}
+        Start page
+      </Typography>
     </Box>
   );
 }
 
-export default App
+export default App;

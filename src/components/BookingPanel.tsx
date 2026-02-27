@@ -1,4 +1,3 @@
-// BookingPanel.tsx
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import {
