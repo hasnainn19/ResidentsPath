@@ -56,6 +56,7 @@ const schema = a.schema({
 
       // What is being requested
       enquiry: a.string().required(),
+      otherEnquiryText: a.string(),
 
       // Prioritisation criteria
       childrenCount: a.string(),
@@ -225,7 +226,7 @@ const schema = a.schema({
 		pronounsOtherText: a.string(),
 
 		enquiry: a.string().required(),
-		specificDetailId: a.string(),
+    otherEnquiryText: a.string(),
 
 		childrenCount: a.string(),
 
@@ -268,7 +269,7 @@ const schema = a.schema({
     .handler(a.handler.function(submitEnquiry)),
 })
 .authorization((allow) => [
-	allow.resource(submitEnquiry),
+	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getTicketStatus),
 ]);
 

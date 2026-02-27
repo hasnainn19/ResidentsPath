@@ -334,6 +334,11 @@ export const formSchema = z
       otherFreeText(FIELD_TEXT_CONSTRAINTS.pronounsOtherText.maxLen).optional(),
     ),
 
+    dob: z.preprocess(
+      trimToUndef,
+      z.string().refine(isValidIsoDate, "dob must be YYYY-MM-DD").optional(),
+    ),
+
     addressLine1: z.preprocess(
       trimToUndef,
       z.string().max(FIELD_TEXT_CONSTRAINTS.addressLine1.maxLen).optional(),

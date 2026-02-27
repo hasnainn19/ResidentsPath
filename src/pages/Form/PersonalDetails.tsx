@@ -406,7 +406,7 @@ export default function PersonalDetails() {
                             value={formData.pronounsOtherText}
                             onChange={(e) => setField("pronounsOtherText", e.target.value)}
                             fullWidth
-                            slotProps={{ htmlInput: { maxLength: 70 } }}
+                            slotProps={{ htmlInput: { maxLength: FIELD_META.pronounsOtherText.maxLen } }}
                           />
                         )}
                       </Stack>

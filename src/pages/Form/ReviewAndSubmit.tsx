@@ -6,9 +6,9 @@
  * that apply based on earlier choices).
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
+import { Paper, Typography, Button, Stack, Divider, Box, Alert } from "@mui/material";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -25,16 +25,27 @@ export default function ReviewAndSubmit() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const client = useMemo(() => generateClient<Schema>(), []);
 
   const submitToBackend = async () => {
-    // Build the payload based on the form data, using the shape expected by the backend
-    const payload = buildSubmitEnquiryPayload(formData);
-    const response = await client.mutations.submitEnquiry({ input: payload });
-    if (response?.data?.referenceNumber) {
-      // If successful, navigate to the confirmation page with the reference number
-      nav("/start");
+    setSubmitError(null);
+
+    try {
+      // Build the payload based on the form data, using the shape expected by the backend
+      const payload = buildSubmitEnquiryPayload(formData);
+      const response = await client.mutations.submitEnquiry({ input: payload });
+      const ref = response?.data?.referenceNumber;
+      if (!ref) {
+        setSubmitError("Submission failed. Please try again.");
+        return;
+      }
       clearSavedDraft();
+      nav("/referencepage");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setSubmitError(msg || "Submission failed. Please try again.");
     }
   };
 
@@ -114,6 +125,7 @@ export default function ReviewAndSubmit() {
       editTo: "/form/actions",
     },
   ];
+
   // Two-column layout for review: label left, answer right
   function ReviewRow({ label, value }: { label: string; value: string }) {
     return (
@@ -189,6 +201,12 @@ export default function ReviewAndSubmit() {
         <Typography variant="h6" sx={{ mb: 3 }}>
           Please review your information before submitting:
         </Typography>
+
+        {submitError && (
+          <Alert severity="error" sx={{ mb: 3 }} role="alert">
+            {submitError}
+          </Alert>
+        )}
 
         {/* Review items */}
         {SECTIONS.map((section) => {

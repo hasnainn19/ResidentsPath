@@ -150,6 +150,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   pronounsOtherText: {
     label: "Pronouns (other)",
     requiresDetails: true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.pronounsOtherText.maxLen,
     omitWhen: () => true,
   },
 
