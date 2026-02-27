@@ -18,9 +18,6 @@ import UserDashboard from "./pages/UserDashboard";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
-  },
-  {
     element: <LandingPage />,
   },
   {
