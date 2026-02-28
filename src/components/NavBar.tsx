@@ -102,9 +102,26 @@ export default function NavBar() {
 							open={Boolean(anchorElUser)}
 							onClose={handleCloseUserMenu}
 							sx={{ mt: 4 }}
+							slotProps={{
+								paper: {
+									sx: {
+										borderRadius: 2,
+										minWidth: 140,
+										boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
+									}
+								}
+							}}
 						>
 							{menuDropdown.map((setting) => (
-								<MenuItem key={setting} onClick={() => handleMenuItemClick(setting)}>
+								<MenuItem
+									key={setting}
+									onClick={() => handleMenuItemClick(setting)}
+									sx={{
+										px: 2.5,
+										py: 1,
+										'&:hover': { backgroundColor: 'primary.light' },
+									}}
+								>
 									<Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
 								</MenuItem>
 							))}
