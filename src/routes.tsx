@@ -16,6 +16,7 @@ import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard";
 
 import RequireGuest from "./guards/RequireGuest";
+import RequireAuth from "./guards/RequireAuth";
 
 export const router = createBrowserRouter([
   {
@@ -36,7 +37,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/bookingpage",
-    element: <BookingPage />,
+    element: <RequireAuth> <BookingPage /> </RequireAuth>,
   },
   {
     path: "/staff",

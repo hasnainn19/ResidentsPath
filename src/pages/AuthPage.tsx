@@ -1,48 +1,11 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button, Box, Typography } from '@mui/material';
 import { ArrowBackIos } from '@mui/icons-material';
-import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
-import { fetchAuthSession } from 'aws-amplify/auth';
+import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 
 export default function AuthPage() {
 	const navigate = useNavigate();
-	const { authStatus } = useAuthenticator((context) => [context.authStatus]);
-
-	/**
-	 * Watch the auth status and redirect based on user's Cognito group.
-	 * Staff users -> /staff
-	 * Resident users -> /referencepage
-	 *
-	 * For new signups, the post-confirmation Lambda adds the user to "Residents" group.
-	 * We force a token refresh to ensure we have the latest group membership.
-	 */
-	useEffect(() => {
-		const checkGroupsAndRedirect = async () => {
-			if (authStatus === 'authenticated') {
-				try {
-					// Force refresh to get the latest token with group assignments
-					const session = await fetchAuthSession({ forceRefresh: true });
-					const groups = session.tokens?.accessToken?.payload['cognito:groups'] as string[] | undefined;
-
-					// Check if user is staff
-					if (groups?.includes('Staff')) {
-						navigate('/staff');
-					}
-					else {
-						// Default to reference page for residents or users with no group
-						navigate('/referencepage');
-					}
-				}
-				catch (error) {
-					console.error('Error fetching auth session:', error);
-				}
-			}
-		};
-
-		checkGroupsAndRedirect();
-	}, [authStatus, navigate]);
 
 	return (
 		<Container maxWidth="sm" sx={{ py: 6 }}>
@@ -57,7 +20,7 @@ export default function AuthPage() {
 
 			<Box sx={{ mb: 4, textAlign: 'center' }}>
 				<Button
-					onClick={() => navigate('/')}
+					onClick={() => navigate(-1)}
 					startIcon={<ArrowBackIos sx={{ fontSize: '0.9rem' }} />}
 					sx={{
 						textTransform: 'none',
