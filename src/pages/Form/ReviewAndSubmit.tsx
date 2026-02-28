@@ -20,19 +20,20 @@ import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
-  const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
+  const { formData, setFormData, handleSave } = useFormWizard();
+  // removed clearSavedDraft from consts above for lint
 
-  // TODO(BACKEND)
-  const submitToBackend = () => {
-    const payload = {
-      ...formData,
-      ageRange: formData.dob ? "" : formData.ageRange,
-      childrenCount: formData.hasChildren ? formData.childrenCount : "0",
-      disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
-      urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
-    };
-    clearSavedDraft();
-  };
+  // #TODO: BACKEND
+  // const submitToBackend = () => {
+  //   const payload = {
+  //     ...formData,
+  //     ageRange: formData.dob ? "" : formData.ageRange,
+  //     childrenCount: formData.hasChildren ? formData.childrenCount : "0",
+  //     disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
+  //     urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
+  //   };
+  //   clearSavedDraft();
+  // };
 
   function isNotNull<T>(x: T | null | undefined | false): x is T {
     return x !== null && x !== undefined && x !== false;
@@ -245,7 +246,7 @@ export default function ReviewAndSubmit() {
         <StepActions
           onSave={handleSave}
           advanceLabel="Submit request"
-          onAdvanceClick={submitToBackend}
+          // onAdvanceClick={submitToBackend}
           advanceType="button"
           showPrevious
           onPrevious={() => nav("/form/actions")}
