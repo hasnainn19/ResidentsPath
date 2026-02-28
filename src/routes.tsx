@@ -17,6 +17,7 @@ import UserDashboard from "./pages/UserDashboard";
 
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
+import RequireRole from "./guards/RequireRole";
 
 export const router = createBrowserRouter([
   {
@@ -41,7 +42,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/staff",
-    element: <StaffLayout />,
+    element: <RequireRole allowedGroups={["Staff"]}> <StaffLayout /> </RequireRole>,
     children: [
       {
         index: true,

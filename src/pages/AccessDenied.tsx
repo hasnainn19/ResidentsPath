@@ -16,7 +16,8 @@ export default function AccessDenied() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
+          paddingTop: "20vh",
           minHeight: "100vh",
           textAlign: "center",
           gap: 3,
@@ -32,7 +33,7 @@ export default function AccessDenied() {
           You don't have permission to access this page.
         </Typography>
 
-        <Button variant="contained" onClick={() => navigate(-1)}>
+        <Button variant="contained" size="large" onClick={() => navigate(-1)}>
           Go Back
         </Button>
       </Box>
