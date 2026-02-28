@@ -13,9 +13,13 @@ import { fetchAuthSession } from "aws-amplify/auth";
  *
  * All data is read from the ID token, which contains both group membership
  * and user profile attributes.
+ *
+ * All values are derived from state so they all update together 
+ * in the same render cycle, preventing stale intermediate states.
  */
 export function useAuth() {
     const { authStatus } = useAuthenticator((context) => [context.authStatus]);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [groups, setGroups] = useState<string[] | null | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [email, setEmail] = useState<string | null | undefined>(undefined);
@@ -43,9 +47,11 @@ export function useAuth() {
                     setEmail(idToken?.email as string | undefined || null);
                     setGivenName(idToken?.given_name as string | undefined || null);
                     setFamilyName(idToken?.family_name as string | undefined || null);
+                    setIsAuthenticated(true);
                 }
                 catch (error) {
                     console.error("Error fetching auth session:", error);
+                    setIsAuthenticated(false);
                     setGroups(undefined);
                     setEmail(undefined);
                     setGivenName(undefined);
@@ -57,6 +63,7 @@ export function useAuth() {
             }
             // User is not authenticated
             else {
+                setIsAuthenticated(false);
                 setGroups(null);
                 setEmail(null);
                 setGivenName(null);
@@ -69,11 +76,8 @@ export function useAuth() {
     }, [authStatus]); // Run whenever authStatus changes
 
     return {
-        // Amplify auth status (e.g. "authenticated", "unauthenticated", "configuring")
-        authStatus,
-
         // Boolean flags
-        isAuthenticated: authStatus === "authenticated",
+        isAuthenticated,
         isStaff: Boolean(groups?.includes("Staff")),
         isResident: Boolean(groups?.includes("Residents")),
 
