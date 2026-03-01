@@ -23,7 +23,7 @@ export default function LandingPage() {
 				<Box sx={{ textAlign: 'center', mb: 6 }}>
 					<Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
 						{isAuthenticated
-							? `Welcome back, ${givenName}`
+							? (givenName ? `Welcome back, ${givenName}` : 'Welcome back')
 							: 'Welcome to ResidentsPath'
 						}
 					</Typography>
