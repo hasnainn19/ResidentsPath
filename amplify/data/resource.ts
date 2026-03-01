@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { getTicketStatus } from '../functions/getTicketStatus/resource';
+import { postConfirmation } from '../functions/postConfirmation/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -168,7 +169,11 @@ const schema = a.schema({
 		}))
 		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
 		.handler(a.handler.function(getTicketStatus)),
-});
+})
+// Schema-level resource access bypasses model-level authorization rules for the named Lambda function.
+.authorization((allow) => [
+	allow.resource(postConfirmation),
+]);
 
 export type Schema = ClientSchema<typeof schema>;
 

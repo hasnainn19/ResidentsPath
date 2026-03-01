@@ -1,15 +1,7 @@
 import type { PostConfirmationTriggerHandler } from "aws-lambda";
-import {
-    CognitoIdentityProviderClient,
-    AdminAddUserToGroupCommand
-} from "@aws-sdk/client-cognito-identity-provider";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../data/resource";
-
-// Initialize Cognito client
-const cognitoClient = new CognitoIdentityProviderClient({
-    region: process.env.AWS_REGION,
-});
+import { AdminAddUserToGroupCommand } from "@aws-sdk/client-cognito-identity-provider";
+import { getAmplifyClient } from "../utils/amplifyClient";
+import { cognitoClient } from "../utils/cognitoClient";
 
 /**
  * Lambda function to handle Cognito post-confirmation trigger.
@@ -46,11 +38,9 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
         console.error(`Failed to add user ${event.userName} to Residents group:`, error);
     }
 
-    // Create a corresponding User record in DynamoDB
+    // Create a corresponding User record in DynamoDB via AppSync
     try {
-        const client = generateClient<Schema>({
-            authMode: "identityPool",
-        });
+        const client = await getAmplifyClient();
 
         const result = await client.models.User.create({
             cognitoUserId: cognitoUserId,
