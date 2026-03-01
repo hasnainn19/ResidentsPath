@@ -172,6 +172,8 @@ const schema = a.schema({
 })
 // Schema-level resource access bypasses model-level authorization rules for the named Lambda function.
 .authorization((allow) => [
+	// We cannot apply lambda authorization to models, so we are forced 
+	// to apply it at the schema level even if it's not ideal.
 	allow.resource(postConfirmation),
 ]);
 
