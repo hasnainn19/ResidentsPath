@@ -81,7 +81,15 @@ export default function NavBar() {
 						<Button color="inherit" onClick={() => navigate("/form")}>Form</Button>
 					</Tooltip>
 					
-					<Button color="inherit" onClick={() => window.open('https://www.hounslow.gov.uk/', '_blank')}>Council Website</Button>
+					<Button
+						color="inherit"
+						component="a"
+						href="https://www.hounslow.gov.uk/"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Council Website
+					</Button>
 
 					<Box>
 						<IconButton onClick={handleOpenUserMenu} color="inherit">
