@@ -43,7 +43,8 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
         const client = await getAmplifyClient();
 
         const result = await client.models.User.create({
-            cognitoUserId: cognitoUserId,
+            id: cognitoUserId, // Use Cognito sub as the User ID for registered users
+            isRegistered: true,
             email: email,
             firstName: givenName,
             lastName: familyName,

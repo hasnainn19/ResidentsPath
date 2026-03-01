@@ -9,7 +9,8 @@ const schema = a.schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
-			cognitoUserId: a.string(), // Authentication link (null for walk-ins)
+			// id is set to the Cognito sub for registered users, auto-UUID for walk-ins
+			isRegistered: a.boolean().required(),
 
 			// Name fields (required for all users)
 			title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
