@@ -3,6 +3,7 @@ import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { postConfirmation } from './functions/postConfirmation/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Aws } from 'aws-cdk-lib';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -31,7 +32,8 @@ backend.postConfirmation.resources.lambda.addToRolePolicy(
 			"cognito-idp:AdminAddUserToGroup", // Add users to Cognito groups
 		],
 		resources: [
-			`arn:aws:cognito-idp:eu-west-2:*:userpool/*`, // backend.auth.resources.userPool.userPoolArn
+			// backend.auth.resources.userPool.userPoolArn causes circular dependency 
+			`arn:aws:cognito-idp:${Aws.REGION}:${Aws.ACCOUNT_ID}:userpool/*`, 
 		],
 	})
 );
