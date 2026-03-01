@@ -74,7 +74,9 @@ const StaffQueuePage = () => {
   } | null>(null);
 
   const serviceCases = useMemo(() => {
-    return cases.filter((c) => !selectedService || c.service === selectedService);
+    return cases.filter(
+      (c) => !selectedService || c.service === selectedService,
+    );
   }, [cases, selectedService]);
 
   const filteredCases = useMemo(() => {
