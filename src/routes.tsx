@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <RequireGuest> <AuthPage /> </RequireGuest>,
+    element: <RequireGuest><AuthPage /></RequireGuest>,
   },
   {
     path: "/start",
@@ -38,11 +38,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/bookingpage",
-    element: <RequireAuth> <BookingPage /> </RequireAuth>,
+    element: <RequireAuth><BookingPage /></RequireAuth>,
   },
   {
     path: "/staff",
-    element: <RequireRole allowedGroups={["Staff"]}> <StaffLayout /> </RequireRole>,
+    element: <RequireRole allowedGroups={["Staff"]}><StaffLayout /></RequireRole>,
     children: [
       {
         index: true,
