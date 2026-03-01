@@ -1,6 +1,6 @@
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
-import { getAmplifyDataClientConfig } from "@aws-amplify/backend-function/runtime";
+import { getAmplifyDataClientConfig, type DataClientEnv } from "@aws-amplify/backend-function/runtime";
 import type { Schema } from "../../data/resource";
 
 /**
@@ -29,7 +29,7 @@ async function ensureConfigured(): Promise<void> {
     if (configured) return;
 
     const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(
-        process.env as any
+        process.env as unknown as DataClientEnv
     );
 
     Amplify.configure(resourceConfig, libraryOptions);
