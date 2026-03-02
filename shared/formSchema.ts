@@ -280,7 +280,7 @@ const otherFreeText = (maxLen: number) =>
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine((s) => !/[\u0000-\u001F\u007F]/.test(s), "Contains invalid control characters");
+    .refine((s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s), "Contains invalid control characters");
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
