@@ -14,10 +14,15 @@ import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
 import { Amplify } from "aws-amplify";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { DepartmentLabelById, formSchema } from "../../../shared/formSchema";
+import { formSchema } from "../../../shared/formSchema";
+import {
+  DynamoDBClient,
+  UpdateItemCommand,
+  PutItemCommand,
+  DeleteItemCommand,
+} from "@aws-sdk/client-dynamodb";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
-type DepartmentCreateInput = Parameters<DataClient["models"]["Department"]["create"]>[0];
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
 type CaseCreateInput = Parameters<DataClient["models"]["Case"]["create"]>[0];
 
@@ -87,10 +92,145 @@ export function generateReferenceNumber(): string {
   return `${prefix}-${suffix}`;
 }
 
+const ddb = new DynamoDBClient({});
+
+function daysFromNowInSeconds(days: number): number {
+  return Math.floor(Date.now() / 1000) + days * 24 * 60 * 60;
+}
+
+// Get the current date in London and format it as YYYYMMDD to use as a key for daily ticket counters
+function getDate(d = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+
+  const year = parts.find((p) => p.type === "year")?.value;
+  const month = parts.find((p) => p.type === "month")?.value;
+  const day = parts.find((p) => p.type === "day")?.value;
+
+  if (!year || !month || !day) throw new Error("Failed to compute date");
+  return `${year}${month}${day}`;
+}
+
+type DepartmentId = ReturnType<typeof formSchema.parse>["departmentId"];
+
+const DepartmentCodeById: Record<DepartmentId, string> = {
+  HOMELESSNESS: "H",
+  ADULTS_DUTY: "A",
+  CHILDRENS_DUTY: "C",
+  COMMUNITY_HUB_ADVISOR: "CH",
+  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "CT",
+  GENERAL_CUSTOMER_SERVICES: "G",
+};
+
+function getDepartmentCode(departmentId: DepartmentId): string {
+  const code = DepartmentCodeById[departmentId];
+  if (!code) throw new Error(`No department code configured for ${departmentId}`);
+  return code;
+}
+
+// Atomically increment and retrieve the next ticket index for a queue from DynamoDB, ensuring uniqueness without race conditions
+async function getNextTicketIndex(queueId: string): Promise<number> {
+  const tableName = process.env.TICKET_COUNTER_TABLE;
+  if (!tableName) throw new Error("TICKET_COUNTER_TABLE is not set");
+
+  const res = await ddb.send(
+    new UpdateItemCommand({
+      TableName: tableName,
+      Key: { counterId: { S: queueId } },
+      UpdateExpression: "SET #next = if_not_exists(#next, :zero) + :one, expiresAt = :expiresAt",
+      ExpressionAttributeNames: { "#next": "next" },
+      ExpressionAttributeValues: {
+        ":zero": { N: "0" },
+        ":one": { N: "1" },
+        ":expiresAt": { N: String(daysFromNowInSeconds(3)) },
+      },
+      ReturnValues: "UPDATED_NEW",
+    }),
+  );
+
+  const nextStr = res.Attributes?.next?.N;
+  const next = typeof nextStr === "string" ? Number(nextStr) : NaN;
+  if (!Number.isFinite(next)) throw new Error("Ticket counter did not return a valid value");
+
+  return (next - 1) % 1000;
+}
+
+// Attempt to claim a ticket number for a queue by inserting a record into the ticket number claims table
+// If the record already exists, it means another process has claimed that ticket number, so try the next one
+async function claimTicketDigits(queueId: string, ticketNumber: string) {
+  const claimsTable = process.env.TICKET_NUMBER_CLAIMS_TABLE;
+  if (!claimsTable) throw new Error("TICKET_NUMBER_CLAIMS_TABLE is not set");
+
+  await ddb.send(
+    new PutItemCommand({
+      TableName: claimsTable,
+      Item: {
+        queueId: { S: queueId },
+        ticketNumber: { S: ticketNumber },
+        allocatedAt: { N: String(Date.now()) },
+        expiresAt: { N: String(daysFromNowInSeconds(3)) },
+      },
+      ConditionExpression: "attribute_not_exists(queueId) AND attribute_not_exists(ticketNumber)",
+    }),
+  );
+}
+
+// Release a claimed ticket number by deleting the corresponding record from the ticket number claims table
+async function releaseTicketNumber(queueId: string, ticketNumber: string) {
+  const claimsTable = process.env.TICKET_NUMBER_CLAIMS_TABLE;
+  if (!claimsTable) return;
+
+  await ddb.send(
+    new DeleteItemCommand({
+      TableName: claimsTable,
+      Key: {
+        queueId: { S: queueId },
+        ticketNumber: { S: ticketNumber },
+      },
+    }),
+  );
+}
+
+// Atomically allocate a unique 3 digit ticket number for the current service day and department
+// TicketNumber is in the form "X000" where X represents the first (or first two) letter(s) of the department and 000 is a zero-padded number from 000 to 999
+async function allocateDeptTicketNumber(departmentCode: string): Promise<{
+  queueId: string;
+  ticketNumber: string;
+  ticketDigits: string;
+}> {
+  const serviceDay = getDate();
+  const queueId = `${serviceDay}#${departmentCode}`;
+
+  const start = await getNextTicketIndex(queueId);
+
+  for (let i = 0; i < 1000; i++) {
+    const idx = (start + i) % 1000;
+    const ticketDigits = String(idx).padStart(3, "0");
+
+    try {
+      await claimTicketDigits(queueId, ticketDigits);
+      return {
+        queueId,
+        ticketDigits,
+        ticketNumber: `${departmentCode}${ticketDigits}`,
+      };
+    } catch (e: any) {
+      const name = typeof e?.name === "string" ? e.name : "";
+      // If the error is a ConditionalCheckFailedException, it means the ticket number is already claimed so continue the loop
+      if (name === "ConditionalCheckFailedException") continue;
+      throw e;
+    }
+  }
+
+  throw new Error("All ticket numbers are currently in use for this department");
+}
+
 // Update existing user details with new information from the form
-function updateUserInfo(
-  validated: ReturnType<typeof formSchema.parse>,
-): Partial<UserCreateInput> {
+function updateUserInfo(validated: ReturnType<typeof formSchema.parse>): Partial<UserCreateInput> {
   return removeIrrelevantValues({
     firstName: validated.firstName,
     middleNames: validated.middleName,
@@ -207,6 +347,9 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   let createdAppointmentId: string | null = null;
   let createdTicketId: string | null = null;
 
+  let claimedQueueId: string | null = null;
+  let claimedTicketDigits: string | null = null;
+
   // Create a new case with the enquiry details, linked to the user and department
   try {
     const referenceNumber = generateReferenceNumber();
@@ -275,10 +418,16 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       return { referenceNumber };
     }
 
+    const departmentCode = getDepartmentCode(validated.departmentId);
+    const { queueId, ticketNumber, ticketDigits } = await allocateDeptTicketNumber(departmentCode);
+
+    claimedQueueId = queueId;
+    claimedTicketDigits = ticketDigits;
+
     // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
       caseId: createdCaseId,
-      ticketNumber: "-1",
+      ticketNumber,
       placement: -1,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
@@ -304,6 +453,14 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     if (createdTicketId) {
       await tryDelete("Ticket.delete", () => client.models.Ticket.delete({ id: createdTicketId! }));
     }
+
+    // If a ticket number was claimed but failed later, release it so it can be reused
+    if (claimedQueueId && claimedTicketDigits) {
+      await tryDelete("TicketNumberClaims.delete", () =>
+        releaseTicketNumber(claimedQueueId!, claimedTicketDigits!),
+      );
+    }
+
     if (createdAppointmentId) {
       await tryDelete("Appointment.delete", () =>
         client.models.Appointment.delete({ id: createdAppointmentId! }),
