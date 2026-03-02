@@ -714,7 +714,7 @@ export default function EnquirySelection() {
                       value={formData.urgentReasonOtherText}
                       onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
                       slotProps={{ htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen }}}
-                      helperText={countChars("additionalInfo", formData.additionalInfo)}
+                      helperText={countChars("urgentReasonOtherText", formData.urgentReasonOtherText)}
                     />
                   )}
                 </Box>

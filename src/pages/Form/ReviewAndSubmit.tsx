@@ -44,8 +44,8 @@ export default function ReviewAndSubmit() {
       clearSavedDraft();
       nav("/referencepage");
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setSubmitError(msg || "Submission failed. Please try again.");
+      console.error("Failed to submit enquiry", e);  
+      setSubmitError("Submission failed. Please try again."); 
     }
   };
 

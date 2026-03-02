@@ -261,6 +261,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   urgentReasonOtherText: {
     label: "Urgent reason (other)",
     omitWhen: () => true,
+    maxLen: FIELD_TEXT_CONSTRAINTS.urgentReasonOtherText.maxLen,
   },
 
   additionalInfo: {
