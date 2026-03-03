@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { getTicketStatus } from '../functions/getTicketStatus/resource';
+import { postConfirmation } from '../functions/postConfirmation/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -8,7 +9,8 @@ const schema = a.schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
-			cognitoUserId: a.string(), // Authentication link (null for walk-ins)
+			// id is set to the Cognito sub for registered users, auto-UUID for walk-ins
+			isRegistered: a.boolean().required(),
 
 			// Name fields (required for all users)
 			title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
@@ -168,7 +170,13 @@ const schema = a.schema({
 		}))
 		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
 		.handler(a.handler.function(getTicketStatus)),
-});
+})
+// Schema-level resource access bypasses model-level authorization rules for the named Lambda function.
+.authorization((allow) => [
+	// We cannot apply lambda authorization to models, so we are forced 
+	// to apply it at the schema level even if it's not ideal.
+	allow.resource(postConfirmation),
+]);
 
 export type Schema = ClientSchema<typeof schema>;
 
