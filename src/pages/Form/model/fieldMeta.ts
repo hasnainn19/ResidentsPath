@@ -55,7 +55,7 @@ const URGENCY_LABELS: Record<FormData["urgent"], string> = {
 const SAFE_TO_CONTACT_LABELS: Record<FormData["safeToContact"], string> = {
   yes: "Yes",
   no: "No",
-  prefer_not_to_say: "Prefer not to say",
+  PREFER_NOT_TO_SAY: "Prefer not to say",
 };
 
 type OptionList = ReadonlyArray<{ value: string; label: string }>;

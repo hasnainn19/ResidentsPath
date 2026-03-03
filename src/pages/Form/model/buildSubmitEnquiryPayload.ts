@@ -84,7 +84,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     pronouns: optionalValue(data.pronouns),
     pronounsOtherText: data.pronouns === "OTHER" ? trimOrUndef(data.pronounsOtherText) : undefined,
 
-    childrenCount: sel.showChildrenQs && data.hasChildren ? data.childrenCount : undefined,
+    childrenCount: sel.showChildrenQs && data.hasChildren ? optionalValue(data.childrenCount) : undefined,
     hasDisabilityOrSensory: sel.showDisabilityQs ? data.hasDisabilityOrSensory : undefined,
     disabilityType:
       sel.showDisabilityQs && data.hasDisabilityOrSensory

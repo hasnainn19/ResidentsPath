@@ -64,13 +64,13 @@ export const UI_OPTIONS = {
   ],
 
   childrenCount: [
-    { value: "0", label: "0" },
     { value: "1", label: "1" },
     { value: "2", label: "2" },
     { value: "3", label: "3" },
     { value: "4", label: "4" },
     { value: "5", label: "5" },
     { value: "6+", label: "6+" },
+    { value: "PREFER_NOT_TO_SAY", label: "Prefer not to say" },
   ],
 
   disabilityType: [
@@ -96,7 +96,7 @@ export const UI_OPTIONS = {
   safeToContact: [
     { value: "yes", label: "Yes" },
     { value: "no", label: "No" },
-    { value: "prefer_not_to_say", label: "Prefer not to say" },
+    { value: "PREFER_NOT_TO_SAY", label: "Prefer not to say" },
   ],
 
   ageRange: [

@@ -20,7 +20,7 @@ export type SafeToContact = NonNullable<formInput["safeToContact"]>;
 export type Proceed = "" | formInput["proceed"];
 export type ContactMethod = "" | NonNullable<formInput["contactMethod"]>;
 
-export type Count = NonNullable<formInput["childrenCount"]>;
+export type Count = "" | NonNullable<formInput["childrenCount"]>;
 
 export type HouseholdSize = "" | NonNullable<formInput["householdSize"]>;
 

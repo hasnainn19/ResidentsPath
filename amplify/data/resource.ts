@@ -67,7 +67,7 @@ const schema = a.schema({
 
       // Safeguarding / urgency
       domesticAbuse: a.boolean(),
-      safeToContact: a.enum(["yes", "no", "prefer_not_to_say"]),
+      safeToContact: a.enum(["yes", "no", "PREFER_NOT_TO_SAY"]),
       safeContactNotes: a.string(),
 
       urgent: a.enum(["yes", "no", "unsure"]),

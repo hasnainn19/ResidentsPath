@@ -393,7 +393,7 @@ export default function EnquirySelection() {
                               setFormData((prev) => ({
                                 ...prev,
                                 hasChildren: checked,
-                                childrenCount: checked ? "1" : "0",
+                                childrenCount: "",
                               }))
                             }
                             label={FIELD_META.hasChildren.label}
@@ -545,7 +545,7 @@ export default function EnquirySelection() {
                                   : {
                                       ...prev,
                                       domesticAbuse: false,
-                                      safeToContact: "prefer_not_to_say",
+                                      safeToContact: "PREFER_NOT_TO_SAY",
                                       safeContactNotes: "",
                                     },
                               )

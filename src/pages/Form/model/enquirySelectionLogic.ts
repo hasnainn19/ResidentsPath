@@ -75,7 +75,7 @@ export function resetFormInfo(prev: FormData): FormData {
     householdSize: "",
 
     hasChildren: false,
-    childrenCount: "0",
+    childrenCount: "",
 
     hasDisabilityOrSensory: false,
     disabilityType: "",
@@ -83,7 +83,7 @@ export function resetFormInfo(prev: FormData): FormData {
     ageRange: "",
 
     domesticAbuse: false,
-    safeToContact: "prefer_not_to_say",
+    safeToContact: "PREFER_NOT_TO_SAY",
     safeContactNotes: "",
 
     appointmentDateIso: "",
@@ -141,7 +141,7 @@ export function applyEnquiryChange(
     householdSize: "",
 
     hasChildren: false,
-    childrenCount: "0",
+    childrenCount: "",
 
     hasDisabilityOrSensory: false,
     disabilityType: "",
@@ -149,7 +149,7 @@ export function applyEnquiryChange(
     ageRange: "",
 
     domesticAbuse: false,
-    safeToContact: "prefer_not_to_say",
+    safeToContact: "PREFER_NOT_TO_SAY",
     safeContactNotes: "",
 
     appointmentDateIso: "",
