@@ -21,6 +21,7 @@ import {
   PutItemCommand,
   DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
+import {getAmplifyClient} from "../utils/amplifyClient";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
@@ -36,24 +37,6 @@ type SubmitEnquiryResult = {
   errorMessage?: string;
 };
 
-let configured = false;
-
-type AmplifyDataClientRuntimeEnv = {
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
-  AWS_SESSION_TOKEN: string;
-  AWS_REGION: string;
-  AMPLIFY_DATA_DEFAULT_NAME: string;
-};
-
-async function ensureAmplifyConfigured() {
-  if (configured) return;
-  const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(
-    process.env as unknown as AmplifyDataClientRuntimeEnv,
-  );
-  Amplify.configure(resourceConfig, libraryOptions);
-  configured = true;
-}
 
 function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const out: Partial<T> = {};
@@ -312,7 +295,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     ? JSON.stringify(validated.supportNeeds)
     : undefined;
 
-  await ensureAmplifyConfigured();
+  await getAmplifyClient(); 
   const client = generateClient<Schema>({ authMode: "iam" });
 
   const identity = event.identity;
@@ -322,16 +305,14 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   let userId: string | null = null;
   let createdGuestUserId: string | null = null;
 
+
   // If the user is logged in, try to find their account in the User model by their Cognito sub
   if (sub) {
     try {
-      const { data: users, errors } = await client.models.User.list({
-        filter: { cognitoUserId: { eq: sub } },
-        limit: 1,
-      });
+      const { data: user, errors } = await client.models.User.get({ id: sub });
 
-      if (!errors?.length && users && users[0]?.id) {
-        userId = users[0].id;
+      if (!errors?.length && user && user.id) {
+        userId = user.id;
 
         // Overwrite saved details with any new information provided
         const new_info = updateUserInfo(validated);
@@ -354,7 +335,8 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   // If no user found, create a new guest user with the provided details
   if (!userId) {
     const userCreateInput = removeIrrelevantValues({
-      cognitoUserId: sub ?? undefined,
+      id: sub ?? undefined,
+      isRegistered: false,
 
       firstName: validated.firstName,
       middleNames: validated.middleName,

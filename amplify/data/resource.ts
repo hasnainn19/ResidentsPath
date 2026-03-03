@@ -1,15 +1,17 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
+import { postConfirmation } from '../functions/postConfirmation/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
 const schema = a.schema({
-  // User (Resident) - supports both registered users and walk-ins
-  User: a
-    .model({
-      cognitoUserId: a.string(), // Authentication link (null for walk-ins)
+	// User (Resident) - supports both registered users and walk-ins
+	User: a
+		.model({
+			// id is set to the Cognito sub for registered users, auto-UUID for walk-ins
+			isRegistered: a.boolean().required(),
 
       // Name fields
       title: a.enum(["MR", "MRS", "MS", "MISS", "DR", "MX"]),
