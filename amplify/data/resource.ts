@@ -262,7 +262,11 @@ const schema = a.schema({
     })
     .returns(
       a.customType({
+        ok: a.boolean().required(),
         referenceNumber: a.string(),
+        ticketNumber: a.string(),
+        errorCode: a.string(),
+        errorMessage: a.string(),
       }),
     )
     .authorization((allow) => [allow.guest()])

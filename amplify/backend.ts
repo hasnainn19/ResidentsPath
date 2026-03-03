@@ -24,7 +24,7 @@ const ticketCounterTable = new Table(backend.stack, "TicketCounterTable", {
 // Table to track claimed ticket numbers for each service day
 // This allows ticket numbers to be reused if the main counter reaches 1000
 // A function to release claimed tickets on completion will need to be implemented elsewhere
-// (This needs to be linked to ticket completion and deletion so ticket numbers are acually released)
+// (This needs to be linked to ticket completion and deletion so ticket numbers are actually released)
 const ticketNumberClaimsTable = new Table(backend.stack, "TicketNumberClaimsTable", {
   partitionKey: { name: "queueId", type: AttributeType.STRING },
   sortKey: { name: "ticketNumber", type: AttributeType.STRING },

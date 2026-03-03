@@ -26,6 +26,16 @@ type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
 type CaseCreateInput = Parameters<DataClient["models"]["Case"]["create"]>[0];
 
+type SubmitEnquiryErrorCode = "VALIDATION" | "CAPACITY" | "SERVER";
+
+type SubmitEnquiryResult = {
+  ok: boolean;
+  referenceNumber?: string;
+  ticketNumber?: string;
+  errorCode?: SubmitEnquiryErrorCode;
+  errorMessage?: string;
+};
+
 let configured = false;
 
 type AmplifyDataClientRuntimeEnv = {
@@ -195,13 +205,24 @@ async function releaseTicketNumber(queueId: string, ticketNumber: string) {
   );
 }
 
+type AllocateDeptTicketNumberResult =
+  | {
+      ok: true;
+      queueId: string;
+      ticketNumber: string;
+      ticketDigits: string;
+    }
+  | {
+      ok: false;
+      errorCode: "CAPACITY";
+      errorMessage: string;
+    };
+
 // Atomically allocate a unique 3 digit ticket number for the current service day and department
 // TicketNumber is in the form "X000" where X represents the first (or first two) letter(s) of the department and 000 is a zero-padded number from 000 to 999
-async function allocateDeptTicketNumber(departmentCode: string): Promise<{
-  queueId: string;
-  ticketNumber: string;
-  ticketDigits: string;
-}> {
+async function allocateDeptTicketNumber(
+  departmentCode: string,
+): Promise<AllocateDeptTicketNumberResult> {
   const serviceDay = getDate();
   const queueId = `${serviceDay}#${departmentCode}`;
 
@@ -214,6 +235,7 @@ async function allocateDeptTicketNumber(departmentCode: string): Promise<{
     try {
       await claimTicketDigits(queueId, ticketDigits);
       return {
+        ok: true,
         queueId,
         ticketDigits,
         ticketNumber: `${departmentCode}${ticketDigits}`,
@@ -226,7 +248,11 @@ async function allocateDeptTicketNumber(departmentCode: string): Promise<{
     }
   }
 
-  throw new Error("All ticket numbers are currently in use for this department");
+  return {
+    ok: false,
+    errorCode: "CAPACITY",
+    errorMessage: "The queue is currently at capacity. Please try again later.",
+  };
 }
 
 // Update existing user details with new information from the form
@@ -264,7 +290,24 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   const { input } = event.arguments;
 
   // Validate the input against the schema used for frontend and backend, ensuring it has the expected shape and types
-  const validated = formSchema.parse(input);
+  const parsed = formSchema.safeParse(input);
+  if (!parsed.success) {
+    console.warn("submitEnquiry: validation failed", {
+      issueCount: parsed.error.issues.length,
+      firstIssue: parsed.error.issues[0]?.message,
+    });
+
+    const result: SubmitEnquiryResult = {
+      ok: false,
+      errorCode: "VALIDATION",
+      errorMessage: "Please check your answers and try again.",
+    };
+
+    return result;
+  }
+
+  const validated = parsed.data;
+
   const supportNeedsJson = validated.supportNeeds
     ? JSON.stringify(validated.supportNeeds)
     : undefined;
@@ -336,7 +379,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     if (guestUserErrors?.length || !guestUserData?.id) {
       logModelErrors("submitEnquiry: User.create failed", guestUserErrors);
-      throw new Error("Failed to create guest user");
+      return {
+        ok: false,
+        errorCode: "SERVER",
+        errorMessage: "Submission failed. Please try again.",
+      };
     }
 
     userId = guestUserData.id;
@@ -349,6 +396,8 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
+
+  let ticketFailure: SubmitEnquiryResult | null = null;
 
   // Create a new case with the enquiry details, linked to the user and department
   try {
@@ -396,15 +445,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     // If the user chose to book an appointment, create an appointment linked to the case
     if (validated.proceed === "BOOK_APPOINTMENT") {
-      if (!validated.appointmentDateIso || !validated.appointmentTime) {
-        throw new Error("Appointment date and time are required to book an appointment");
-      }
-
       const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
         caseId: createdCaseId,
         userId,
-        date: validated.appointmentDateIso,
-        time: validated.appointmentTime,
+        date: validated.appointmentDateIso!,
+        time: validated.appointmentTime!,
         status: "SCHEDULED",
         notes: null,
       });
@@ -415,19 +460,28 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       }
 
       createdAppointmentId = apptData.id;
-      return { referenceNumber };
+      return { ok: true, referenceNumber: referenceNumber };
     }
 
     const departmentCode = getDepartmentCode(validated.departmentId);
-    const { queueId, ticketNumber, ticketDigits } = await allocateDeptTicketNumber(departmentCode);
+    const alloc = await allocateDeptTicketNumber(departmentCode);
 
-    claimedQueueId = queueId;
-    claimedTicketDigits = ticketDigits;
+    if (!alloc.ok) {
+      ticketFailure = {
+        ok: false,
+        errorCode: alloc.errorCode,
+        errorMessage: alloc.errorMessage,
+      };
+      throw new Error("Ticket allocation failed");
+    }
+
+    claimedQueueId = alloc.queueId;
+    claimedTicketDigits = alloc.ticketDigits;
 
     // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
       caseId: createdCaseId,
-      ticketNumber,
+      ticketNumber: alloc.ticketNumber,
       placement: -1,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
@@ -439,7 +493,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     createdTicketId = ticketData.id;
-    return { referenceNumber };
+    return { ok: true, referenceNumber: referenceNumber, ticketNumber: alloc.ticketNumber };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("submitEnquiry: failed", {
@@ -473,6 +527,12 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       await tryDelete("User.delete", () => client.models.User.delete({ id: createdGuestUserId! }));
     }
 
-    throw e;
+    if (ticketFailure) return ticketFailure;
+
+    return {
+      ok: false,
+      errorCode: "SERVER",
+      errorMessage: "Submission failed. Please try again.",
+    };
   }
 };

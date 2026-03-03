@@ -26,26 +26,40 @@ export default function ReviewAndSubmit() {
   const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const client = useMemo(() => generateClient<Schema>(), []);
 
   const submitToBackend = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
     setSubmitError(null);
 
     try {
       // Build the payload based on the form data, using the shape expected by the backend
       const payload = buildSubmitEnquiryPayload(formData);
       const response = await client.mutations.submitEnquiry({ input: payload });
-      const ref = response?.data?.referenceNumber;
-      if (!ref) {
+
+      if (response?.errors?.length) {
+        console.error("submitEnquiry returned errors", response.errors);
         setSubmitError("Submission failed. Please try again.");
         return;
       }
+
+      const result = response?.data;
+      if (!result?.ok) {
+        setSubmitError(result?.errorMessage || "Submission failed. Please try again.");
+        return;
+      }
+
       clearSavedDraft();
       nav("/referencepage");
     } catch (e) {
-      console.error("Failed to submit enquiry", e);  
-      setSubmitError("Submission failed. Please try again."); 
+      console.error("Failed to submit enquiry", e);
+      setSubmitError("Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -272,6 +286,7 @@ export default function ReviewAndSubmit() {
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           advanceType="button"
+          advanceDisabled={submitting}
           showPrevious
           onPrevious={() => nav("/form/actions")}
         />
