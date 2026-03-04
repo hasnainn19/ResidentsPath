@@ -76,6 +76,7 @@ const schema = a.
 			// Relationships
 			cases: a.hasMany("Case", "departmentId"),
 			staff: a.hasMany("Staff", "departmentId"),
+			tickets: a.hasMany("Ticket", "departmentName"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all departments
@@ -86,10 +87,10 @@ const schema = a.
 		.model({
 			// Foreign keys
 			caseId: a.id().required(),
+			departmentName:a.string().required(),
 
 			// Display information
 			ticketNumber: a.string().required(),
-			// displayName: a.string().required(),
 
 			// Queue information
 			urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
@@ -107,6 +108,7 @@ const schema = a.
 
 			// Relationships
 			case: a.belongsTo("Case", "caseId"),
+			department: a.belongsTo("Department", "departmentName"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all tickets
@@ -158,8 +160,10 @@ const schema = a.
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
-	
+
+
 	// Custom queries and mutations (lambdas defined in amplify/functions)
+
 	getTicketStatus: a
 		.query()
 		.arguments({
@@ -179,6 +183,7 @@ const schema = a.
 	// Named custom type for daily ticket list responses
 	DailyTicket: a.customType({
 		caseId: a.id().required(),
+		departmentName:a.string().required(),
 		ticketNumber: a.string().required(),
 		status: a.string().required(),
 		placement: a.integer().required(),
@@ -194,8 +199,8 @@ const schema = a.
 		.handler(a.handler.function(getDailyTickets)),
 	})
 	.authorization(allow => [
-    allow.resource(getDailyTickets).to(['query', 'listen'])
-  ]);
+		allow.resource(getDailyTickets).to(['query', 'listen']),
+  	]);
 
 export type Schema = ClientSchema<typeof schema>;
 

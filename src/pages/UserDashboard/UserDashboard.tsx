@@ -1,14 +1,14 @@
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import type { Schema } from '../../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
-import { useNavigate } from "react-router-dom";
 
 import TextToSpeechButton from '../../components/TextToSpeechButton';
 import NavBar from '../../components/NavBar';
+import EstimatedWaitingTime from '../../functions/EstimatedWaitingTime';
 import { useParams } from 'react-router-dom';
 
 
@@ -34,7 +34,8 @@ export default function UserDashboard() {
     const[stepOut, setStepOut]=useState(false);
     const[errors, setErrors] = useState('');
     const [queuePosition, setQueuePosition] = useState(0); 
-    const [estWaitTime, setEstWaitTime] = useState(null);
+    const [estWaitTime, setEstWaitTime] = useState(0);
+    const[ticketDepartment, setTicketDepartment]=useState('');
     const [tickets, setTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
 
     const handleStepOut = () => {
@@ -58,28 +59,53 @@ export default function UserDashboard() {
         }
     }, [tickets]);
 
+
+const client = generateClient<Schema>();
+
     async function fetchDailyTickets() {
         try {
+            // console.log(caseId);
+            // const newTicket = await client.models.Ticket.create({
+            //     caseId: "123",
+            //     departmentName: "Homelessness",
+            //     status: "WAITING",
+            //     ticketNumber: '134234',
+            //     placement: 1,
+            //     estimatedWaitTimeLower: 5,
+            //     estimatedWaitTimeUpper: 10,
+            // });
+            // console.log(newTicket);
+
+
             const { data, errors } = await client.queries.getDailyTickets();
+            console.log(data);
 
             if (errors) {
-            console.error(errors);
-            return;
+                console.error(errors);
+                return;
             }
 
-            // console.log(data);
             // Ensure we only pass non-null items to setTickets
             const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
-            const filtered = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
+            const ticketData = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
 
-            filtered.sort((a, b) => {
+            // Find department the ticket belongs to
+            for(const ticket of ticketData)
+                if(ticket.caseId == caseId) {
+                    setTicketDepartment(ticket.departmentName)
+                }
+
+            // Only consider tickets in the same department
+            const filteredTickets = ticketData.filter(ticket => ticket.departmentName === ticketDepartment);
+
+            filteredTickets.sort((a, b) => {
                 const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                 const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                 return timeA - timeB; // ascending
             });
 
-            console.log(filtered);
-            setTickets(filtered);
+            // console.log(filteredTickets);
+            setTickets(filteredTickets);
         } catch (err) {
             console.error("Failed to fetch tickets:", err);
         }
@@ -87,12 +113,13 @@ export default function UserDashboard() {
 
     
     function calculateWaitTime(){
-
+        const waitingTime = EstimatedWaitingTime({departmentName:ticketDepartment})*queuePosition;
+        setEstWaitTime(waitingTime);
     }
 
     function calculatePosition () {
         let position = 0; 
-       for(const ticket of tickets) {
+        for(const ticket of tickets) {
             if(ticket.caseId == caseId) {
                 setQueuePosition(position)
                 return;
@@ -132,14 +159,14 @@ export default function UserDashboard() {
                                             <Typography variant='body1'>There are </Typography>
                                             <Typography variant='h5' sx={{color:'primary.main'}}>{queuePosition}</Typography>
                                             <Typography variant='body1'>people ahead of you</Typography>
-                                            <TextToSpeechButton text='You are the Nth person in the queue'/>
+                                            <TextToSpeechButton text={`There are ${queuePosition} people ahead of you`}/>
                                         </Item>
                                     </Grid>
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>Estimated waiting time is:</Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>{estWaitTime}</Typography>
-                                            <TextToSpeechButton text='Estimated wait time is 15-30 minutes'/>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>{estWaitTime} to {estWaitTime+20} minutes</Typography>
+                                            <TextToSpeechButton text={`Estimated wait time is ${estWaitTime} minutes`} />
                                         </Item>
                                     </Grid>
                                 </Stack>

@@ -1,6 +1,7 @@
 // lambda/getDailyTickets.ts
-import type { Schema } from "../../data/resource";
+import { data, type Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
+import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql';
 import { Amplify } from 'aws-amplify'
 
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
@@ -12,7 +13,6 @@ Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
-
 export const handler: Schema["getDailyTickets"]["functionHandler"] = async () => {
     const now = new Date();
 
@@ -22,24 +22,28 @@ export const handler: Schema["getDailyTickets"]["functionHandler"] = async () =>
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999); // 23:59:59
 
+    // const { data:tickets } = await client.models.Ticket.list();
+    //console.log(tickets);
+
     const { data: tickets } = await client.models.Ticket.list({
         filter: {
             status:{
                 ne: "COMPLETED",
             },
-            createdAt: {
-                between: [startOfDay.toISOString(), endOfDay.toISOString()],
-            },
+            // createdAt: {
+            //     between: [startOfDay.toISOString(), endOfDay.toISOString()],
+            // },
         },
     });
 
     if (!tickets || tickets.length === 0) {
-        return [];
+        console.error("There are no tickets");
     }
 
 
     return tickets.map(ticket => ({
         caseId: ticket.caseId,
+        departmentName:ticket.departmentName,
         ticketNumber: ticket.ticketNumber,
         status: ticket.status as string,
         placement: ticket.placement,
