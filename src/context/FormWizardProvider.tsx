@@ -41,7 +41,6 @@ export function FormWizardProvider({ children }: { children: ReactNode }) {
 
   const clearSavedDraft = () => {
     clearDraft(localStorage);
-    nav("/start", { replace: true });
   };
 
   return (

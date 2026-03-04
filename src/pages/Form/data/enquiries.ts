@@ -25,7 +25,7 @@ export const TOP_LEVEL: { value: string; label: string }[] = [
   { value: "Other", label: "Other" },
 ];
 
-// The General Services section is split into specific service areas, each with their own enquiries 
+// The General Services section is split into specific service areas, each with their own enquiries
 export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
   { value: "EnvWaste", label: "Environment and waste" },
   { value: "RoadsParking", label: "Roads, parking and street issues" },
@@ -34,7 +34,7 @@ export const GENERAL_SERVICES_SECTIONS: { value: string; label: string }[] = [
   { value: "RegistrationCivic", label: "Registration and civic services" },
 ];
 
-// The actual enquiries, grouped by top-level area or General Services section. 
+// The actual enquiries, grouped by top-level area or General Services section.
 // Each enquiry can optionally have "specifics" which are more detailed options shown if the user selects that enquiry
 // Enquiries can also have flags saying which follow up questions apply
 export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
@@ -42,11 +42,20 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "council_tax_help",
       label: "Council Tax help",
-      department: "Council Tax or Housing Benefit Help",
+      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
       selfServiceLinks: [
-        { label: "View your Council Tax account", href: "https://www.hounslow.gov.uk/council-tax/view-council-tax-account" },
-        { label: "Paying your Council Tax", href: "https://www.hounslow.gov.uk/council-tax/paying-council-tax" },
-        { label: "Council Tax Support", href: "https://www.hounslow.gov.uk/council-tax/council-tax-support" },
+        {
+          label: "View your Council Tax account",
+          href: "https://www.hounslow.gov.uk/council-tax/view-council-tax-account",
+        },
+        {
+          label: "Paying your Council Tax",
+          href: "https://www.hounslow.gov.uk/council-tax/paying-council-tax",
+        },
+        {
+          label: "Council Tax Support",
+          href: "https://www.hounslow.gov.uk/council-tax/council-tax-support",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -57,11 +66,20 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "council_tax_appointment",
       label: "Council Tax appointment",
-      department: "Council Tax or Housing Benefit Help",
+      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
       selfServiceLinks: [
-        { label: "Contact Council Tax (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
-        { label: "Problems paying your Council Tax", href: "https://www.hounslow.gov.uk/council-tax/problems-paying-council-tax" },
-        { label: "Moving home and Council Tax", href: "https://www.hounslow.gov.uk/council-tax/moving-home-council-tax" },
+        {
+          label: "Contact Council Tax (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
+        {
+          label: "Problems paying your Council Tax",
+          href: "https://www.hounslow.gov.uk/council-tax/problems-paying-council-tax",
+        },
+        {
+          label: "Moving home and Council Tax",
+          href: "https://www.hounslow.gov.uk/council-tax/moving-home-council-tax",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -72,11 +90,20 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "liberata",
       label: "Liberata (payments, bills or letters)",
-      department: "Council Tax or Housing Benefit Help",
+      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
       selfServiceLinks: [
-        { label: "Customer accounts", href: "https://www.hounslow.gov.uk/homepage/1178/customer-accounts" },
-        { label: "Council Tax (guide and support)", href: "https://www.hounslow.gov.uk/council-tax" },
-        { label: "Benefits and financial support", href: "https://www.hounslow.gov.uk/benefits-financial-support" },
+        {
+          label: "Customer accounts",
+          href: "https://www.hounslow.gov.uk/homepage/1178/customer-accounts",
+        },
+        {
+          label: "Council Tax (guide and support)",
+          href: "https://www.hounslow.gov.uk/council-tax",
+        },
+        {
+          label: "Benefits and financial support",
+          href: "https://www.hounslow.gov.uk/benefits-financial-support",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -89,11 +116,17 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "housing_benefit_help",
       label: "Housing Benefit help",
-      department: "Council Tax or Housing Benefit Help",
+      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
       selfServiceLinks: [
         { label: "Housing Benefit", href: "https://www.hounslow.gov.uk/housing-benefit" },
-        { label: "Housing Benefit claim reviews (verification)", href: "https://www.hounslow.gov.uk/housing-benefit/housing-benefit-claim-reviews" },
-        { label: "Benefits and financial support", href: "https://www.hounslow.gov.uk/benefits-financial-support" },
+        {
+          label: "Housing Benefit claim reviews (verification)",
+          href: "https://www.hounslow.gov.uk/housing-benefit/housing-benefit-claim-reviews",
+        },
+        {
+          label: "Benefits and financial support",
+          href: "https://www.hounslow.gov.uk/benefits-financial-support",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -104,12 +137,21 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "homelessness",
       label: "Homelessness",
-      department: "Homelessness",
+      department: "HOMELESSNESS",
       selfServiceLinks: [
-        { label: "Problems paying your rent", href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent" },
-        { label: "Contact Housing (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Problems paying your rent",
+          href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent",
+        },
+        {
+          label: "Contact Housing (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Housing (service hub)", href: "https://www.hounslow.gov.uk/housing" },
-        { label: "Get help if you're facing homelessness", href: "https://www.hounslow.gov.uk/homelessness" },
+        {
+          label: "Get help if you're facing homelessness",
+          href: "https://www.hounslow.gov.uk/homelessness",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -120,11 +162,17 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "voids_lettings",
       label: "Voids and lettings",
-      department: "Homelessness",
+      department: "HOMELESSNESS",
       selfServiceLinks: [
         { label: "Housing (service hub)", href: "https://www.hounslow.gov.uk/housing" },
-        { label: "Problems paying your rent", href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent" },
-        { label: "Contact Housing (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Problems paying your rent",
+          href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent",
+        },
+        {
+          label: "Contact Housing (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -135,11 +183,17 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "housing_issue",
       label: "Housing issue",
-      department: "Homelessness",
+      department: "HOMELESSNESS",
       selfServiceLinks: [
         { label: "Housing (service hub)", href: "https://www.hounslow.gov.uk/housing" },
-        { label: "Contact Housing (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
-        { label: "Problems paying your rent", href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent" },
+        {
+          label: "Contact Housing (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
+        {
+          label: "Problems paying your rent",
+          href: "https://www.hounslow.gov.uk/paying-rent/problems-paying-rent",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -152,11 +206,17 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "blue_badges",
       label: "Blue Badges",
-      department: "Adults duty",
+      department: "ADULTS_DUTY",
       selfServiceLinks: [
         { label: "Apply for a Blue Badge (GOV.UK)", href: "https://www.gov.uk/apply-blue-badge" },
-        { label: "Adult social care financial assessment", href: "https://www.hounslow.gov.uk/money-legal-matters/financial-assessment-adult-social-care" },
-        { label: "Contact Adult Social Care (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Adult social care financial assessment",
+          href: "https://www.hounslow.gov.uk/money-legal-matters/financial-assessment-adult-social-care",
+        },
+        {
+          label: "Contact Adult Social Care (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -167,10 +227,16 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "freedom_passes",
       label: "Freedom Passes",
-      department: "Adults duty",
+      department: "ADULTS_DUTY",
       selfServiceLinks: [
-        { label: "Freedom Pass (London Councils)", href: "https://www.londoncouncils.gov.uk/services/freedom-pass" },
-        { label: "Contact Adult Social Care (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Freedom Pass (London Councils)",
+          href: "https://www.londoncouncils.gov.uk/services/freedom-pass",
+        },
+        {
+          label: "Contact Adult Social Care (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       ],
       askVulnerabilityQs: true,
@@ -184,9 +250,12 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "child_prot_case_conference",
       label: "Child protection case conference",
-      department: "Childrens duty",
+      department: "CHILDRENS_DUTY",
       selfServiceLinks: [
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       ],
       askVulnerabilityQs: true,
@@ -198,9 +267,12 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "youth_offending_service",
       label: "Youth Offending Service",
-      department: "Childrens duty",
+      department: "CHILDRENS_DUTY",
       selfServiceLinks: [
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       ],
       askVulnerabilityQs: true,
@@ -214,10 +286,13 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "community_hub_advisor",
       label: "Community Hub Advisor",
-      department: "Community Hub Advisor",
+      department: "COMMUNITY_HUB_ADVISOR",
       selfServiceLinks: [
         { label: "Community hub and libraries", href: "https://www.hounslow.gov.uk/libraries" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
       askVulnerabilityQs: true,
       askHouseholdSize: true,
@@ -228,9 +303,12 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "translation",
       label: "Translation",
-      department: "Community Hub Advisor",
+      department: "COMMUNITY_HUB_ADVISOR",
       selfServiceLinks: [
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
       askVulnerabilityQs: true,
     },
@@ -243,21 +321,30 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
     {
       value: "environment",
       label: "Environment",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Environment", href: "https://www.hounslow.gov.uk/environment" },
-        { label: "Report fly-tipping", href: "https://www.hounslow.gov.uk/street-problems/report-fly-tipping-or-illegal-waste-dumping" },
+        {
+          label: "Report fly-tipping",
+          href: "https://www.hounslow.gov.uk/street-problems/report-fly-tipping-or-illegal-waste-dumping",
+        },
         { label: "Street problems", href: "https://www.hounslow.gov.uk/street-problems" },
       ],
     },
     {
       value: "waste_recycling",
       label: "Waste and recycling",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Waste and recycling", href: "https://www.hounslow.gov.uk/recycling-rubbish" },
-        { label: "Collection days", href: "https://www.hounslow.gov.uk/collections/recycling-rubbish-collection-days" },
-        { label: "Report a missed collection", href: "https://www.hounslow.gov.uk/recycling-rubbish/report-missed-collection" },
+        {
+          label: "Collection days",
+          href: "https://www.hounslow.gov.uk/collections/recycling-rubbish-collection-days",
+        },
+        {
+          label: "Report a missed collection",
+          href: "https://www.hounslow.gov.uk/recycling-rubbish/report-missed-collection",
+        },
       ],
       specifics: [
         { value: "waste", label: "Waste" },
@@ -269,20 +356,26 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
     {
       value: "highways",
       label: "Highways",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Street problems", href: "https://www.hounslow.gov.uk/street-problems" },
         { label: "Report a pothole", href: "https://www.hounslow.gov.uk/street-problems/potholes" },
-        { label: "Street and traffic lights", href: "https://www.hounslow.gov.uk/roads-streets/street-traffic-lights" },
+        {
+          label: "Street and traffic lights",
+          href: "https://www.hounslow.gov.uk/roads-streets/street-traffic-lights",
+        },
       ],
     },
     {
       value: "parking",
       label: "Parking",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Parking (service hub)", href: "https://www.hounslow.gov.uk/parking" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       ],
       specifics: [
@@ -295,30 +388,45 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
     {
       value: "planning",
       label: "Planning",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
-        { label: "Search planning applications", href: "https://planning.hounslow.gov.uk/online-applications/" },
+        {
+          label: "Search planning applications",
+          href: "https://planning.hounslow.gov.uk/online-applications/",
+        },
         { label: "Planning (service hub)", href: "https://www.hounslow.gov.uk/planning" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
     },
     {
       value: "building_control",
       label: "Building Control",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
-        { label: "Building Control (service hub)", href: "https://www.hounslow.gov.uk/building-control" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Building Control (service hub)",
+          href: "https://www.hounslow.gov.uk/building-control",
+        },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       ],
     },
     {
       value: "licensing",
       label: "Licensing",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Licensing (service hub)", href: "https://www.hounslow.gov.uk/licensing" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
         { label: "Council homepage", href: "https://www.hounslow.gov.uk/" },
       ],
     },
@@ -327,41 +435,59 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
     {
       value: "parks",
       label: "Parks",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Parks and open spaces", href: "https://www.hounslow.gov.uk/parks-open-spaces" },
-        { label: "Leisure, parks and sports", href: "https://www.hounslow.gov.uk/leisure-parks-sports" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Leisure, parks and sports",
+          href: "https://www.hounslow.gov.uk/leisure-parks-sports",
+        },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
     },
     {
       value: "leisure_centres",
       label: "Leisure centres",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Leisure services", href: "https://www.hounslow.gov.uk/leisure-services" },
-        { label: "Get active", href: "https://www.hounslow.gov.uk/leisure-parks-sports/get-active" },
-        { label: "Leisure, parks and sports", href: "https://www.hounslow.gov.uk/leisure-parks-sports" },
+        {
+          label: "Get active",
+          href: "https://www.hounslow.gov.uk/leisure-parks-sports/get-active",
+        },
+        {
+          label: "Leisure, parks and sports",
+          href: "https://www.hounslow.gov.uk/leisure-parks-sports",
+        },
       ],
     },
     {
       value: "libraries",
       label: "Libraries",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Community hub and libraries", href: "https://www.hounslow.gov.uk/libraries" },
         { label: "Join the library", href: "https://www.hounslow.gov.uk/libraries/join-library" },
-        { label: "Library catalogue and online account", href: "https://libraries.hounslow.gov.uk/" },
+        {
+          label: "Library catalogue and online account",
+          href: "https://libraries.hounslow.gov.uk/",
+        },
       ],
     },
     {
       value: "allotments",
       label: "Allotments",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Allotments", href: "https://www.hounslow.gov.uk/parks-open-spaces/allotments" },
         { label: "Parks and open spaces", href: "https://www.hounslow.gov.uk/parks-open-spaces" },
-        { label: "Leisure, parks and sports", href: "https://www.hounslow.gov.uk/leisure-parks-sports" },
+        {
+          label: "Leisure, parks and sports",
+          href: "https://www.hounslow.gov.uk/leisure-parks-sports",
+        },
       ],
     },
   ],
@@ -369,41 +495,65 @@ export const ENQUIRIES_BY_GENERAL_SERVICES_SECTION: Record<string, EnquiryItem[]
     {
       value: "registrars",
       label: "Registrars",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
-        { label: "Births, deaths, citizenship and ceremonies", href: "https://www.hounslow.gov.uk/births-deaths-citizenship-ceremonies" },
+        {
+          label: "Births, deaths, citizenship and ceremonies",
+          href: "https://www.hounslow.gov.uk/births-deaths-citizenship-ceremonies",
+        },
         { label: "Register a birth", href: "https://www.hounslow.gov.uk/births-3/register-birth" },
-        { label: "Order a birth certificate", href: "https://www.hounslow.gov.uk/births-3/order-birth-certificate" },
+        {
+          label: "Order a birth certificate",
+          href: "https://www.hounslow.gov.uk/births-3/order-birth-certificate",
+        },
       ],
     },
     {
       value: "cemeteries",
       label: "Cemeteries",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Cemeteries", href: "https://www.hounslow.gov.uk/cemeteries" },
         { label: "Burials", href: "https://www.hounslow.gov.uk/cemeteries/burials" },
-        { label: "Births, deaths, citizenship and ceremonies", href: "https://www.hounslow.gov.uk/births-deaths-citizenship-ceremonies" },
+        {
+          label: "Births, deaths, citizenship and ceremonies",
+          href: "https://www.hounslow.gov.uk/births-deaths-citizenship-ceremonies",
+        },
       ],
     },
     {
       value: "elections",
       label: "Elections",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
         { label: "Elections and voting", href: "https://www.hounslow.gov.uk/elections-voting" },
-        { label: "Register to vote", href: "https://www.hounslow.gov.uk/elections-voting/register-vote" },
-        { label: "Voting by post", href: "https://www.hounslow.gov.uk/elections-voting/voting-post" },
+        {
+          label: "Register to vote",
+          href: "https://www.hounslow.gov.uk/elections-voting/register-vote",
+        },
+        {
+          label: "Voting by post",
+          href: "https://www.hounslow.gov.uk/elections-voting/voting-post",
+        },
       ],
     },
     {
       value: "members_mps",
       label: "Members and MPs",
-      department: "General customer services",
+      department: "GENERAL_CUSTOMER_SERVICES",
       selfServiceLinks: [
-        { label: "Councillors, meetings and minutes", href: "https://www.hounslow.gov.uk/councillors-meetings-minutes" },
-        { label: "Meetings, agendas and minutes", href: "https://democraticservices.hounslow.gov.uk/" },
-        { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+        {
+          label: "Councillors, meetings and minutes",
+          href: "https://www.hounslow.gov.uk/councillors-meetings-minutes",
+        },
+        {
+          label: "Meetings, agendas and minutes",
+          href: "https://democraticservices.hounslow.gov.uk/",
+        },
+        {
+          label: "Contact us (online)",
+          href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+        },
       ],
       specifics: [
         { value: "member", label: "Councillor (Member)" },
@@ -418,9 +568,12 @@ export const GENERAL_SERVICES_DIRECT_ITEMS: EnquiryItem[] = [
   {
     value: "floorwalker",
     label: "Floorwalker",
-    department: "General customer services",
+    department: "GENERAL_CUSTOMER_SERVICES",
     selfServiceLinks: [
-      { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+      {
+        label: "Contact us (online)",
+        href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+      },
       { label: "Customer services", href: "https://www.hounslow.gov.uk/customer-services" },
       { label: "Council homepage", href: "https://www.hounslow.gov.uk/" },
     ],
@@ -429,11 +582,17 @@ export const GENERAL_SERVICES_DIRECT_ITEMS: EnquiryItem[] = [
   {
     value: "fraud",
     label: "Fraud",
-    department: "General customer services",
+    department: "GENERAL_CUSTOMER_SERVICES",
     selfServiceLinks: [
       { label: "Fraud", href: "https://www.hounslow.gov.uk/council/fraud" },
-      { label: "Report benefit fraud", href: "https://www.hounslow.gov.uk/benefits-financial-support/report-benefit-fraud" },
-      { label: "Report tenancy fraud", href: "https://www.hounslow.gov.uk/housing/tenancy-fraud/2" },
+      {
+        label: "Report benefit fraud",
+        href: "https://www.hounslow.gov.uk/benefits-financial-support/report-benefit-fraud",
+      },
+      {
+        label: "Report tenancy fraud",
+        href: "https://www.hounslow.gov.uk/housing/tenancy-fraud/2",
+      },
     ],
     askDomesticAbuseQs: true,
     askVulnerabilityQs: true,
@@ -441,16 +600,31 @@ export const GENERAL_SERVICES_DIRECT_ITEMS: EnquiryItem[] = [
   {
     value: "complaints",
     label: "Complaints",
-    department: "General customer services",
+    department: "GENERAL_CUSTOMER_SERVICES",
     selfServiceLinks: [
-      { label: "Make a complaint or comment", href: "https://www.hounslow.gov.uk/customer-services/make-complaint-comment" },
-      { label: "Online complaint form", href: "https://www.hounslow.gov.uk/customer-services/make-complaint-comment/2" },
-      { label: "Contact us (online)", href: "https://www.hounslow.gov.uk/customer-services/contact-us" },
+      {
+        label: "Make a complaint or comment",
+        href: "https://www.hounslow.gov.uk/customer-services/make-complaint-comment",
+      },
+      {
+        label: "Online complaint form",
+        href: "https://www.hounslow.gov.uk/customer-services/make-complaint-comment/2",
+      },
+      {
+        label: "Contact us (online)",
+        href: "https://www.hounslow.gov.uk/customer-services/contact-us",
+      },
     ],
   },
 ];
 
-const sectionOptions = GENERAL_SERVICES_SECTIONS.map((s) => ({ value: "section:" + s.value, label: s.label }));
-const directOptions = GENERAL_SERVICES_DIRECT_ITEMS.map((i) => ({ value: "direct:" + i.value, label: i.label }));
+const sectionOptions = GENERAL_SERVICES_SECTIONS.map((s) => ({
+  value: "section:" + s.value,
+  label: s.label,
+}));
+const directOptions = GENERAL_SERVICES_DIRECT_ITEMS.map((i) => ({
+  value: "direct:" + i.value,
+  label: i.label,
+}));
 
 export const GENERAL_SERVICES_CHOICE_OPTIONS = sectionOptions.concat(directOptions);
