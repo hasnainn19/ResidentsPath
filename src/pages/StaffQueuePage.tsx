@@ -80,11 +80,13 @@ const StaffQueuePage = () => {
   }, [cases, selectedService]);
 
   const filteredCases = useMemo(() => {
-    return serviceCases.filter(
-      (c) =>
-        c.title.toLowerCase().includes(search.toLowerCase()) ||
-        c.description.toLowerCase().includes(search.toLowerCase()),
-    );
+    return serviceCases
+      .filter(
+        (c) =>
+          c.title.toLowerCase().includes(search.toLowerCase()) ||
+          c.description.toLowerCase().includes(search.toLowerCase()),
+      )
+      .sort((a, b) => a.position - b.position);
   }, [search, serviceCases]);
 
   const serviceCaseCountMap = useMemo(() => {
