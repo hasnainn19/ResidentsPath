@@ -15,6 +15,10 @@ import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard";
 
+import RequireGuest from "./guards/RequireGuest";
+import RequireAuth from "./guards/RequireAuth";
+import RequireRole from "./guards/RequireRole";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -22,7 +26,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <AuthPage />,
+    element: <RequireGuest><AuthPage /></RequireGuest>,
   },
   {
     path: "/start",
@@ -34,11 +38,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/bookingpage",
-    element: <BookingPage />,
+    element: <RequireAuth><BookingPage /></RequireAuth>,
   },
   {
     path: "/staff",
-    element: <StaffLayout />,
+    element: <RequireRole allowedGroups={["Staff"]}><StaffLayout /></RequireRole>,
     children: [
       {
         index: true,

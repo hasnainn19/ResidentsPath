@@ -55,7 +55,6 @@ import {
   shouldShowSupportNotes,
 } from "./model/enquirySelectionLogic";
 
-
 import type {
   Count,
   DisabilityType,
@@ -69,6 +68,7 @@ import type {
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { FIELD_META } from "./model/fieldMeta";
+import { UI_OPTIONS } from "../../../shared/formSchema";
 
 export default function EnquirySelection() {
   const nav = useNavigate();
@@ -76,10 +76,8 @@ export default function EnquirySelection() {
 
   const labelOptional = (key: keyof FormData) => FIELD_META[key].label + " (optional)";
 
-  const maxLenFor = (key: keyof FormData) => FIELD_META[key].maxLen ?? 0;
-
   const countChars = (key: keyof FormData, value: string, extra?: string) => {
-    const max = maxLenFor(key);
+    const max = FIELD_META[key].maxLen ?? 0;
     if (!max) return extra;
     const count = value.length;
 
@@ -95,9 +93,8 @@ export default function EnquirySelection() {
   const handleVoiceInput = () => alert("Voice input started (mock)");
 
   // Logic for which follow-up questions to show.
-  const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData), [formData]);
-    
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
+
   const {
     isGeneralServices,
     generalServicesIsSection,
@@ -114,7 +111,6 @@ export default function EnquirySelection() {
     showAgeRange,
   } = enquirySelectionState;
 
-
   const needsUrgentReason = formData.urgent === "yes";
 
   // Whether the continue button should be enabled, based on whether required fields are filled in
@@ -124,32 +120,26 @@ export default function EnquirySelection() {
     setFormData((prev) => applyTopLevelChange(prev, nextTopLevel));
   }
 
-
   function handleGeneralServicesChoiceChange(nextChoice: string) {
     setFormData((prev) => applyGeneralServicesChoiceChange(prev, nextChoice));
   }
-
 
   function handleEnquiryChange(nextId: string) {
     setFormData((prev) => applyEnquiryChange(prev, nextId, enquiryOptions));
   }
 
-
   function setUrgency(value: Urgency) {
     setFormData((prev) => applyUrgencyChange(prev, value));
   }
-
 
   function handleProceedChange(next: Proceed) {
     setFormData((prev) => applyProceedChange(prev, next));
   }
 
-
   // Keep the support section short unless "Show more" is opened
   const [showMoreSupport, setShowMoreSupport] = useState(false);
 
   const showSupportNotes = shouldShowSupportNotes(formData);
-
 
   // Build TTS strings for each section based on what is currently shown
   function buildServiceTts() {
@@ -195,7 +185,7 @@ export default function EnquirySelection() {
   }
 
   const urgencyTts =
-    "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason. If you choose other, type a short explanation.";
+    "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason.";
 
   const proceedTts =
     "How would you like to proceed? Select join the digital queue or book an appointment. We may suggest a quicker online or self-service option if available.";
@@ -257,7 +247,10 @@ export default function EnquirySelection() {
               // For General Services: only show enquiries after a section is chosen (unless it is a direct item)
               isGeneralServices && formData.topLevel !== "" && (
                 <WithTTS
-                  copy={{ label: "Choose a topic", tts: "Choose a topic. This helps narrow down your request." }}
+                  copy={{
+                    label: "Choose a topic",
+                    tts: "Choose a topic. This helps narrow down your request.",
+                  }}
                   required
                   sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
                 >
@@ -286,7 +279,8 @@ export default function EnquirySelection() {
               formData.topLevel !== "" &&
                 !isOther &&
                 // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
-                (!isGeneralServices || (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
+                (!isGeneralServices ||
+                  (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
                   <WithTTS
                     copy={{
                       label: FIELD_META.enquiryId.label,
@@ -377,9 +371,16 @@ export default function EnquirySelection() {
             {
               // Show follow-up questions only when a specific enquiry has been chosen
               hasEnoughToProceed &&
-                (showChildrenQs || showDisabilityQs || showHouseholdSize || showDomesticAbuseQs || showAgeRange) && (
+                (showChildrenQs ||
+                  showDisabilityQs ||
+                  showHouseholdSize ||
+                  showDomesticAbuseQs ||
+                  showAgeRange) && (
                   <WithTTS
-                    copy={{ label: "Additional questions (optional)", tts: buildAdditionalQuestionsTts() }}
+                    copy={{
+                      label: "Additional questions (optional)",
+                      tts: buildAdditionalQuestionsTts(),
+                    }}
                     titleVariant="subtitle2"
                   >
                     <Stack spacing={3}>
@@ -392,31 +393,36 @@ export default function EnquirySelection() {
                               setFormData((prev) => ({
                                 ...prev,
                                 hasChildren: checked,
-                                childrenCount: checked ? "1" : "0",
+                                childrenCount: "",
                               }))
                             }
                             label={FIELD_META.hasChildren.label}
                           >
                             <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                              (Children who usually live with you and are financially dependent on you.)
+                              (Children who usually live with you and are financially dependent on
+                              you.)
                             </Typography>
 
                             {formData.hasChildren && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
-                                  <InputLabel id="children-count-label">{FIELD_META.childrenCount.label}</InputLabel>
+                                  <InputLabel id="children-count-label">
+                                    {FIELD_META.childrenCount.label}
+                                  </InputLabel>
                                   <Select
                                     labelId="children-count-label"
                                     label={FIELD_META.childrenCount.label}
                                     value={formData.childrenCount}
-                                    onChange={(e) => setField("childrenCount", String(e.target.value) as Count)}
+                                    onChange={(e) =>
+                                      setField("childrenCount", String(e.target.value) as Count)
+                                    }
                                   >
-                                    <MenuItem value="1">1</MenuItem>
-                                    <MenuItem value="2">2</MenuItem>
-                                    <MenuItem value="3">3</MenuItem>
-                                    <MenuItem value="4">4</MenuItem>
-                                    <MenuItem value="5">5</MenuItem>
-                                    <MenuItem value="6+">6+</MenuItem>
+                                    <MenuItem value="">Select...</MenuItem>
+                                    {UI_OPTIONS.childrenCount.map((opt) => (
+                                      <MenuItem key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                      </MenuItem>
+                                    ))}
                                   </Select>
                                 </FormControl>
                               </Box>
@@ -446,23 +452,26 @@ export default function EnquirySelection() {
                             {formData.hasDisabilityOrSensory && (
                               <Box sx={{ mt: 1 }}>
                                 <FormControl fullWidth>
-                                  <InputLabel id="disability-type-label">{FIELD_META.disabilityType.label}</InputLabel>
+                                  <InputLabel id="disability-type-label">
+                                    {FIELD_META.disabilityType.label}
+                                  </InputLabel>
                                   <Select
                                     labelId="disability-type-label"
                                     label={FIELD_META.disabilityType.label}
                                     value={formData.disabilityType}
                                     onChange={(e) =>
-                                      setField("disabilityType", String(e.target.value) as DisabilityType)
+                                      setField(
+                                        "disabilityType",
+                                        String(e.target.value) as DisabilityType,
+                                      )
                                     }
                                   >
                                     <MenuItem value="">Select...</MenuItem>
-                                    <MenuItem value="Mobility impairment">Mobility impairment</MenuItem>
-                                    <MenuItem value="Visual impairment">Visual impairment</MenuItem>
-                                    <MenuItem value="Hearing impairment">Hearing impairment</MenuItem>
-                                    <MenuItem value="Cognitive / learning">Cognitive / learning</MenuItem>
-                                    <MenuItem value="Mental health">Mental health</MenuItem>
-                                    <MenuItem value="Other">Other</MenuItem>
-                                    <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                                    {UI_OPTIONS.disabilityType.map((opt) => (
+                                      <MenuItem key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                      </MenuItem>
+                                    ))}
                                   </Select>
                                 </FormControl>
                               </Box>
@@ -474,21 +483,23 @@ export default function EnquirySelection() {
                       {showHouseholdSize && (
                         <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
                           <FormControl fullWidth>
-                            <InputLabel id="household-label">{FIELD_META.householdSize.label}</InputLabel>
+                            <InputLabel id="household-label">
+                              {FIELD_META.householdSize.label}
+                            </InputLabel>
                             <Select
                               labelId="household-label"
                               label={FIELD_META.householdSize.label}
                               value={formData.householdSize}
-                              onChange={(e) => setField("householdSize", String(e.target.value) as HouseholdSize)}
+                              onChange={(e) =>
+                                setField("householdSize", String(e.target.value) as HouseholdSize)
+                              }
                             >
                               <MenuItem value="">Select...</MenuItem>
-                              <MenuItem value="1">1</MenuItem>
-                              <MenuItem value="2">2</MenuItem>
-                              <MenuItem value="3">3</MenuItem>
-                              <MenuItem value="4">4</MenuItem>
-                              <MenuItem value="5">5</MenuItem>
-                              <MenuItem value="6+">6+</MenuItem>
-                              <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                              {UI_OPTIONS.householdSize.map((opt) => (
+                                <MenuItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </MenuItem>
+                              ))}
                             </Select>
                             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                               People who usually live with you (including you).
@@ -507,17 +518,16 @@ export default function EnquirySelection() {
                                 labelId="age-range-label"
                                 label="Select an age range..."
                                 value={formData.ageRange}
-                                onChange={(e) => setField("ageRange", String(e.target.value) as AgeRange)}
+                                onChange={(e) =>
+                                  setField("ageRange", String(e.target.value) as AgeRange)
+                                }
                               >
                                 <MenuItem value="">Select...</MenuItem>
-                                <MenuItem value="Under 18">Under 18</MenuItem>
-                                <MenuItem value="18-24">18-24</MenuItem>
-                                <MenuItem value="25-34">25-34</MenuItem>
-                                <MenuItem value="35-44">35-44</MenuItem>
-                                <MenuItem value="45-54">45-54</MenuItem>
-                                <MenuItem value="55-64">55-64</MenuItem>
-                                <MenuItem value="65+">65+</MenuItem>
-                                <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
+                                {UI_OPTIONS.ageRange.map((opt) => (
+                                  <MenuItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </MenuItem>
+                                ))}
                               </Select>
                             </FormControl>
                           </Box>
@@ -535,7 +545,7 @@ export default function EnquirySelection() {
                                   : {
                                       ...prev,
                                       domesticAbuse: false,
-                                      safeToContact: "prefer_not_to_say",
+                                      safeToContact: "PREFER_NOT_TO_SAY",
                                       safeContactNotes: "",
                                     },
                               )
@@ -546,18 +556,25 @@ export default function EnquirySelection() {
                               <Box sx={{ mt: 1.5 }}>
                                 <Stack spacing={2}>
                                   <FormControl fullWidth>
-                                    <InputLabel id="safe-contact-label">{FIELD_META.safeToContact.label}</InputLabel>
+                                    <InputLabel id="safe-contact-label">
+                                      {FIELD_META.safeToContact.label}
+                                    </InputLabel>
                                     <Select
                                       labelId="safe-contact-label"
                                       label={FIELD_META.safeToContact.label}
                                       value={formData.safeToContact}
                                       onChange={(e) =>
-                                        setField("safeToContact", String(e.target.value) as SafeToContact)
+                                        setField(
+                                          "safeToContact",
+                                          String(e.target.value) as SafeToContact,
+                                        )
                                       }
                                     >
-                                      <MenuItem value="yes">Yes</MenuItem>
-                                      <MenuItem value="no">No</MenuItem>
-                                      <MenuItem value="prefer_not_to_say">Prefer not to say</MenuItem>
+                                      {UI_OPTIONS.safeToContact.map((opt) => (
+                                        <MenuItem key={opt.value} value={opt.value}>
+                                          {opt.label}
+                                        </MenuItem>
+                                      ))}
                                     </Select>
                                   </FormControl>
 
@@ -569,8 +586,15 @@ export default function EnquirySelection() {
                                       placeholder="Safe time or method, or do not contact"
                                       value={formData.safeContactNotes}
                                       onChange={(e) => setField("safeContactNotes", e.target.value)}
-                                      helperText={countChars("safeContactNotes", formData.safeContactNotes)}
-                                      slotProps={{ htmlInput: { maxLength: FIELD_META.safeContactNotes.maxLen } }}
+                                      helperText={countChars(
+                                        "safeContactNotes",
+                                        formData.safeContactNotes,
+                                      )}
+                                      slotProps={{
+                                        htmlInput: {
+                                          maxLength: FIELD_META.safeContactNotes.maxLen,
+                                        },
+                                      }}
                                     />
                                   )}
                                 </Stack>
@@ -585,10 +609,13 @@ export default function EnquirySelection() {
             }
 
             {/* Urgency */}
-            <WithTTS copy={{ label: FIELD_META.urgent.label, tts: urgencyTts }} titleVariant="subtitle1">
+            <WithTTS
+              copy={{ label: FIELD_META.urgent.label, tts: urgencyTts }}
+              titleVariant="subtitle1"
+            >
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something
-                time-limited today.
+                For example: a safety concern, nowhere safe to stay tonight, health or mobility
+                needs, or something time-limited today.
               </Typography>
 
               <FormControl component="fieldset" sx={{ width: "100%" }}>
@@ -622,7 +649,8 @@ export default function EnquirySelection() {
                           borderColor: checked ? "primary.main" : "divider",
                           bgcolor: checked ? "action.selected" : "background.paper",
                           cursor: "pointer",
-                          transition: "background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease",
+                          transition:
+                            "background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease",
                           "&:hover": {
                             bgcolor: checked ? "action.selected" : "action.hover",
                           },
@@ -655,48 +683,49 @@ export default function EnquirySelection() {
                       labelId="urgent-reason-label"
                       label="Select a reason..."
                       value={formData.urgentReason}
-                      onChange={(e) =>
-                        setFormData((prev) => {
-                          const nextReason = String(e.target.value);
-                          return {
-                            ...prev,
-                            urgentReason: nextReason,
-                            urgentOtherReason: nextReason === "Other" ? prev.urgentOtherReason : "",
-                          };
-                        })
-                      }
+                      onChange={(e) => {
+                        const v = String(
+                          (e.target as HTMLInputElement).value,
+                        ) as FormData["urgentReason"];
+                        setFormData((prev) => ({
+                          ...prev,
+                          urgentReason: v,
+                          urgentReasonOtherText: v === "OTHER" ? prev.urgentReasonOtherText : "",
+                        }));
+                      }}
                     >
                       <MenuItem value="">Select a reason...</MenuItem>
-                      <MenuItem value="Safety concern">Safety concern</MenuItem>
-                      <MenuItem value="No safe place to stay tonight">No safe place to stay tonight</MenuItem>
-                      <MenuItem value="Health or mobility">Health or mobility</MenuItem>
-                      <MenuItem value="Time-limited today">Time-limited today</MenuItem>
-                      <MenuItem value="Other">Other</MenuItem>
+                      {UI_OPTIONS.urgentReason.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
 
-                  {formData.urgentReason === "Other" && (
-                    <Box sx={{ mt: 2 }}>
-                      <TextField
-                        fullWidth
-                        required
-                        multiline
-                        minRows={3}
-                        label={FIELD_META.urgentOtherReason.label}
-                        placeholder="Briefly describe why you need support sooner today"
-                        value={formData.urgentOtherReason}
-                        onChange={(e) => setField("urgentOtherReason", e.target.value)}
-                        helperText={countChars("urgentOtherReason", formData.urgentOtherReason)}
-                        slotProps={{ htmlInput: { maxLength: FIELD_META.urgentOtherReason.maxLen } }}
-                      />
-                    </Box>
+                  {formData.urgentReason === "OTHER" && (
+                    <TextField
+                      fullWidth
+                      required
+                      multiline
+                      minRows={3}
+                      sx={{ mt: 2 }}
+                      label="Briefly describe why you need support sooner today"
+                      value={formData.urgentReasonOtherText}
+                      onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen }}}
+                      helperText={countChars("urgentReasonOtherText", formData.urgentReasonOtherText)}
+                    />
                   )}
                 </Box>
               )}
             </WithTTS>
 
             {/* Additional info */}
-            <WithTTS copy={{ label: labelOptional("additionalInfo"), tts: additionalInfoTts }} titleVariant="subtitle1">
+            <WithTTS
+              copy={{ label: labelOptional("additionalInfo"), tts: additionalInfoTts }}
+              titleVariant="subtitle1"
+            >
               <TextField
                 fullWidth
                 multiline
@@ -710,7 +739,12 @@ export default function EnquirySelection() {
 
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
                 <MicIcon fontSize="small" />
-                <Button type="button" size="small" onClick={handleVoiceInput} sx={{ textTransform: "none" }}>
+                <Button
+                  type="button"
+                  size="small"
+                  onClick={handleVoiceInput}
+                  sx={{ textTransform: "none" }}
+                >
                   Voice input
                 </Button>
               </Stack>
@@ -720,7 +754,11 @@ export default function EnquirySelection() {
             <Box sx={{ pt: 2 }}>
               <Divider sx={{ mb: 3 }} />
 
-              <WithTTS copy={{ label: FIELD_META.proceed.label, tts: proceedTts }} required titleVariant="subtitle1">
+              <WithTTS
+                copy={{ label: FIELD_META.proceed.label, tts: proceedTts }}
+                required
+                titleVariant="subtitle1"
+              >
                 <FormControl fullWidth required>
                   <InputLabel id="proceed-label">Select an option...</InputLabel>
                   <Select
@@ -730,8 +768,11 @@ export default function EnquirySelection() {
                     onChange={(e) => handleProceedChange(String(e.target.value) as Proceed)}
                   >
                     <MenuItem value="">Select an option...</MenuItem>
-                    <MenuItem value="Join digital queue">Join the digital queue</MenuItem>
-                    <MenuItem value="Schedule appointment">Book an appointment</MenuItem>
+                    {UI_OPTIONS.proceed.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
                   </Select>
 
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>

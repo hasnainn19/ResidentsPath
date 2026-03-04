@@ -95,7 +95,9 @@ function buildTimeOptionsToday(now: Date, limitHoursAhead: number): string[] {
   let cur = start;
 
   while (cur.getDate() === now.getDate() && cur <= end) {
-    out.push(`${String(cur.getHours()).padStart(2, "0")}:${String(cur.getMinutes()).padStart(2, "0")}`);
+    out.push(
+      `${String(cur.getHours()).padStart(2, "0")}:${String(cur.getMinutes()).padStart(2, "0")}`,
+    );
     cur = new Date(cur.getTime() + 15 * 60 * 1000);
   }
 
@@ -149,14 +151,13 @@ export default function Actions() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
-  const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData), [formData]);
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   const selectedEnquiry = enquirySelectionState.selectedEnquiry;
   const selfServiceLinks = selectedEnquiry?.selfServiceLinks || [];
 
-  const showQueue = formData.proceed === "Join digital queue";
-  const showBooking = formData.proceed === "Schedule appointment";
+  const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
+  const showBooking = formData.proceed === "BOOK_APPOINTMENT";
 
   const queueStatus = useMemo(() => getQueueStatusStub(), []);
   const typicalMid = Math.round((queueStatus.typicalWaitMin + queueStatus.typicalWaitMax) / 2);
@@ -168,9 +169,12 @@ export default function Actions() {
   const [confirmReminderOpen, setConfirmReminderOpen] = useState(false);
 
   const hasReminderContact =
-    formData.provideDetails === "yes" && (formData.phone.trim() !== "" || formData.email.trim() !== "");
+    formData.provideDetails === "yes" &&
+    (formData.phone.trim() !== "" || formData.email.trim() !== "");
 
-  const bookingIncomplete = showBooking && (formData.appointmentDateIso.trim() === "" || formData.appointmentTime.trim() === "");
+  const bookingIncomplete =
+    showBooking &&
+    (formData.appointmentDateIso.trim() === "" || formData.appointmentTime.trim() === "");
 
   // Compute the time for the reminder based on the user's selection
   const computedReminderAt = useMemo(() => {
@@ -313,9 +317,12 @@ export default function Actions() {
                   }}
                 >
                   <Stack spacing={0.5}>
-                    <Typography fontWeight={800}>The queue is currently: {busyLabel(busy)}</Typography>
+                    <Typography fontWeight={800}>
+                      The queue is currently: {busyLabel(busy)}
+                    </Typography>
                     <Typography variant="body2">
-                      Typical wait if you join now: {queueStatus.typicalWaitMin} to {queueStatus.typicalWaitMax} minutes
+                      Typical wait if you join now: {queueStatus.typicalWaitMin} to{" "}
+                      {queueStatus.typicalWaitMax} minutes
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Some urgent or vulnerable cases may be seen sooner.
@@ -385,9 +392,16 @@ export default function Actions() {
                           </Alert>
                         ) : null}
 
-                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
                           <Typography variant="body2" color="text.secondary">
-                            {computedReminderAt ? `Reminder time: ${formatTimeGb(computedReminderAt)}` : ""}
+                            {computedReminderAt
+                              ? `Reminder time: ${formatTimeGb(computedReminderAt)}`
+                              : ""}
                           </Typography>
 
                           <Button
@@ -426,7 +440,11 @@ export default function Actions() {
 
                 <DialogActions>
                   <Button onClick={handleCancelReminder}>Cancel</Button>
-                  <Button variant="contained" onClick={handleConfirmReminder} disabled={!computedReminderAt}>
+                  <Button
+                    variant="contained"
+                    onClick={handleConfirmReminder}
+                    disabled={!computedReminderAt}
+                  >
                     Confirm
                   </Button>
                 </DialogActions>
