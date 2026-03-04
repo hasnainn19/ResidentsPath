@@ -24,6 +24,7 @@ const schema = a.schema({
 
       // Contact info (optional - walk-ins may not provide)
       email: a.string(),
+      additionalEmail: a.string(),
       phoneNumber: a.string(),
 
       // Address fields (optional - may not have for walk-ins or homeless)

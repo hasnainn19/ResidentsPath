@@ -247,7 +247,7 @@ function updateUserInfo(validated: ReturnType<typeof formSchema.parse>): Partial
     pronouns: validated.pronouns,
     pronounsOtherText: validated.pronounsOtherText,
 
-    email: validated.email,
+    additionalEmail: validated.email,
     phoneNumber: validated.phone,
 
     addressLine1: validated.addressLine1,
