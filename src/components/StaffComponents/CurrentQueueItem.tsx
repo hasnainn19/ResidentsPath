@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -28,7 +29,10 @@ interface CurrentQueueItemProps {
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { caseItem, totalPositions, handleSelectPosition } = props;
-  const positionOptions = Array.from({ length: totalPositions }, (_, index) => index + 1);
+  const positionOptions = Array.from(
+    { length: totalPositions },
+    (_, index) => index + 1,
+  );
   const statusColorMap: Record<string, "error" | "default"> = {
     Priority: "error",
     Standard: "default",
@@ -94,9 +98,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
               </Select>
             </FormControl>
 
-            <IconButton>
-              <ChevronRightIcon />
-            </IconButton>
+            <Button>Mark as Seen</Button>
           </Stack>
         </Stack>
       </CardContent>
