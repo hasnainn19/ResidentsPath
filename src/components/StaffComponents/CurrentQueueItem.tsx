@@ -13,7 +13,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import FlagIcon from "@mui/icons-material/Flag";
+import { useState } from "react";
 
 interface CurrentQueueItemProps {
   caseItem: {
@@ -29,6 +30,7 @@ interface CurrentQueueItemProps {
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { caseItem, totalPositions, handleSelectPosition } = props;
+  const [isFlagged, setIsFlagged] = useState(false);
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -98,7 +100,12 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
               </Select>
             </FormControl>
 
-            <Button>Mark as Seen</Button>
+            <Stack>
+              <Button>Mark as Seen</Button>
+              <IconButton onClick={() => setIsFlagged(!isFlagged)}>
+                <FlagIcon color={isFlagged ? "error" : "disabled"} />
+              </IconButton>
+            </Stack>
           </Stack>
         </Stack>
       </CardContent>
