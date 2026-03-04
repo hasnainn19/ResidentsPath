@@ -28,7 +28,7 @@ export const initialFormData: FormData = {
   postcode: "",
 
   pronouns: "",
-  pronounsOther: "",
+  pronounsOtherText: "",
 
   topLevel: "",
   generalServicesChoice: "",
@@ -39,7 +39,7 @@ export const initialFormData: FormData = {
   otherEnquiryText: "",
 
   hasChildren: false,
-  childrenCount: "0",
+  childrenCount: "",
 
   hasDisabilityOrSensory: false,
   disabilityType: "",
@@ -47,14 +47,14 @@ export const initialFormData: FormData = {
   householdSize: "",
 
   domesticAbuse: false,
-  safeToContact: "prefer_not_to_say",
+  safeToContact: "PREFER_NOT_TO_SAY",
   safeContactNotes: "",
 
   ageRange: "",
 
   urgent: "unsure",
   urgentReason: "",
-  urgentOtherReason: "",
+  urgentReasonOtherText: "",
 
   additionalInfo: "",
 
@@ -62,7 +62,6 @@ export const initialFormData: FormData = {
 
   needsAccessibility: false,
   needsLanguage: false,
-
   needsSeating: false,
   needsWrittenUpdates: false,
   needsLargeText: false,

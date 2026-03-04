@@ -43,6 +43,13 @@ import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/formFieldTypes";
+import {
+  UI_OPTIONS,
+  countDigits,
+  isValidEmail,
+  isValidUkPostcode,
+  normaliseUkPostcode,
+} from "../../../shared/formSchema";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { FIELD_META } from "./model/fieldMeta";
 
@@ -50,25 +57,6 @@ import { FIELD_META } from "./model/fieldMeta";
 function digitsOnly(s: string) {
   return s.replace(/\D/g, "");
 }
-
-function normaliseUkPostcode(postCode: string) {
-  const compact = postCode.toUpperCase().replace(/\s+/g, "").trim();
-  if (!compact) return "";
-
-  // If it's too short to be a full postcode, just return the compact form
-  if (compact.length <= 3) return compact;
-
-  // Insert a space before the final 3 characters to normalise the format
-  return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
-}
-
-function isValidUkPostcode(postCode: string) {
-  const s = normaliseUkPostcode(postCode);
-  if (!s) return true;
-  const re = /^(GIR\s?0AA|[A-Z]{1,2}\d{1,2}[A-Z]?\s\d[A-Z]{2})$/;
-  return re.test(s);
-}
-
 
 export default function PersonalDetails() {
   const nav = useNavigate();
@@ -130,7 +118,7 @@ export default function PersonalDetails() {
           townOrCity: "",
           postcode: "",
           pronouns: "" as PronounsOption,
-          pronounsOther: "",
+          pronounsOtherText: "",
         };
       }
 
@@ -164,9 +152,11 @@ export default function PersonalDetails() {
 
   // UI edits the national part, state stores the full number with dial code
   const nationalDigits =
-    formData.phone && formData.phone.startsWith(dialCode) ? digitsOnly(formData.phone.slice(dialCode.length)) : "";
+    formData.phone && formData.phone.startsWith(dialCode)
+      ? digitsOnly(formData.phone.slice(dialCode.length))
+      : "";
 
-  // Soft length cap to prevent very long inputs. Not full phone validation yet
+  // Soft length cap to prevent very long inputs
   const maxNationalLen = phoneCountry === "GB" ? 10 : 15;
 
   // Preserve the phone digits when changing country, then rebuild the stored value with the new dial code
@@ -187,7 +177,6 @@ export default function PersonalDetails() {
   function handleNationalPhoneChange(raw: string) {
     let d = digitsOnly(raw);
 
-    // UK: store without the leading 0, replace with +44
     if (phoneCountry === "GB") d = d.replace(/^0+/, "");
 
     d = d.slice(0, maxNationalLen);
@@ -203,14 +192,30 @@ export default function PersonalDetails() {
 
   const [contactMethodTouched, setContactMethodTouched] = useState(false);
 
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
   const postcodeRaw = formData.postcode ?? "";
-  const postcodeInvalid = provideDetails === "yes" && postcodeRaw.trim() !== "" && !isValidUkPostcode(postcodeRaw);
+  const postcodeInvalid =
+    provideDetails === "yes" && postcodeRaw.trim() !== "" && !isValidUkPostcode(postcodeRaw);
+
+  const emailRaw = (formData.email ?? "").trim();
+  const emailInvalid = provideDetails === "yes" && emailRaw !== "" && !isValidEmail(emailRaw);
+
+  const phoneDigitsCount = countDigits(formData.phone ?? "");
+  const phoneInvalid =
+    provideDetails === "yes" &&
+    phoneDigitsCount > 0 &&
+    (phoneDigitsCount < 7 || phoneDigitsCount > 15);
 
   const needsPhoneForContactMethod =
-    provideDetails === "yes" && formData.contactMethod === "Text message" && formData.phone.trim() === "";
+    provideDetails === "yes" &&
+    formData.contactMethod === "TEXT_MESSAGE" &&
+    formData.phone.trim() === "";
 
   const needsEmailForContactMethod =
-    provideDetails === "yes" && formData.contactMethod === "Email" && formData.email.trim() === "";
+    provideDetails === "yes" && formData.contactMethod === "EMAIL" && formData.email.trim() === "";
 
   // If the user has touched the contact method field, validate that they have provided the necessary contact details for their chosen method
   const contactMethodInvalid = needsPhoneForContactMethod || needsEmailForContactMethod;
@@ -232,11 +237,18 @@ export default function PersonalDetails() {
 
           const mostRecentPostcode = normaliseUkPostcode(formData.postcode ?? "");
           const postcodeInvalidNow =
-            provideDetails === "yes" && mostRecentPostcode.trim() !== "" && !isValidUkPostcode(mostRecentPostcode);
+            provideDetails === "yes" &&
+            mostRecentPostcode.trim() !== "" &&
+            !isValidUkPostcode(mostRecentPostcode);
 
-          if (provideDetails === "yes" && (postcodeInvalidNow || contactMethodInvalid)) {
+          if (
+            provideDetails === "yes" &&
+            (postcodeInvalidNow || contactMethodInvalid || emailInvalid || phoneInvalid)
+          ) {
             setPostcodeTouched(true);
             setContactMethodTouched(true);
+            setEmailTouched(true);
+            setPhoneTouched(true);
             return;
           }
 
@@ -267,10 +279,23 @@ export default function PersonalDetails() {
                 };
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                sx={{ mb: 1 }}
+              >
                 <Stack direction="row" spacing={1} alignItems="flex-start">
-                  <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px", opacity: 0 }} aria-hidden />
-                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }} color="primary.main">
+                  <CheckCircleOutlineIcon
+                    fontSize="small"
+                    sx={{ mt: "2px", opacity: 0 }}
+                    aria-hidden
+                  />
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 800, lineHeight: 1.2 }}
+                    color="primary.main"
+                  >
                     {COPY.info.label}
                   </Typography>
                 </Stack>
@@ -304,17 +329,34 @@ export default function PersonalDetails() {
 
             {/* Option to not provide details */}
             <FormControl component="fieldset">
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 1 }}
+              >
                 <FormLabel sx={{ fontWeight: 800 }}>{COPY.provideDetails.label}</FormLabel>
-                <TextToSpeechButton text={(COPY.provideDetails.tts ?? COPY.provideDetails.label).trim()} />
+                <TextToSpeechButton
+                  text={(COPY.provideDetails.tts ?? COPY.provideDetails.label).trim()}
+                />
               </Stack>
 
               <RadioGroup
                 value={provideDetails}
-                onChange={(e) => handleProvideDetailsChange((e.target as HTMLInputElement).value as YesNo)}
+                onChange={(e) =>
+                  handleProvideDetailsChange((e.target as HTMLInputElement).value as YesNo)
+                }
               >
-                <FormControlLabel value="yes" control={<Radio />} label="Yes, I'd like to provide details (optional)" />
-                <FormControlLabel value="no" control={<Radio />} label="No, continue without details" />
+                <FormControlLabel
+                  value="yes"
+                  control={<Radio />}
+                  label="Yes, I'd like to provide details (optional)"
+                />
+                <FormControlLabel
+                  value="no"
+                  control={<Radio />}
+                  label="No, continue without details"
+                />
               </RadioGroup>
             </FormControl>
 
@@ -323,7 +365,6 @@ export default function PersonalDetails() {
               <Stack spacing={2}>
                 <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
                   <Stack spacing={2}>
-                    {/* Pronouns + preferred name row */}
                     <Box
                       sx={{
                         display: "grid",
@@ -332,30 +373,43 @@ export default function PersonalDetails() {
                         alignItems: "start",
                       }}
                     >
-                      <FormControl fullWidth>
-                        <InputLabel id="pronouns-label">{labelOptional("pronouns")}</InputLabel>
-                        <Select
-                          labelId="pronouns-label"
-                          label={labelOptional("pronouns")}
-                          value={(formData.pronouns ?? "") as PronounsOption}
-                          onChange={(e) => {
-                            const v = String(e.target.value) as PronounsOption;
-                            setFormData((prev) => ({
-                              ...prev,
-                              pronouns: v,
-                              pronounsOther: v === "Other" ? prev.pronounsOther : "",
-                            }));
-                          }}
-                        >
-                          <MenuItem value="">No selection</MenuItem>
-                          <MenuItem value="He/him">He/him</MenuItem>
-                          <MenuItem value="She/her">She/her</MenuItem>
-                          <MenuItem value="They/them">They/them</MenuItem>
-                          <MenuItem value="Use my name only">Use my name only</MenuItem>
-                          <MenuItem value="Other">Other (please specify)</MenuItem>
-                          <MenuItem value="Prefer not to say">Prefer not to say</MenuItem>
-                        </Select>
-                      </FormControl>
+                      <Stack spacing={1}>
+                        <FormControl fullWidth>
+                          <InputLabel id="pronouns-label">{labelOptional("pronouns")}</InputLabel>
+                          <Select
+                            labelId="pronouns-label"
+                            label={labelOptional("pronouns")}
+                            value={formData.pronouns}
+                            onChange={(e) => {
+                              const v = String(
+                                (e.target as HTMLInputElement).value,
+                              ) as FormData["pronouns"];
+                              setFormData((prev) => ({
+                                ...prev,
+                                pronouns: v,
+                                pronounsOtherText: v === "OTHER" ? prev.pronounsOtherText : "",
+                              }));
+                            }}
+                          >
+                            <MenuItem value="">No selection</MenuItem>
+                            {UI_OPTIONS.pronouns.map((opt) => (
+                              <MenuItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+
+                        {formData.pronouns === "OTHER" && (
+                          <TextField
+                            label="Pronouns (please specify)"
+                            value={formData.pronounsOtherText}
+                            onChange={(e) => setField("pronounsOtherText", e.target.value)}
+                            fullWidth
+                            slotProps={{ htmlInput: { maxLength: FIELD_META.pronounsOtherText.maxLen } }}
+                          />
+                        )}
+                      </Stack>
 
                       <TextField
                         label={labelOptional("preferredName")}
@@ -365,21 +419,6 @@ export default function PersonalDetails() {
                         autoComplete="nickname"
                         slotProps={{ htmlInput: { maxLength: FIELD_META.preferredName.maxLen } }}
                       />
-
-                      <Collapse
-                        in={formData.pronouns === "Other"}
-                        timeout={200}
-                        unmountOnExit
-                        sx={{ gridColumn: "1 / 2" }}
-                      >
-                        <TextField
-                          label="Pronouns (please specify)"
-                          value={formData.pronounsOther ?? ""}
-                          onChange={(e) => setField("pronounsOther", e.target.value)}
-                          fullWidth
-                          slotProps={{ htmlInput: { maxLength: FIELD_META.pronounsOther.maxLen } }}
-                        />
-                      </Collapse>
                     </Box>
 
                     {/* Names row */}
@@ -417,7 +456,6 @@ export default function PersonalDetails() {
                         slotProps={{ htmlInput: { maxLength: FIELD_META.lastName.maxLen } }}
                       />
                     </Box>
-
                     {/* DOB */}
                     <DatePicker
                       label={labelOptional("dob")}
@@ -447,18 +485,25 @@ export default function PersonalDetails() {
                 {/* Contact details */}
                 <WithTTS copy={COPY.contactDetails} titleVariant="subtitle1">
                   <Stack spacing={2}>
-                    {/* Email */}
                     <TextField
                       label={labelOptional("email")}
                       type="email"
                       value={formData.email ?? ""}
                       onChange={(e) => setField("email", e.target.value)}
+                      onBlur={() => setEmailTouched(true)}
+                      error={emailTouched && emailInvalid}
+                      helperText={
+                        emailTouched && emailInvalid
+                          ? "Enter a valid email address or leave blank."
+                          : " "
+                      }
                       fullWidth
                       autoComplete="email"
-                      slotProps={{ htmlInput: { maxLength: FIELD_META.email.maxLen, inputMode: "email" } }}
+                      slotProps={{
+                        htmlInput: { maxLength: FIELD_META.email.maxLen, inputMode: "email" },
+                      }}
                     />
 
-                    {/* Phone controls: country/dial + digits-only number */}
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
                       <FormControl fullWidth>
                         <InputLabel id="phone-country-label">Country / dial code</InputLabel>
@@ -466,7 +511,9 @@ export default function PersonalDetails() {
                           labelId="phone-country-label"
                           label="Country / dial code"
                           value={phoneCountry}
-                          onChange={(e) => handleCountryChange(String(e.target.value) as CountryCode)}
+                          onChange={(e) =>
+                            handleCountryChange(String(e.target.value) as CountryCode)
+                          }
                         >
                           {dialOptions.map((opt) => (
                             <MenuItem key={opt.country} value={opt.country}>
@@ -476,10 +523,18 @@ export default function PersonalDetails() {
                         </Select>
                       </FormControl>
 
+                      {/* Phone controls: country/dial + digits-only number */}
                       <TextField
                         label={labelOptional("phone")}
                         value={nationalDigits}
                         onChange={(e) => handleNationalPhoneChange(e.target.value)}
+                        onBlur={() => setPhoneTouched(true)}
+                        error={phoneTouched && phoneInvalid}
+                        helperText={
+                          phoneTouched && phoneInvalid
+                            ? "Enter a valid phone number or leave blank."
+                            : " "
+                        }
                         fullWidth
                         autoComplete="tel-national"
                         placeholder={phoneCountry === "GB" ? "e.g. 7912345678" : "Digits only"}
@@ -487,7 +542,7 @@ export default function PersonalDetails() {
                           htmlInput: {
                             maxLength: maxNationalLen,
                             pattern: "[0-9]*",
-                            inputMode: "numeric"
+                            inputMode: "numeric",
                           },
                         }}
                       />
@@ -502,7 +557,9 @@ export default function PersonalDetails() {
                     <Stack direction="row" spacing={2} alignItems="flex-start">
                       <Box sx={{ flex: 1 }}>
                         <FormControl fullWidth error={contactMethodTouched && contactMethodInvalid}>
-                          <InputLabel id="contact-label">{labelOptional("contactMethod")}</InputLabel>
+                          <InputLabel id="contact-label">
+                            {labelOptional("contactMethod")}
+                          </InputLabel>
                           <Select
                             labelId="contact-label"
                             label={labelOptional("contactMethod")}
@@ -514,8 +571,11 @@ export default function PersonalDetails() {
                             onBlur={() => setContactMethodTouched(true)}
                           >
                             <MenuItem value="">Contact method (optional)</MenuItem>
-                            <MenuItem value="Text message">Text message</MenuItem>
-                            <MenuItem value="Email">Email</MenuItem>
+                            {UI_OPTIONS.contactMethod.map((opt) => (
+                              <MenuItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </MenuItem>
+                            ))}
                           </Select>
 
                           <FormHelperText>
@@ -634,7 +694,10 @@ export default function PersonalDetails() {
             <StepActions
               onSave={handleSave}
               advanceLabel="Continue"
-              advanceDisabled={provideDetails === "yes" && (postcodeInvalid || contactMethodInvalid)}
+              advanceDisabled={
+                provideDetails === "yes" &&
+                (postcodeInvalid || contactMethodInvalid || emailInvalid || phoneInvalid)
+              }
             />
           </Stack>
         </Paper>

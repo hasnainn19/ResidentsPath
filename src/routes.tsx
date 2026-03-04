@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import App from "./App";
+import StaffDashboard from "./pages/StaffDashboard";
+import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
 import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
@@ -13,6 +15,9 @@ import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
 
+import RequireGuest from "./guards/RequireGuest";
+import RequireAuth from "./guards/RequireAuth";
+import RequireRole from "./guards/RequireRole";
 
 export const router = createBrowserRouter([
   {
@@ -21,7 +26,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <AuthPage />,
+    element: <RequireGuest><AuthPage /></RequireGuest>,
   },
   {
     path: "/start",
@@ -33,7 +38,17 @@ export const router = createBrowserRouter([
   },
   {
     path: "/bookingpage",
-    element: <BookingPage />,
+    element: <RequireAuth><BookingPage /></RequireAuth>,
+  },
+  {
+    path: "/staff",
+    element: <RequireRole allowedGroups={["Staff"]}><StaffLayout /></RequireRole>,
+    children: [
+      {
+        index: true,
+        element: <StaffDashboard />,
+      },
+    ],
   },
   {
       path: "/userdashboard/:caseId", element: <UserDashboard /> 

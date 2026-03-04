@@ -15,7 +15,7 @@ const ReferencePage = () => {
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [ scanning, setScanning ] = useState(false);
     const [ refNo, setRefNo ] = useState('');
-    const [ qrScanError, setQrScanError] = useState('');
+    // const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
 
     function handleQRScanner() {
@@ -42,7 +42,7 @@ const ReferencePage = () => {
                     setRefNo(decodedText);
                     stopScanner();
                 },
-                (err) => setQrScanError(err)
+                (err) => console.error(err)
                 )
             .catch(() => {
                 scannerRef.current = null;

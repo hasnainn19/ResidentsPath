@@ -6,9 +6,9 @@
  * that apply based on earlier choices).
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Paper, Typography, Button, Stack, Divider, Box } from "@mui/material";
+import { Paper, Typography, Button, Stack, Divider, Box, Alert } from "@mui/material";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -17,21 +17,60 @@ import type { FormData } from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../../amplify/data/resource";
+import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave, clearSavedDraft } = useFormWizard();
 
-  // TODO(BACKEND)
-  const submitToBackend = () => {
-    const payload = {
-      ...formData,
-      ageRange: formData.dob ? "" : formData.ageRange,
-      childrenCount: formData.hasChildren ? formData.childrenCount : "0",
-      disabilityType: formData.hasDisabilityOrSensory ? formData.disabilityType : "",
-      urgentOtherReason: formData.urgentReason === "Other" ? formData.urgentOtherReason : "",
-    };
-    clearSavedDraft();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const clientUserPool = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const clientIdentityPool = useMemo(
+    () => generateClient<Schema>({ authMode: "identityPool" }),
+    [],
+  );
+
+  const submitToBackend = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const payload = buildSubmitEnquiryPayload(formData);
+
+      const session = await fetchAuthSession();
+      const isSignedIn = !!session.tokens?.idToken;
+
+      const client = isSignedIn ? clientUserPool : clientIdentityPool;
+
+      const response = await client.mutations.submitEnquiry({ input: payload });
+
+      if (response?.errors?.length) {
+        console.error("submitEnquiry returned errors", response.errors);
+        setSubmitError("Submission failed. Please try again.");
+        return;
+      }
+
+      const result = response?.data;
+      if (!result?.ok) {
+        setSubmitError(result?.errorMessage || "Submission failed. Please try again.");
+        return;
+      }
+
+      clearSavedDraft();
+      nav("/referencepage");
+    } catch (e) {
+      console.error("Failed to submit enquiry", e);
+      setSubmitError("Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   function isNotNull<T>(x: T | null | undefined | false): x is T {
@@ -47,7 +86,6 @@ export default function ReviewAndSubmit() {
       title: "Your details",
       keys: [
         "pronouns",
-        "pronounsOther",
         "firstName",
         "middleName",
         "lastName",
@@ -71,7 +109,7 @@ export default function ReviewAndSubmit() {
     },
     {
       title: "Urgency",
-      keys: ["urgent", "urgentReason", "urgentOtherReason"],
+      keys: ["urgent", "urgentReason"],
       editTo: "/form/enquiry-selection",
     },
     {
@@ -111,6 +149,7 @@ export default function ReviewAndSubmit() {
       editTo: "/form/actions",
     },
   ];
+
   // Two-column layout for review: label left, answer right
   function ReviewRow({ label, value }: { label: string; value: string }) {
     return (
@@ -148,8 +187,7 @@ export default function ReviewAndSubmit() {
   }
 
   // Get the enquiry selection state which determines which questions were actually asked based on earlier answers
-  const enquirySelectionState = useMemo(
-    () => getEnquirySelectionState(formData), [formData]);
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   // For each field, determine if it should be shown on the review page, and if so render it with the appropriate label and value
   function renderReviewItem(key: keyof FormData) {
@@ -188,6 +226,12 @@ export default function ReviewAndSubmit() {
           Please review your information before submitting:
         </Typography>
 
+        {submitError && (
+          <Alert severity="error" sx={{ mb: 3 }} role="alert">
+            {submitError}
+          </Alert>
+        )}
+
         {/* Review items */}
         {SECTIONS.map((section) => {
           const pairs = section.keys
@@ -204,7 +248,12 @@ export default function ReviewAndSubmit() {
           const items = section.keys.map((k) => renderReviewItem(k)).filter(isNotNull);
 
           return (
-            <WithTTS key={section.title} copy={{ label: section.title, tts: ttsText }} titleVariant="h6" sx={{ mb: 3 }}>
+            <WithTTS
+              key={section.title}
+              copy={{ label: section.title, tts: ttsText }}
+              titleVariant="h6"
+              sx={{ mb: 3 }}
+            >
               <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
                 <Button
                   type="button"
@@ -247,10 +296,10 @@ export default function ReviewAndSubmit() {
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           advanceType="button"
+          advanceDisabled={submitting}
           showPrevious
           onPrevious={() => nav("/form/actions")}
         />
-
       </Paper>
     </FormStepLayout>
   );
