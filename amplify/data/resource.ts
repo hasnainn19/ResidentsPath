@@ -271,12 +271,17 @@ const schema = a.schema({
         errorMessage: a.string(),
       }),
     )
-    .authorization((allow) => [allow.guest()])
+    .authorization((allow) => [
+      allow.guest(), 
+      allow.authenticated(),
+      allow.authenticated("identityPool")
+    ]) // Allow both guests and authenticated users to submit enquiries
     .handler(a.handler.function(submitEnquiry)),
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getTicketStatus),
+  allow.resource(postConfirmation),
 ]);
 
 export type Schema = ClientSchema<typeof schema>;

@@ -20,6 +20,7 @@ import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -28,7 +29,11 @@ export default function ReviewAndSubmit() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const client = useMemo(() => generateClient<Schema>(), []);
+  const clientUserPool = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const clientIdentityPool = useMemo(
+    () => generateClient<Schema>({ authMode: "identityPool" }),
+    [],
+  );
 
   const submitToBackend = async () => {
     if (submitting) return;
@@ -37,8 +42,13 @@ export default function ReviewAndSubmit() {
     setSubmitError(null);
 
     try {
-      // Build the payload based on the form data, using the shape expected by the backend
       const payload = buildSubmitEnquiryPayload(formData);
+
+      const session = await fetchAuthSession();
+      const isSignedIn = !!session.tokens?.idToken;
+
+      const client = isSignedIn ? clientUserPool : clientIdentityPool;
+
       const response = await client.mutations.submitEnquiry({ input: payload });
 
       if (response?.errors?.length) {

@@ -21,7 +21,7 @@ import {
   PutItemCommand,
   DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import {getAmplifyClient} from "../utils/amplifyClient";
+import { getAmplifyClient } from "../utils/amplifyClient";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
@@ -36,7 +36,6 @@ type SubmitEnquiryResult = {
   errorCode?: SubmitEnquiryErrorCode;
   errorMessage?: string;
 };
-
 
 function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const out: Partial<T> = {};
@@ -295,8 +294,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     ? JSON.stringify(validated.supportNeeds)
     : undefined;
 
-  await getAmplifyClient(); 
-  const client = generateClient<Schema>({ authMode: "iam" });
+  const client = await getAmplifyClient();
 
   const identity = event.identity;
   const sub =
@@ -304,7 +302,6 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
   let userId: string | null = null;
   let createdGuestUserId: string | null = null;
-
 
   // If the user is logged in, try to find their account in the User model by their Cognito sub
   if (sub) {
