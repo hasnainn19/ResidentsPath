@@ -1,13 +1,12 @@
 import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
+import { getAmplifyClient } from "../utils/amplifyClient";
 
 export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
   event,
 ) => {
   // Initialize Amplify client with admin permissions
-  const client = generateClient<Schema>({
-    authMode: "identityPool",
-  });
+  const client = await getAmplifyClient();
 
   // Query all tickets#
   const { data: tickets } = await client.models.Ticket.list();

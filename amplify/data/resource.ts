@@ -229,7 +229,7 @@ const schema = a
           longestWaitTime: a.integer().required(),
         }),
       )
-      .authorization((allow) => allow.groups(["Staff"]))
+      .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
     submitEnquiry: a
       .mutation()
@@ -310,6 +310,7 @@ const schema = a
     allow.resource(submitEnquiry).to(["query", "mutate"]),
     allow.resource(getTicketStatus),
     allow.resource(postConfirmation),
+    allow.resource(getDashboardStats),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;
