@@ -222,10 +222,11 @@ export default function PersonalDetails() {
 
   return (
     <FormStepLayout
-      step={1}
+      step={2}
       totalSteps={4}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
+      onBack={() => nav("/form/enquiry-selection")}
       languageValue={formData.language}
       onLanguageChange={(code) => setField("language", code as FormData["language"])}
       languageOptions={LANGUAGE_OPTIONS}
@@ -257,7 +258,7 @@ export default function PersonalDetails() {
             setFormData((prev) => ({ ...prev, postcode: mostRecentPostcode }));
           }
 
-          nav("/form/enquiry-selection");
+          nav("/form/actions");
         }}
       >
         <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
@@ -694,6 +695,8 @@ export default function PersonalDetails() {
             <StepActions
               onSave={handleSave}
               advanceLabel="Continue"
+              showPrevious
+              onPrevious={() => nav("/form/enquiry-selection")}
               advanceDisabled={
                 provideDetails === "yes" &&
                 (postcodeInvalid || contactMethodInvalid || emailInvalid || phoneInvalid)

@@ -34,11 +34,11 @@ export default function ResumeFromSave() {
   const draft = loadDraft(localStorage);
 
   if (!draft) {
-    return <Navigate to="/form/personal-details" replace />;
+    return <Navigate to="/form/enquiry-selection" replace />;
   }
 
   const lastPath = draft.lastPath;
-  const safeTarget = lastPath && lastPath.startsWith("/form/") ? lastPath : "/form/personal-details";
+  const safeTarget = lastPath && lastPath.startsWith("/form/") ? lastPath : "/form/enquiry-selection";
   const savedAt = formatSavedTime(draft.updatedAt);
 
   const handleContinue = () => {
@@ -49,7 +49,7 @@ export default function ResumeFromSave() {
   const handleStartNew = () => {
     clearDraft(localStorage);
     setFormData(initialFormData);
-    nav("/form/personal-details", { replace: true });
+    nav("/form/enquiry-selection", { replace: true });
   };
 
   return (

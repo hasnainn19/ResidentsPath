@@ -12,9 +12,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Button,
-  Divider,
-  List,
-  ListItem,
   Paper,
   Stack,
   Typography,
@@ -38,7 +35,6 @@ import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
-import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import BookingPanel from "../../components/BookingPanel";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
 
@@ -151,11 +147,6 @@ export default function Actions() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
-  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
-
-  const selectedEnquiry = enquirySelectionState.selectedEnquiry;
-  const selfServiceLinks = selectedEnquiry?.selfServiceLinks || [];
-
   const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
   const showBooking = formData.proceed === "BOOK_APPOINTMENT";
 
@@ -223,8 +214,8 @@ export default function Actions() {
       step={3}
       totalSteps={4}
       title="Council service request"
-      subtitle="Online options and next steps"
-      onBack={() => nav("/form/enquiry-selection")}
+      subtitle="Next steps"
+      onBack={() => nav("/form/personal-details")}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
@@ -235,58 +226,6 @@ export default function Actions() {
         </Typography>
 
         <Stack spacing={4}>
-          {/* Self-service */}
-          <WithTTS
-            copy={{
-              label: "Online self-service options",
-              tts:
-                selfServiceLinks.length > 0
-                  ? "Online self-service options are available. Use the links to complete your request online."
-                  : "No online self-service options are listed for this choice.",
-            }}
-            titleVariant="h6"
-          >
-            {selfServiceLinks.length > 0 ? (
-              <List sx={{ pl: 0 }}>
-                {selfServiceLinks.map((l) => (
-                  <ListItem key={l.href} sx={{ px: 0 }}>
-                    <Button
-                      component="a"
-                      href={l.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      variant="outlined"
-                      sx={{ textTransform: "none" }}
-                      fullWidth
-                    >
-                      {l.label}
-                    </Button>
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Alert
-                severity="info"
-                variant="outlined"
-                sx={(theme) => {
-                  const accent = theme.palette.primary.main;
-                  return {
-                    borderRadius: 2,
-                    py: 1.5,
-                    borderColor: accent,
-                    bgcolor: alpha(accent, 0.08),
-                    "& .MuiAlert-message": { width: "100%" },
-                    "& svg": { color: accent },
-                    color: theme.palette.primary.main,
-                  };
-                }}
-              >
-                No online options are listed for this enquiry yet.
-              </Alert>
-            )}
-          </WithTTS>
-
-          <Divider />
 
           {/* Queue */}
           {showQueue && (
@@ -388,7 +327,7 @@ export default function Actions() {
 
                         {!hasReminderContact ? (
                           <Alert severity="info" variant="outlined">
-                            To get a reminder, add a phone number or email in Step 1.
+                            To get a reminder, add a phone number or email in Step 2.
                           </Alert>
                         ) : null}
 
@@ -481,7 +420,7 @@ export default function Actions() {
             onAdvanceClick={() => nav("/form/review-and-submit")}
             advanceDisabled={(showQueue && joinTiming === "later") || bookingIncomplete}
             showPrevious
-            onPrevious={() => nav("/form/enquiry-selection")}
+            onPrevious={() => nav("/form/personal-details")}
           />
         </Stack>
       </Paper>

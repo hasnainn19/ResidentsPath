@@ -16,16 +16,17 @@ import type { FormData } from "../../pages/Form/model/formFieldTypes";
 
 type StepKey = "personal-details" | "enquiry-selection" | "actions" | "review-and-submit";
 
-const STEP_ORDER: StepKey[] = ["personal-details", "enquiry-selection", "actions", "review-and-submit"];
+const STEP_ORDER: StepKey[] = ["enquiry-selection", "personal-details", "actions", "review-and-submit"];
 
-function isStep1Complete() {
-  return true;
-}
-
-function isStep2Complete(data: FormData) {
+function isStep1Complete(data: FormData) {
   const ctx = getEnquirySelectionState(data);
   const needsUrgentReason = data.urgent === "yes";
   return computeCanGoNext(data, ctx.hasEnoughToProceed, needsUrgentReason);
+}
+
+function isStep2Complete(data: FormData) {
+  // Step 2 is always optional but requries step 1 to be complete
+  return isStep1Complete(data); 
 }
 
 function isStep3Complete(data: FormData) {
@@ -42,8 +43,8 @@ function isStep3Complete(data: FormData) {
 }
 
 function getMaxAllowedStep(data: FormData): StepKey {
-  if (!isStep1Complete()) return "personal-details";
-  if (!isStep2Complete(data)) return "enquiry-selection";
+  if (!isStep1Complete(data)) return "enquiry-selection";
+  if (!isStep2Complete(data)) return "personal-details";
   if (!isStep3Complete(data)) return "actions";
   return "review-and-submit";
 }
