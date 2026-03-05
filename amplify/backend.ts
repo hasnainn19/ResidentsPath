@@ -11,10 +11,10 @@ import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
  */
 const backend = defineBackend({
-	auth,
+	// auth,
 	data,
-	postConfirmation,
-  submitEnquiry,
+	// postConfirmation,
+  	submitEnquiry,
 });
 
 /**
@@ -29,17 +29,18 @@ const backend = defineBackend({
  * 
  * This approach is a workaround for the limitations of the Amplify CDK when it comes to cross-referencing resources in different stacks.
  */
-backend.postConfirmation.resources.lambda.addToRolePolicy(
-	new PolicyStatement({
-		actions: [
-			"cognito-idp:AdminAddUserToGroup", // Add users to Cognito groups
-		],
-		resources: [
-			// backend.auth.resources.userPool.userPoolArn causes circular dependency 
-			`arn:aws:cognito-idp:${Aws.REGION}:${Aws.ACCOUNT_ID}:userpool/*`, 
-		],
-	})
-);
+// backend.postConfirmation.resources.lambda.addToRolePolicy(
+// 	new PolicyStatement({
+// 		actions: [
+// 			"cognito-idp:AdminAddUserToGroup", // Add users to Cognito groups
+// 		],
+// 		resources: [
+// 			// backend.auth.resources.userPool.userPoolArn causes circular dependency 
+// 			`arn:aws:cognito-idp:${Aws.REGION}:${Aws.ACCOUNT_ID}:userpool/*`, 
+// 		],
+// 	})
+// );
+
 // Create a DynamoDB table to keep track of daily ticket numbers for the submitEnquiry function
 // to ensure unique ticket numbers without race conditions
 const ticketCounterTable = new Table(backend.stack, "TicketCounterTable", {
