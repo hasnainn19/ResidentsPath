@@ -21,12 +21,29 @@ import {
 import React from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../../amplify/data/resource";
+import { Amplify } from "aws-amplify";
+import outputs from "../../amplify_outputs.json";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
 const StaffDashboard = () => {
   const [sortColumn, setSortColumn] = React.useState<string | null>(null);
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
-
+  const [waitingCount, setWaitingCount] = React.useState<number | null>(null);
+  const [steppedOutCount, setSteppedOutCount] = React.useState<number | null>(
+    null,
+  );
+  const [staffCount, setStaffCount] = React.useState<number | null>(null);
+  const [urgentCount, setUrgentCount] = React.useState<number | null>(null);
+  const [longestWaitTime, setLongestWaitTime] = React.useState<number | null>(
+    null,
+  );
+  // React.useEffect(() => {
+  //   Amplify.configure(outputs);
+  //   const client = generateClient<Schema>({ authMode: "userPool" });
+  //   client.queries.getDashboardStats({}).then(console.log);
+  // }, []);
   const lastUpdated = "2026-02-16 14:00";
   const stats = [
     {
