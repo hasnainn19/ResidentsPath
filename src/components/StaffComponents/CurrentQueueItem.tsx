@@ -27,9 +27,11 @@ interface CurrentQueueItemProps {
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
+  showPosition: boolean;
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
-  const { caseItem, totalPositions, handleSelectPosition } = props;
+  const { showPosition, caseItem, totalPositions, handleSelectPosition } =
+    props;
   const [isFlagged, setIsFlagged] = useState(false);
   const positionOptions = Array.from(
     { length: totalPositions },
@@ -43,7 +45,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     <Card key={caseItem.id} sx={{ borderRadius: 3 }}>
       <CardContent>
         <Stack direction="row" justifyContent="space-between">
-          <Box>
+          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
             <Stack direction="row" spacing={1} mb={1}>
               <Chip
                 label={caseItem.status}
@@ -63,7 +65,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
 
             <Box
               sx={{
-                maxHeight: 120,
+                height: 120,
                 overflowY: "scroll",
                 scrollbarGutter: "stable",
                 pr: 1,
@@ -79,32 +81,48 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
             </Box>
           </Box>
 
-          <Stack spacing={1} alignItems="flex-end">
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel id={`move-position-label-${caseItem.id}`}>
-                Move to position
-              </InputLabel>
-              <Select
-                labelId={`move-position-label-${caseItem.id}`}
-                label="Move to position"
-                value={String(Math.min(caseItem.position, totalPositions))}
-                onChange={(event) =>
-                  handleSelectPosition(caseItem.id, Number(event.target.value))
-                }
-              >
-                {positionOptions.map((position) => (
-                  <MenuItem key={position} value={String(position)}>
-                    {position}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Stack>
-              <Button>Mark as Seen</Button>
-              <IconButton onClick={() => setIsFlagged(!isFlagged)}>
+          <Stack
+            alignItems="stretch"
+            justifyContent="space-between"
+            sx={{ flexShrink: 0, minWidth: 140, ml: 2 }}
+          >
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
                 <FlagIcon color={isFlagged ? "error" : "disabled"} />
               </IconButton>
+            </Box>
+            <Stack spacing={1.5} alignItems="stretch">
+              {showPosition && (
+                <FormControl size="small">
+                  <InputLabel id={`move-position-label-${caseItem.id}`}>
+                    Move to position
+                  </InputLabel>
+                  <Select
+                    labelId={`move-position-label-${caseItem.id}`}
+                    label="Move to position"
+                    value={String(Math.min(caseItem.position, totalPositions))}
+                    onChange={(event) =>
+                      handleSelectPosition(
+                        caseItem.id,
+                        Number(event.target.value),
+                      )
+                    }
+                  >
+                    {positionOptions.map((position) => (
+                      <MenuItem key={position} value={String(position)}>
+                        {position}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
+              >
+                Mark as Seen
+              </Button>
             </Stack>
           </Stack>
         </Stack>

@@ -62,9 +62,14 @@ const mockCases: CaseItem[] = [
 ];
 
 // This page displays a searchable and filterable list of past cases for staff users, allowing them to review case details and statuses. Each case is presented in a card format with key information and a link to view more details.
+
+const validDepartments = [...new Set(mockCases.map((c) => c.service))];
+
 const StaffQueuePage = () => {
   const [searchParams] = useSearchParams();
   const selectedService = searchParams.get("service")?.trim() || "";
+  const isValidDepartment = !!selectedService && validDepartments.includes(selectedService);
+  const showPosition = isValidDepartment;
   const [search, setSearch] = useState("");
   const [cases, setCases] = useState<CaseItem[]>(mockCases);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -75,9 +80,9 @@ const StaffQueuePage = () => {
 
   const serviceCases = useMemo(() => {
     return cases.filter(
-      (c) => !selectedService || c.service === selectedService,
+      (c) => !isValidDepartment || c.service === selectedService,
     );
-  }, [cases, selectedService]);
+  }, [cases, selectedService, isValidDepartment]);
 
   const filteredCases = useMemo(() => {
     return serviceCases
@@ -183,6 +188,7 @@ const StaffQueuePage = () => {
               caseItem={caseItem}
               totalPositions={serviceCaseCountMap[caseItem.service] ?? 1}
               handleSelectPosition={handleSelectPosition}
+              showPosition={showPosition}
             />
           ))}
         </Stack>
