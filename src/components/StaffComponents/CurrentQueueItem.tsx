@@ -123,6 +123,13 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
               >
                 Mark as Seen
               </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
+              >
+                View/Edit Notes
+              </Button>
             </Stack>
           </Stack>
         </Stack>
