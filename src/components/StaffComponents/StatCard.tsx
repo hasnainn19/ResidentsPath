@@ -5,9 +5,6 @@ interface StatCardProps {
   icon: SvgIconComponent;
   value: string | number;
   label: string;
-  change: number;
-  isPositive: boolean;
-  lastUpdated?: string;
 }
 // This component represents a single statistic card on the staff dashboard, displaying an icon, a key metric value, a label, and the change from the previous period. It also shows the last updated time for the data. The card is styled to visually indicate whether the change is positive or negative.
 const StatCard = ({ icon: Icon, value, label }: StatCardProps) => {

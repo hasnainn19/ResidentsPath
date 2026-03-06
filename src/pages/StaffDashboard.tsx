@@ -18,73 +18,93 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
-import { generateClient } from "aws-amplify/api";
+import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { Amplify } from "aws-amplify";
 import outputs from "../../amplify_outputs.json";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
+interface StaffDashboardStats {
+  waitingCount: number;
+  steppedOutCount: number;
+  staffCount: number;
+  urgentCount: number;
+  longestWaitTime: number;
+}
 const StaffDashboard = () => {
-  const [sortColumn, setSortColumn] = React.useState<string | null>(null);
-  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
-  const [waitingCount, setWaitingCount] = React.useState<number | null>(null);
-  const [steppedOutCount, setSteppedOutCount] = React.useState<number | null>(
-    null,
-  );
-  const [staffCount, setStaffCount] = React.useState<number | null>(null);
-  const [urgentCount, setUrgentCount] = React.useState<number | null>(null);
-  const [longestWaitTime, setLongestWaitTime] = React.useState<number | null>(
-    null,
-  );
-  // React.useEffect(() => {
-  //   Amplify.configure(outputs);
-  //   const client = generateClient<Schema>({ authMode: "userPool" });
-  //   client.queries.getDashboardStats({}).then(console.log);
-  // }, []);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [dashboardStats, setDashboardStats] = useState<StaffDashboardStats>({
+    waitingCount: 0,
+    steppedOutCount: 0,
+    staffCount: 0,
+    urgentCount: 0,
+    longestWaitTime: 0,
+  } as StaffDashboardStats);
+  useEffect(() => {
+    const client = generateClient<Schema>({ authMode: "userPool" });
+
+    const fetchStats = () => {
+      client.queries.getDashboardStats({}).then((data) => {
+        setDashboardStats({
+          waitingCount: data.data?.waitingCount,
+          steppedOutCount: data.data?.steppedOutCount,
+          staffCount: data.data?.staffCount,
+          urgentCount: data.data?.urgentCount,
+          longestWaitTime: data.data?.longestWaitTime,
+        });
+      });
+    };
+
+    // Initial fetch
+    fetchStats();
+
+    // Re-fetch stats whenever any ticket is created, updated, or deleted
+    const createSub = client.models.Ticket.onCreate().subscribe({
+      next: fetchStats,
+    });
+    const updateSub = client.models.Ticket.onUpdate().subscribe({
+      next: fetchStats,
+    });
+    const deleteSub = client.models.Ticket.onDelete().subscribe({
+      next: fetchStats,
+    });
+
+    return () => {
+      createSub.unsubscribe();
+      updateSub.unsubscribe();
+      deleteSub.unsubscribe();
+    };
+  }, []);
   const lastUpdated = "2026-02-16 14:00";
   const stats = [
     {
       icon: GroupsIcon,
-      value: 67,
+      value: dashboardStats.waitingCount,
       label: "Waiting in reception",
-      change: 12,
-      isPositive: true,
-      lastUpdated,
     },
     {
       icon: ExitToAppIcon,
-      value: 23,
+      value: dashboardStats.steppedOutCount,
       label: "Stepped Out",
-      change: 8,
-      isPositive: true,
-      lastUpdated,
     },
     {
       icon: PriorityHighIcon,
-      value: 13,
+      value: dashboardStats.urgentCount,
       label: "Urgent Cases",
-      change: -2,
-      isPositive: false,
-      lastUpdated,
     },
     {
       icon: SupervisorAccountIcon,
-      value: "2",
+      value: dashboardStats.staffCount,
       label: "Available Staff",
-      change: 5,
-      isPositive: true,
-      lastUpdated,
     },
     {
       icon: HourglassBottomIcon,
-      value: "55m",
+      value: dashboardStats.longestWaitTime,
       label: "Longest Wait Time",
-      change: 5,
-      isPositive: true,
-      lastUpdated,
     },
   ];
 
