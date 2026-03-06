@@ -4,6 +4,10 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   IconButton,
@@ -11,6 +15,7 @@ import {
   MenuItem,
   Select,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -33,6 +38,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { showPosition, caseItem, totalPositions, handleSelectPosition } =
     props;
   const [isFlagged, setIsFlagged] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notes, setNotes] = useState("");
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -127,6 +134,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
+                onClick={() => setNotesOpen(true)}
               >
                 View/Edit Notes
               </Button>
@@ -134,6 +142,33 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           </Stack>
         </Stack>
       </CardContent>
+
+      <Dialog
+        open={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Notes — {caseItem.title}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            multiline
+            fullWidth
+            minRows={6}
+            placeholder="Add notes here..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => setNotesOpen(false)}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };
