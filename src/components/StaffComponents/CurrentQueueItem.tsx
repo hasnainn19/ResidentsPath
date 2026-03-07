@@ -16,9 +16,11 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { useState } from "react";
 
 interface CurrentQueueItemProps {
@@ -38,6 +40,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { showPosition, caseItem, totalPositions, handleSelectPosition } =
     props;
   const [isFlagged, setIsFlagged] = useState(false);
+  const [isPriority, setIsPriority] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const positionOptions = Array.from(
@@ -94,9 +97,16 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
             sx={{ flexShrink: 0, minWidth: 140, ml: 2 }}
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
-                <FlagIcon color={isFlagged ? "error" : "disabled"} />
-              </IconButton>
+              <Tooltip title="Safeguarding flag">
+                <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
+                  <FlagIcon color={isFlagged ? "error" : "disabled"} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Priority flag">
+                <IconButton size="small" onClick={() => setIsPriority(!isPriority)}>
+                  <PriorityHighIcon color={isPriority ? "error" : "disabled"} />
+                </IconButton>
+              </Tooltip>
             </Box>
             <Stack spacing={1.5} alignItems="stretch">
               {showPosition && (
