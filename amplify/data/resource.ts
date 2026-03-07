@@ -3,6 +3,7 @@ import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { getDailyTickets } from '../functions/getDailyTickets/resource';
+import { getDepartmentEstimatedTime } from '../functions/getDepartmentEstimatedTime/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -99,24 +100,26 @@ const schema = a.
   // Department - service departments (Housing, Council Tax, etc)
   Department: a
     .model({
-      // Department information
-      name: a.string().required(),
-      isActive: a.boolean().default(false), // Is this department currently operating?
+		// Department information
+		name: a.string().required(),
+		isActive: a.boolean().default(false), // Is this department currently operating?
+    estimatedWaitingTime: a.integer().required(), // has a default estimated waiting time which gets updated
 
-			// Relationships
-			cases: a.hasMany("Case", "departmentId"),
-			staff: a.hasMany("Staff", "departmentId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Staff can see all departments
-		]),
+		// Relationships
+		cases: a.hasMany("Case", "departmentId"),
+		staff: a.hasMany("Staff", "departmentId"),
+		tickets:a.hasMany("Ticket", "departmentName"),
+	})
+	.authorization((allow) => [
+		allow.groups(["Staff"]), // Staff can see all departments
+	]),
 
 	// Ticket - represents a queue entry for a resident's visit
 	Ticket: a
 		.model({
 			// Foreign keys
 			caseId: a.id().required(),
-			departmentName:a.string().required(),
+			departmentName:a.string(),
 
 			// Display information
 			ticketNumber: a.string().required(),
@@ -129,7 +132,7 @@ const schema = a.
       estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
 
       // Timestamps for queue tracking
-      calledAt: a.datetime(),
+          //calledAt: a.datetime(),
       completedAt: a.datetime(),
 
       // Visit notes
@@ -211,13 +214,14 @@ const schema = a.
 	// Named custom type for daily ticket list responses
 	DailyTicket: a.customType({
 		caseId: a.id().required(),
-		departmentName:a.string().required(),
+		departmentName:a.string(),
 		ticketNumber: a.string().required(),
 		status: a.string().required(),
 		placement: a.integer().required(),
 		estimatedWaitTimeLower: a.integer().required(),
 		estimatedWaitTimeUpper: a.integer().required(),
 		createdAt: a.datetime(),
+    completedAt:a.datetime(),
 	}),
 
 	getDailyTickets: a
@@ -225,6 +229,17 @@ const schema = a.
 		.returns(a.ref("DailyTicket").array())
 		.authorization((allow) => [allow.guest()]) 
 		.handler(a.handler.function(getDailyTickets)),
+
+  getDepartmentEstimatedTime: a
+    .query()
+		.arguments({
+			departmentName: a.string().required()
+		})
+		.returns(a.customType({
+			estimatedWaitingtTime: a.integer().required(),
+		}))
+		.authorization((allow) => [allow.guest()])
+		.handler(a.handler.function(getDepartmentEstimatedTime)),
 
 	submitEnquiry: a
     .mutation()
@@ -304,8 +319,9 @@ const schema = a.
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getDailyTickets).to(["query", "listen"]),
+  allow.resource(getDepartmentEstimatedTime).to(["query", "listen"]),
 	allow.resource(getTicketStatus),
-  	allow.resource(postConfirmation),
+  allow.resource(postConfirmation),
 ]);
 
 export type Schema = ClientSchema<typeof schema>;

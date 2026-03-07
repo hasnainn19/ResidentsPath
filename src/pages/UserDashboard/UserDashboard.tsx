@@ -26,8 +26,6 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 
-const client = generateClient<Schema>();
-
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
@@ -36,7 +34,8 @@ export default function UserDashboard() {
     const [queuePosition, setQueuePosition] = useState(0); 
     const [estWaitTime, setEstWaitTime] = useState(0);
     const[ticketDepartment, setTicketDepartment]=useState('');
-    const [tickets, setTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
+    const [waitingTickets, setWaitingTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
+    const [completedTickets, setCompletedTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
 
     const handleStepOut = () => {
         setStepOut(true);
@@ -53,32 +52,18 @@ export default function UserDashboard() {
     }, []);
 
     useEffect(() => {
-        if (tickets.length > 0) {
+        if (waitingTickets.length > 0) {
             calculatePosition();
             calculateWaitTime();
         }
-    }, [tickets]);
+    }, [waitingTickets, completedTickets]);
 
 
 const client = generateClient<Schema>();
 
     async function fetchDailyTickets() {
         try {
-            // console.log(caseId);
-            // const newTicket = await client.models.Ticket.create({
-            //     caseId: "123",
-            //     departmentName: "Homelessness",
-            //     status: "WAITING",
-            //     ticketNumber: '134234',
-            //     placement: 1,
-            //     estimatedWaitTimeLower: 5,
-            //     estimatedWaitTimeUpper: 10,
-            // });
-            // console.log(newTicket);
-
-
             const { data, errors } = await client.queries.getDailyTickets();
-            console.log(data);
 
             if (errors) {
                 console.error(errors);
@@ -89,37 +74,105 @@ const client = generateClient<Schema>();
             const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
             const ticketData = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
 
+
             // Find department the ticket belongs to
+            let department = null;
             for(const ticket of ticketData)
                 if(ticket.caseId == caseId) {
-                    setTicketDepartment(ticket.departmentName)
+                    if(ticket.departmentName){
+                        department = ticket.departmentName;
+                        setTicketDepartment(ticket.departmentName)
+                    }
                 }
 
             // Only consider tickets in the same department
-            const filteredTickets = ticketData.filter(ticket => ticket.departmentName === ticketDepartment);
+            const filteredTickets = ticketData.filter(ticket => ticket.departmentName === department);
 
-            filteredTickets.sort((a, b) => {
+            // set completed tickets list to be used for calculating estimated waiting time
+            const completeTickets = filteredTickets
+                .filter(ticket => ticket.status === "COMPLETED")
+                .sort((a, b) => {
+                    const aTime = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+                    const bTime = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+                    return bTime - aTime;
+                })
+                .slice(0, 5);
+
+           setCompletedTickets(completeTickets);
+
+            // Only consider WAITING tickets
+            const waitingTickets = filteredTickets.filter(ticket => ticket.status === "WAITING");
+
+            waitingTickets.sort((a, b) => {
                 const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                 const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                 return timeA - timeB; // ascending
             });
 
-            // console.log(filteredTickets);
-            setTickets(filteredTickets);
+            console.log(waitingTickets);
+            setWaitingTickets(waitingTickets);
         } catch (err) {
-            console.error("Failed to fetch tickets:", err);
+            console.error("Failed to fetch tickets: ", err);
         }
     }
 
+
+    async function fetchDepartmentEstimatedTime() {
+        try {
+            const { data, errors } = await client.queries.getDepartmentEstimatedTime({departmentName:ticketDepartment});
+
+            if (errors) {
+                console.error(errors);
+                return 0;
+            }
+
+            return data?.estimatedWaitingtTime;
+        }
+        catch (err) {
+            console.error("Failed to fetch department estimated waiting time: ", err);
+            return 0;
+        }
+    }
     
-    function calculateWaitTime(){
-        const waitingTime = EstimatedWaitingTime({departmentName:ticketDepartment})*queuePosition;
-        setEstWaitTime(waitingTime);
+    async function calculateWaitTime() {
+        if (completedTickets.length < 5) 
+        {
+            const estTime = await fetchDepartmentEstimatedTime();
+            setEstWaitTime((estTime ?? 0) * queuePosition);
+        }
+
+        else{
+            const waitingTimes: number[] = [];
+
+            for (let i = 0; i < completedTickets.length - 1; i++) {
+                const createdAt = completedTickets[i].createdAt ?? new Date(0);
+                const completedAt = completedTickets[i].completedAt ?? new Date(0);
+
+                const t1 = new Date(createdAt).getTime();
+                const t2 = new Date(completedAt).getTime();
+
+                const diffMinutes = Math.abs(t2 - t1) / 60000;
+                waitingTimes.push(diffMinutes);
+            }
+
+            waitingTimes.sort((a, b) => a - b);
+
+            const mid = Math.ceil(waitingTimes.length / 2);
+
+            const median =
+                waitingTimes.length % 2 !== 0
+                    ? waitingTimes[mid]
+                    : (waitingTimes[mid - 1] + waitingTimes[mid]) / 2;
+
+            console.log("median: "+median)
+            //return median;
+
+        }
     }
 
     function calculatePosition () {
         let position = 0; 
-        for(const ticket of tickets) {
+        for(const ticket of waitingTickets) {
             if(ticket.caseId == caseId) {
                 setQueuePosition(position)
                 return;

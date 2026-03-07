@@ -38,5 +38,7 @@ export const handler: Schema["getTicketStatus"]["functionHandler"] = async (even
         placement: ticket.placement,
         estimatedWaitTimeLower: ticket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: ticket.estimatedWaitTimeUpper,
+        completedAt:ticket.completedAt ?? new Date(0),
+        createdAt:ticket.createdAt,
     };
 };

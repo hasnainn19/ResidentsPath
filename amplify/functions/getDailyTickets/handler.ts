@@ -22,14 +22,8 @@ export const handler: Schema["getDailyTickets"]["functionHandler"] = async () =>
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999); // 23:59:59
 
-    // const { data:tickets } = await client.models.Ticket.list();
-    //console.log(tickets);
-
     const { data: tickets } = await client.models.Ticket.list({
         filter: {
-            status:{
-                ne: "COMPLETED",
-            },
             // createdAt: {
             //     between: [startOfDay.toISOString(), endOfDay.toISOString()],
             // },
@@ -38,6 +32,7 @@ export const handler: Schema["getDailyTickets"]["functionHandler"] = async () =>
 
     if (!tickets || tickets.length === 0) {
         console.error("There are no tickets");
+        return null;
     }
 
 
