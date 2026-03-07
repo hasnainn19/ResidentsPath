@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import {Dangerous, DirectionsWalk, CommentsDisabled} from '@mui/icons-material';
+import { useParams } from 'react-router-dom';
+
 
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
@@ -22,6 +24,8 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
+    const { caseId } = useParams<{ caseId: string }>();
+
 
     const handleStepOut = () => {
         setStepOut(true);
@@ -46,7 +50,7 @@ export default function UserDashboard() {
                             <Stack spacing={4} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <Item sx={{backgroundColor:'success.main'}}>
-                                        <Typography variant='h4'>You are in the queue!
+                                        <Typography variant='h4'>You are in the queue! {caseId && `(Case ID: ${caseId})`}
                                             <TextToSpeechButton text='You are currently in the queue!'/>
                                         </Typography>
                                     </Item>
