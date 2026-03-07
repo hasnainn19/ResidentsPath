@@ -50,7 +50,7 @@ export default function UserDashboard() {
                             <Stack spacing={4} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <Item sx={{backgroundColor:'success.main'}}>
-                                        <Typography variant='h4'>You are in the queue! {caseId && `(Case ID: ${caseId})`}
+                                        <Typography variant='h4'>You are in the queue!
                                             <TextToSpeechButton text='You are currently in the queue!'/>
                                         </Typography>
                                     </Item>

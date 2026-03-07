@@ -1,5 +1,5 @@
 import { Html5Qrcode } from "html5-qrcode";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -9,6 +9,10 @@ import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
+import { useNavigate } from 'react-router-dom';
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../../amplify/data/resource";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 
 const ReferencePage = () => {
@@ -17,6 +21,12 @@ const ReferencePage = () => {
     const [ refNo, setRefNo ] = useState('');
     // const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
+    const navigate = useNavigate();
+    // const clientUserPool = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+    // const clientIdentityPool = useMemo(
+    //     () => generateClient<Schema>({ authMode: "identityPool" }),
+    //     [],
+    // );
 
     function handleQRScanner() {
         if (scanning || startingRef.current) return;
@@ -74,9 +84,32 @@ const ReferencePage = () => {
             });
     }
 
+    const client = generateClient<Schema>({ authMode: "userPool" });
+
+    const checkRefNumberExists = async () => {
+        try{
+
+            const {data, errors} = await client.queries.checkTicketNumber({ ticketNumber: refNo });
+            console.log(data);
+
+            if (errors) {
+                console.error(errors);
+                return;
+            }
+        }
+        catch(errors){
+            console.error(errors);
+            return;
+        }
+        console.log(refNo);
+        console.log("finished")
+
+
+
+    }
+
     function handleCheckStatus() {
-        // process ref no. 
-        // navigate to next page
+        checkRefNumberExists();
     }
 
     return (
@@ -108,7 +141,7 @@ const ReferencePage = () => {
 
                         <CardActions sx={{ px: 4, pb: 4}}>
                             <Box sx={{ mt: 'auto', width: '100%' }}>
-                                <TextField fullWidth id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} />
+                                <TextField fullWidth value={refNo} id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} />
                                 <Tooltip title="Check your status" placement="top">
                                     <Button variant="contained" onClick={handleCheckStatus} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
@@ -156,12 +189,6 @@ const ReferencePage = () => {
                                         </Tooltip>
                                     )}
                                 </Box>
-                                {/* Placeholder showing qr code extracts text */}
-                                {refNo && (
-                                    <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                                        Reference number retrieved: {refNo}
-                                    </Typography>
-                                )}
                             </Box>
                         </CardActions>
                     </Card>

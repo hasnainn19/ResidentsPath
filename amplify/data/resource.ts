@@ -2,6 +2,8 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
+import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
+
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -204,6 +206,24 @@ const schema = a.schema({
     .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
     .handler(a.handler.function(getTicketStatus)),
     
+  checkTicketNumber: a
+    .query()
+    .arguments({
+      ticketNumber: a.string().required(),
+    })
+    .returns(
+      a.customType({
+        caseId: a.string().required(),
+        ticketNumber: a.string().required(),
+      }),
+    )
+    .authorization((allow) => [
+      allow.guest(), 
+      allow.authenticated(),
+      allow.authenticated("identityPool")
+    ])    
+    .handler(a.handler.function(checkTicketNumber)),
+
   submitEnquiry: a
     .mutation()
     .arguments({
@@ -282,8 +302,13 @@ const schema = a.schema({
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getTicketStatus),
+    allow.resource(checkTicketNumber),
   allow.resource(postConfirmation),
 ]);
+
+
+
+    
 
 export type Schema = ClientSchema<typeof schema>;
 
