@@ -1,6 +1,6 @@
 import { Html5Qrcode } from "html5-qrcode";
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
+import { Alert, Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
@@ -12,7 +12,6 @@ import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
-import { fetchAuthSession } from "aws-amplify/auth";
 
 
 const ReferencePage = () => {
@@ -22,11 +21,9 @@ const ReferencePage = () => {
     // const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
     const navigate = useNavigate();
-    // const clientUserPool = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
-    // const clientIdentityPool = useMemo(
-    //     () => generateClient<Schema>({ authMode: "identityPool" }),
-    //     [],
-    // );
+    const [ foundCaseId, setFoundCaseId ] = useState<string | null>(null);
+    const [ refNoError, setRefNoError ] = useState('');
+
 
     function handleQRScanner() {
         if (scanning || startingRef.current) return;
@@ -86,36 +83,39 @@ const ReferencePage = () => {
 
     const client = generateClient<Schema>({ authMode: "userPool" });
 
-    const checkRefNumberExists = async () => {
+
+    const handleCheckStatus = async () => {
         try{
-
-            const {data, errors} = await client.queries.checkTicketNumber({ ticketNumber: refNo });
-            console.log(data);
-
-            if (errors) {
-                console.error(errors);
-                return;
+            const data = await client.queries.checkTicketNumber({ ticketNumber: refNo });
+            if (data?.data){
+                const id = data.data.caseId;
+                setFoundCaseId(id);
+            }
+            else {
+                setRefNoError(`No ticket number or reference number exists by the name - ${refNo}`);
             }
         }
         catch(errors){
             console.error(errors);
             return;
         }
-        console.log(refNo);
-        console.log("finished")
-
-
-
     }
 
-    function handleCheckStatus() {
-        checkRefNumberExists();
-    }
+    useEffect(() => {
+        if (foundCaseId) {
+            navigate(`/userdashboard/${foundCaseId}`);
+        }
+    }, [foundCaseId]);
 
     return (
     <>
         <Navbar />
         <Container maxWidth="lg"  sx={{ py: 6, textAlign: 'center', height:'85vh'  }}>
+            {refNoError && (
+                <Alert  severity="error" color="error" onClose={() => {}}>
+                    {refNoError}
+                </Alert>
+            )}
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
                 Use one of the following methods to see more details
             </Typography>

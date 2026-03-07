@@ -37,7 +37,7 @@ export const handler: Schema["checkTicketNumber"]["functionHandler"] = async (ev
     });
 
     if (!tickets || tickets.length === 0) {
-        return null;
+        return null
     }
 
     // Ticket numbers should be unique, so we take the first match
