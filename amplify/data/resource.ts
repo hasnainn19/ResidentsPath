@@ -236,7 +236,7 @@ const schema = a.
 			departmentName: a.string().required()
 		})
 		.returns(a.customType({
-			estimatedWaitingtTime: a.integer().required(),
+			estimatedWaitingTime: a.integer().required(),
 		}))
 		.authorization((allow) => [allow.guest()])
 		.handler(a.handler.function(getDepartmentEstimatedTime)),

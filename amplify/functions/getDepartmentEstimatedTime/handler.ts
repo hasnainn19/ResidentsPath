@@ -24,6 +24,6 @@ export const handler: Schema["getDepartmentEstimatedTime"]["functionHandler"] = 
     }
 
     return {
-        estimatedWaitingtTime:department[0].estimatedWaitingTime
+        estimatedWaitingTime:department[0].estimatedWaitingTime
     };
 };

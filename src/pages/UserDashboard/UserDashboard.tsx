@@ -126,7 +126,7 @@ const client = generateClient<Schema>();
                 return 0;
             }
 
-            return data?.estimatedWaitingtTime;
+            return data?.estimatedWaitingTime;
         }
         catch (err) {
             console.error("Failed to fetch department estimated waiting time: ", err);
