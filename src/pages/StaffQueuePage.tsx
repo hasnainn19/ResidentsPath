@@ -101,7 +101,7 @@ const StaffQueuePage = () => {
     }, {});
   }, [cases]);
 
-  const queueTitle = selectedService || "Current Queue";
+  const queueTitle = selectedService || "Case Management";
 
   const handleSelectPosition = (caseId: string, newPosition: number) => {
     setPendingPositionChange({ caseId, position: newPosition });
