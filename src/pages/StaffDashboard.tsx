@@ -18,67 +18,16 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
-import { Amplify } from "aws-amplify";
-import outputs from "../../amplify_outputs.json";
+import useDashboardStats from "../hooks/useDashboardStats";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
-interface StaffDashboardStats {
-  waitingCount: number;
-  steppedOutCount: number;
-  staffCount: number;
-  urgentCount: number;
-  longestWaitTime: number;
-}
 const StaffDashboard = () => {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [dashboardStats, setDashboardStats] = useState<StaffDashboardStats>({
-    waitingCount: 0,
-    steppedOutCount: 0,
-    staffCount: 0,
-    urgentCount: 0,
-    longestWaitTime: 0,
-  } as StaffDashboardStats);
-  useEffect(() => {
-    const client = generateClient<Schema>({ authMode: "userPool" });
-
-    const fetchStats = () => {
-      client.queries.getDashboardStats({}).then((data) => {
-        setDashboardStats({
-          waitingCount: data.data?.waitingCount,
-          steppedOutCount: data.data?.steppedOutCount,
-          staffCount: data.data?.staffCount,
-          urgentCount: data.data?.urgentCount,
-          longestWaitTime: data.data?.longestWaitTime,
-        });
-      });
-    };
-
-    // Initial fetch
-    fetchStats();
-
-    // Re-fetch stats whenever any ticket is created, updated, or deleted
-    const createSub = client.models.Ticket.onCreate().subscribe({
-      next: fetchStats,
-    });
-    const updateSub = client.models.Ticket.onUpdate().subscribe({
-      next: fetchStats,
-    });
-    const deleteSub = client.models.Ticket.onDelete().subscribe({
-      next: fetchStats,
-    });
-
-    return () => {
-      createSub.unsubscribe();
-      updateSub.unsubscribe();
-      deleteSub.unsubscribe();
-    };
-  }, []);
+  const dashboardStats = useDashboardStats();
   const lastUpdated = "2026-02-16 14:00";
   const stats = [
     {
