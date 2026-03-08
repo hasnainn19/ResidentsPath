@@ -48,9 +48,15 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
     const startOfDay = new Date();
     startOfDay.setHours(0,0,0,0);
 
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
     const todaysTickets = tickets.filter(ticket => {
-      if (!ticket.createdAt) return false;
-      return new Date(ticket.createdAt) >= startOfDay;
+        if (!ticket.createdAt) return false;
+
+        const created = new Date(ticket.createdAt);
+
+        return created >= startOfDay && created <= endOfDay;
     });
 
     // Filter department

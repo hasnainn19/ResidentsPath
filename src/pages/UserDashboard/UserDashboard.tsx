@@ -57,39 +57,45 @@ export default function UserDashboard() {
             if (!caseId) {
                 return;
             }
-            const caseData = await client.models.Case.get({ id: caseId });
 
-            const departmentId = caseData?.data.departmentId;
-            if (!departmentId) {
+            const { data: ticketInfo, errors: ticketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
+
+            if (ticketErrors && ticketErrors.length > 0) {
+                setErrors(ticketErrors[0].message);
+                return;
+            }
+            if (!ticketInfo) {
+                return;
+            }
+            const ticketDepartmentId = ticketInfo?.departmentId;
+
+            if (!ticketDepartmentId) {
                 return;
             }
 
-            const calcResult = await client.queries.calculateDepartmentQueue({ departmentId: departmentId });
-
+            const calcResult = await client.queries.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
 
             if (!calcResult) {
                 return;
             }
 
-            const { data: ticket } = await client.models.Ticket.list({
-                filter: { caseId: { eq: caseId } }
-            });
+            const { data: newTicketInfo, errors: newTicketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
 
-
-            if (!ticket || ticket.length === 0) {
+            if (newTicketErrors && newTicketErrors.length > 0) {
+                setErrors(newTicketErrors[0].message);
                 return;
             }
 
-            // Assuming only one ticket per caseId
-            const t = ticket[0];
-            setQueuePosition(t.placement);
-            setWaitTimeLower(t.estimatedWaitTimeLower);
-            setWaitTimeUpper(t.estimatedWaitTimeUpper);
+            if (!newTicketInfo) {
+                return;
+            }
 
-        
+            setQueuePosition(newTicketInfo.placement);
+            setWaitTimeLower(newTicketInfo.estimatedWaitTimeLower);
+            setWaitTimeUpper(newTicketInfo.estimatedWaitTimeUpper);
 
         } catch (err) {
-            console.error("Failed to fetch tickets:", err);
+            setErrors(`Failed to fetch tickets: ${err}`);
         }
     }
 
@@ -100,6 +106,11 @@ export default function UserDashboard() {
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
+                    )}
+                    {errors && (
+                        <Alert severity="error" color="error" onClose={() => {}}>
+                            {errors}
+                        </Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
                         <Grid container sx={{alignItems: 'stretch', width: '100%' }} spacing={2}>

@@ -1,6 +1,6 @@
 import { defineFunction } from "@aws-amplify/backend";
 
-export const getDailyTickets = defineFunction({
-  name: "getDailyTickets",
+export const getTicketInfo = defineFunction({
+  name: "getTicketInfo",
   entry: "./handler.ts"
 });

@@ -6,8 +6,8 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
-import { getDailyTickets } from "./functions/getDailyTickets/resource";
-import { getDepartmentEstimatedTime } from "./functions/getDepartmentEstimatedTime/resource";
+import { getTicketInfo } from "./functions/getTicketInfo/resource";
+import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
 
 
 /**
@@ -18,12 +18,9 @@ const backend = defineBackend({
 	data,
 	postConfirmation,
     submitEnquiry,
-    getDailyTickets,
-    getDepartmentEstimatedTime,
+    getTicketInfo,
+    calculateDepartmentQueue,
 });
-
-// Grant submitEnquiry necessary permission to run calculateDepartmentQueue function
-
 
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups

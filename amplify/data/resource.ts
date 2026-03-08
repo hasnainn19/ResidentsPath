@@ -2,9 +2,8 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
-import { getDailyTickets } from '../functions/getDailyTickets/resource';
-import { getDepartmentEstimatedTime } from '../functions/getDepartmentEstimatedTime/resource';
 import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
+import { getTicketInfo } from '../functions/getTicketInfo/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -96,8 +95,6 @@ const schema = a.
     })
     .authorization((allow) => [
       allow.groups(["Staff"]), // Only staff can access cases directly
-      allow.authenticated(),
-      allow.guest(),
     ]),
 
   // Department - service departments (Housing, Council Tax, etc)
@@ -122,7 +119,6 @@ const schema = a.
 		.model({
 			// Foreign keys
 			caseId: a.id().required(),
-			departmentName:a.string(),
             departmentId: a.id().required(),
 
 			// Display information
@@ -148,8 +144,6 @@ const schema = a.
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all tickets
-            allow.authenticated(),
-            allow.guest(),
 		]),
 
   // Staff - represents a staff member at Hounslow
@@ -217,35 +211,24 @@ const schema = a.
 		.handler(a.handler.function(getTicketStatus)),
 
     
-	// Named custom type for daily ticket list responses
-	DailyTicket: a.customType({
-		caseId: a.id().required(),
-		departmentName:a.string(),
-		ticketNumber: a.string().required(),
-		status: a.string().required(),
-		placement: a.integer().required(),
-		estimatedWaitTimeLower: a.integer().required(),
-		estimatedWaitTimeUpper: a.integer().required(),
-		createdAt: a.datetime(),
-    completedAt:a.datetime(),
-	}),
-
-	getDailyTickets: a
-		.query()
-		.returns(a.ref("DailyTicket").array())
-		.authorization((allow) => [allow.guest()]) 
-		.handler(a.handler.function(getDailyTickets)),
-
-  getDepartmentEstimatedTime: a
-    .query()
+    
+    getTicketInfo: a
+        .query()
 		.arguments({
-			departmentName: a.string().required()
+			caseId: a.string().required()
 		})
 		.returns(a.customType({
-			estimatedWaitingTime: a.integer().required(),
+            departmentId: a.id(),
+            placement: a.integer(),
+            estimatedWaitTimeLower: a.integer(),
+            estimatedWaitTimeUpper: a.integer(),
 		}))
-		.authorization((allow) => [allow.guest()])
-		.handler(a.handler.function(getDepartmentEstimatedTime)),
+		.authorization((allow) => [
+            allow.guest(), 
+            allow.authenticated(),
+            allow.authenticated("identityPool")
+        ]) // Allow both guests and authenticated users to submit enquiries
+		.handler(a.handler.function(getTicketInfo)),
 
     calculateDepartmentQueue: a
         .query()
@@ -337,13 +320,11 @@ const schema = a.
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
-	allow.resource(getDailyTickets).to(["query", "listen"]),
-  allow.resource(getDepartmentEstimatedTime).to(["query", "listen"]),
 	allow.resource(getTicketStatus),
-  allow.resource(postConfirmation),
-  allow.resource(calculateDepartmentQueue),
+    allow.resource(postConfirmation),
+    allow.resource(calculateDepartmentQueue),
+    allow.resource(getTicketInfo),
 ]);
-
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
