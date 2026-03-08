@@ -31,11 +31,10 @@ export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
     const[errors, setErrors] = useState('');
-    const [queuePosition, setQueuePosition] = useState(0); 
-    const [estWaitTime, setEstWaitTime] = useState(0);
-    const[ticketDepartment, setTicketDepartment]=useState('');
-    const [waitingTickets, setWaitingTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
-    const [completedTickets, setCompletedTickets] = useState<Schema["DailyTicket"]["type"][]>([]);
+    const [queuePosition, setQueuePosition] = useState(-2); 
+    const [ waitTimeLower, setWaitTimeLower ] = useState(-2);
+    const [ waitTimeUpper, setWaitTimeUpper ] = useState(-2);
+
 
     const handleStepOut = () => {
         setStepOut(true);
@@ -48,145 +47,51 @@ export default function UserDashboard() {
     };
 
     useEffect(() => {
-        fetchDailyTickets();
+        fetchTicketQueueInfo();
     }, []);
 
-    useEffect(() => {
-        if (waitingTickets.length > 0) {
-            calculatePosition();
-            calculateWaitTime();
-        }
-    }, [waitingTickets, completedTickets]);
+    const client = generateClient<Schema>({ authMode: "userPool" });
 
-
-const client = generateClient<Schema>();
-
-    async function fetchDailyTickets() {
+    async function fetchTicketQueueInfo() {
         try {
-            const { data, errors } = await client.queries.getDailyTickets();
+            if (!caseId) {
+                return;
+            }
+            const caseData = await client.models.Case.get({ id: caseId });
 
-            if (errors) {
-                console.error(errors);
+            const departmentId = caseData?.data.departmentId;
+            if (!departmentId) {
                 return;
             }
 
-            // Ensure we only pass non-null items to setTickets
-            const raw = (data ?? []) as Array<Schema["DailyTicket"]["type"] | null | undefined>;
-            const ticketData = raw.filter((t): t is Schema["DailyTicket"]["type"] => t != null);
+            const calcResult = await client.queries.calculateDepartmentQueue({ departmentId: departmentId });
 
 
-            // Find department the ticket belongs to
-            let department = null;
-            for(const ticket of ticketData)
-                if(ticket.caseId == caseId) {
-                    if(ticket.departmentName){
-                        department = ticket.departmentName;
-                        setTicketDepartment(ticket.departmentName)
-                    }
-                }
+            if (!calcResult) {
+                return;
+            }
 
-            // Only consider tickets in the same department
-            const filteredTickets = ticketData.filter(ticket => ticket.departmentName === department);
-
-            // set completed tickets list to be used for calculating estimated waiting time
-            const completeTickets = filteredTickets
-                .filter(ticket => ticket.status === "COMPLETED")
-                .sort((a, b) => {
-                    const aTime = a.completedAt ? new Date(a.completedAt).getTime() : 0;
-                    const bTime = b.completedAt ? new Date(b.completedAt).getTime() : 0;
-                    return bTime - aTime;
-                })
-                .slice(0, 5);
-
-           setCompletedTickets(completeTickets);
-
-            // Only consider WAITING tickets
-            const waitingTickets = filteredTickets.filter(ticket => ticket.status === "WAITING");
-
-            waitingTickets.sort((a, b) => {
-                const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return timeA - timeB; // ascending
+            const { data: ticket } = await client.models.Ticket.list({
+                filter: { caseId: { eq: caseId } }
             });
 
-            console.log(waitingTickets);
-            setWaitingTickets(waitingTickets);
-        } catch (err) {
-            console.error("Failed to fetch tickets: ", err);
-        }
-    }
 
-
-    async function fetchDepartmentEstimatedTime() {
-        try {
-            const { data, errors } = await client.queries.getDepartmentEstimatedTime({departmentName:ticketDepartment});
-
-            if (errors) {
-                console.error(errors);
-                return 0;
-            }
-
-            return data?.estimatedWaitingTime;
-        }
-        catch (err) {
-            console.error("Failed to fetch department estimated waiting time: ", err);
-            return 0;
-        }
-    }
-    
-    async function calculateWaitTime() {
-        if (completedTickets.length < 5) 
-        {
-            const estTime = await fetchDepartmentEstimatedTime();
-            setEstWaitTime((estTime ?? 0) * queuePosition);
-        }
-
-        else{
-            const waitingTimes: number[] = [];
-
-            for (let i = 0; i < completedTickets.length - 1; i++) {
-                const createdAt = completedTickets[i].createdAt ?? new Date(0);
-                const completedAt = completedTickets[i].completedAt ?? new Date(0);
-
-                const t1 = new Date(createdAt).getTime();
-                const t2 = new Date(completedAt).getTime();
-
-                const diffMinutes = Math.abs(t2 - t1) / 60000;
-                waitingTimes.push(diffMinutes);
-            }
-
-            waitingTimes.sort((a, b) => a - b);
-
-            const mid = Math.ceil(waitingTimes.length / 2);
-
-            const median =
-                waitingTimes.length % 2 !== 0
-                    ? waitingTimes[mid]
-                    : (waitingTimes[mid - 1] + waitingTimes[mid]) / 2;
-
-            console.log("median: "+median)
-            //return median;
-
-        }
-    }
-
-    function calculatePosition () {
-        let position = 0; 
-        for(const ticket of waitingTickets) {
-            if(ticket.caseId == caseId) {
-                setQueuePosition(position)
+            if (!ticket || ticket.length === 0) {
                 return;
             }
-            else {
-                position++;
-                setQueuePosition(position)
-            }
-        }
-        setErrors("The case ID is not in the queue!");
-        setQueuePosition(-1);
-    }
 
-    
+            // Assuming only one ticket per caseId
+            const t = ticket[0];
+            setQueuePosition(t.placement);
+            setWaitTimeLower(t.estimatedWaitTimeLower);
+            setWaitTimeUpper(t.estimatedWaitTimeUpper);
+
+        
+
+        } catch (err) {
+            console.error("Failed to fetch tickets:", err);
+        }
+    }
 
     return (
         <>
@@ -218,8 +123,10 @@ const client = generateClient<Schema>();
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>Estimated waiting time is:</Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>{estWaitTime} to {estWaitTime+20} minutes</Typography>
-                                            <TextToSpeechButton text={`Estimated wait time is ${estWaitTime} minutes`} />
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>
+                                                {waitTimeLower} to {waitTimeUpper} minutes
+                                            </Typography>
+                                            <TextToSpeechButton text={`Estimated wait time is ${waitTimeLower} to ${waitTimeUpper} minutes`} />
                                         </Item>
                                     </Grid>
                                 </Stack>

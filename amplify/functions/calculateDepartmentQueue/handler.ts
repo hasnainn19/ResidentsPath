@@ -1,0 +1,136 @@
+import { generateClient } from "aws-amplify/data";
+import { Amplify } from "aws-amplify";
+import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+
+import { env } from "$amplify/env/calculateDepartmentQueue";
+import type { Schema } from "../../data/resource";
+
+const { resourceConfig, libraryOptions } =
+  await getAmplifyDataClientConfig(env);
+
+Amplify.configure(resourceConfig, libraryOptions);
+
+const client = generateClient<Schema>();
+
+function median(values: number[]) {
+  if (values.length === 0) return 0;
+
+  values.sort((a, b) => a - b);
+
+  const mid = Math.floor(values.length / 2);
+
+  if (values.length % 2 === 0) {
+    return (values[mid - 1] + values[mid]) / 2;
+  }
+
+  return values[mid];
+}
+
+const DEFAULT_WAITING_TIMES: Record<string, number> = {
+  "Council_Tax": 50,
+  "Housing_Benefit": 50,
+  "Homelessness": 100,
+  "Adults_Duty": 30,
+  "Childrens_Duty": 30,
+  "Other": 30
+};
+
+export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
+  async (event) => {
+
+    const { departmentId } = event.arguments;
+
+    const { data: tickets } = await client.models.Ticket.list();
+
+    if (!tickets) return false;
+
+    // Only today's tickets
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
+
+    const todaysTickets = tickets.filter(ticket => {
+      if (!ticket.createdAt) return false;
+      return new Date(ticket.createdAt) >= startOfDay;
+    });
+
+    // Filter department
+    const departmentTickets = todaysTickets.filter(
+      t => t.departmentId === departmentId
+    );
+
+    // Sort by queue order
+    departmentTickets.sort((a,b) =>
+      new Date(a.createdAt ?? 0).getTime() -
+      new Date(b.createdAt ?? 0).getTime()
+    );
+
+    // Waiting tickets
+    const waitingTickets = departmentTickets.filter(
+      t => t.status === "WAITING"
+    );
+
+    // Completed tickets
+    const completedTickets = departmentTickets
+      .filter(t => t.status === "COMPLETED" && t.completedAt)
+      .sort((a,b) =>
+        new Date(b.completedAt ?? 0).getTime() -
+        new Date(a.completedAt ?? 0).getTime()
+      )
+      .slice(0,5);
+
+
+    // Get department default
+    const { data: department } =
+      await client.models.Department.get({ id: departmentId });
+
+    let serviceTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 40;
+
+    // Calculate median if enough completed
+    if (completedTickets.length >= 5) {
+      const durations: number[] = [];
+
+      for (const ticket of completedTickets) {
+
+        if (!ticket.createdAt || !ticket.completedAt) continue;
+
+        const start = new Date(ticket.createdAt).getTime();
+        const end = new Date(ticket.completedAt).getTime();
+
+        const minutes = (end - start) / 60000;
+
+        durations.push(minutes);
+      }
+
+      const medianTime = median(durations);
+
+      if (medianTime > 0) {
+        serviceTime = medianTime;
+
+        await client.models.Department.update({
+          id: departmentId,
+          estimatedWaitingTime: Math.round(serviceTime),
+        });
+      }
+    }
+
+    // Update all waiting tickets
+    for (let i = 0; i < waitingTickets.length; i++) {
+
+      const ticket = waitingTickets[i];
+
+      const placement = i;
+
+      const lower = Math.round(serviceTime * placement);
+
+      const upper = lower + 20;
+
+      await client.models.Ticket.update({
+        id: ticket.id,
+        placement,
+        estimatedWaitTimeLower: lower,
+        estimatedWaitTimeUpper: upper,
+      });
+    }
+
+    return true;
+};

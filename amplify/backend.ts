@@ -6,6 +6,9 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
+import { getDailyTickets } from "./functions/getDailyTickets/resource";
+import { getDepartmentEstimatedTime } from "./functions/getDepartmentEstimatedTime/resource";
+
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -14,8 +17,13 @@ const backend = defineBackend({
 	auth,
 	data,
 	postConfirmation,
-  submitEnquiry,
+    submitEnquiry,
+    getDailyTickets,
+    getDepartmentEstimatedTime,
 });
+
+// Grant submitEnquiry necessary permission to run calculateDepartmentQueue function
+
 
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups

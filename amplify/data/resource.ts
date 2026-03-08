@@ -4,6 +4,7 @@ import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { getDailyTickets } from '../functions/getDailyTickets/resource';
 import { getDepartmentEstimatedTime } from '../functions/getDepartmentEstimatedTime/resource';
+import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -95,6 +96,8 @@ const schema = a.
     })
     .authorization((allow) => [
       allow.groups(["Staff"]), // Only staff can access cases directly
+      allow.authenticated(),
+      allow.guest(),
     ]),
 
   // Department - service departments (Housing, Council Tax, etc)
@@ -108,7 +111,7 @@ const schema = a.
 		// Relationships
 		cases: a.hasMany("Case", "departmentId"),
 		staff: a.hasMany("Staff", "departmentId"),
-		tickets:a.hasMany("Ticket", "departmentName"),
+		tickets:a.hasMany("Ticket", "departmentId"),
 	})
 	.authorization((allow) => [
 		allow.groups(["Staff"]), // Staff can see all departments
@@ -120,6 +123,7 @@ const schema = a.
 			// Foreign keys
 			caseId: a.id().required(),
 			departmentName:a.string(),
+            departmentId: a.id().required(),
 
 			// Display information
 			ticketNumber: a.string().required(),
@@ -140,10 +144,12 @@ const schema = a.
 
 			// Relationships
 			case: a.belongsTo("Case", "caseId"),
-			department: a.belongsTo("Department", "departmentName"),
+			department: a.belongsTo("Department", "departmentId"),
 		})
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Staff can see all tickets
+            allow.authenticated(),
+            allow.guest(),
 		]),
 
   // Staff - represents a staff member at Hounslow
@@ -241,6 +247,19 @@ const schema = a.
 		.authorization((allow) => [allow.guest()])
 		.handler(a.handler.function(getDepartmentEstimatedTime)),
 
+    calculateDepartmentQueue: a
+        .query()
+        .arguments({
+			departmentId: a.string().required()
+		})
+        .returns(a.boolean())
+        .authorization((allow) => [
+            allow.guest(), 
+            allow.authenticated(),
+            allow.authenticated("identityPool")
+        ]) // Allow both guests and authenticated users to submit enquiries
+        .handler(a.handler.function(calculateDepartmentQueue)),
+
 	submitEnquiry: a
     .mutation()
     .arguments({
@@ -322,6 +341,7 @@ const schema = a.
   allow.resource(getDepartmentEstimatedTime).to(["query", "listen"]),
 	allow.resource(getTicketStatus),
   allow.resource(postConfirmation),
+  allow.resource(calculateDepartmentQueue),
 ]);
 
 export type Schema = ClientSchema<typeof schema>;
