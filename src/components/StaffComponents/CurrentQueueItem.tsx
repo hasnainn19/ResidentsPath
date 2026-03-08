@@ -12,6 +12,7 @@ import {
   FormControl,
   IconButton,
   InputLabel,
+  Menu,
   MenuItem,
   Select,
   Stack,
@@ -20,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+import EditIcon from "@mui/icons-material/Edit";
 import { useState } from "react";
 
 interface CurrentQueueItemProps {
@@ -40,7 +41,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { showPosition, caseItem, totalPositions, handleSelectPosition } =
     props;
   const [isFlagged, setIsFlagged] = useState(false);
-  const [isPriority, setIsPriority] = useState(false);
+  const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
+  const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const positionOptions = Array.from(
@@ -58,8 +60,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
             <Stack direction="row" spacing={1} mb={1}>
               <Chip
-                label={caseItem.status}
-                color={statusColorMap[caseItem.status]}
+                label={localStatus}
+                color={statusColorMap[localStatus]}
                 size="small"
               />
               <Typography variant="caption" color="text.secondary">
@@ -97,14 +99,26 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
             sx={{ flexShrink: 0, minWidth: 140, ml: 2 }}
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Tooltip title="Safeguarding flag">
-                <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
-                  <FlagIcon color={isFlagged ? "error" : "disabled"} />
+              <Tooltip title="Edit priority">
+                <IconButton size="small" onClick={(e) => setPriorityAnchor(e.currentTarget)}>
+                  <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Priority flag">
-                <IconButton size="small" onClick={() => setIsPriority(!isPriority)}>
-                  <PriorityHighIcon color={isPriority ? "error" : "disabled"} />
+              <Menu
+                anchorEl={priorityAnchor}
+                open={Boolean(priorityAnchor)}
+                onClose={() => setPriorityAnchor(null)}
+              >
+                <MenuItem onClick={() => {
+                  setLocalStatus(localStatus === "Standard" ? "Priority" : "Standard");
+                  setPriorityAnchor(null);
+                }}>
+                  {localStatus === "Standard" ? "Set to Priority" : "Set to Standard"}
+                </MenuItem>
+              </Menu>
+              <Tooltip title="Flag this case">
+                <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
+                  <FlagIcon color={isFlagged ? "error" : "disabled"} />
                 </IconButton>
               </Tooltip>
             </Box>
