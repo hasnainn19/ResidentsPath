@@ -8,7 +8,6 @@ import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
 import TextToSpeechButton from '../../components/TextToSpeechButton';
 import NavBar from '../../components/NavBar';
-import EstimatedWaitingTime from '../../functions/EstimatedWaitingTime';
 import { useParams } from 'react-router-dom';
 
 
