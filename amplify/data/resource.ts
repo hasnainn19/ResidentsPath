@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
+import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 
 /**
@@ -90,6 +91,7 @@ const schema = a.schema({
       tickets: a.hasMany("Ticket", "caseId"),
       appointments: a.hasMany("Appointment", "caseId"),
     })
+    .secondaryIndexes((index) => [index("referenceNumber")])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Only staff can access cases directly
     ]),
@@ -136,6 +138,7 @@ const schema = a.schema({
       // Relationships
       case: a.belongsTo("Case", "caseId"),
     })
+    .secondaryIndexes((index) => [index("caseId")])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all tickets
     ]),
@@ -182,6 +185,7 @@ const schema = a.schema({
       user: a.belongsTo("User", "userId"),
       case: a.belongsTo("Case", "caseId"),
     })
+    .secondaryIndexes((index) => [index("caseId")])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Only staff can access appointments directly
     ]),
@@ -204,6 +208,7 @@ const schema = a.schema({
     .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
     .handler(a.handler.function(getTicketStatus)),
     
+
   submitEnquiry: a
     .mutation()
     .arguments({
@@ -278,10 +283,36 @@ const schema = a.schema({
       allow.authenticated("identityPool")
     ]) // Allow both guests and authenticated users to submit enquiries
     .handler(a.handler.function(submitEnquiry)),
+
+  getSubmissionReceipt: a
+    .query()
+    .arguments({
+      referenceNumber: a.string().required(),
+    })
+    .returns(
+      a.customType({
+        found: a.boolean().required(),
+        errorMessage: a.string(),
+        createdAt: a.datetime(),
+        referenceNumber: a.string(),
+        receiptType: a.string(),
+        ticketNumber: a.string(),
+        appointmentDateIso: a.string(),
+        appointmentTime: a.string(),
+        departmentName: a.string(),
+      }),
+    )
+    .authorization((allow) => [
+      allow.guest(),
+      allow.authenticated("identityPool"),
+      allow.authenticated(), 
+    ])
+    .handler(a.handler.function(getSubmissionReceipt)),
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getTicketStatus),
+  allow.resource(getSubmissionReceipt).to(["query"]),
   allow.resource(postConfirmation),
 ]);
 

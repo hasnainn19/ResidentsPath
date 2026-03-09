@@ -136,7 +136,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
   ChildrensDuty: [
     {
       value: "child_safety_concerns",
-      label: "Child safety concerns concerns",
+      label: "Child safety concerns",
       department: "CHILDRENS_DUTY",
       askVulnerabilityQs: true,
       askHouseholdSize: true,

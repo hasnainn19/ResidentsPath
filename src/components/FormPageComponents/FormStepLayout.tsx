@@ -25,7 +25,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import type { LanguageOption } from "../../pages/Form/model/formFieldTypes";
 import { useEffect } from "react";
 import TextToSpeechButton from "../TextToSpeechButton";
@@ -61,23 +61,36 @@ export default function FormStepLayout(props: Props) {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
       <Container maxWidth="lg">
-        <Paper variant="outlined" sx={{ p: 6, borderWidth: 2, borderRadius: 2, bgcolor: "background.paper" }}>
+        <Paper
+          variant="outlined"
+          sx={{ p: 6, borderWidth: 2, borderRadius: 2, bgcolor: "background.paper" }}
+        >
           {/* Top row */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          {props.step > 1 && props.onBack ? (
-            <Button type="button" variant="text" onClick={props.onBack} sx={{ textTransform: "none" }}>
-              <ArrowBackIcon sx={{ mr: 1 }} />
-              Previous
-            </Button>
-          ) : (
-            <Box sx={{ width: 80 }} />
-          )}
+            {props.step > 1 && props.onBack ? (
+              <Button
+                type="button"
+                variant="text"
+                onClick={props.onBack}
+                sx={{ textTransform: "none" }}
+              >
+                <ArrowBackIcon sx={{ mr: 1 }} />
+                Previous
+              </Button>
+            ) : (
+              <Box sx={{ width: 80 }} />
+            )}
 
-          <TextToSpeechButton text={listenText} />
+            <TextToSpeechButton text={listenText} />
           </Stack>
 
           {/* Title + language */}
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            sx={{ mb: 3 }}
+          >
             <Box>
               <Typography variant="h5" fontWeight={800}>
                 {props.title}

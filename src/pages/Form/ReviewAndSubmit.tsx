@@ -20,7 +20,7 @@ import { getReviewDisplayValue, getReviewLabel } from "./model/fieldMeta";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
-import { fetchAuthSession } from "aws-amplify/auth";
+import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -29,11 +29,7 @@ export default function ReviewAndSubmit() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const clientUserPool = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
-  const clientIdentityPool = useMemo(
-    () => generateClient<Schema>({ authMode: "identityPool" }),
-    [],
-  );
+  const client = useMemo(() => generateClient<Schema>(), []);
 
   const submitToBackend = async () => {
     if (submitting) return;
@@ -44,12 +40,8 @@ export default function ReviewAndSubmit() {
     try {
       const payload = buildSubmitEnquiryPayload(formData);
 
-      const session = await fetchAuthSession();
-      const isSignedIn = !!session.tokens?.idToken;
-
-      const client = isSignedIn ? clientUserPool : clientIdentityPool;
-
-      const response = await client.mutations.submitEnquiry({ input: payload });
+      const authMode = await getDataAuthMode();
+      const response = await client.mutations.submitEnquiry({ input: payload }, { authMode });
 
       if (response?.errors?.length) {
         console.error("submitEnquiry returned errors", response.errors);
@@ -63,8 +55,26 @@ export default function ReviewAndSubmit() {
         return;
       }
 
+      if (!result.referenceNumber) {
+        setSubmitError("Submission succeeded but no case reference was returned.");
+        return;
+      }
+
+      const receiptType =
+        formData.proceed === "BOOK_APPOINTMENT" ? "APPOINTMENT" : "QUEUE";
+
       clearSavedDraft();
-      nav("/referencepage");
+      nav(`/receipts/${encodeURIComponent(result.referenceNumber)}`, {
+        state: {
+          receipt: {
+            referenceNumber: result.referenceNumber,
+            receiptType,
+            ticketNumber: result.ticketNumber || undefined,
+            appointmentDateIso: formData.appointmentDateIso || undefined,
+            appointmentTime: formData.appointmentTime || undefined,
+          },
+        },
+      });
     } catch (e) {
       console.error("Failed to submit enquiry", e);
       setSubmitError("Submission failed. Please try again.");

@@ -12,8 +12,6 @@
 import { randomBytes } from "crypto";
 import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
-import { Amplify } from "aws-amplify";
-import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
 import { formSchema } from "../../../shared/formSchema";
 import {
   DynamoDBClient,
@@ -56,10 +54,14 @@ function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Part
 function logModelErrors(prefix: string, errors: unknown[] | undefined) {
   if (!Array.isArray(errors) || errors.length === 0) return;
 
-  const safe = errors.map((e: any) => ({
-    message: typeof e?.message === "string" ? e.message.slice(0, 200) : "unknown",
-    errorType: typeof e?.errorType === "string" ? e.errorType : undefined,
-  }));
+  const safe = errors.map((error) => {
+    const item = error as { message?: unknown; errorType?: unknown };
+
+    return {
+      message: typeof item.message === "string" ? item.message.slice(0, 200) : "unknown",
+      errorType: typeof item.errorType === "string" ? item.errorType : undefined,
+    };
+  });
   console.error(prefix, safe);
 }
 
@@ -85,6 +87,59 @@ export function generateReferenceNumber(): string {
 }
 
 const ddb = new DynamoDBClient({});
+
+// Attempt to claim a reference number by inserting a record into the case reference claims table
+async function claimCaseReferenceNumber(referenceNumber: string) {
+  const tableName = process.env.CASE_REFERENCE_CLAIMS_TABLE;
+  if (!tableName) throw new Error("CASE_REFERENCE_CLAIMS_TABLE is not set");
+
+  await ddb.send(
+    new PutItemCommand({
+      TableName: tableName,
+      Item: {
+        referenceNumber: { S: referenceNumber },
+        allocatedAt: { N: String(Date.now()) },
+      },
+      ConditionExpression: "attribute_not_exists(referenceNumber)",
+    }),
+  );
+}
+
+// Release a claimed reference number by deleting the corresponding record from the case reference claims table
+async function releaseCaseReferenceNumber(referenceNumber: string) {
+  const tableName = process.env.CASE_REFERENCE_CLAIMS_TABLE;
+  if (!tableName) return;
+
+  await ddb.send(
+    new DeleteItemCommand({
+      TableName: tableName,
+      Key: {
+        referenceNumber: { S: referenceNumber },
+      },
+    }),
+  );
+}
+
+// Attempt to allocate a unique case reference number by generating random reference numbers
+// and trying to claim them until one succeeds or a maximum number of attempts is reached
+// This avoids race conditions and ensures uniqueness without needing to query the database for existing reference numbers
+async function allocateCaseReferenceNumber() {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const referenceNumber = generateReferenceNumber();
+
+    try {
+      await claimCaseReferenceNumber(referenceNumber);
+      return referenceNumber;
+    } catch (e: any) {
+      const name = typeof e?.name === "string" ? e.name : "";
+      // If the error is a ConditionalCheckFailedException, it means the reference number is already claimed so continue the loop
+      if (name === "ConditionalCheckFailedException") continue;
+      throw e;
+    }
+  }
+
+  throw new Error("Failed to allocate a unique case reference");
+}
 
 function daysFromNowInSeconds(days: number): number {
   return Math.floor(Date.now() / 1000) + days * 24 * 60 * 60;
@@ -262,9 +317,11 @@ function updateUserInfo(validated: ReturnType<typeof formSchema.parse>): Partial
 async function tryDelete(label: string, fn: () => Promise<unknown>) {
   try {
     await fn();
+    return true;
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.warn(`submitEnquiry: cleanup ${label} failed`, msg);
+    return false;
   }
 }
 
@@ -312,11 +369,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
         userId = user.id;
 
         // Overwrite saved details with any new information provided
-        const new_info = updateUserInfo(validated);
-        if (Object.keys(new_info).length) {
+        const updatedFields = updateUserInfo(validated);
+        if (Object.keys(updatedFields).length) {
           const { errors: updateErrors } = await client.models.User.update({
             id: userId,
-            ...new_info,
+            ...updatedFields,
           } as any);
 
           if (updateErrors?.length) {
@@ -369,9 +426,16 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     createdGuestUserId = guestUserData.id;
   }
 
+  if (!userId) {
+    throw new Error("User id was not created");
+  }
+
+  const finalUserId = userId;
+
   let createdCaseId: string | null = null;
   let createdAppointmentId: string | null = null;
   let createdTicketId: string | null = null;
+  let claimedReferenceNumber: string | null = null;
 
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
@@ -380,10 +444,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
   // Create a new case with the enquiry details, linked to the user and department
   try {
-    const referenceNumber = generateReferenceNumber();
+    const referenceNumber = await allocateCaseReferenceNumber();
+    claimedReferenceNumber = referenceNumber;
 
     const caseCreateInput = removeIrrelevantValues({
-      userId,
+      userId: finalUserId,
       departmentId: validated.departmentId,
       referenceNumber,
       status: "OPEN",
@@ -421,12 +486,13 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     createdCaseId = caseData.id;
+    const caseId = createdCaseId;
 
     // If the user chose to book an appointment, create an appointment linked to the case
     if (validated.proceed === "BOOK_APPOINTMENT") {
       const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
-        caseId: createdCaseId,
-        userId,
+        caseId,
+        userId: finalUserId,
         date: validated.appointmentDateIso!,
         time: validated.appointmentTime!,
         status: "SCHEDULED",
@@ -439,7 +505,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       }
 
       createdAppointmentId = apptData.id;
-      return { ok: true, referenceNumber: referenceNumber };
+      return { ok: true, referenceNumber };
     }
 
     const departmentCode = getDepartmentCode(validated.departmentId);
@@ -459,7 +525,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
-      caseId: createdCaseId,
+      caseId,
       ticketNumber: alloc.ticketNumber,
       placement: -1,
       estimatedWaitTimeLower: -1,
@@ -472,7 +538,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     createdTicketId = ticketData.id;
-    return { ok: true, referenceNumber: referenceNumber, ticketNumber: alloc.ticketNumber };
+    return { ok: true, referenceNumber, ticketNumber: alloc.ticketNumber };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("submitEnquiry: failed", {
@@ -484,26 +550,45 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     });
 
     if (createdTicketId) {
-      await tryDelete("Ticket.delete", () => client.models.Ticket.delete({ id: createdTicketId! }));
+      const ticketId = createdTicketId;
+      await tryDelete("Ticket.delete", () => client.models.Ticket.delete({ id: ticketId }));
     }
 
-    // If a ticket number was claimed but failed later, release it so it can be reused
     if (claimedQueueId && claimedTicketDigits) {
+      const queueId = claimedQueueId;
+      const ticketDigits = claimedTicketDigits;
+
       await tryDelete("TicketNumberClaims.delete", () =>
-        releaseTicketNumber(claimedQueueId!, claimedTicketDigits!),
+        releaseTicketNumber(queueId, ticketDigits),
       );
     }
 
     if (createdAppointmentId) {
+      const appointmentId = createdAppointmentId;
       await tryDelete("Appointment.delete", () =>
-        client.models.Appointment.delete({ id: createdAppointmentId! }),
+        client.models.Appointment.delete({ id: appointmentId }),
       );
     }
+
+    let caseDeleted = !createdCaseId;
+
     if (createdCaseId) {
-      await tryDelete("Case.delete", () => client.models.Case.delete({ id: createdCaseId! }));
+      const caseId = createdCaseId;
+      caseDeleted = await tryDelete("Case.delete", () =>
+        client.models.Case.delete({ id: caseId }),
+      );
     }
+
+    if (claimedReferenceNumber && caseDeleted) {
+      const referenceNumber = claimedReferenceNumber;
+      await tryDelete("CaseReferenceClaims.delete", () =>
+        releaseCaseReferenceNumber(referenceNumber),
+      );
+    }
+
     if (createdGuestUserId) {
-      await tryDelete("User.delete", () => client.models.User.delete({ id: createdGuestUserId! }));
+      const guestUserId = createdGuestUserId;
+      await tryDelete("User.delete", () => client.models.User.delete({ id: guestUserId }));
     }
 
     if (ticketFailure) return ticketFailure;

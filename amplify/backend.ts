@@ -62,8 +62,22 @@ const ticketNumberClaimsTable = new Table(backend.stack, "TicketNumberClaimsTabl
 ticketCounterTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
 ticketNumberClaimsTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
 
+const caseReferenceClaimsTable = new Table(backend.stack, "CaseReferenceClaimsTable", {
+  partitionKey: {
+    name: "referenceNumber",
+    type: AttributeType.STRING,
+  },
+  billingMode: BillingMode.PAY_PER_REQUEST,
+});
+
+caseReferenceClaimsTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
+
 backend.submitEnquiry.addEnvironment("TICKET_COUNTER_TABLE", ticketCounterTable.tableName);
 backend.submitEnquiry.addEnvironment(
   "TICKET_NUMBER_CLAIMS_TABLE",
   ticketNumberClaimsTable.tableName,
+);
+backend.submitEnquiry.addEnvironment(
+  "CASE_REFERENCE_CLAIMS_TABLE",
+  caseReferenceClaimsTable.tableName,
 );
