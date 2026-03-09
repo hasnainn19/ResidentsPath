@@ -75,7 +75,7 @@ async function getTodayTickets(departmentId:string){
 }
 
 // Calculate median if enough completed tickets exist
-async function calculateEstTimewithMedian(completedTickets: Schema["Ticket"]["type"][], departmentId:string)
+async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["type"][], departmentId:string)
 {
   let estWaitingTime=0;
   const durations: number[] = [];
@@ -107,7 +107,7 @@ async function calculateEstTimewithMedian(completedTickets: Schema["Ticket"]["ty
 }
 
 // Update all waiting tickets
-async function updateTicketsTime(waitingTickets: Schema["Ticket"]["type"][], estWaitingTime:number)
+async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWaitingTime:number)
 {
   for (let i = 0; i < waitingTickets.length; i++) {
 
@@ -167,13 +167,13 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
     }
 
     let estWaitingTime = 0;
-    if (completedTickets.length >= 5) 
-       estWaitingTime = await calculateEstTimewithMedian(completedTickets, departmentId);
-    else if(estWaitingTime == 0)
+    if (completedTickets.length >= 5) {
+        estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentId);
+    } else {
         estWaitingTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 40;
-
+    }
     
-    updateTicketsTime(waitingTickets, estWaitingTime);
+    updateTickets(waitingTickets, estWaitingTime);
 
     return true;
 };
