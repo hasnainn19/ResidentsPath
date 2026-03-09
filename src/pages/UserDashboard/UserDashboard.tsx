@@ -31,9 +31,9 @@ export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
     const[errors, setErrors] = useState('');
-    const [queuePosition, setQueuePosition] = useState(-2); 
-    const [ waitTimeLower, setWaitTimeLower ] = useState(-2);
-    const [ waitTimeUpper, setWaitTimeUpper ] = useState(-2);
+    const [queuePosition, setQueuePosition] = useState(0); 
+    const [ waitTimeLower, setWaitTimeLower ] = useState(0);
+    const [ waitTimeUpper, setWaitTimeUpper ] = useState(0);
 
 
     const handleStepOut = () => {
