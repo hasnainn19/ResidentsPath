@@ -1,9 +1,26 @@
 import { data, type Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
 import { Amplify } from 'aws-amplify'
-
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
 import { env } from '$amplify/env/getTicketInfo'; 
+
+/**
+ * Lambda function to fetch today's waiting ticket information for a case.
+ *
+ * This is a public-facing query that retrieves the current ticket for
+ * a given case if it is in the "WAITING" status and was created today.
+ * It returns the departmentId and the ticket's queue details, including
+ * placement and estimated wait time bounds.
+ *
+ * @param event.arguments.caseId - The ID of the case to look up
+ * @throws Error if the caseId is missing, the case is not found, the case has no departmentId,
+ *         or there is no waiting ticket for today
+ * @returns Object containing:
+ *   - departmentId: ID of the department handling the case
+ *   - placement: the current ticket's placement in the queue
+ *   - estimatedWaitTimeLower: lower bound of the estimated wait time in minutes
+ *   - estimatedWaitTimeUpper: upper bound of the estimated wait time in minutes
+ */
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
 

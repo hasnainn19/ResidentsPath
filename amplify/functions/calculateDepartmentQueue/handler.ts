@@ -1,9 +1,28 @@
 import { generateClient } from "aws-amplify/data";
 import { Amplify } from "aws-amplify";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-
 import { env } from "$amplify/env/calculateDepartmentQueue";
 import type { Schema } from "../../data/resource";
+
+/**
+ * Lambda function to calculate and update the queue for a department.
+ *
+ * This function recalculates the estimated waiting times for all
+ * waiting tickets in a department for today. It uses the median service
+ * time from the last 5 completed tickets (if available) to update
+ * the department's estimated waiting time and each ticket's placement
+ * and estimated wait time bounds.
+ *
+ * @param event.arguments.departmentId - The ID of the department whose queue should be recalculated
+ * @returns true if the calculation and updates were successful, false if there were no tickets to process
+ * @throws Error if:
+ *   - departmentId is missing
+ *   - no tickets exist at all
+ *   - no tickets exist for today
+ *   - no tickets exist for today in the specified department
+ *   - the department with the given departmentId cannot be found
+
+ */
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -40,9 +59,15 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
 
     const { departmentId } = event.arguments;
 
+    if (!departmentId) {
+      throw new Error("departmentId is required");
+    }
+
     const { data: tickets } = await client.models.Ticket.list();
 
-    if (!tickets) return false;
+    if (!tickets || tickets.length === 0) {
+      throw new Error(`No tickets found`);
+    }
 
     // Only today's tickets
     const startOfDay = new Date();
@@ -59,10 +84,18 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
         return created >= startOfDay && created <= endOfDay;
     });
 
+    if (todaysTickets.length === 0) {
+      throw new Error(`No tickets for today`);
+    }
+
     // Filter department
     const departmentTickets = todaysTickets.filter(
       t => t.departmentId === departmentId
     );
+
+    if (departmentTickets.length === 0) {
+      throw new Error(`No tickets for today in department ${departmentId}`);
+    }
 
     // Sort by queue order
     departmentTickets.sort((a,b) =>
@@ -85,13 +118,17 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
       .slice(0,5);
 
 
-    // Get department default
-    const { data: department } =
-      await client.models.Department.get({ id: departmentId });
+    // Get department 
+    const { data: department } = await client.models.Department.get({ id: departmentId });
 
+    if (!department) {
+      throw new Error(`Department ${departmentId} not found`);
+    }
+
+    // Assign estimated wait time for the department 
     let serviceTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 40;
 
-    // Calculate median if enough completed
+    // Calculate median if enough completed tickets exist
     if (completedTickets.length >= 5) {
       const durations: number[] = [];
 

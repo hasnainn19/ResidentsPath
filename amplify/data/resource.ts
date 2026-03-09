@@ -209,8 +209,6 @@ const schema = a.
 		}))
 		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
 		.handler(a.handler.function(getTicketStatus)),
-
-    
     
     getTicketInfo: a
         .query()
@@ -227,7 +225,7 @@ const schema = a.
             allow.guest(), 
             allow.authenticated(),
             allow.authenticated("identityPool")
-        ]) // Allow both guests and authenticated users to submit enquiries
+        ]) 
 		.handler(a.handler.function(getTicketInfo)),
 
     calculateDepartmentQueue: a
@@ -240,7 +238,7 @@ const schema = a.
             allow.guest(), 
             allow.authenticated(),
             allow.authenticated("identityPool")
-        ]) // Allow both guests and authenticated users to submit enquiries
+        ]) 
         .handler(a.handler.function(calculateDepartmentQueue)),
 
 	submitEnquiry: a
