@@ -119,7 +119,7 @@ const schema = a.
 		.model({
 			// Foreign keys
 			caseId: a.id().required(),
-            departmentId: a.id().required(),
+      departmentId: a.id().required(),
 
 			// Display information
 			ticketNumber: a.string().required(),
