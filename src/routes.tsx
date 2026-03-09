@@ -14,7 +14,7 @@ import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard/UserDashboard";
-
+import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
@@ -48,10 +48,15 @@ export const router = createBrowserRouter([
         index: true,
         element: <StaffDashboard />,
       },
+      {
+        path: "queues",
+        element: <StaffQueuePage />,
+      },
     ],
   },
   {
-      path: "/userdashboard/:caseId", element: <UserDashboard /> 
+      path: "/userdashboard/:caseId",
+      element: <UserDashboard /> 
   },
   {
     path: "/form",

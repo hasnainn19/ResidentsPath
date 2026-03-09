@@ -6,6 +6,7 @@ import {
   Box,
   Chip,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 type PriorityBreakdown = {
   Standard: number;
@@ -29,6 +30,13 @@ const QueueRow = ({
   steppedOut,
   availableStaff,
 }: QueueRowProps) => {
+  const navigate = useNavigate();
+
+  const handleAdjustClick = () => {
+    const params = new URLSearchParams({ service });
+    navigate(`/staff/queues?${params.toString()}`);
+  };
+
   return (
     <TableRow hover>
       <TableCell>
@@ -70,7 +78,7 @@ const QueueRow = ({
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button variant="outlined" size="small">
+          <Button variant="outlined" size="small" onClick={handleAdjustClick}>
             Adjust
           </Button>
         </Box>
