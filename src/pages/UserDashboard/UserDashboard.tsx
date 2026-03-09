@@ -56,7 +56,7 @@ export default function UserDashboard() {
             if (!caseId) {
                 return;
             }
-
+            // get department id of ticket from case id
             const { data: ticketInfo, errors: ticketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
 
             if (ticketErrors && ticketErrors.length > 0) {
@@ -71,7 +71,7 @@ export default function UserDashboard() {
             if (!ticketDepartmentId) {
                 return;
             }
-
+            // calculate department wait times
             const { data: calcResult, errors: calcErrors} = await client.queries.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
             
             if (calcErrors && calcErrors.length > 0) {
@@ -82,7 +82,7 @@ export default function UserDashboard() {
             if (!calcResult) {
                 return;
             }
-
+            // fetch new ticket information to display
             const { data: newTicketInfo, errors: newTicketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
 
             if (newTicketErrors && newTicketErrors.length > 0) {
@@ -94,9 +94,9 @@ export default function UserDashboard() {
                 return;
             }
 
-            setQueuePosition(newTicketInfo.placement);
-            setWaitTimeLower(newTicketInfo.estimatedWaitTimeLower);
-            setWaitTimeUpper(newTicketInfo.estimatedWaitTimeUpper);
+            setQueuePosition(newTicketInfo?.placement ?? 0);
+            setWaitTimeLower(newTicketInfo?.estimatedWaitTimeLower ?? 0);
+            setWaitTimeUpper(newTicketInfo?.estimatedWaitTimeUpper ?? 0);
 
         } catch (err) {
             setErrors(`Failed to fetch tickets: ${err}`);
