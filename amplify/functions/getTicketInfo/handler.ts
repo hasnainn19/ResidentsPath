@@ -89,6 +89,5 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
         placement: currentTicket.placement,
         estimatedWaitTimeLower: currentTicket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: currentTicket.estimatedWaitTimeUpper,
-
     };
 };
