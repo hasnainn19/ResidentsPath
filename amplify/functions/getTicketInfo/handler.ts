@@ -1,4 +1,4 @@
-import { data, type Schema } from "../../data/resource";
+import { type Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
 import { Amplify } from 'aws-amplify'
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';

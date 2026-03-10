@@ -1,5 +1,4 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
-import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
@@ -194,21 +193,6 @@ const schema = a.
 
 
 	// Custom queries and mutations (lambdas defined in amplify/functions)
-
-	getTicketStatus: a
-		.query()
-		.arguments({
-			ticketNumber: a.string().required()
-		})
-		.returns(a.customType({
-			ticketNumber: a.string().required(),
-			status: a.string().required(),
-			placement: a.integer().required(),
-			estimatedWaitTimeLower: a.integer().required(),
-			estimatedWaitTimeUpper: a.integer().required(),
-		}))
-		.authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
-		.handler(a.handler.function(getTicketStatus)),
     
     getTicketInfo: a
         .query()
@@ -318,7 +302,6 @@ const schema = a.
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
-	allow.resource(getTicketStatus),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),

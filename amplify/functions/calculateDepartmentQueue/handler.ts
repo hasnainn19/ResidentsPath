@@ -1,4 +1,4 @@
-import { Client, generateClient } from "aws-amplify/data";
+import { generateClient } from "aws-amplify/data";
 import { Amplify } from "aws-amplify";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
 import { env } from "$amplify/env/calculateDepartmentQueue";
@@ -68,7 +68,7 @@ async function getTodayTickets(departmentId:string){
   });
 
   if (!tickets || tickets.length === 0) {
-    throw new Error(`No tickets found for deparment ${departmentId} for today`);
+    throw new Error(`No tickets found for department ${departmentId} for today`);
   }
 
   return tickets;
@@ -173,7 +173,7 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
         estWaitingTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 40;
     }
     
-    updateTickets(waitingTickets, estWaitingTime);
+    await updateTickets(waitingTickets, estWaitingTime);
 
     return true;
 };

@@ -241,3 +241,6 @@ amplifyconfiguration*
 stats.html
 coverage/
 .eslintcache
+
+# AWS CLI
+aws/
