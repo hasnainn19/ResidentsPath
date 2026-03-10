@@ -1,8 +1,6 @@
 import { type Schema } from "../../data/resource";
-import { generateClient } from "aws-amplify/data";
-import { Amplify } from 'aws-amplify'
-import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-import { env } from '$amplify/env/getTicketInfo'; 
+import { getAmplifyClient } from "../utils/amplifyClient";
+
 
 /**
  * Lambda function to fetch today's waiting ticket information for a case.
@@ -22,11 +20,7 @@ import { env } from '$amplify/env/getTicketInfo';
  *   - estimatedWaitTimeUpper: upper bound of the estimated wait time in minutes
  */
 
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
-
-Amplify.configure(resourceConfig, libraryOptions);
-
-const client = generateClient<Schema>();
+const client = await getAmplifyClient();
 
 export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event) => {
     const { caseId } = event.arguments;

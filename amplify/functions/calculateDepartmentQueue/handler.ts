@@ -1,8 +1,5 @@
-import { generateClient } from "aws-amplify/data";
-import { Amplify } from "aws-amplify";
-import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/calculateDepartmentQueue";
 import type { Schema } from "../../data/resource";
+import { getAmplifyClient } from "../utils/amplifyClient";
 
 /**
  * Lambda function to calculate and update the queue for a department.
@@ -24,11 +21,7 @@ import type { Schema } from "../../data/resource";
 
  */
 
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
-
-Amplify.configure(resourceConfig, libraryOptions);
-
-const client = generateClient<Schema>();
+const client = await getAmplifyClient();
 
 function median(values: number[]) {
   if (values.length === 0) return 0;
@@ -46,7 +39,9 @@ const DEFAULT_WAITING_TIMES: Record<string, number> = {
   "Homelessness": 100,
   "Adults_Duty": 30,
   "Childrens_Duty": 30,
-  "Other": 30
+  "Community_Hub_Advisor": 30,
+  "General_Customer_Service": 10,
+  "Other": 30,
 };
 
 // Get today's tickets for the department
@@ -170,7 +165,7 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
     if (completedTickets.length >= 5) {
         estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentId);
     } else {
-        estWaitingTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 40;
+        estWaitingTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 30;
     }
     
     await updateTickets(waitingTickets, estWaitingTime);
