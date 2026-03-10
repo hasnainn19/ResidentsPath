@@ -460,8 +460,9 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
       caseId: createdCaseId,
+      departmentId:validated.departmentId,
       ticketNumber: alloc.ticketNumber,
-      placement: -1,
+      position: -1,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
     });

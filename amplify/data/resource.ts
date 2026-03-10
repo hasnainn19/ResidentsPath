@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
+import { DepartmentEnum } from "../../shared/formSchema";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -98,12 +99,13 @@ const schema = a.schema({
   Department: a
     .model({
       // Department information
-      name: a.string().required(),
-      isActive: a.boolean().default(false), // Is this department currently operating?
+      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Other"]),
+      estimatedWaitingTime: a.integer().required(),
 
       // Relationships
       cases: a.hasMany("Case", "departmentId"),
       staff: a.hasMany("Staff", "departmentId"),
+      tickets: a.hasMany("Ticket", "departmentId"),
     })
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all departments
@@ -114,20 +116,20 @@ const schema = a.schema({
     .model({
       // Foreign keys
       caseId: a.id().required(),
+      departmentId: a.id().required(),
 
       // Display information
       ticketNumber: a.string().required(),
-      // displayName: a.string().required(),
+      
 
       // Queue information
-      urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-      status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
-      placement: a.integer().required(),
+      status: a.enum(["WAITING", "COMPLETED"]),
+      position: a.integer().required(),
       estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
       estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
+      steppedOut: a.boolean().default(false),
 
       // Timestamps for queue tracking
-      calledAt: a.datetime(),
       completedAt: a.datetime(),
 
       // Visit notes
@@ -135,6 +137,7 @@ const schema = a.schema({
 
       // Relationships
       case: a.belongsTo("Case", "caseId"),
+      department: a.belongsTo("Department", "departmentId"),
     })
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all tickets
@@ -196,7 +199,7 @@ const schema = a.schema({
       a.customType({
         ticketNumber: a.string().required(),
         status: a.string().required(),
-        placement: a.integer().required(),
+        position: a.integer().required(),
         estimatedWaitTimeLower: a.integer().required(),
         estimatedWaitTimeUpper: a.integer().required(),
       }),
