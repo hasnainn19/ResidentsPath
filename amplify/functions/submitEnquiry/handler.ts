@@ -88,33 +88,64 @@ export function generateReferenceNumber(): string {
 
 const ddb = new DynamoDBClient({});
 
-// Attempt to claim a reference number by inserting a record into the case reference claims table
+function getEnquiriesStateTableName() {
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
+  if (!tableName) throw new Error("ENQUIRIES_STATE_TABLE is not set");
+  return tableName;
+}
+
+function getCaseReferenceClaimKey(referenceNumber: string) {
+  return {
+    pk: `CASE_REFERENCE#${referenceNumber}`,
+    sk: "CLAIM",
+  };
+}
+
+function getTicketCounterKey(queueId: string) {
+  return {
+    pk: `QUEUE#${queueId}`,
+    sk: "COUNTER",
+  };
+}
+
+function getTicketClaimKey(queueId: string, ticketNumber: string) {
+  return {
+    pk: `QUEUE#${queueId}`,
+    sk: `TICKET#${ticketNumber}`,
+  };
+}
+
+// Attempt to claim a reference number by inserting a record into the enquiries state table
 async function claimCaseReferenceNumber(referenceNumber: string) {
-  const tableName = process.env.CASE_REFERENCE_CLAIMS_TABLE;
-  if (!tableName) throw new Error("CASE_REFERENCE_CLAIMS_TABLE is not set");
+  const tableName = getEnquiriesStateTableName();
+  const key = getCaseReferenceClaimKey(referenceNumber);
 
   await ddb.send(
     new PutItemCommand({
       TableName: tableName,
       Item: {
-        referenceNumber: { S: referenceNumber },
+        pk: { S: key.pk },
+        sk: { S: key.sk },
         allocatedAt: { N: String(Date.now()) },
       },
-      ConditionExpression: "attribute_not_exists(referenceNumber)",
+      ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
     }),
   );
 }
 
-// Release a claimed reference number by deleting the corresponding record from the case reference claims table
+// Release a claimed reference number by deleting the corresponding record from the enquiries state table
 async function releaseCaseReferenceNumber(referenceNumber: string) {
-  const tableName = process.env.CASE_REFERENCE_CLAIMS_TABLE;
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
   if (!tableName) return;
+
+  const key = getCaseReferenceClaimKey(referenceNumber);
 
   await ddb.send(
     new DeleteItemCommand({
       TableName: tableName,
       Key: {
-        referenceNumber: { S: referenceNumber },
+        pk: { S: key.pk },
+        sk: { S: key.sk },
       },
     }),
   );
@@ -181,13 +212,16 @@ function getDepartmentCode(departmentId: DepartmentId): string {
 
 // Atomically increment and retrieve the next ticket index for a queue from DynamoDB, ensuring uniqueness without race conditions
 async function getNextTicketIndex(queueId: string): Promise<number> {
-  const tableName = process.env.TICKET_COUNTER_TABLE;
-  if (!tableName) throw new Error("TICKET_COUNTER_TABLE is not set");
+  const tableName = getEnquiriesStateTableName();
+  const key = getTicketCounterKey(queueId);
 
   const res = await ddb.send(
     new UpdateItemCommand({
       TableName: tableName,
-      Key: { counterId: { S: queueId } },
+      Key: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+      },
       UpdateExpression: "SET #next = if_not_exists(#next, :zero) + :one, expiresAt = :expiresAt",
       ExpressionAttributeNames: { "#next": "next" },
       ExpressionAttributeValues: {
@@ -206,37 +240,39 @@ async function getNextTicketIndex(queueId: string): Promise<number> {
   return (next - 1) % 1000;
 }
 
-// Attempt to claim a ticket number for a queue by inserting a record into the ticket number claims table
+// Attempt to claim a ticket number for a queue by inserting a record into the enquiries state table
 // If the record already exists, it means another process has claimed that ticket number, so try the next one
 async function claimTicketDigits(queueId: string, ticketNumber: string) {
-  const claimsTable = process.env.TICKET_NUMBER_CLAIMS_TABLE;
-  if (!claimsTable) throw new Error("TICKET_NUMBER_CLAIMS_TABLE is not set");
+  const tableName = getEnquiriesStateTableName();
+  const key = getTicketClaimKey(queueId, ticketNumber);
 
   await ddb.send(
     new PutItemCommand({
-      TableName: claimsTable,
+      TableName: tableName,
       Item: {
-        queueId: { S: queueId },
-        ticketNumber: { S: ticketNumber },
+        pk: { S: key.pk },
+        sk: { S: key.sk },
         allocatedAt: { N: String(Date.now()) },
         expiresAt: { N: String(daysFromNowInSeconds(3)) },
       },
-      ConditionExpression: "attribute_not_exists(queueId) AND attribute_not_exists(ticketNumber)",
+      ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
     }),
   );
 }
 
-// Release a claimed ticket number by deleting the corresponding record from the ticket number claims table
+// Release a claimed ticket number by deleting the corresponding record from the enquiries state table
 async function releaseTicketNumber(queueId: string, ticketNumber: string) {
-  const claimsTable = process.env.TICKET_NUMBER_CLAIMS_TABLE;
-  if (!claimsTable) return;
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
+  if (!tableName) return;
+
+  const key = getTicketClaimKey(queueId, ticketNumber);
 
   await ddb.send(
     new DeleteItemCommand({
-      TableName: claimsTable,
+      TableName: tableName,
       Key: {
-        queueId: { S: queueId },
-        ticketNumber: { S: ticketNumber },
+        pk: { S: key.pk },
+        sk: { S: key.sk },
       },
     }),
   );
