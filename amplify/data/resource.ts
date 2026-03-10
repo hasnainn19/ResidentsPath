@@ -98,7 +98,7 @@ const schema = a.schema({
   Department: a
     .model({
       // Department information
-      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Other"]),
+      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Community_Hub_Advisor", "General_Customer_Service"]),
       estimatedWaitingTime: a.integer().required(),
 
       // Relationships
