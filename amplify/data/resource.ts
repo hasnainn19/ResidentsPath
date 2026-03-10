@@ -206,21 +206,17 @@ const schema = a.
 		}))
 		.authorization((allow) => [
             allow.guest(), 
-            allow.authenticated(),
-            allow.authenticated("identityPool")
         ]) 
 		.handler(a.handler.function(getTicketInfo)),
 
     calculateDepartmentQueue: a
-        .query()
+        .mutation()
         .arguments({
 			departmentId: a.string().required()
 		})
         .returns(a.boolean())
         .authorization((allow) => [
             allow.guest(), 
-            allow.authenticated(),
-            allow.authenticated("identityPool")
         ]) 
         .handler(a.handler.function(calculateDepartmentQueue)),
 

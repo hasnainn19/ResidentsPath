@@ -11,8 +11,7 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  * and estimated wait time bounds.
  *
  * @param event.arguments.departmentId - The ID of the department whose queue should be recalculated
- * @returns true if the calculation and updates were successful, false if there were no tickets to process
- * @throws Error if:
+ * @returns true if the calculation and updates were successful
  *   - departmentId is missing
  *   - no tickets exist at all
  *   - no tickets exist for today
