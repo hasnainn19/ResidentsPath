@@ -13,38 +13,38 @@ type PriorityBreakdown = {
 };
 
 interface QueueRowProps {
-  service: string;
-  waiting: number;
-  longestWaitTime: number | null;
-  priorityBreakdown: PriorityBreakdown;
-  steppedOut: number;
+  serviceName: string;
+  waitingCount: number;
+  longestWait: number;
+  priorityCaseCount: number;
+  standardCaseCount: number;
+  steppedOutCount: number;
   availableStaff: number;
 }
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
-  service,
-  waiting,
-  longestWaitTime,
-  priorityBreakdown,
-  steppedOut,
+  serviceName,
+  waitingCount,
+  longestWait,
+  priorityCaseCount,
+  standardCaseCount,
+  steppedOutCount,
   availableStaff,
 }: QueueRowProps) => {
   return (
     <TableRow hover>
       <TableCell>
-        <Typography fontWeight={500}>{service}</Typography>
+        <Typography fontWeight={500}>{serviceName}</Typography>
       </TableCell>
 
-      <TableCell>{waiting}</TableCell>
+      <TableCell>{waitingCount}</TableCell>
 
-      <TableCell>
-        {longestWaitTime ? `${longestWaitTime} mins` : "--"}
-      </TableCell>
+      <TableCell>{longestWait ? `${longestWait} mins` : "--"}</TableCell>
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Chip
-            label={`Priority: ${priorityBreakdown.Priority}`}
+            label={`Priority: ${priorityCaseCount}`}
             size="small"
             color="error"
             sx={{
@@ -53,7 +53,7 @@ const QueueRow = ({
             }}
           />
           <Chip
-            label={`Standard: ${priorityBreakdown.Standard}`}
+            label={`Standard: ${standardCaseCount}`}
             size="small"
             color="warning"
             sx={{
@@ -64,7 +64,7 @@ const QueueRow = ({
         </Box>
       </TableCell>
 
-      <TableCell>{steppedOut}</TableCell>
+      <TableCell>{steppedOutCount}</TableCell>
 
       <TableCell>{availableStaff}</TableCell>
 

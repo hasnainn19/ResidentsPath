@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
+import { getServiceStats } from "../functions/getServiceStats/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from "../functions/postConfirmation/resource";
 
@@ -231,6 +232,20 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
+    ServiceStat: a.customType({
+      serviceName: a.string().required(),
+      waitingCount: a.integer().required(),
+      longestWait: a.integer().required(),
+      priorityCaseCount: a.integer().required(),
+      standardCaseCount: a.integer().required(),
+      steppedOutCount: a.integer().required(),
+      availableStaff: a.integer().required(),
+    }),
+    getServiceStats: a
+      .query()
+      .returns(a.ref("ServiceStat").array())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getServiceStats)),
     submitEnquiry: a
       .mutation()
       .arguments({
@@ -311,6 +326,7 @@ const schema = a
     allow.resource(getTicketStatus),
     allow.resource(postConfirmation),
     allow.resource(getDashboardStats),
+    allow.resource(getServiceStats),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;
