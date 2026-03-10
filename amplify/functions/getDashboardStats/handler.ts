@@ -11,14 +11,29 @@ export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
   // Query all tickets#
   const { data: tickets } = await client.models.Ticket.list();
   const { data: staff } = await client.models.Staff.list();
+  const { data: cases } = await client.models.Case.list();
+
+  const waitingTickets = tickets.filter((t) => t.status === "WAITING");
 
   return {
-    waitingCount: tickets.filter((t) => t.status === "WAITING").length,
-    steppedOutCount: tickets.filter((t) => t.status === "STEPPED_OUT").length,
+    waitingCount: waitingTickets.length,
+    steppedOutCount: tickets.filter((t) => t.steppedOut === true).length,
     staffCount: staff.filter((s) => s.isAvailable).length,
-    urgentCount: tickets.filter((t) => t.urgency === "CRITICAL").length, //TODO: Change to priority in schema,
-    longestWaitTime: Math.max(
-      ...tickets.map((t) => t.estimatedWaitTimeUpper || 0),
-    ),
+    urgentCount: (() => {
+      const priorityCaseIds = new Set(
+        cases
+          .filter(
+            (c) =>
+              c.priority === true &&
+              (c.status === "OPEN" || c.status === "IN_PROGRESS"),
+          )
+          .map((c) => c.id),
+      );
+      return tickets.filter((t) => priorityCaseIds.has(t.caseId)).length;
+    })(),
+    longestWaitTime:
+      waitingTickets.length > 0
+        ? Math.max(...waitingTickets.map((t) => t.estimatedWaitTimeUpper || 0))
+        : 0,
   };
 };
