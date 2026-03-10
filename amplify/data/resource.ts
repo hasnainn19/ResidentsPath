@@ -338,7 +338,7 @@ const schema = a
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
     allow.resource(getServiceStats),
-    allow.resource.(getDashboardStats)
+    allow.resource(getDashboardStats),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 
