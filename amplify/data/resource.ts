@@ -99,51 +99,50 @@ const schema = a.
   // Department - service departments (Housing, Council Tax, etc)
   Department: a
     .model({
-		// Department information
-		name: a.string().required(),
-		isActive: a.boolean().default(false), // Is this department currently operating?
-    estimatedWaitingTime: a.integer().required(), // has a default estimated waiting time which gets updated
+      // Department information
+      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Community_Hub_Advisor", "General_Customer_Service"]),
+      estimatedWaitingTime: a.integer().required(),
 
-		// Relationships
-		cases: a.hasMany("Case", "departmentId"),
-		staff: a.hasMany("Staff", "departmentId"),
-		tickets:a.hasMany("Ticket", "departmentId"),
-	})
-	.authorization((allow) => [
-		allow.groups(["Staff"]), // Staff can see all departments
-	]),
+      // Relationships
+      cases: a.hasMany("Case", "departmentId"),
+      staff: a.hasMany("Staff", "departmentId"),
+      tickets: a.hasMany("Ticket", "departmentId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Staff can see all departments
+    ]),
 
-	// Ticket - represents a queue entry for a resident's visit
-	Ticket: a
-		.model({
-			// Foreign keys
-			caseId: a.id().required(),
+  // Ticket - represents a queue entry for a resident's visit
+  Ticket: a
+    .model({
+      // Foreign keys
+      caseId: a.id().required(),
       departmentId: a.id().required(),
 
-			// Display information
-			ticketNumber: a.string().required(),
+      // Display information
+      ticketNumber: a.string().required(),
+      
 
       // Queue information
-      urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-      status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
-      placement: a.integer().required(),
+      status: a.enum(["WAITING", "COMPLETED"]),
+      position: a.integer().required(),
       estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
       estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
+      steppedOut: a.boolean().default(false),
 
       // Timestamps for queue tracking
-          //calledAt: a.datetime(),
       completedAt: a.datetime(),
 
       // Visit notes
       notes: a.string(),
 
-			// Relationships
-			case: a.belongsTo("Case", "caseId"),
-			department: a.belongsTo("Department", "departmentId"),
-		})
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Staff can see all tickets
-		]),
+      // Relationships
+      case: a.belongsTo("Case", "caseId"),
+      department: a.belongsTo("Department", "departmentId"),
+    })
+    .authorization((allow) => [
+      allow.groups(["Staff"]), // Staff can see all tickets
+    ]),
 
   // Staff - represents a staff member at Hounslow
   Staff: a
@@ -201,7 +200,7 @@ const schema = a.
 		})
 		.returns(a.customType({
             departmentId: a.id(),
-            placement: a.integer(),
+            position: a.integer(),
             estimatedWaitTimeLower: a.integer(),
             estimatedWaitTimeUpper: a.integer(),
 		}))

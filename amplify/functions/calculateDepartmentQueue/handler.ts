@@ -7,7 +7,7 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  * This function recalculates the estimated waiting times for all
  * waiting tickets in a department for today. It uses the median service
  * time from the last 5 completed tickets (if available) to update
- * the department's estimated waiting time and each ticket's placement
+ * the department's estimated waiting time and each ticket's position
  * and estimated wait time bounds.
  *
  * @param event.arguments.departmentId - The ID of the department whose queue should be recalculated
@@ -108,15 +108,15 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
 
       const ticket = waitingTickets[i];
 
-      const placement = i; 
+      const position = i; 
 
-      const lower = Math.round(estWaitingTime * placement);
+      const lower = Math.round(estWaitingTime * position);
 
       const upper = lower + 20;
 
       await client.models.Ticket.update({
           id: ticket.id,
-          placement,
+          position,
           estimatedWaitTimeLower: lower,
           estimatedWaitTimeUpper: upper,
       });
@@ -153,7 +153,7 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
         new Date(a.completedAt ?? 0).getTime()
       )
       .slice(0,5);
-
+    
     // Get department 
     const { data: department } = await client.models.Department.get({ id: departmentId });
 

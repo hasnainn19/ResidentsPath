@@ -465,7 +465,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       departmentId: validated.departmentId,
       ticketNumber: alloc.ticketNumber,
       status: "WAITING",
-      placement: -1,
+      position: -1,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
     });

@@ -94,7 +94,7 @@ export default function UserDashboard() {
                 return;
             }
 
-            setQueuePosition(newTicketInfo?.placement ?? 0);
+            setQueuePosition(newTicketInfo?.position ?? 0);
             setWaitTimeLower(newTicketInfo?.estimatedWaitTimeLower ?? 0);
             setWaitTimeUpper(newTicketInfo?.estimatedWaitTimeUpper ?? 0);
 

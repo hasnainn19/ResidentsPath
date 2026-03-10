@@ -8,14 +8,14 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  * This is a public-facing query that retrieves the current ticket for
  * a given case if it is in the "WAITING" status and was created today.
  * It returns the departmentId and the ticket's queue details, including
- * placement and estimated wait time bounds.
+ * position and estimated wait time bounds.
  *
  * @param event.arguments.caseId - The ID of the case to look up
  * @throws Error if the caseId is missing, the case is not found, the case has no departmentId,
  *         or there is no waiting ticket for today
  * @returns Object containing:
  *   - departmentId: ID of the department handling the case
- *   - placement: the current ticket's placement in the queue
+ *   - position: the current ticket's position in the queue
  *   - estimatedWaitTimeLower: lower bound of the estimated wait time in minutes
  *   - estimatedWaitTimeUpper: upper bound of the estimated wait time in minutes
  */
@@ -53,7 +53,14 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
     });
 
     if (!tickets || tickets.length === 0) {
-        throw new Error(`Ticket with caseId ${caseId} not found`);
+        throw new Error(`Tickets with caseId ${caseId} not found`);
+    }
+
+    // Filter out null tickets
+    const validTickets = (tickets ?? []).filter(Boolean);
+
+    if (!validTickets || validTickets.length === 0) {
+        throw new Error(`No valid tickets with caseId ${caseId} found`);
     }
 
     const startOfDay = new Date();
@@ -62,9 +69,8 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    const currentTicket = tickets.find(ticket => {
+    const currentTicket = validTickets.find(ticket => {
         if (!ticket.createdAt) return false;
-
         const created = new Date(ticket.createdAt);
 
         return (
@@ -80,7 +86,7 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
 
     return {
         departmentId: departmentId,
-        placement: currentTicket.placement,
+        position: currentTicket.position,
         estimatedWaitTimeLower: currentTicket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: currentTicket.estimatedWaitTimeUpper,
     };
