@@ -2,7 +2,6 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
-import { DepartmentEnum } from "../../shared/formSchema";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
