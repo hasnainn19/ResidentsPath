@@ -23,7 +23,7 @@ const useDashboardStats = () => {
     const client = generateClient<Schema>({ authMode: "userPool" });
 
     const fetchStats = () => {
-      client.queries.getDashboardStats({}).then((data) => {
+      client.queries.getDashboardStats({}).then((data: any) => {
         setDashboardStats({
           waitingCount: data.data?.waitingCount ?? 0,
           steppedOutCount: data.data?.steppedOutCount ?? 0,

@@ -97,126 +97,48 @@ const schema = a
         allow.groups(["Staff"]), // Only staff can access cases directly
       ]),
 
-  // Department - service departments (Housing, Council Tax, etc)
-  Department: a
-    .model({
-      // Department information
-      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Community_Hub_Advisor", "General_Customer_Service"]),
-      estimatedWaitingTime: a.integer().required(),
+    // Department - service departments (Housing, Council Tax, etc)
+    Department: a
+      .model({
+        // Department information
+        name: a.enum([
+          "Homelessness",
+          "Housing_Benefit",
+          "Council_Tax",
+          "Adults_Duty",
+          "Childrens_Duty",
+          "Community_Hub_Advisor",
+          "General_Customer_Service",
+        ]),
+        estimatedWaitingTime: a.integer().required(),
 
-      // Relationships
-      cases: a.hasMany("Case", "departmentId"),
-      staff: a.hasMany("Staff", "departmentId"),
-      tickets: a.hasMany("Ticket", "departmentId"),
-    })
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Staff can see all departments
-    ]),
+        // Relationships
+        cases: a.hasMany("Case", "departmentId"),
+        staff: a.hasMany("Staff", "departmentId"),
+        tickets: a.hasMany("Ticket", "departmentId"),
+      })
+      .authorization((allow) => [
+        allow.groups(["Staff"]), // Staff can see all departments
+      ]),
 
-  // Ticket - represents a queue entry for a resident's visit
-  Ticket: a
-    .model({
-      // Foreign keys
-      caseId: a.id().required(),
-      departmentId: a.id().required(),
+    // Ticket - represents a queue entry for a resident's visit
+    Ticket: a
+      .model({
+        // Foreign keys
+        caseId: a.id().required(),
+        departmentId: a.id().required(),
 
-      // Display information
-      ticketNumber: a.string().required(),
-      
-
-      // Queue information
-      status: a.enum(["WAITING", "COMPLETED"]),
-      position: a.integer().required(),
-      estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
-      estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
-      steppedOut: a.boolean().default(false),
-
-      // Timestamps for queue tracking
-      completedAt: a.datetime(),
-
-      // Visit notes
-      notes: a.string(),
-
-      // Relationships
-      case: a.belongsTo("Case", "caseId"),
-      department: a.belongsTo("Department", "departmentId"),
-    })
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Staff can see all tickets
-    ]),
-
-  // Staff - represents a staff member at Hounslow
-  Staff: a
-    .model({
-      // Foreign keys
-      departmentId: a.id().required(),
-
-      // Staff information
-      cognitoUserId: a.string().required(), // Link to Cognito user for authentication
-      name: a.string().required(),
-      role: a.string().required(), // e.g "Receptionist"
-
-      // Current status
-      isAvailable: a.boolean().default(false),
-
-      // Relationships
-      department: a.belongsTo("Department", "departmentId"),
-    })
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Only staff can see staff information
-    ]),
-
-  // Appointment - represents a scheduled appointment for a registered resident
-  Appointment: a
-    .model({
-      // Foreign keys
-      userId: a.id().required(),
-      caseId: a.id().required(),
-
-      // Appointment scheduling
-      date: a.date().required(),
-      time: a.time().required(),
-
-      // Appointment status
-      status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
-
-      // Additional information
-      notes: a.string(),
-
-      // Relationships
-      user: a.belongsTo("User", "userId"),
-      case: a.belongsTo("Case", "caseId"),
-    })
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Only staff can access appointments directly
-    ]),
-
-  // Custom queries and mutations (lambdas defined in amplify/functions)
-  getTicketStatus: a
-    .query()
-    .arguments({
-      ticketNumber: a.string().required(),
-    })
-    .returns(
-      a.customType({
+        // Display information
         ticketNumber: a.string().required(),
-        status: a.string().required(),
+
+        // Queue information
+        status: a.enum(["WAITING", "COMPLETED"]),
         position: a.integer().required(),
-        estimatedWaitTimeLower: a.integer().required(),
-        estimatedWaitTimeUpper: a.integer().required(),
-      }),
-    )
-    .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
-    .handler(a.handler.function(getTicketStatus)),
-    
-  submitEnquiry: a
-    .mutation()
-    .arguments({
-      input: a.customType({
-		departmentId: a.id().required(),
+        estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
+        estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
+        steppedOut: a.boolean().default(false),
 
         // Timestamps for queue tracking
-        calledAt: a.datetime(),
         completedAt: a.datetime(),
 
         // Visit notes
@@ -224,6 +146,7 @@ const schema = a
 
         // Relationships
         case: a.belongsTo("Case", "caseId"),
+        department: a.belongsTo("Department", "departmentId"),
       })
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
@@ -291,7 +214,7 @@ const schema = a
         a.customType({
           ticketNumber: a.string().required(),
           status: a.string().required(),
-          placement: a.integer().required(),
+          position: a.integer().required(),
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
         }),

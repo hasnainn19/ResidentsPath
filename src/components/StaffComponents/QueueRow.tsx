@@ -30,7 +30,7 @@ const QueueRow = ({
   const navigate = useNavigate();
 
   const handleAdjustClick = () => {
-    const params = new URLSearchParams({ service });
+    const params = new URLSearchParams({ serviceName });
     navigate(`/staff/queues?${params.toString()}`);
   };
 
