@@ -20,7 +20,8 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
-import {VolumeUp, Stop} from '@mui/icons-material';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import StopIcon from '@mui/icons-material/Stop';
 
 
 type TextToSpeechButtonProps = {
@@ -63,7 +64,7 @@ export default function TextToSpeechButton({text}: TextToSpeechButtonProps) {
 
   return (
     <Button onClick={speak} sx={{display:'inline-flex', ml:1}}>
-      {isSpeaking ? <Stop/> : <VolumeUp/>}
+      {isSpeaking ? <StopIcon /> : <VolumeUpIcon />}
       {isSpeaking ? "Stop" : "Read"}
     </Button>
   );

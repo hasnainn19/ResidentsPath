@@ -373,6 +373,8 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   let createdAppointmentId: string | null = null;
   let createdTicketId: string | null = null;
 
+
+
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
 
@@ -460,8 +462,9 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
       caseId: createdCaseId,
-      departmentId:validated.departmentId,
+      departmentId: validated.departmentId,
       ticketNumber: alloc.ticketNumber,
+      status: "WAITING",
       position: -1,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
@@ -470,6 +473,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     if (ticketErrors?.length || !ticketData?.id) {
       logModelErrors("submitEnquiry: Ticket.create failed", ticketErrors);
       throw new Error("Failed to create ticket");
+      console.log("ticket fail");
     }
 
     createdTicketId = ticketData.id;

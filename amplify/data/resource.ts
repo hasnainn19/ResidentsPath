@@ -1,12 +1,14 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
-import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
+import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
+import { getTicketInfo } from '../functions/getTicketInfo/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
-const schema = a.schema({
+const schema = a.
+	schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
@@ -180,33 +182,45 @@ const schema = a.schema({
       // Additional information
       notes: a.string(),
 
-      // Relationships
-      user: a.belongsTo("User", "userId"),
-      case: a.belongsTo("Case", "caseId"),
-    })
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Only staff can access appointments directly
-    ]),
+			// Relationships
+			user: a.belongsTo("User", "userId"),
+			case: a.belongsTo("Case", "caseId"),
+		})
+		.authorization((allow) => [
+			allow.groups(["Staff"]), // Only staff can access appointments directly
+		]),
 
-  // Custom queries and mutations (lambdas defined in amplify/functions)
-  getTicketStatus: a
-    .query()
-    .arguments({
-      ticketNumber: a.string().required(),
-    })
-    .returns(
-      a.customType({
-        ticketNumber: a.string().required(),
-        status: a.string().required(),
-        position: a.integer().required(),
-        estimatedWaitTimeLower: a.integer().required(),
-        estimatedWaitTimeUpper: a.integer().required(),
-      }),
-    )
-    .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
-    .handler(a.handler.function(getTicketStatus)),
+
+	// Custom queries and mutations (lambdas defined in amplify/functions)
     
-  submitEnquiry: a
+    getTicketInfo: a
+        .query()
+		.arguments({
+			caseId: a.string().required()
+		})
+		.returns(a.customType({
+            departmentId: a.id(),
+            position: a.integer(),
+            estimatedWaitTimeLower: a.integer(),
+            estimatedWaitTimeUpper: a.integer(),
+		}))
+		.authorization((allow) => [
+            allow.guest(), 
+        ]) 
+		.handler(a.handler.function(getTicketInfo)),
+
+    calculateDepartmentQueue: a
+        .mutation()
+        .arguments({
+			departmentId: a.string().required()
+		})
+        .returns(a.boolean())
+        .authorization((allow) => [
+            allow.guest(), 
+        ]) 
+        .handler(a.handler.function(calculateDepartmentQueue)),
+
+	submitEnquiry: a
     .mutation()
     .arguments({
       input: a.customType({
@@ -283,10 +297,10 @@ const schema = a.schema({
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
-	allow.resource(getTicketStatus),
-  allow.resource(postConfirmation),
+    allow.resource(postConfirmation),
+    allow.resource(calculateDepartmentQueue),
+    allow.resource(getTicketInfo),
 ]);
-
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
