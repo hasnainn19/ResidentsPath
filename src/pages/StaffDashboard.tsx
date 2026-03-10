@@ -18,13 +18,11 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
-import React, { useState } from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
 import useDashboardStats from "../hooks/useDashboardStats";
-import { generateClient } from "aws-amplify/api";
-import type { Schema } from "../../amplify/data/resource";
 import useServiceStats from "../hooks/useServiceStats";
+import { useState } from "react";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
 const StaffDashboard = () => {
@@ -142,8 +140,11 @@ const StaffDashboard = () => {
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "serviceName" ? "secondary.main" : "inherit",
-                    fontWeight: sortColumn === "serviceName" ? "bold" : "normal",
+                      sortColumn === "serviceName"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "serviceName" ? "bold" : "normal",
                     color:
                       sortColumn === "serviceName" ? "primary.main" : "inherit",
                   }}
@@ -157,10 +158,15 @@ const StaffDashboard = () => {
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "waitingCount" ? "secondary.main" : "inherit",
-                    fontWeight: sortColumn === "waitingCount" ? "bold" : "normal",
+                      sortColumn === "waitingCount"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "waitingCount" ? "bold" : "normal",
                     color:
-                      sortColumn === "waitingCount" ? "primary.main" : "inherit",
+                      sortColumn === "waitingCount"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Waiting
@@ -178,9 +184,7 @@ const StaffDashboard = () => {
                     fontWeight:
                       sortColumn === "longestWait" ? "bold" : "normal",
                     color:
-                      sortColumn === "longestWait"
-                        ? "primary.main"
-                        : "inherit",
+                      sortColumn === "longestWait" ? "primary.main" : "inherit",
                   }}
                 >
                   Longest Wait
@@ -196,9 +200,12 @@ const StaffDashboard = () => {
                       sortColumn === "steppedOutCount"
                         ? "secondary.main"
                         : "inherit",
-                    fontWeight: sortColumn === "steppedOutCount" ? "bold" : "normal",
+                    fontWeight:
+                      sortColumn === "steppedOutCount" ? "bold" : "normal",
                     color:
-                      sortColumn === "steppedOutCount" ? "primary.main" : "inherit",
+                      sortColumn === "steppedOutCount"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Stepped Out

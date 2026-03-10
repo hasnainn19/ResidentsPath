@@ -7,11 +7,6 @@ import {
   Chip,
 } from "@mui/material";
 
-type PriorityBreakdown = {
-  Standard: number;
-  Priority: number;
-};
-
 interface QueueRowProps {
   serviceName: string;
   waitingCount: number;

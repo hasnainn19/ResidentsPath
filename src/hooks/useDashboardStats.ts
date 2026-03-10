@@ -25,11 +25,11 @@ const useDashboardStats = () => {
     const fetchStats = () => {
       client.queries.getDashboardStats({}).then((data) => {
         setDashboardStats({
-          waitingCount: data.data?.waitingCount,
-          steppedOutCount: data.data?.steppedOutCount,
-          staffCount: data.data?.staffCount,
-          urgentCount: data.data?.urgentCount,
-          longestWaitTime: data.data?.longestWaitTime,
+          waitingCount: data.data?.waitingCount ?? 0,
+          steppedOutCount: data.data?.steppedOutCount ?? 0,
+          staffCount: data.data?.staffCount ?? 0,
+          urgentCount: data.data?.urgentCount ?? 0,
+          longestWaitTime: data.data?.longestWaitTime ?? 0,
         });
       });
     };
