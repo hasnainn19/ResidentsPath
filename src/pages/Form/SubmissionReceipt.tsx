@@ -342,36 +342,45 @@ export default function SubmissionReceipt() {
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <NavBar />
 
-      <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 3, md: 5 } }}>
         {/* Receipt details*/}
-        <Stack spacing={3}>
+        <Stack spacing={{ xs: 2.5, md: 3 }}>
           <Paper
             variant="outlined"
             sx={{
-              p: { xs: 3, md: 4 },
+              p: { xs: 2, sm: 3, md: 4 },
               borderRadius: 3,
               bgcolor: "background.paper",
             }}
           >
-            <Stack spacing={3}>
+            <Stack spacing={{ xs: 2.5, md: 3 }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
                 justifyContent="space-between"
-                alignItems={{ xs: "flex-start", md: "stretch" }}
-                spacing={3}
+                alignItems={{ xs: "stretch", md: "stretch" }}
+                spacing={{ xs: 2, md: 3 }}
               >
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Chip
                     label={chipLabel}
                     color={isAppointment ? "success" : "primary"}
-                    sx={{ mb: 2, fontWeight: 700 }}
+                    sx={{ mb: 2, fontWeight: 700, maxWidth: "100%" }}
                   />
 
-                  <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, lineHeight: 1.1 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 900,
+                      mb: 1.5,
+                      lineHeight: 1.1,
+                      fontSize: { xs: "1.9rem", sm: "2.125rem" },
+                      overflowWrap: "anywhere",
+                    }}
+                  >
                     {heading}
                   </Typography>
 
-                  <Typography color="text.secondary" sx={{ maxWidth: 620 }}>
+                  <Typography color="text.secondary" sx={{ maxWidth: { xs: "100%", md: 620 } }}>
                     {introText}
                   </Typography>
                 </Box>
@@ -379,8 +388,9 @@ export default function SubmissionReceipt() {
                 <Paper
                   variant="outlined"
                   sx={{
-                    minWidth: { xs: "100%", md: 280 },
-                    p: 2.5,
+                    width: { xs: "100%", md: 280 },
+                    minWidth: 0,
+                    p: { xs: 2, sm: 2.5 },
                     borderRadius: 2.5,
                     bgcolor: "background.default",
                   }}
@@ -392,7 +402,13 @@ export default function SubmissionReceipt() {
 
                   <Typography
                     variant="h5"
-                    sx={{ fontWeight: 900, letterSpacing: 1, wordBreak: "break-word", mb: 2 }}
+                    sx={{
+                      fontWeight: 900,
+                      letterSpacing: 1,
+                      overflowWrap: "anywhere",
+                      mb: 2,
+                      fontSize: { xs: "1.35rem", sm: "1.5rem" },
+                    }}
                   >
                     {referenceToShow || "-"}
                   </Typography>
@@ -404,7 +420,10 @@ export default function SubmissionReceipt() {
                         Ticket number
                       </Typography>
 
-                      <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 800, mb: 2, overflowWrap: "anywhere" }}
+                      >
                         {receipt.ticketNumber}
                       </Typography>
                     </>
@@ -417,7 +436,10 @@ export default function SubmissionReceipt() {
                         Appointment time
                       </Typography>
 
-                      <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 800, mb: 2, overflowWrap: "anywhere" }}
+                      >
                         {receipt.appointmentTime}
                       </Typography>
                     </>
@@ -430,11 +452,17 @@ export default function SubmissionReceipt() {
                       variant="outlined"
                       onClick={() => copyValue("Case reference number", referenceToShow)}
                       disabled={!referenceToShow}
+                      fullWidth
                     >
                       Copy reference number
                     </Button>
 
-                    <Button type="button" variant="contained" onClick={() => window.print()}>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      onClick={() => window.print()}
+                      fullWidth
+                    >
                       Print or save
                     </Button>
                   </Stack>
@@ -450,7 +478,7 @@ export default function SubmissionReceipt() {
 
           {/* Loading/errors */}
           {loading ? (
-            <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+            <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
               <Typography fontWeight={700}>Loading your receipt...</Typography>
             </Paper>
           ) : null}
@@ -464,17 +492,28 @@ export default function SubmissionReceipt() {
           {/* Main receipt body */}
           {receipt ? (
             <WithTTS copy={{ label: "Submission receipt", tts: ttsText }} titleVariant="h6">
-              <Stack spacing={3}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
-                  <Paper variant="outlined" sx={{ flex: 1, p: 3, borderRadius: 3 }}>
-                    <Stack spacing={3}>
+              <Stack spacing={{ xs: 2.5, md: 3 }}>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 2.5, md: 3 }}>
+                  <Paper
+                    variant="outlined"
+                    sx={{ flex: 1, p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}
+                  >
+                    <Stack spacing={{ xs: 2.5, md: 3 }}>
                       {!isAppointment ? (
                         <>
                           <Box>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
                               Ticket number
                             </Typography>
-                            <Typography variant="h2" sx={{ fontWeight: 900, lineHeight: 1 }}>
+                            <Typography
+                              variant="h2"
+                              sx={{
+                                fontWeight: 900,
+                                lineHeight: 1,
+                                fontSize: { xs: "3rem", sm: "3.75rem" },
+                                overflowWrap: "anywhere",
+                              }}
+                            >
                               {receipt.ticketNumber || "-"}
                             </Typography>
                           </Box>
@@ -485,6 +524,7 @@ export default function SubmissionReceipt() {
                               variant="outlined"
                               onClick={() => copyValue("Ticket number", receipt.ticketNumber)}
                               disabled={!receipt.ticketNumber}
+                              fullWidth
                             >
                               Copy ticket number
                             </Button>
@@ -494,6 +534,7 @@ export default function SubmissionReceipt() {
                               variant="contained"
                               onClick={() => nav("/referencepage")}
                               disabled={!receipt.ticketNumber}
+                              fullWidth
                             >
                               Check queue status
                             </Button>
@@ -505,7 +546,10 @@ export default function SubmissionReceipt() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
                               Appointment date
                             </Typography>
-                            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                            <Typography
+                              variant="h5"
+                              sx={{ fontWeight: 800, overflowWrap: "anywhere" }}
+                            >
                               {appointmentDate || "Not available"}
                             </Typography>
                           </Box>
@@ -514,7 +558,10 @@ export default function SubmissionReceipt() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
                               Appointment time
                             </Typography>
-                            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                            <Typography
+                              variant="h5"
+                              sx={{ fontWeight: 800, overflowWrap: "anywhere" }}
+                            >
                               {receipt.appointmentTime || "Not available"}
                             </Typography>
                           </Box>
@@ -530,6 +577,7 @@ export default function SubmissionReceipt() {
                                   .join(" "),
                               )
                             }
+                            fullWidth
                           >
                             Copy appointment details
                           </Button>
@@ -545,7 +593,7 @@ export default function SubmissionReceipt() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                               Department
                             </Typography>
-                            <Typography sx={{ fontWeight: 700 }}>
+                            <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
                               {receipt.departmentName}
                             </Typography>
                           </Box>
@@ -556,7 +604,9 @@ export default function SubmissionReceipt() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                               Submitted
                             </Typography>
-                            <Typography sx={{ fontWeight: 700 }}>{submittedAt}</Typography>
+                            <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                              {submittedAt}
+                            </Typography>
                           </Box>
                         ) : null}
                       </Stack>
@@ -567,7 +617,7 @@ export default function SubmissionReceipt() {
                     variant="outlined"
                     sx={{
                       width: { xs: "100%", md: 320 },
-                      p: 3,
+                      p: { xs: 2.5, sm: 3 },
                       borderRadius: 3,
                       display: "flex",
                       flexDirection: "column",
@@ -591,13 +641,21 @@ export default function SubmissionReceipt() {
                         component="img"
                         src={qrCodeUrl}
                         alt="Receipt QR code"
-                        sx={{ width: 220, height: 220, display: "block", mb: 2 }}
+                        sx={{
+                          width: "100%",
+                          maxWidth: 220,
+                          height: "auto",
+                          aspectRatio: "1 / 1",
+                          display: "block",
+                          mb: 2,
+                        }}
                       />
                     ) : (
                       <Box
                         sx={{
-                          width: 220,
-                          height: 220,
+                          width: "100%",
+                          maxWidth: 220,
+                          aspectRatio: "1 / 1",
                           border: 1,
                           borderColor: "divider",
                           borderRadius: 2,
@@ -618,7 +676,7 @@ export default function SubmissionReceipt() {
                   </Paper>
                 </Stack>
 
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+                <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
                   <Stack spacing={1.5}>
                     <Typography variant="h6" sx={{ fontWeight: 800 }}>
                       What to keep

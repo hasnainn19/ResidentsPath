@@ -166,16 +166,17 @@ export default function ReviewAndSubmit() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "minmax(260px, 1fr) minmax(260px, 1fr)",
+          gridTemplateColumns: { xs: "1fr", md: "minmax(260px, 1fr) minmax(260px, 1fr)" },
+          gap: { xs: 0.5, md: 0 },
           py: 1.25,
-          px: 2,
-          "&:hover": { bgcolor: "grey.50" },
+          px: { xs: 0, sm: 2 },
+          "&:hover": { bgcolor: { xs: "transparent", sm: "grey.50" } },
         }}
       >
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ textAlign: "left", pr: 2, minWidth: 220, fontWeight: 800 }}
+          sx={{ textAlign: "left", pr: { xs: 0, md: 2 }, minWidth: 0, fontWeight: 800 }}
         >
           {label}
         </Typography>
@@ -183,11 +184,11 @@ export default function ReviewAndSubmit() {
         <Typography
           variant="body2"
           sx={{
-            textAlign: "right",
+            textAlign: { xs: "left", md: "right" },
             wordBreak: "break-word",
             flex: 1,
             fontWeight: 800,
-            pl: 2,
+            pl: { xs: 0, md: 2 },
           }}
         >
           {value}
@@ -227,7 +228,7 @@ export default function ReviewAndSubmit() {
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
+      <Paper variant="outlined" sx={{ p: { xs: 0, sm: 4 }, borderRadius: { xs: 0, sm: 2 }, borderWidth: { xs: 0, sm: 1 }, bgcolor: { xs: "transparent", sm: "background.paper" } }}>
         <Typography fontWeight={800} sx={{ mb: 2 }}>
           Review and submit
         </Typography>
@@ -264,13 +265,13 @@ export default function ReviewAndSubmit() {
               titleVariant="h6"
               sx={{ mb: 3 }}
             >
-              <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+              <Box sx={{ display: "flex", justifyContent: { xs: "flex-start", sm: "center" }, mb: 1 }}>
                 <Button
                   type="button"
                   size="medium"
                   variant="text"
                   onClick={() => nav(section.editTo)}
-                  sx={{ textTransform: "none" }}
+                  sx={{ textTransform: "none", px: { xs: 0, sm: 1 } }}
                 >
                   Edit
                 </Button>
@@ -279,11 +280,13 @@ export default function ReviewAndSubmit() {
               <Paper
                 variant="outlined"
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: { xs: 0, sm: 2 },
+                  borderWidth: { xs: 0, sm: 1 },
                   position: "relative",
                   overflow: "hidden",
+                  bgcolor: { xs: "transparent", sm: "background.paper" },
                   "&::before": {
-                    content: '""',
+                    content: { xs: "none", md: '""' },
                     position: "absolute",
                     top: 0,
                     bottom: 0,

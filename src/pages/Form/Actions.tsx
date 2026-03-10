@@ -220,13 +220,20 @@ export default function Actions() {
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: { xs: 0, sm: 4 },
+          borderRadius: { xs: 0, sm: 2 },
+          borderWidth: { xs: 0, sm: 1 },
+          bgcolor: { xs: "transparent", sm: "background.paper" },
+        }}
+      >
         <Typography fontWeight={800} sx={{ mb: 2 }}>
           Actions and next steps
         </Typography>
 
         <Stack spacing={4}>
-
           {/* Queue */}
           {showQueue && (
             <WithTTS
@@ -281,7 +288,7 @@ export default function Actions() {
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
                         gap: 1.5,
                       }}
                     >
@@ -332,9 +339,9 @@ export default function Actions() {
                         ) : null}
 
                         <Stack
-                          direction="row"
+                          direction={{ xs: "column", sm: "row" }}
                           spacing={1}
-                          alignItems="center"
+                          alignItems={{ xs: "stretch", sm: "center" }}
                           justifyContent="space-between"
                         >
                           <Typography variant="body2" color="text.secondary">
@@ -347,7 +354,7 @@ export default function Actions() {
                             variant="contained"
                             onClick={handleSetReminder}
                             disabled={!hasReminderContact || !computedReminderAt}
-                            sx={{ whiteSpace: "nowrap" }}
+                            sx={{ width: { xs: "100%", sm: "auto" } }}
                           >
                             Set reminder
                           </Button>

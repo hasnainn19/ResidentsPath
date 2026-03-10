@@ -59,14 +59,33 @@ export default function FormStepLayout(props: Props) {
     .join(". ");
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 4 }}>
-      <Container maxWidth="lg">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          "@supports (height: 100svh)": { minHeight: "100svh" },
+          bgcolor: "background.default",
+          py: { xs: 2, sm: 4 },
+        }}
+      >
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         <Paper
           variant="outlined"
-          sx={{ p: 6, borderWidth: 2, borderRadius: 2, bgcolor: "background.paper" }}
+          sx={{
+            p: { xs: 2, sm: 6 },
+            borderWidth: { xs: 1, sm: 2 },
+            borderRadius: 2,
+            bgcolor: "background.paper",
+          }}
         >
           {/* Top row */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            flexWrap={{ xs: "wrap", sm: "nowrap" }}
+            rowGap={1}
+            sx={{ mb: { xs: 1.5, sm: 2 } }}
+          >
             {props.step > 1 && props.onBack ? (
               <Button
                 type="button"
@@ -78,7 +97,7 @@ export default function FormStepLayout(props: Props) {
                 Previous
               </Button>
             ) : (
-              <Box sx={{ width: 80 }} />
+              <Box sx={{ width: { xs: 0, sm: 80 } }} />
             )}
 
             <TextToSpeechButton text={listenText} />
@@ -86,12 +105,13 @@ export default function FormStepLayout(props: Props) {
 
           {/* Title + language */}
           <Stack
-            direction="row"
+            direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
-            alignItems="flex-start"
-            sx={{ mb: 3 }}
+            alignItems={{ xs: "stretch", sm: "flex-start" }}
+            spacing={{ xs: 1.5, sm: 0 }}
+            sx={{ mb: { xs: 2, sm: 3 } }}
           >
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Typography variant="h5" fontWeight={800}>
                 {props.title}
               </Typography>
@@ -102,7 +122,10 @@ export default function FormStepLayout(props: Props) {
               )}
             </Box>
 
-            <FormControl size="small" sx={{ minWidth: 220 }}>
+            <FormControl
+              size="small"
+              sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: "100%", sm: "auto" } }}
+            >
               <InputLabel id="lang-label">Language</InputLabel>
               <Select
                 labelId="lang-label"
@@ -120,7 +143,22 @@ export default function FormStepLayout(props: Props) {
           </Stack>
 
           {/* Progress */}
-          <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, mb: 3 }}>
+          <Box sx={{ display: { xs: "block", sm: "none" }, mb: 2 }}>
+            <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+              <Typography variant="body2" fontWeight={700}>
+                Step {props.step} of {props.totalSteps}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {percent}% complete
+              </Typography>
+            </Stack>
+            <LinearProgress variant="determinate" value={percent} />
+          </Box>
+
+          <Paper
+            variant="outlined"
+            sx={{ display: { xs: "none", sm: "block" }, p: 3, borderRadius: 2, mb: 3 }}
+          >
             <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
               <Typography variant="body2" fontWeight={700}>
                 Step {props.step} of {props.totalSteps}

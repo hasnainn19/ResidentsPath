@@ -36,6 +36,20 @@ const theme = createTheme({
   typography: {
     fontFamily: "Roboto, Arial, sans-serif",
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        "@media (max-width:900px)": {
+          body: {
+            paddingRight: "0 !important",
+          },
+          ".mui-fixed": {
+            paddingRight: "0 !important",
+          },
+        },
+      },
+    },
+  },
 });
 
 export default theme;

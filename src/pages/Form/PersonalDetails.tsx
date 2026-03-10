@@ -30,7 +30,6 @@ import {
   FormHelperText,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
@@ -261,8 +260,16 @@ export default function PersonalDetails() {
           nav("/form/actions");
         }}
       >
-        <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
-          <Stack spacing={3}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 0, sm: 4 },
+            borderRadius: { xs: 0, sm: 2 },
+            borderWidth: { xs: 0, sm: 1 },
+            bgcolor: { xs: "transparent", sm: "background.paper" },
+          }}
+        >
+          <Stack spacing={{ xs: 2.5, sm: 3 }}>
             {/* Info block */}
             <Alert
               severity="info"
@@ -284,6 +291,9 @@ export default function PersonalDetails() {
                 direction="row"
                 justifyContent="space-between"
                 alignItems="flex-start"
+                flexWrap="wrap"
+                columnGap={1}
+                rowGap={0.75}
                 sx={{ mb: 1 }}
               >
                 <Stack direction="row" spacing={1} alignItems="flex-start">
@@ -304,7 +314,11 @@ export default function PersonalDetails() {
                 <TextToSpeechButton text={(COPY.info.tts ?? COPY.info.label).trim()} />
               </Stack>
 
-              <Stack component="ul" spacing={1} sx={{ m: 0, p: 0, listStyle: "none" }}>
+              <Stack
+                component="ul"
+                spacing={{ xs: 0.75, sm: 1 }}
+                sx={{ m: 0, p: 0, listStyle: "none" }}
+              >
                 <Stack component="li" direction="row" spacing={1} alignItems="flex-start">
                   <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} aria-hidden />
                   <Typography variant="body2" color="text.secondary">
@@ -333,7 +347,10 @@ export default function PersonalDetails() {
               <Stack
                 direction="row"
                 justifyContent="space-between"
-                alignItems="center"
+                alignItems="flex-start"
+                flexWrap="wrap"
+                columnGap={1}
+                rowGap={0.75}
                 sx={{ mb: 1 }}
               >
                 <FormLabel sx={{ fontWeight: 800 }}>{COPY.provideDetails.label}</FormLabel>
@@ -363,13 +380,13 @@ export default function PersonalDetails() {
 
             {/* Personal details */}
             <Collapse in={provideDetails === "yes"} timeout={200} unmountOnExit>
-              <Stack spacing={2}>
+              <Stack spacing={{ xs: 1.5, sm: 2 }}>
                 <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
                   <Stack spacing={2}>
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "260px 1fr",
+                        gridTemplateColumns: { xs: "1fr", md: "260px 1fr" },
                         gap: 2,
                         alignItems: "start",
                       }}
@@ -407,7 +424,9 @@ export default function PersonalDetails() {
                             value={formData.pronounsOtherText}
                             onChange={(e) => setField("pronounsOtherText", e.target.value)}
                             fullWidth
-                            slotProps={{ htmlInput: { maxLength: FIELD_META.pronounsOtherText.maxLen } }}
+                            slotProps={{
+                              htmlInput: { maxLength: FIELD_META.pronounsOtherText.maxLen },
+                            }}
                           />
                         )}
                       </Stack>
@@ -426,7 +445,7 @@ export default function PersonalDetails() {
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
                         gap: 2,
                       }}
                     >
@@ -457,6 +476,7 @@ export default function PersonalDetails() {
                         slotProps={{ htmlInput: { maxLength: FIELD_META.lastName.maxLen } }}
                       />
                     </Box>
+
                     {/* DOB */}
                     <DatePicker
                       label={labelOptional("dob")}
@@ -481,11 +501,11 @@ export default function PersonalDetails() {
                   </Stack>
                 </WithTTS>
 
-                <Divider />
+                <Divider sx={{ display: { xs: "none", sm: "block" } }} />
 
                 {/* Contact details */}
                 <WithTTS copy={COPY.contactDetails} titleVariant="subtitle1">
-                  <Stack spacing={2}>
+                  <Stack spacing={{ xs: 1.5, sm: 2 }}>
                     <TextField
                       label={labelOptional("email")}
                       type="email"
@@ -505,7 +525,13 @@ export default function PersonalDetails() {
                       }}
                     />
 
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                        gap: 2,
+                      }}
+                    >
                       <FormControl fullWidth>
                         <InputLabel id="phone-country-label">Country / dial code</InputLabel>
                         <Select
@@ -548,81 +574,43 @@ export default function PersonalDetails() {
                         }}
                       />
                     </Box>
-                    <Divider />
-                    {/* Preferred contact method */}
-                    <Box>
-                      <Typography fontWeight={700} sx={{ mb: 1 }}>
-                        {labelOptional("contactMethod")}
-                      </Typography>
-                    </Box>
-                    <Stack direction="row" spacing={2} alignItems="flex-start">
-                      <Box sx={{ flex: 1 }}>
-                        <FormControl fullWidth error={contactMethodTouched && contactMethodInvalid}>
-                          <InputLabel id="contact-label">
-                            {labelOptional("contactMethod")}
-                          </InputLabel>
-                          <Select
-                            labelId="contact-label"
-                            label={labelOptional("contactMethod")}
-                            value={formData.contactMethod ?? ""}
-                            onChange={(e) => {
-                              setField("contactMethod", String(e.target.value) as ContactMethod);
-                              setContactMethodTouched(true);
-                            }}
-                            onBlur={() => setContactMethodTouched(true)}
-                          >
-                            <MenuItem value="">Contact method (optional)</MenuItem>
-                            {UI_OPTIONS.contactMethod.map((opt) => (
-                              <MenuItem key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
 
-                          <FormHelperText>
-                            {contactMethodTouched && contactMethodInvalid
-                              ? needsPhoneForContactMethod
-                                ? "To use Text message, add a phone number above."
-                                : "To use Email, add an email address above."
-                              : " "}
-                          </FormHelperText>
-                        </FormControl>
-                      </Box>
-
-                      {/* Small help box */}
-                      <Box
-                        sx={(theme) => {
-                          const accent = theme.palette.primary.main;
-                          return {
-                            bgcolor: alpha(accent, 0.08),
-                            border: "1px solid",
-                            borderColor: accent,
-                            borderRadius: 1,
-                            px: 2,
-                            py: 1.5,
-                            maxWidth: 320,
-                          };
+                    <FormControl fullWidth error={contactMethodTouched && contactMethodInvalid}>
+                      <InputLabel id="contact-label">{labelOptional("contactMethod")}</InputLabel>
+                      <Select
+                        labelId="contact-label"
+                        label={labelOptional("contactMethod")}
+                        value={formData.contactMethod ?? ""}
+                        onChange={(e) => {
+                          setField("contactMethod", String(e.target.value) as ContactMethod);
+                          setContactMethodTouched(true);
                         }}
+                        onBlur={() => setContactMethodTouched(true)}
                       >
-                        <Typography variant="body2" sx={{ color: "primary.main" }}>
-                          <InfoOutlinedIcon
-                            sx={{
-                              fontSize: 16,
-                              mr: 1,
-                              verticalAlign: "text-bottom",
-                              color: "primary.main",
-                            }}
-                          />
-                          We will use this to update you on your request
-                        </Typography>
-                      </Box>
-                    </Stack>
+                        <MenuItem value="">Contact method (optional)</MenuItem>
+                        {UI_OPTIONS.contactMethod.map((opt) => (
+                          <MenuItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+
+                      <FormHelperText>
+                        {contactMethodTouched && contactMethodInvalid
+                          ? needsPhoneForContactMethod
+                            ? "To use Text message, add a phone number above."
+                            : "To use Email, add an email address above."
+                          : "We will use this to update you on your request."}
+                      </FormHelperText>
+                    </FormControl>
                   </Stack>
                 </WithTTS>
-                <Divider />
+
+                <Divider sx={{ display: { xs: "none", sm: "block" } }} />
+
                 {/* Address */}
                 <WithTTS copy={COPY.address} titleVariant="subtitle1">
-                  <Stack spacing={2}>
+                  <Stack spacing={{ xs: 1.5, sm: 2 }}>
                     <TextField
                       label={labelOptional("addressLine1")}
                       value={formData.addressLine1 ?? ""}
@@ -650,7 +638,13 @@ export default function PersonalDetails() {
                       slotProps={{ htmlInput: { maxLength: FIELD_META.addressLine3.maxLen } }}
                     />
 
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 2 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 220px" },
+                        gap: 2,
+                      }}
+                    >
                       <TextField
                         label={labelOptional("townOrCity")}
                         value={formData.townOrCity ?? ""}
