@@ -51,13 +51,17 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
     const options = ENQUIRIES_BY_TOPLEVEL[out.topLevel] || [];
     if (options.length === 1) {
       const only = options[0];
-      if (out.enquiryId === "" || out.enquiryId === only.value) {
-        out.enquiryId = only.value;
-        if (!out.routedDepartment) out.routedDepartment = only.department ?? "";
-      }
-    } else if (out.enquiryId && !out.routedDepartment) {
+      out.enquiryId = only.value;
+      out.routedDepartment = only.department ?? "";
+    } else if (out.enquiryId) {
       const match = options.find((x) => x.value === out.enquiryId);
-      if (match?.department) out.routedDepartment = match.department;
+      if (match?.department) {
+        out.routedDepartment = match.department;
+      } else {
+        out.enquiryId = "";
+        out.specificDetailId = "";
+        out.routedDepartment = "";
+      }
     }
   }
 

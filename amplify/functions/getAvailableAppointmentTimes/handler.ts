@@ -18,7 +18,9 @@ const PENDING_APPOINTMENT_SLOT_STATE = "PENDING";
 
 function getEnquiriesStateTableName() {
   const tableName = process.env.ENQUIRIES_STATE_TABLE;
-  if (!tableName) throw new Error("ENQUIRIES_STATE_TABLE is not set");
+  if (!tableName){
+    throw new Error("ENQUIRIES_STATE_TABLE is not set");
+  }
   return tableName;
 }
 

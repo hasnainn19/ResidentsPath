@@ -222,7 +222,9 @@ export function getSupportedPhoneCountry(value: string | undefined): CountryCode
 
 export function normalisePhoneToE164(value: string, phoneCountry?: string) {
   const trimmed = value.trim();
-  if (!trimmed.length) return undefined;
+  if (!trimmed.length){ 
+    return undefined;
+  }
 
   const candidate = trimmed.startsWith("00") ? `+${trimmed.slice(2)}` : trimmed;
   const supportedCountry = getSupportedPhoneCountry(phoneCountry);
