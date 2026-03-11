@@ -5,7 +5,6 @@
  * to the checkbox id.
  */
 
-
 import { type ReactNode, useId } from "react";
 import { Box, Checkbox, Typography } from "@mui/material";
 
@@ -16,16 +15,21 @@ export default function LeftCheckRow(props: {
   children?: ReactNode;
 }) {
   const id = useId();
+
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+    <Box sx={{ display: "flex", alignItems: "flex-start", gap: { xs: 1.25, sm: 0 } }}>
       <Checkbox
         slotProps={{ input: { id } }}
         checked={props.checked}
         onChange={(e) => props.onChange(e.target.checked)}
-        sx={{ mt: 0.25, mr: 1, p: 0 }}
+        sx={{ mt: 0.25, mr: { xs: 0, sm: 1 }, p: { xs: 0.5, sm: 0 } }}
       />
-      <Box sx={{ flex: 1 }}>
-        <Typography component="label" htmlFor={id} sx={{ mt: 0.45, textAlign: "left", cursor: "pointer" }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          component="label"
+          htmlFor={id}
+          sx={{ mt: 0.45, textAlign: "left", cursor: "pointer", lineHeight: { xs: 1.35, sm: "inherit" } }}
+        >
           {props.label}
         </Typography>
         {props.children}

@@ -5,6 +5,7 @@ import { postConfirmation } from './functions/postConfirmation/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
+import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
@@ -20,6 +21,7 @@ const backend = defineBackend({
     submitEnquiry,
     getTicketInfo,
     calculateDepartmentQueue,
+  getAvailableAppointmentTimes,
 });
 
 /**
@@ -45,30 +47,24 @@ backend.postConfirmation.resources.lambda.addToRolePolicy(
 		],
 	})
 );
-// Create a DynamoDB table to keep track of daily ticket numbers for the submitEnquiry function
-// to ensure unique ticket numbers without race conditions
-const ticketCounterTable = new Table(backend.stack, "TicketCounterTable", {
-  partitionKey: { name: "counterId", type: AttributeType.STRING },
+// Create a DynamoDB table to keep track of daily ticket numbers, claimed ticket numbers,
+// and claimed case reference numbers for the submitEnquiry function
+const enquiriesStateTable = new Table(backend.stack, "EnquiriesStateTable", {
+  partitionKey: { name: "pk", type: AttributeType.STRING },
+  sortKey: { name: "sk", type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
   timeToLiveAttribute: "expiresAt",
 });
 
-// Table to track claimed ticket numbers for each service day
-// This allows ticket numbers to be reused if the main counter reaches 1000
-// A function to release claimed tickets on completion will need to be implemented elsewhere
-// (This needs to be linked to ticket completion and deletion so ticket numbers are actually released)
-const ticketNumberClaimsTable = new Table(backend.stack, "TicketNumberClaimsTable", {
-  partitionKey: { name: "queueId", type: AttributeType.STRING },
-  sortKey: { name: "ticketNumber", type: AttributeType.STRING },
-  billingMode: BillingMode.PAY_PER_REQUEST,
-  timeToLiveAttribute: "expiresAt",
-});
+enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
+enquiriesStateTable.grantReadData(backend.getAvailableAppointmentTimes.resources.lambda);
 
-ticketCounterTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
-ticketNumberClaimsTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
-
-backend.submitEnquiry.addEnvironment("TICKET_COUNTER_TABLE", ticketCounterTable.tableName);
 backend.submitEnquiry.addEnvironment(
-  "TICKET_NUMBER_CLAIMS_TABLE",
-  ticketNumberClaimsTable.tableName,
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
+backend.getAvailableAppointmentTimes.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
 );
