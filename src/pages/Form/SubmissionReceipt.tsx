@@ -22,6 +22,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 import type { Schema } from "../../../amplify/data/resource";
 import NavBar from "../../components/NavBar";
@@ -469,9 +470,24 @@ export default function SubmissionReceipt() {
                 </Paper>
               </Stack>
 
-              <Alert severity="info" variant="outlined">
-                Write down or save your case reference number now.
-                {!isAppointment && receipt?.ticketNumber ? " Keep your ticket number as well." : ""}
+              <Alert
+                severity="info"
+                variant="outlined"
+                sx={(theme) => {
+                  const accent = theme.palette.primary.main;
+                  return {
+                    borderRadius: 2,
+                    py: 1.5,
+                    borderColor: accent,
+                    bgcolor: alpha(accent, 0.08),
+                    "& .MuiAlert-message": { width: "100%" },
+                    "& .MuiAlert-icon": { color: accent },
+                    color: theme.palette.primary.main,
+                  };
+                }}
+              >
+                Write down or save your case reference number
+                {!isAppointment && receipt?.ticketNumber ? " and ticket number now." : " now."}
               </Alert>
             </Stack>
           </Paper>
@@ -671,7 +687,7 @@ export default function SubmissionReceipt() {
                     )}
 
                     <Typography variant="body2" color="text.secondary">
-                      You can still use your case reference if the QR code is not available.
+                      You can still use your case reference number if the QR code is not available.
                     </Typography>
                   </Paper>
                 </Stack>
@@ -682,15 +698,15 @@ export default function SubmissionReceipt() {
                       What to keep
                     </Typography>
                     <Typography color="text.secondary">
-                      Make sure you keep your case reference number.
+                      Make sure you keep your case reference number
                       {!isAppointment && receipt.ticketNumber
-                        ? " Keep your ticket number as well."
-                        : ""}
+                        ? " and ticket number."
+                        : "."}
                     </Typography>
                     <Typography color="text.secondary">
                       {isAppointment
                         ? "When you arrive at reception, have your case reference number or QR code ready."
-                        : "Use the queue page and your ticket number or QR code to check position and wait time."}
+                        : "Use your ticket number or QR code on the reference page to check your position and wait time."}
                     </Typography>
                   </Stack>
                 </Paper>

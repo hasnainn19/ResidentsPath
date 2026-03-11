@@ -21,6 +21,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
 import { fetchAuthSession } from "aws-amplify/auth";
+import { DepartmentLabelById } from "../../../shared/formSchema";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -80,6 +81,7 @@ export default function ReviewAndSubmit() {
             ticketNumber: result.ticketNumber || undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
             appointmentTime: formData.appointmentTime || undefined,
+            departmentName: DepartmentLabelById[payload.departmentId],
           },
         },
       });

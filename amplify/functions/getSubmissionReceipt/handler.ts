@@ -1,5 +1,6 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { DepartmentLabelById } from "../../../shared/formSchema";
 
 export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async (event) => {
   const referenceNumber = event.arguments.referenceNumber.trim().toUpperCase();
@@ -12,8 +13,8 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
   }
 
   const client = await getAmplifyClient();
-  const caseLookup = await (client.models.Case as any).listCaseByReferenceNumber({
-    referenceNumber,
+  const caseLookup = await client.models.Case.list({
+    filter: { referenceNumber: { eq: referenceNumber } },
     limit: 1,
   });
 
@@ -70,16 +71,15 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     }
   }
 
-  const [ticketLookup, appointmentLookup, departmentLookup] = await Promise.all([
-    (client.models.Ticket as any).listTicketByCaseId({
-      caseId: caseRecord.id,
+  const [ticketLookup, appointmentLookup] = await Promise.all([
+    client.models.Ticket.list({
+      filter: { caseId: { eq: caseRecord.id } },
       limit: 1,
     }),
-    (client.models.Appointment as any).listAppointmentByCaseId({
-      caseId: caseRecord.id,
+    client.models.Appointment.list({
+      filter: { caseId: { eq: caseRecord.id } },
       limit: 1,
     }),
-    client.models.Department.get({ id: caseRecord.departmentId }),
   ]);
 
   if (ticketLookup.errors?.length || appointmentLookup.errors?.length) {
@@ -93,9 +93,6 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     };
   }
 
-  if (departmentLookup.errors?.length) {
-    console.error("getSubmissionReceipt: department lookup failed", departmentLookup.errors);
-  }
 
   const ticket = ticketLookup.data?.[0];
   const appointment = appointmentLookup.data?.[0];
@@ -115,6 +112,8 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     ticketNumber: ticket?.ticketNumber ?? undefined,
     appointmentDateIso: appointment?.date ?? undefined,
     appointmentTime: appointment?.time ?? undefined,
-    departmentName: departmentLookup.data?.name ?? undefined,
+    departmentName: caseRecord.departmentId
+      ? DepartmentLabelById[caseRecord.departmentId as keyof typeof DepartmentLabelById] ?? undefined
+      : undefined,
   };
 };
