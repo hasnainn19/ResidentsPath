@@ -1,10 +1,56 @@
-import type { DynamoDBStreamHandler } from "aws-lambda";
+import type { DynamoDBStreamHandler, DynamoDBRecord } from "aws-lambda";
 import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { endUserMessagingClient } from "../utils/endUserMessagingClient";
 import { SendTextMessageCommand } from "@aws-sdk/client-pinpoint-sms-voice-v2";
 import { sesClient } from "../utils/sesClient";
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
+
+/**
+ * Validates a raw DynamoDB stream record and extracts the unmarshalled images.
+ * Checks that the event is a MODIFY, that both images are present, and that the
+ * ticket record contains the required fields.
+ *
+ * @returns An object containing the unmarshalled images, caseId, and ticketNumber, or null if invalid
+ */
+function validateTicketRecord(record: DynamoDBRecord) {
+    if (record.eventName !== "MODIFY") {
+        return null;
+    }
+    if (!record.dynamodb?.NewImage || !record.dynamodb?.OldImage) {
+        return null;
+    }
+
+    // Casted to any because the types are mismatched between @aws-lambda and @aws-sdk/util-dynamodb, but we know the structure is correct
+    const newImage = unmarshall(record.dynamodb.NewImage as any);
+    const oldImage = unmarshall(record.dynamodb.OldImage as any);
+
+    const caseId = newImage.caseId;
+    const ticketNumber = newImage.ticketNumber;
+    if (!caseId || !ticketNumber) {
+        console.error("notifyResident: Missing caseId or ticketNumber in ticket record,", JSON.stringify(record));
+        return null;
+    }
+
+    return { newImage, oldImage, caseId, ticketNumber };
+}
+
+/**
+ * Determines whether a resident should be notified based on the changes between
+ * the old and new images of a Ticket record.
+ *
+ * @returns the message to be sent to the resident if they should be notified or null otherwise
+ */
+function shouldNotifyResident(newImage: Record<string, any>, oldImage: Record<string, any>, ticketNumber: string): string | null {
+    // Notify when the ticket transitions TO position 0 (i.e. now being served)
+    if (newImage.position === 0 && oldImage.position !== 0) {
+        return `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
+    }
+
+    // Other notification conditions will go here
+
+    return null;
+}
 
 async function getCase(client: AmplifyClient, caseId: string) {
     const { data: caseData } = await client.models.Case.get({ id: caseId });
@@ -53,7 +99,7 @@ async function sendEmail(email: string, ticketNumber: string, message: string): 
             Content: {
                 Simple: {
                     Subject: {
-                        Data: "Your ticket is now being served",
+                        Data: "An update about your ticket",
                     },
                     Body: {
                         Text: {
@@ -83,30 +129,15 @@ export const handler: DynamoDBStreamHandler = async (event) => {
     const client = await getAmplifyClient();
 
     for (const record of event.Records) {
-        // Only care about updates, not inserts or deletes
-        if (record.eventName !== "MODIFY") {
-            continue;
-        }
-        // Ensure we have both the old and new images to compare
-        if (!record.dynamodb?.NewImage || !record.dynamodb?.OldImage) {
+        const validated = validateTicketRecord(record);
+        if (!validated) {
             continue;
         }
 
-        // Unmarshall the DynamoDB images to get the actual data objects
-        // Casted to any because the types are mismatched between @aws-lambda and @aws-sdk/util-dynamodb, but we know the structure is correct
-        const newImage = unmarshall(record.dynamodb.NewImage as any);
-        const oldImage = unmarshall(record.dynamodb.OldImage as any);
+        const { newImage, oldImage, caseId, ticketNumber } = validated;
 
-        // Only fire on the transition TO position 0
-        if (newImage.position !== 0 || oldImage.position === 0) {
-            continue;
-        }
-
-        const caseId = newImage.caseId;
-        const ticketNumber = newImage.ticketNumber;
-
-        if (!caseId || !ticketNumber) {
-            console.error("notifyResident: Missing caseId or ticketNumber in DynamoDB record:", { newImage, oldImage });
+        const message = shouldNotifyResident(newImage, oldImage, ticketNumber);
+        if (!message) {
             continue;
         }
 
@@ -131,8 +162,6 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             console.log(`notifyResident: User with ID ${user.id} has no contact information, skipping notification for ticket ${ticketNumber}.`);
             continue;
         }
-
-        const message = `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
 
         // If they have a phone number, we contact them via SMS using End User Messaging
         if (phoneNumber) {
