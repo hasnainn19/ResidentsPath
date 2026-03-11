@@ -7,11 +7,19 @@ export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
 ) => {
   // Initialize Amplify client with admin permissions
   const client = await getAmplifyClient();
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
 
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
   // Query all tickets#
   const { data: tickets } = await client.models.Ticket.list({
     filter: {
       status: { eq: "WAITING" },
+      createdAt: {
+        ge: startOfDay.toISOString(),
+        le: endOfDay.toISOString(),
+      },
     },
   });
   const { data: staff } = await client.models.Staff.list({

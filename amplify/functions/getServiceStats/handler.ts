@@ -2,12 +2,27 @@ import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
 
 export const handler: Schema["getServiceStats"]["functionHandler"] = async (
-  event,
+  _event,
 ) => {
   const client = await getAmplifyClient();
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
 
-  const { data: tickets } = await client.models.Ticket.list();
-  const { data: staff } = await client.models.Staff.list();
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const { data: tickets } = await client.models.Ticket.list({
+    filter: {
+      status: { eq: "WAITING" },
+      createdAt: {
+        ge: startOfDay.toISOString(),
+        le: endOfDay.toISOString(),
+      },
+    },
+  });
+  const { data: staff } = await client.models.Staff.list({
+    filter: { isAvailable: { eq: true } },
+  });
   const { data: cases } = await client.models.Case.list();
   const { data: departments } = await client.models.Department.list();
 
@@ -17,19 +32,13 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
 
   const getWaitingCount = (departmentId: string) => {
     return tickets.filter(
-      (t) =>
-        t.status === "WAITING" &&
-        !t.steppedOut &&
-        t.departmentId === departmentId,
+      (t) => !t.steppedOut && t.departmentId === departmentId,
     ).length;
   };
 
   const getLongestWait = (departmentId: string) => {
     const waiting = tickets.filter(
-      (t) =>
-        t.status === "WAITING" &&
-        !t.steppedOut &&
-        t.departmentId === departmentId,
+      (t) => !t.steppedOut && t.departmentId === departmentId,
     );
     if (waiting.length === 0) return 0;
     return Math.max(...waiting.map((t) => t.estimatedWaitTimeUpper || 0));
@@ -39,10 +48,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
       return (
-        t.status === "WAITING" &&
-        !t.steppedOut &&
-        t.departmentId === departmentId &&
-        c?.priority === true
+        !t.steppedOut && t.departmentId === departmentId && c?.priority === true
       );
     }).length;
   };
@@ -51,20 +57,14 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
       return (
-        t.status === "WAITING" &&
-        !t.steppedOut &&
-        t.departmentId === departmentId &&
-        c?.priority !== true
+        !t.steppedOut && t.departmentId === departmentId && c?.priority !== true
       );
     }).length;
   };
 
   const getSteppedOutCount = (departmentId: string) => {
     return tickets.filter(
-      (t) =>
-        t.status === "WAITING" &&
-        t.steppedOut === true &&
-        t.departmentId === departmentId,
+      (t) => t.steppedOut === true && t.departmentId === departmentId,
     ).length;
   };
 
