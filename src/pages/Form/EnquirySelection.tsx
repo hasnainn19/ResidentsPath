@@ -43,12 +43,11 @@ import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
-import { GENERAL_SERVICES_CHOICE_OPTIONS, TOP_LEVEL } from "./data/enquiries";
+import { TOP_LEVEL } from "./data/enquiries";
 
 import {
   computeCanGoNext,
   applyTopLevelChange,
-  applyGeneralServicesChoiceChange,
   applyEnquiryChange,
   applyUrgencyChange,
   applyProceedChange,
@@ -96,8 +95,6 @@ export default function EnquirySelection() {
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   const {
-    isGeneralServices,
-    generalServicesIsSection,
     isOther,
     enquiryOptions,
     specificOptions,
@@ -116,12 +113,10 @@ export default function EnquirySelection() {
   // Whether the continue button should be enabled, based on whether required fields are filled in
   const canGoNext = computeCanGoNext(formData, hasEnoughToProceed, needsUrgentReason);
 
+  const showEnquiryDropdown = formData.topLevel !== "" && !isOther && enquiryOptions.length > 1;
+
   function handleTopLevelChange(nextTopLevel: string) {
     setFormData((prev) => applyTopLevelChange(prev, nextTopLevel));
-  }
-
-  function handleGeneralServicesChoiceChange(nextChoice: string) {
-    setFormData((prev) => applyGeneralServicesChoiceChange(prev, nextChoice));
   }
 
   function handleEnquiryChange(nextId: string) {
@@ -153,13 +148,7 @@ export default function EnquirySelection() {
       return parts.join(" ");
     }
 
-    if (isGeneralServices) {
-      if (!formData.generalServicesChoice) {
-        parts.push("Then choose a topic.");
-        return parts.join(" ");
-      }
-      parts.push("Then choose an enquiry.");
-    } else {
+    if (showEnquiryDropdown) {
       parts.push("Then choose an enquiry.");
     }
 
@@ -188,7 +177,7 @@ export default function EnquirySelection() {
     "Do you need support sooner today? Choose yes, no, or not sure. For example: a safety concern, nowhere safe to stay tonight, health or mobility needs, or something time-limited today. If you choose yes, select a reason.";
 
   const proceedTts =
-    "How would you like to proceed? Select join the digital queue or book an appointment. We may suggest a quicker online or self-service option if available.";
+    "How would you like to proceed? Select join the digital queue or book an appointment.";
 
   const additionalInfoTts =
     "Anything else you want to tell us. This is optional. Add any details that might help. You can also use voice input.";
@@ -196,28 +185,41 @@ export default function EnquirySelection() {
   const supportTts =
     "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options, and add support notes.";
 
+  const insetSectionSx = {
+    borderLeft: "4px solid",
+    borderColor: "primary.main",
+    pl: { xs: 2, sm: 3 },
+    py: { xs: 0.25, sm: 0 },
+  } as const;
+
+  
   return (
     <FormStepLayout
-      step={2}
+      step={1}
       totalSteps={4}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
-      onBack={() => nav("/form/personal-details")}
       languageValue={formData.language}
       onLanguageChange={(code) => setField("language", code)}
       languageOptions={LANGUAGE_OPTIONS}
     >
       {/* Main form card */}
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: { xs: 2.5, sm: 4 },
+          borderRadius: { xs: 1.5, sm: 2 },
+        }}
+      >
         <Box
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
             if (!canGoNext) return;
-            nav("/form/actions");
+            nav("/form/personal-details");
           }}
         >
-          <Stack spacing={4}>
+          <Stack spacing={{ xs: 3, sm: 4 }}>
             {/* Service */}
             <WithTTS
               copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
@@ -242,72 +244,33 @@ export default function EnquirySelection() {
               </FormControl>
             </WithTTS>
 
-            {/* Further information */}
-            {
-              // For General Services: only show enquiries after a section is chosen (unless it is a direct item)
-              isGeneralServices && formData.topLevel !== "" && (
-                <WithTTS
-                  copy={{
-                    label: "Choose a topic",
-                    tts: "Choose a topic. This helps narrow down your request.",
-                  }}
-                  required
-                  sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
-                >
-                  <FormControl fullWidth required>
-                    <InputLabel id="general-services-choice-label">Select a topic...</InputLabel>
-                    <Select
-                      labelId="general-services-choice-label"
-                      label="Select a topic..."
-                      value={formData.generalServicesChoice}
-                      onChange={(e) => handleGeneralServicesChoiceChange(String(e.target.value))}
-                    >
-                      <MenuItem value="">Select a topic...</MenuItem>
-                      {GENERAL_SERVICES_CHOICE_OPTIONS.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </WithTTS>
-              )
-            }
-
-            {
-              // Show the enquiry dropdown when a top-level area is chosen
-              formData.topLevel !== "" &&
-                !isOther &&
-                // For General Services, only show the enquiry dropdown after a section is chosen unless it's a direct item, which maps straight to an enquiry
-                (!isGeneralServices ||
-                  (formData.generalServicesChoice !== "" && generalServicesIsSection)) && (
-                  <WithTTS
-                    copy={{
-                      label: FIELD_META.enquiryId.label,
-                      tts: "Choose an enquiry. This tells us what you need help with.",
-                    }}
-                    required
-                    sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+            {showEnquiryDropdown && (
+              <WithTTS
+                copy={{
+                  label: FIELD_META.enquiryId.label,
+                  tts: "Choose an enquiry. This tells us what you need help with.",
+                }}
+                required
+                sx={insetSectionSx}
+              >
+                <FormControl fullWidth required>
+                  <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                  <Select
+                    labelId="enquiry-label"
+                    label="Select an enquiry..."
+                    value={formData.enquiryId}
+                    onChange={(e) => handleEnquiryChange(String(e.target.value))}
                   >
-                    <FormControl fullWidth required>
-                      <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
-                      <Select
-                        labelId="enquiry-label"
-                        label="Select an enquiry..."
-                        value={formData.enquiryId}
-                        onChange={(e) => handleEnquiryChange(String(e.target.value))}
-                      >
-                        <MenuItem value="">Select an enquiry...</MenuItem>
-                        {enquiryOptions.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </WithTTS>
-                )
-            }
+                    <MenuItem value="">Select an enquiry...</MenuItem>
+                    {enquiryOptions.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </WithTTS>
+            )}
 
             {isOther && formData.topLevel !== "" && (
               <WithTTS
@@ -316,7 +279,7 @@ export default function EnquirySelection() {
                   tts: "Describe your enquiry. Briefly tell us what you need help with.",
                 }}
                 required
-                sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+                sx={insetSectionSx}
               >
                 <TextField
                   fullWidth
@@ -346,7 +309,7 @@ export default function EnquirySelection() {
                     tts: "More detail. Choose the option that best matches your situation.",
                   }}
                   required
-                  sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+                  sx={insetSectionSx}
                 >
                   <FormControl fullWidth required>
                     <InputLabel id="detail-label">Select a detail...</InputLabel>
@@ -383,10 +346,10 @@ export default function EnquirySelection() {
                     }}
                     titleVariant="subtitle2"
                   >
-                    <Stack spacing={3}>
+                    <Stack spacing={{ xs: 2.25, sm: 3 }}>
                       {/* Children */}
                       {showChildrenQs && (
-                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                        <Box sx={insetSectionSx}>
                           <LeftCheckRow
                             checked={formData.hasChildren}
                             onChange={(checked) =>
@@ -433,7 +396,7 @@ export default function EnquirySelection() {
 
                       {/* Disability */}
                       {showDisabilityQs && (
-                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                        <Box sx={insetSectionSx}>
                           <LeftCheckRow
                             checked={formData.hasDisabilityOrSensory}
                             onChange={(checked) =>
@@ -481,7 +444,7 @@ export default function EnquirySelection() {
                       )}
 
                       {showHouseholdSize && (
-                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                        <Box sx={insetSectionSx}>
                           <FormControl fullWidth>
                             <InputLabel id="household-label">
                               {FIELD_META.householdSize.label}
@@ -509,9 +472,9 @@ export default function EnquirySelection() {
                       )}
 
                       {
-                        // If DOB was not provided in Step 1, offer an optional age range after the enquiry is chosen
+                        // If DOB was not provided in Step 2, offer an optional age range after the enquiry is chosen
                         showAgeRange && (
-                          <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                          <Box sx={insetSectionSx}>
                             <FormControl fullWidth>
                               <InputLabel id="age-range-label">Select an age range...</InputLabel>
                               <Select
@@ -535,7 +498,7 @@ export default function EnquirySelection() {
                       }
 
                       {showDomesticAbuseQs && (
-                        <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                        <Box sx={insetSectionSx}>
                           <LeftCheckRow
                             checked={formData.domesticAbuse}
                             onChange={(checked) =>
@@ -642,8 +605,8 @@ export default function EnquirySelection() {
                         sx={{
                           m: 0,
                           width: "100%",
-                          px: 2,
-                          py: 1.25,
+                          px: { xs: 1.5, sm: 2 },
+                          py: { xs: 1, sm: 1.25 },
                           borderRadius: 2,
                           border: "1px solid",
                           borderColor: checked ? "primary.main" : "divider",
@@ -658,7 +621,7 @@ export default function EnquirySelection() {
                             boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}`,
                           },
                           "& .MuiFormControlLabel-label": {
-                            fontSize: 16,
+                            fontSize: { xs: 15, sm: 16 },
                             lineHeight: 1.3,
                           },
                         }}
@@ -669,7 +632,7 @@ export default function EnquirySelection() {
               </FormControl>
 
               {needsUrgentReason && (
-                <Box sx={{ mt: 2, borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}>
+                <Box sx={{ ...insetSectionSx, mt: 2 }}>
                   <Typography fontWeight={700} sx={{ mb: 1 }}>
                     {FIELD_META.urgentReason.label}{" "}
                     <Typography component="span" color="error">
@@ -704,19 +667,27 @@ export default function EnquirySelection() {
                   </FormControl>
 
                   {formData.urgentReason === "OTHER" && (
+                  <Stack spacing={1} sx={{ mt: 2 }}>
+                    <Typography component="label" htmlFor="urgent-reason-other" fontWeight={700}>
+                      Briefly describe why you need support sooner today
+                    </Typography>
+
                     <TextField
+                      id="urgent-reason-other"
                       fullWidth
                       required
                       multiline
                       minRows={3}
-                      sx={{ mt: 2 }}
-                      label="Briefly describe why you need support sooner today"
+                      placeholder="Tell us why this is urgent"
                       value={formData.urgentReasonOtherText}
                       onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
-                      slotProps={{ htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen }}}
+                      slotProps={{
+                        htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen },
+                      }}
                       helperText={countChars("urgentReasonOtherText", formData.urgentReasonOtherText)}
                     />
-                  )}
+                  </Stack>
+                )}
                 </Box>
               )}
             </WithTTS>
@@ -737,7 +708,12 @@ export default function EnquirySelection() {
                 slotProps={{ htmlInput: { maxLength: FIELD_META.additionalInfo.maxLen } }}
               />
 
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ mt: 1.5, flexWrap: "wrap", rowGap: 0.5 }}
+              >
                 <MicIcon fontSize="small" />
                 <Button
                   type="button"
@@ -774,10 +750,6 @@ export default function EnquirySelection() {
                       </MenuItem>
                     ))}
                   </Select>
-
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    We may suggest a quicker online or self-service option if available.
-                  </Typography>
                 </FormControl>
               </WithTTS>
             </Box>
@@ -785,7 +757,7 @@ export default function EnquirySelection() {
             {/* Support options */}
             <WithTTS
               copy={{ label: "Support needs (optional)", tts: supportTts }}
-              sx={{ borderLeft: "4px solid", borderColor: "primary.main", pl: 3 }}
+              sx={insetSectionSx}
               titleVariant="subtitle1"
             >
               <Stack spacing={1.25}>
@@ -874,8 +846,6 @@ export default function EnquirySelection() {
               onSave={handleSave}
               advanceLabel="Continue"
               advanceDisabled={!canGoNext}
-              showPrevious
-              onPrevious={() => nav("/form/personal-details")}
             />
           </Stack>
         </Box>
