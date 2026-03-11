@@ -25,7 +25,7 @@ function isStep1Complete(data: FormData) {
 }
 
 function isStep2Complete(data: FormData) {
-  // Step 2 is always optional but requries step 1 to be complete
+  // Step 2 is always optional but requires step 1 to be complete
   return isStep1Complete(data); 
 }
 

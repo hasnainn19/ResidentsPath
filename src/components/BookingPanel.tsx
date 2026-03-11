@@ -357,7 +357,7 @@ export default function BookingPanel(props: Props) {
                         variant="contained"
                         disabled={!selectedTime || availabilityLoading}
                         onClick={handleConfirm}
-                        sx={{ bgColor: "secondary" }}
+                        sx={{ backgroundColor: "secondary" }}
                         fullWidth
                       >
                         Confirm
@@ -386,7 +386,7 @@ export default function BookingPanel(props: Props) {
                       variant="contained"
                       disabled={!selectedTime || availabilityLoading}
                       onClick={handleConfirm}
-                      sx={{ bgColor: "secondary" }}
+                      sx={{ backgroundColor: "secondary" }}
                     >
                       Confirm
                     </Button>
