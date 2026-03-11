@@ -53,29 +53,24 @@ async function listClaimedAppointmentTimes(departmentId: string, dateIso: string
   // Loop through the results and extract the time from the sort key of each claimed appointment slot
   for (const item of result.Items ?? []) {
     const sk = item.sk?.S;
-    if (!sk?.startsWith("TIME#")) continue;
-
     const status = item.status?.S;
     const expiresAtRaw = item.expiresAt?.N;
     const expiresAt = typeof expiresAtRaw === "string" ? Number(expiresAtRaw) : NaN;
 
-    if (Number.isFinite(expiresAt) && expiresAt <= nowSeconds) {
-      continue;
-    }
+    const isExpired = Number.isFinite(expiresAt) && expiresAt <= nowSeconds;
+    const hasAllowedStatus =
+      !status ||
+      status === BOOKED_APPOINTMENT_SLOT_STATE ||
+      status === PENDING_APPOINTMENT_SLOT_STATE;
 
-    if (
-      status &&
-      status !== BOOKED_APPOINTMENT_SLOT_STATE &&
-      status !== PENDING_APPOINTMENT_SLOT_STATE
-    ) {
-      continue;
-    }
-
-    const time = sk.slice("TIME#".length);
-    if (isBookableAppointmentTime(time)) {
-      times.add(time);
+    if (sk?.startsWith("TIME#") && !isExpired && hasAllowedStatus) {
+      const time = sk.slice("TIME#".length);
+      if (isBookableAppointmentTime(time)) {
+        times.add(time);
+      }
     }
   }
+
 
   return times;
 }
