@@ -120,17 +120,24 @@ backend.notifyResident.resources.lambda.addEventSource(
   })
 );
 
-// Grant the Lambda permission to send SMS via SNS and emails via SES
+// Grant the Lambda permission to send SMS via End User Messaging
 backend.notifyResident.resources.lambda.addToRolePolicy(
   new PolicyStatement({
-    actions: [
-      "sns:Publish", // For sending SMS notifications
-      "ses:SendEmail", // For sending email notifications
-    ],
-    // SNS and SES don't require resource-level permissions for sending messages
-    resources: ["*"], 
+    actions: ["sms-voice:SendTextMessage"],
+    resources: ["arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB"],
   })
 );
 
-// Sender email address - must be a verified identity in SES
+// Grant the Lambda permission to send emails via SES
+backend.notifyResident.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["ses:SendEmail"],
+    resources: ["*"],
+  })
+);
+
+// SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
+// The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
+backend.notifyResident.addEnvironment("SMS_ORIGINATION_IDENTITY", "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB");
+
 backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");

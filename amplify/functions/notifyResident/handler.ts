@@ -1,10 +1,10 @@
 import type { DynamoDBStreamHandler } from "aws-lambda";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import { PublishCommand } from "@aws-sdk/client-sns";
-import { SendEmailCommand } from "@aws-sdk/client-sesv2";
-import { snsClient } from "../utils/snsClient";
+import { endUserMessagingClient } from "../utils/endUserMessagingClient";
+import { SendTextMessageCommand } from "@aws-sdk/client-pinpoint-sms-voice-v2";
 import { sesClient } from "../utils/sesClient";
+import { SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 /**
  * Lambda function to send notifications to residents based on changes to their ticket in the queue.
@@ -68,17 +68,20 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         // They have no form of contact, skip
         if (!phoneNumber && !email) {
+            console.log(`notifyResident: User with ID ${user.id} has no contact information, skipping notification for ticket ${ticketNumber}.`);
             continue;
         }
 
         const message = `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
 
-        // If they have a phone number, we contact them via SMS using SNS
+        // If they have a phone number, we contact them via SMS using End User Messaging
         if (phoneNumber) {
             try {
-                await snsClient.send(new PublishCommand({
-                    PhoneNumber: phoneNumber,
-                    Message: message,
+                await endUserMessagingClient.send(new SendTextMessageCommand({
+                    DestinationPhoneNumber: phoneNumber,
+                    MessageBody: message,
+                    OriginationIdentity: process.env.SMS_ORIGINATION_IDENTITY,
+                    MessageType: "TRANSACTIONAL",
                 }));
                 console.log(`notifyResident: SMS sent for ticket ${ticketNumber} to phone number ${phoneNumber}`);
             }
