@@ -19,7 +19,8 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     return tickets.filter(
       (t) =>
         t.status === "WAITING" &&
-        getCase(t.caseId)?.departmentId === departmentId,
+        !t.steppedOut &&
+        t.departmentId === departmentId,
     ).length;
   };
 
@@ -27,7 +28,8 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     const waiting = tickets.filter(
       (t) =>
         t.status === "WAITING" &&
-        getCase(t.caseId)?.departmentId === departmentId,
+        !t.steppedOut &&
+        t.departmentId === departmentId,
     );
     if (waiting.length === 0) return 0;
     return Math.max(...waiting.map((t) => t.estimatedWaitTimeUpper || 0));
@@ -38,7 +40,8 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
       const c = getCase(t.caseId);
       return (
         t.status === "WAITING" &&
-        c?.departmentId === departmentId &&
+        !t.steppedOut &&
+        t.departmentId === departmentId &&
         c?.priority === true
       );
     }).length;
@@ -49,7 +52,8 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
       const c = getCase(t.caseId);
       return (
         t.status === "WAITING" &&
-        c?.departmentId === departmentId &&
+        !t.steppedOut &&
+        t.departmentId === departmentId &&
         c?.priority !== true
       );
     }).length;
@@ -58,8 +62,9 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   const getSteppedOutCount = (departmentId: string) => {
     return tickets.filter(
       (t) =>
-        t.status === "STEPPED_OUT" &&
-        getCase(t.caseId)?.departmentId === departmentId,
+        t.status === "WAITING" &&
+        t.steppedOut === true &&
+        t.departmentId === departmentId,
     ).length;
   };
 
@@ -69,7 +74,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const results = departments.map((d) => ({
-    serviceName: d.name,
+    serviceName: d.name ?? "",
     waitingCount: getWaitingCount(d.id),
     longestWait: getLongestWait(d.id),
     priorityCaseCount: getPriorityCaseCount(d.id),
