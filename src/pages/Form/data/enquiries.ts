@@ -191,8 +191,8 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
 
   GeneralServices: [
     {
-      value: "flytipping",
-      label: "Flytipping",
+      value: "fly-tipping",
+      label: "Fly-tipping",
       department: "GENERAL_CUSTOMER_SERVICES",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
