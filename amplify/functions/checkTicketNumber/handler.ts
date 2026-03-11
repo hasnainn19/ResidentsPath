@@ -1,17 +1,6 @@
-import { data, type Schema } from "../../data/resource";
-import { generateClient } from "aws-amplify/data";
-import { GraphQLAPI, graphqlOperation } from '@aws-amplify/api-graphql';
-import { Amplify } from 'aws-amplify'
+import { type Schema } from "../../data/resource";
 
-import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-import { env } from '$amplify/env/checkTicketNumber'; 
 import { getAmplifyClient } from "../utils/amplifyClient";
-
-// const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
-
-// Amplify.configure(resourceConfig, libraryOptions);
-
-// const client = generateClient<Schema>();
 
 
 /**
@@ -22,30 +11,24 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  * fields to prevent exposing internal IDs or private case information.
  *
  * @param event.arguments.ticketNumber - The ticket number to look up
- * @returns 
+ * @returns Object containing case id of the ticket
  */
 export const handler: Schema["checkTicketNumber"]["functionHandler"] = async (event) => {
     const client = await getAmplifyClient();
 
     const { ticketNumber } = event.arguments;
 
-
-
-    // Query tickets by ticket number
-    const { data: tickets } = await client.models.Ticket.list({
-        filter: { ticketNumber: { eq: ticketNumber } },
+    const { data: tickets } = await client.models.Ticket.listTicketByTicketNumber({
+        ticketNumber
     });
 
-    if (!tickets || tickets.length === 0) {
-        return null
+    if (!tickets?.length) {
+    throw new Error(`No ticket found with ticketNumber ${ticketNumber}`);
     }
 
-    // Ticket numbers should be unique, so we take the first match
     const ticket = tickets[0];
 
-    // Return only safe, public fields
     return {
         caseId: ticket.caseId,
-        ticketNumber: ticket.ticketNumber,
     };
 };

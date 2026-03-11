@@ -1,5 +1,5 @@
 import { Html5Qrcode } from "html5-qrcode";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Alert, Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -11,7 +11,7 @@ import TextToSpeechButton from "../components/TextToSpeechButton";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
 import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../../amplify/data/resource";
+import type { Schema } from "../../amplify/data/resource";
 
 
 const ReferencePage = () => {
@@ -22,7 +22,7 @@ const ReferencePage = () => {
     const startingRef = useRef(false);
     const navigate = useNavigate();
     const [ foundCaseId, setFoundCaseId ] = useState<string | null>(null);
-    const [ refNoError, setRefNoError ] = useState('');
+    const [ ticketNoError, setTicketNoError ] = useState('');
 
 
     function handleQRScanner() {
@@ -86,17 +86,20 @@ const ReferencePage = () => {
 
     const handleCheckStatus = async () => {
         try{
-            const data = await client.queries.checkTicketNumber({ ticketNumber: refNo });
-            if (data?.data){
-                const id = data.data.caseId;
-                setFoundCaseId(id);
+            const { data: ticketData, errors: ticketErrors } = await client.queries.checkTicketNumber({ ticketNumber: refNo });
+            if (ticketErrors && ticketErrors.length > 0) {
+                setTicketNoError(ticketErrors[0].message);
+                return;
             }
-            else {
-                setRefNoError(`No ticket number or reference number exists by the name - ${refNo}`);
+            if (!ticketData) {
+                return;
             }
+            const id = ticketData.caseId;
+            setFoundCaseId(id);
+
         }
         catch(errors){
-            console.error(errors);
+            setTicketNoError(`Failed to fetch ticket: ${errors}`);
             return;
         }
     }
@@ -111,9 +114,9 @@ const ReferencePage = () => {
     <>
         <Navbar />
         <Container maxWidth="lg"  sx={{ py: 6, textAlign: 'center', height:'85vh'  }}>
-            {refNoError && (
+            {ticketNoError && (
                 <Alert  severity="error" color="error" onClose={() => {}}>
-                    {refNoError}
+                    {ticketNoError}
                 </Alert>
             )}
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>

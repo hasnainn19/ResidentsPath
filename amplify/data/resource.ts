@@ -138,6 +138,9 @@ const schema = a.schema({
       // Relationships
       case: a.belongsTo("Case", "caseId"),
     })
+    .secondaryIndexes((index) => [
+        index("ticketNumber")
+    ])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all tickets
     ]),
@@ -214,13 +217,11 @@ const schema = a.schema({
     .returns(
       a.customType({
         caseId: a.string().required(),
-        ticketNumber: a.string().required(),
       }),
     )
     .authorization((allow) => [
       allow.guest(), 
       allow.authenticated(),
-      allow.authenticated("identityPool")
     ])    
     .handler(a.handler.function(checkTicketNumber)),
 
