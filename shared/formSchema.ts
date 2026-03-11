@@ -235,7 +235,9 @@ export function normalisePhoneToE164(value: string, phoneCountry?: string) {
       ? parsePhoneNumberFromString(candidate, supportedCountry)
       : undefined;
 
-  if (!parsed || !parsed.isValid()) return undefined;
+  if (!parsed || !parsed.isValid()){ 
+    return undefined;
+  }
 
   return parsed.number;
 }

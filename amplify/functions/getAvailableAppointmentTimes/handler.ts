@@ -29,8 +29,7 @@ function getAppointmentSlotPartitionKey(departmentId: string, dateIso: string) {
   return `APPOINTMENT_SLOT#${departmentId}#${dateIso}`;
 }
 
-// List all claimed appointment times for a given department and date by querying the enquiries state table
-async function listClaimedAppointmentTimes(departmentId: string, dateIso: string) {
+async function queryClaimedAppointmentTimes(departmentId: string, dateIso: string) {
   const tableName = getEnquiriesStateTableName();
   const pk = getAppointmentSlotPartitionKey(departmentId, dateIso);
 
@@ -48,12 +47,19 @@ async function listClaimedAppointmentTimes(departmentId: string, dateIso: string
       },
     }),
   );
+  return result
+}
 
+  const times = new Set<string>();
+
+// List all claimed appointment times for a given department and date by querying the enquiries state table
+async function listClaimedAppointmentTimes(departmentId: string, dateIso: string) {
+  const claimedTimes = await queryClaimedAppointmentTimes(departmentId, dateIso);
   const times = new Set<string>();
   const nowSeconds = Math.floor(Date.now() / 1000);
 
   // Loop through the results and extract the time from the sort key of each claimed appointment slot
-  for (const item of result.Items ?? []) {
+  for (const item of claimedTimes.Items ?? []) {
     const sk = item.sk?.S;
     const status = item.status?.S;
     const expiresAtRaw = item.expiresAt?.N;
