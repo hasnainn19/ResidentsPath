@@ -36,6 +36,7 @@ import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import BookingPanel from "../../components/BookingPanel";
+import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
 
 function clampInt(n: number, min: number, max: number): number {
@@ -149,6 +150,9 @@ export default function Actions() {
 
   const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
   const showBooking = formData.proceed === "BOOK_APPOINTMENT";
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
+  const bookingDepartmentId =
+    formData.routedDepartment || enquirySelectionState.selectedEnquiry?.department;
 
   const queueStatus = useMemo(() => getQueueStatusStub(), []);
   const typicalMid = Math.round((queueStatus.typicalWaitMin + queueStatus.typicalWaitMax) / 2);
@@ -408,6 +412,7 @@ export default function Actions() {
               titleVariant="h6"
             >
               <BookingPanel
+                departmentId={bookingDepartmentId || undefined}
                 onConfirm={(dateIso, time) => {
                   setFormData((p) => ({
                     ...p,

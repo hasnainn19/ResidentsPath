@@ -215,7 +215,7 @@ export function normaliseUkPostcode(value: string) {
   return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
 }
 
-function isValidIsoDate(value: string) {
+export function isValidIsoDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 
   const y = Number(value.slice(0, 4));
@@ -253,6 +253,106 @@ function normaliseAppointmentDateIso(value: unknown) {
 
 function isValidTimeHHmm(value: string) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+export const APPOINTMENT_SLOT_START = "09:30";
+export const APPOINTMENT_SLOT_END = "16:30";
+export const APPOINTMENT_SLOT_INTERVAL_MINUTES = 30;
+export const APPOINTMENT_SLOT_VALIDATION_MESSAGE =
+  `appointmentTime must be a ${APPOINTMENT_SLOT_INTERVAL_MINUTES}-minute slot between ` +
+  `${APPOINTMENT_SLOT_START} and ${APPOINTMENT_SLOT_END}`;
+export const APPOINTMENT_MUST_BE_FUTURE_MESSAGE = "Appointments must be in the future";
+
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function minutesToTime(value: number) {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+// Get all bookable appointment times for a given date (all time slots in intervals of APPOINTMENT_SLOT_INTERVAL_MINUTES) within the defined start and end times
+export function isBookableAppointmentTime(value: string) {
+  if (!isValidTimeHHmm(value)) return false;
+
+  const totalMinutes = timeToMinutes(value);
+  return (
+    totalMinutes >= timeToMinutes(APPOINTMENT_SLOT_START) &&
+    totalMinutes <= timeToMinutes(APPOINTMENT_SLOT_END) &&
+    totalMinutes % APPOINTMENT_SLOT_INTERVAL_MINUTES === 0
+  );
+}
+
+export function getBookableAppointmentTimes() {
+  const times: string[] = [];
+
+  for (
+    let totalMinutes = timeToMinutes(APPOINTMENT_SLOT_START);
+    totalMinutes <= timeToMinutes(APPOINTMENT_SLOT_END);
+    totalMinutes += APPOINTMENT_SLOT_INTERVAL_MINUTES
+  ) {
+    times.push(minutesToTime(totalMinutes));
+  }
+
+  return times;
+}
+
+type AppointmentCurrentDateTime = {
+  dateIso: string;
+  time: string;
+};
+
+export function getCurrentAppointmentDateTime(now = new Date()): AppointmentCurrentDateTime {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  const hour = parts.find((part) => part.type === "hour")?.value;
+  const minute = parts.find((part) => part.type === "minute")?.value;
+
+  if (!year || !month || !day || !hour || !minute) {
+    throw new Error("Failed to compute current appointment date and time");
+  }
+
+  return {
+    dateIso: `${year}-${month}-${day}`,
+    time: `${hour}:${minute}`,
+  };
+}
+
+// Check if the given appointment date and time is in the future
+export function isFutureAppointmentDateTime(dateIso: string, time: string, now = new Date()) {
+  if (!isValidIsoDate(dateIso) || !isBookableAppointmentTime(time)) return false;
+
+  const current = getCurrentAppointmentDateTime(now);
+
+  if (dateIso !== current.dateIso) {
+    return dateIso > current.dateIso;
+  }
+
+  return time > current.time;
+}
+
+// Get all bookable appointment times for a given date that are in the future
+export function getFutureBookableAppointmentTimes(dateIso: string, now = new Date()) {
+  if (!isValidIsoDate(dateIso)) return [];
+
+  return getBookableAppointmentTimes().filter((time) =>
+    isFutureAppointmentDateTime(dateIso, time, now),
+  );
 }
 
 export function isValidEmail(value: string) {
@@ -304,7 +404,11 @@ export const formSchema = z
     ),
     appointmentTime: z.preprocess(
       trimToUndef,
-      z.string().refine(isValidTimeHHmm, "appointmentTime must be HH:mm").optional(),
+      z
+        .string()
+        .refine(isValidTimeHHmm, "appointmentTime must be HH:mm")
+        .refine(isBookableAppointmentTime, APPOINTMENT_SLOT_VALIDATION_MESSAGE)
+        .optional(),
     ),
 
     firstName: z.preprocess(
@@ -435,6 +539,19 @@ export const formSchema = z
           code: "custom",
           path: ["appointmentTime"],
           message: "appointmentTime is required for appointment",
+        });
+      }
+      if (
+        v.appointmentDateIso &&
+        v.appointmentTime &&
+        isValidIsoDate(v.appointmentDateIso) &&
+        isBookableAppointmentTime(v.appointmentTime) &&
+        !isFutureAppointmentDateTime(v.appointmentDateIso, v.appointmentTime)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["appointmentTime"],
+          message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
         });
       }
     } else {

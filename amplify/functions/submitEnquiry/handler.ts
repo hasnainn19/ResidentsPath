@@ -25,7 +25,7 @@ type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
 type CaseCreateInput = Parameters<DataClient["models"]["Case"]["create"]>[0];
 
-type SubmitEnquiryErrorCode = "VALIDATION" | "CAPACITY" | "SERVER";
+type SubmitEnquiryErrorCode = "VALIDATION" | "CAPACITY" | "CONFLICT" | "SERVER";
 
 type SubmitEnquiryResult = {
   ok: boolean;
@@ -115,6 +115,13 @@ function getTicketClaimKey(queueId: string, ticketNumber: string) {
   };
 }
 
+function getAppointmentSlotClaimKey(departmentId: DepartmentId, dateIso: string, time: string) {
+  return {
+    pk: `APPOINTMENT_SLOT#${departmentId}#${dateIso}`,
+    sk: `TIME#${time}`,
+  };
+}
+
 // Attempt to claim a reference number by inserting a record into the enquiries state table
 async function claimCaseReferenceNumber(referenceNumber: string) {
   const tableName = getEnquiriesStateTableName();
@@ -194,6 +201,11 @@ function getDate(d = new Date()): string {
 }
 
 type DepartmentId = ReturnType<typeof formSchema.parse>["departmentId"];
+type AppointmentSlotClaim = {
+  departmentId: DepartmentId;
+  dateIso: string;
+  time: string;
+};
 
 const DepartmentCodeById: Record<DepartmentId, string> = {
   HOMELESSNESS: "H",
@@ -208,6 +220,55 @@ function getDepartmentCode(departmentId: DepartmentId): string {
   const code = DepartmentCodeById[departmentId];
   if (!code) throw new Error(`No department code configured for ${departmentId}`);
   return code;
+}
+
+// Calculate an expiry time for an appointment slot claim, which is the end of the day of the appointment
+// plus a buffer of 7 days
+function getAppointmentSlotExpiresAt(dateIso: string) {
+  const endOfDayMs = Date.parse(`${dateIso}T23:59:59Z`);
+
+  if (!Number.isFinite(endOfDayMs)) {
+    return daysFromNowInSeconds(30);
+  }
+
+  return Math.floor(endOfDayMs / 1000) + 7 * 24 * 60 * 60;
+}
+
+// Atomically claim an appointment slot by inserting a record into the enquiries state table
+async function claimAppointmentSlot(slot: AppointmentSlotClaim, caseId: string) {
+  const tableName = getEnquiriesStateTableName();
+  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+
+  await ddb.send(
+    new PutItemCommand({
+      TableName: tableName,
+      Item: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+        caseId: { S: caseId },
+        allocatedAt: { N: String(Date.now()) },
+        expiresAt: { N: String(getAppointmentSlotExpiresAt(slot.dateIso)) },
+      },
+      ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+    }),
+  );
+}
+
+async function releaseAppointmentSlot(slot: AppointmentSlotClaim) {
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
+  if (!tableName) return;
+
+  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+
+  await ddb.send(
+    new DeleteItemCommand({
+      TableName: tableName,
+      Key: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+      },
+    }),
+  );
 }
 
 // Atomically increment and retrieve the next ticket index for a queue from DynamoDB, ensuring uniqueness without race conditions
@@ -475,8 +536,10 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
+  let claimedAppointmentSlot: AppointmentSlotClaim | null = null;
 
   let ticketFailure: SubmitEnquiryResult | null = null;
+  let appointmentFailure: SubmitEnquiryResult | null = null;
 
   // Create a new case with the enquiry details, linked to the user and department
   try {
@@ -526,11 +589,37 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     // If the user chose to book an appointment, create an appointment linked to the case
     if (validated.proceed === "BOOK_APPOINTMENT") {
+      const appointmentSlot = {
+        departmentId: validated.departmentId,
+        dateIso: validated.appointmentDateIso!,
+        time: validated.appointmentTime!,
+      } satisfies AppointmentSlotClaim;
+
+      try {
+        // Attempt to claim the appointment slot to ensure it is not double-booked
+        await claimAppointmentSlot(appointmentSlot, caseId);
+        claimedAppointmentSlot = appointmentSlot;
+      } catch (e: any) {
+        const name = typeof e?.name === "string" ? e.name : "";
+
+        if (name === "ConditionalCheckFailedException") {
+          appointmentFailure = {
+            ok: false,
+            errorCode: "CONFLICT",
+            errorMessage:
+              "That appointment time is no longer available for this department. Please choose another slot.",
+          };
+          throw new Error("Appointment slot already claimed");
+        }
+
+        throw e;
+      }
+
       const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
         caseId,
         userId: finalUserId,
-        date: validated.appointmentDateIso!,
-        time: validated.appointmentTime!,
+        date: appointmentSlot.dateIso,
+        time: appointmentSlot.time,
         status: "SCHEDULED",
         notes: null,
       });
@@ -599,11 +688,18 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       );
     }
 
+    let appointmentDeleted = !createdAppointmentId;
+
     if (createdAppointmentId) {
       const appointmentId = createdAppointmentId;
-      await tryDelete("Appointment.delete", () =>
+      appointmentDeleted = await tryDelete("Appointment.delete", () =>
         client.models.Appointment.delete({ id: appointmentId }),
       );
+    }
+
+    if (claimedAppointmentSlot && appointmentDeleted) {
+      const slot = claimedAppointmentSlot;
+      await tryDelete("AppointmentSlotClaims.delete", () => releaseAppointmentSlot(slot));
     }
 
     let caseDeleted = !createdCaseId;
@@ -628,6 +724,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     if (ticketFailure) return ticketFailure;
+    if (appointmentFailure) return appointmentFailure;
 
     return {
       ok: false,

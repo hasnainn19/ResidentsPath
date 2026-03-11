@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
+import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 
 /**
@@ -284,6 +285,24 @@ const schema = a.schema({
     ]) // Allow both guests and authenticated users to submit enquiries
     .handler(a.handler.function(submitEnquiry)),
 
+  getAvailableAppointmentTimes: a
+    .query()
+    .arguments({
+      departmentId: a.id().required(),
+      dateIso: a.string().required(),
+    })
+    .returns(
+      a.customType({
+        availableTimes: a.string().array().required(),
+      }),
+    )
+    .authorization((allow) => [
+      allow.guest(),
+      allow.authenticated("identityPool"),
+      allow.authenticated(),
+    ])
+    .handler(a.handler.function(getAvailableAppointmentTimes)),
+
   getSubmissionReceipt: a
     .query()
     .arguments({
@@ -312,6 +331,7 @@ const schema = a.schema({
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
 	allow.resource(getTicketStatus),
+  allow.resource(getAvailableAppointmentTimes).to(["query"]),
   allow.resource(getSubmissionReceipt).to(["query"]),
   allow.resource(postConfirmation),
 ]);

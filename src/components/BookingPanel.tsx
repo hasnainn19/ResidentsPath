@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { generateClient } from "aws-amplify/data";
 import {
   Card,
   CardContent,
@@ -28,41 +29,129 @@ import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import HistoryToggleOffOutlinedIcon from "@mui/icons-material/HistoryToggleOffOutlined";
 import TextToSpeechButton from "../components/TextToSpeechButton";
+import type { Schema } from "../../amplify/data/resource";
+import { getDataAuthMode } from "../utils/getDataAuthMode";
+import {
+  getCurrentAppointmentDateTime,
+  isBookableAppointmentTime,
+} from "../../shared/formSchema";
+import type { DepartmentId } from "../../shared/formSchema";
 
 type Props = {
+  departmentId?: DepartmentId;
   onConfirm?: (dateIso: string, time: string) => void;
 };
+
+async function fetchAvailableAppointmentTimes(
+  departmentId: DepartmentId,
+  dateIso: string,
+  authMode: Awaited<ReturnType<typeof getDataAuthMode>>,
+) {
+  const client = generateClient<Schema>();
+  const response = await client.queries.getAvailableAppointmentTimes(
+    { departmentId, dateIso },
+    { authMode },
+  );
+
+  return {
+    availableTimes: response.data?.availableTimes ?? [],
+    errors: response.errors,
+  };
+}
 
 export default function BookingPanel(props: Props) {
   const theme = useTheme();
   const isMobileLayout = useMediaQuery(theme.breakpoints.down("md"));
+  const todayInLondon = dayjs(getCurrentAppointmentDateTime().dateIso);
 
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(() => dayjs(todayInLondon));
   const [selectedTime, setSelectedTime] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   const prettyDate = selectedDate ? selectedDate.format("D MMMM YYYY") : "";
+  const selectedDateIso = selectedDate ? selectedDate.format("YYYY-MM-DD") : "";
 
-  // Generate 30-minute slots (9am–5pm)
-  const generateTimes = () => {
-    const times: string[] = [];
-    for (let hour = 9; hour < 17; hour++) {
-      times.push(`${hour.toString().padStart(2, "0")}:00`);
-      times.push(`${hour.toString().padStart(2, "0")}:30`);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAvailability() {
+      if (!props.departmentId || !selectedDateIso) {
+        setAvailableTimes([]);
+        setAvailabilityError(null);
+        setAvailabilityLoading(false);
+        return;
+      }
+
+      setAvailabilityLoading(true);
+      setAvailabilityError(null);
+
+      try {
+        const authMode = await getDataAuthMode();
+        const response = await fetchAvailableAppointmentTimes(
+          props.departmentId,
+          selectedDateIso,
+          authMode,
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        if (response.errors?.length) {
+          console.error("getAvailableAppointmentTimes returned errors", response.errors);
+          setAvailableTimes([]);
+          setAvailabilityError("Unable to load available appointment times right now.");
+          setAvailabilityLoading(false);
+          return;
+        }
+
+        const times = Array.isArray(response.availableTimes)
+          ? response.availableTimes.filter(
+              (value): value is string =>
+                typeof value === "string" && isBookableAppointmentTime(value),
+            )
+          : [];
+
+        setAvailableTimes(times);
+        setAvailabilityLoading(false);
+      } catch (error) {
+        console.error("Failed to load appointment availability", error);
+
+        if (cancelled) {
+          return;
+        }
+
+        setAvailableTimes([]);
+        setAvailabilityError("Unable to load available appointment times right now.");
+        setAvailabilityLoading(false);
+      }
     }
-    return times;
-  };
-  const allTimes = generateTimes();
+
+    loadAvailability();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [props.departmentId, selectedDateIso]);
+
+  useEffect(() => {
+    if (selectedTime && !availableTimes.includes(selectedTime)) {
+      setSelectedTime("");
+    }
+  }, [availableTimes, selectedTime]);
 
   function handleConfirm() {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDate || !selectedTime || !availableTimes.includes(selectedTime)) return;
     props.onConfirm?.(selectedDate.format("YYYY-MM-DD"), selectedTime);
     setConfirmOpen(true);
   }
 
   function handleClear() {
     setSelectedTime("");
-    setSelectedDate(dayjs());
+    setSelectedDate(dayjs(todayInLondon));
   }
 
   return (
@@ -130,8 +219,11 @@ export default function BookingPanel(props: Props) {
                   <StaticDatePicker
                     displayStaticWrapperAs="desktop"
                     value={selectedDate}
-                    onChange={(newValue) => setSelectedDate(newValue)}
-                    minDate={dayjs()}
+                    onChange={(newValue) => {
+                      setSelectedDate(newValue);
+                      setSelectedTime("");
+                    }}
+                    minDate={todayInLondon}
                     sx={{ color: "primary.main" }}
                     slotProps={{
                       toolbar: { hidden: true },
@@ -144,8 +236,11 @@ export default function BookingPanel(props: Props) {
                   <StaticDatePicker
                     displayStaticWrapperAs="desktop"
                     value={selectedDate}
-                    onChange={(newValue) => setSelectedDate(newValue)}
-                    minDate={dayjs()}
+                    onChange={(newValue) => {
+                      setSelectedDate(newValue);
+                      setSelectedTime("");
+                    }}
+                    minDate={todayInLondon}
                     sx={{ color: "primary.main" }}
                     slotProps={{
                       toolbar: { toolbarFormat: "ddd DD MMMM", hidden: false },
@@ -192,18 +287,38 @@ export default function BookingPanel(props: Props) {
                 }}
               >
                 <List disablePadding>
-                  {allTimes.map((time) => (
-                    <ListItem key={time} disablePadding>
-                      <ListItemButton
-                        selected={selectedTime === time}
-                        className="bookingpage-time-list-item-btn"
-                        onClick={() => setSelectedTime(time)}
-                        sx={{ borderBottom: "1px solid #ddd" }}
-                      >
-                        <ListItemText primary={time} />
-                      </ListItemButton>
+                  {availabilityLoading ? (
+                    <ListItem>
+                      <ListItemText primary="Loading available times..." />
                     </ListItem>
-                  ))}
+                  ) : availabilityError ? (
+                    <ListItem>
+                      <ListItemText
+                        primary="Unable to load appointment times."
+                        secondary={availabilityError}
+                      />
+                    </ListItem>
+                  ) : availableTimes.length === 0 ? (
+                    <ListItem>
+                      <ListItemText
+                        primary="No remaining appointment times available for this date."
+                        secondary="Please choose another date."
+                      />
+                    </ListItem>
+                  ) : (
+                    availableTimes.map((time) => (
+                      <ListItem key={time} disablePadding>
+                        <ListItemButton
+                          selected={selectedTime === time}
+                          className="bookingpage-time-list-item-btn"
+                          onClick={() => setSelectedTime(time)}
+                          sx={{ borderBottom: "1px solid #ddd" }}
+                        >
+                          <ListItemText primary={time} />
+                        </ListItemButton>
+                      </ListItem>
+                    ))
+                  )}
                 </List>
               </Box>
 
@@ -240,7 +355,7 @@ export default function BookingPanel(props: Props) {
                     <Tooltip title="Confirm your appointment" placement="top">
                       <Button
                         variant="contained"
-                        disabled={!selectedTime}
+                        disabled={!selectedTime || availabilityLoading}
                         onClick={handleConfirm}
                         sx={{ bgColor: "secondary" }}
                         fullWidth
@@ -269,7 +384,7 @@ export default function BookingPanel(props: Props) {
                   <Tooltip title="Confirm your appointment" placement="top">
                     <Button
                       variant="contained"
-                      disabled={!selectedTime}
+                      disabled={!selectedTime || availabilityLoading}
                       onClick={handleConfirm}
                       sx={{ bgColor: "secondary" }}
                     >
