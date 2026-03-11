@@ -7,6 +7,9 @@ import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
+import { getTicketInfo } from "./functions/getTicketInfo/resource";
+import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
+
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -15,7 +18,9 @@ const backend = defineBackend({
 	auth,
 	data,
 	postConfirmation,
-  submitEnquiry,
+    submitEnquiry,
+    getTicketInfo,
+    calculateDepartmentQueue,
   getAvailableAppointmentTimes,
 });
 

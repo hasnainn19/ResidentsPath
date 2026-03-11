@@ -1,14 +1,16 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
-import { getTicketStatus } from "../functions/getTicketStatus/resource";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
+import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
+import { getTicketInfo } from '../functions/getTicketInfo/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
-const schema = a.schema({
+const schema = a.
+	schema({
 	// User (Resident) - supports both registered users and walk-ins
 	User: a
 		.model({
@@ -101,12 +103,13 @@ const schema = a.schema({
   Department: a
     .model({
       // Department information
-      name: a.string().required(),
-      isActive: a.boolean().default(false), // Is this department currently operating?
+      name: a.enum(["Homelessness", "Housing_Benefit", "Council_Tax", "Adults_Duty", "Childrens_Duty", "Community_Hub_Advisor", "General_Customer_Service"]),
+      estimatedWaitingTime: a.integer().required(),
 
       // Relationships
       cases: a.hasMany("Case", "departmentId"),
       staff: a.hasMany("Staff", "departmentId"),
+      tickets: a.hasMany("Ticket", "departmentId"),
     })
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all departments
@@ -117,20 +120,20 @@ const schema = a.schema({
     .model({
       // Foreign keys
       caseId: a.id().required(),
+      departmentId: a.id().required(),
 
       // Display information
       ticketNumber: a.string().required(),
-      // displayName: a.string().required(),
+      
 
       // Queue information
-      urgency: a.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-      status: a.enum(["WAITING", "CALLED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "STEPPED_OUT"]),
-      placement: a.integer().required(),
+      status: a.enum(["WAITING", "COMPLETED"]),
+      position: a.integer().required(),
       estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
       estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
+      steppedOut: a.boolean().default(false),
 
       // Timestamps for queue tracking
-      calledAt: a.datetime(),
       completedAt: a.datetime(),
 
       // Visit notes
@@ -138,6 +141,7 @@ const schema = a.schema({
 
       // Relationships
       case: a.belongsTo("Case", "caseId"),
+      department: a.belongsTo("Department", "departmentId"),
     })
     .secondaryIndexes((index) => [index("caseId")])
     .authorization((allow) => [
@@ -182,35 +186,46 @@ const schema = a.schema({
       // Additional information
       notes: a.string(),
 
-      // Relationships
-      user: a.belongsTo("User", "userId"),
-      case: a.belongsTo("Case", "caseId"),
-    })
+			// Relationships
+			user: a.belongsTo("User", "userId"),
+			case: a.belongsTo("Case", "caseId"),
+		})
     .secondaryIndexes((index) => [index("caseId")])
-    .authorization((allow) => [
-      allow.groups(["Staff"]), // Only staff can access appointments directly
-    ]),
+		.authorization((allow) => [
+			allow.groups(["Staff"]), // Only staff can access appointments directly
+		]),
 
-  // Custom queries and mutations (lambdas defined in amplify/functions)
-  getTicketStatus: a
-    .query()
-    .arguments({
-      ticketNumber: a.string().required(),
-    })
-    .returns(
-      a.customType({
-        ticketNumber: a.string().required(),
-        status: a.string().required(),
-        placement: a.integer().required(),
-        estimatedWaitTimeLower: a.integer().required(),
-        estimatedWaitTimeUpper: a.integer().required(),
-      }),
-    )
-    .authorization((allow) => [allow.guest()]) // Anyone can check their ticket status with a ticket number
-    .handler(a.handler.function(getTicketStatus)),
+
+	// Custom queries and mutations (lambdas defined in amplify/functions)
     
+    getTicketInfo: a
+        .query()
+		.arguments({
+			caseId: a.string().required()
+		})
+		.returns(a.customType({
+            departmentId: a.id(),
+            position: a.integer(),
+            estimatedWaitTimeLower: a.integer(),
+            estimatedWaitTimeUpper: a.integer(),
+		}))
+		.authorization((allow) => [
+            allow.guest(), 
+        ]) 
+		.handler(a.handler.function(getTicketInfo)),
 
-  submitEnquiry: a
+    calculateDepartmentQueue: a
+        .mutation()
+        .arguments({
+			departmentId: a.string().required()
+		})
+        .returns(a.boolean())
+        .authorization((allow) => [
+            allow.guest(), 
+        ]) 
+        .handler(a.handler.function(calculateDepartmentQueue)),
+
+	submitEnquiry: a
     .mutation()
     .arguments({
       input: a.customType({
@@ -330,12 +345,12 @@ const schema = a.schema({
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
-	allow.resource(getTicketStatus),
   allow.resource(getAvailableAppointmentTimes).to(["query"]),
   allow.resource(getSubmissionReceipt).to(["query"]),
-  allow.resource(postConfirmation),
+    allow.resource(postConfirmation),
+    allow.resource(calculateDepartmentQueue),
+    allow.resource(getTicketInfo),
 ]);
-
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
