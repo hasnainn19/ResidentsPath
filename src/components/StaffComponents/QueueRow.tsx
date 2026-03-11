@@ -42,7 +42,9 @@ const QueueRow = ({
 
       <TableCell>{waitingCount}</TableCell>
 
-      <TableCell>{longestWait ? `${longestWait} mins` : "--"}</TableCell>
+      <TableCell>
+        {longestWait == null ? "--" : `${longestWait} mins`}
+      </TableCell>
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
