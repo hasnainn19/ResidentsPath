@@ -206,6 +206,7 @@ type AppointmentSlotClaim = {
   dateIso: string;
   time: string;
 };
+type AppointmentSlotState = "PENDING" | "BOOKED";
 
 const DepartmentCodeById: Record<DepartmentId, string> = {
   HOMELESSNESS: "H",
@@ -222,9 +223,9 @@ function getDepartmentCode(departmentId: DepartmentId): string {
   return code;
 }
 
-// Calculate an expiry time for an appointment slot claim, which is the end of the day of the appointment
-// plus a buffer of 7 days
-function getAppointmentSlotExpiresAt(dateIso: string) {
+// Calculate an expiry time for a booked appointment slot, which is the end of the day of the
+// appointment plus a buffer of 7 days
+function getBookedAppointmentSlotExpiresAt(dateIso: string) {
   const endOfDayMs = Date.parse(`${dateIso}T23:59:59Z`);
 
   if (!Number.isFinite(endOfDayMs)) {
@@ -234,8 +235,10 @@ function getAppointmentSlotExpiresAt(dateIso: string) {
   return Math.floor(endOfDayMs / 1000) + 7 * 24 * 60 * 60;
 }
 
-// Atomically claim an appointment slot by inserting a record into the enquiries state table
-async function claimAppointmentSlot(slot: AppointmentSlotClaim, caseId: string) {
+// Atomically claim an appointment slot by inserting a brief pending record into the
+// enquiries state table. If the Lambda crashes before the appointment is created,
+// availability will stop treating this slot as blocked after the pending expiry passes.
+async function claimAppointmentSlot(slot: AppointmentSlotClaim) {
   const tableName = getEnquiriesStateTableName();
   const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
 
@@ -245,11 +248,37 @@ async function claimAppointmentSlot(slot: AppointmentSlotClaim, caseId: string) 
       Item: {
         pk: { S: key.pk },
         sk: { S: key.sk },
-        caseId: { S: caseId },
+        status: { S: "PENDING" },
         allocatedAt: { N: String(Date.now()) },
-        expiresAt: { N: String(getAppointmentSlotExpiresAt(slot.dateIso)) },
+        // Set the expiry to 15 minutes from now to allow some time for the appointment creation to complete
+        expiresAt: { N: String(Math.floor(Date.now() / 1000) + 15 * 60) },
       },
       ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+    }),
+  );
+}
+
+// Mark an appointment slot as booked after the appointment has been successfully created
+async function markAppointmentSlotBooked(slot: AppointmentSlotClaim) {
+  const tableName = getEnquiriesStateTableName();
+  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+
+  await ddb.send(
+    new UpdateItemCommand({
+      TableName: tableName,
+      Key: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+      },
+      UpdateExpression: "SET #status = :booked, expiresAt = :expiresAt",
+      ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
+      ExpressionAttributeValues: {
+        ":booked": { S: "BOOKED" satisfies AppointmentSlotState },
+        ":expiresAt": { N: String(getBookedAppointmentSlotExpiresAt(slot.dateIso)) },
+      },
     }),
   );
 }
@@ -597,7 +626,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
       try {
         // Attempt to claim the appointment slot to ensure it is not double-booked
-        await claimAppointmentSlot(appointmentSlot, caseId);
+        await claimAppointmentSlot(appointmentSlot);
         claimedAppointmentSlot = appointmentSlot;
       } catch (e: any) {
         const name = typeof e?.name === "string" ? e.name : "";
@@ -630,6 +659,8 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       }
 
       createdAppointmentId = apptData.id;
+      // Appointment successfully created, now mark the slot as booked
+      await markAppointmentSlotBooked(appointmentSlot);
       return { ok: true, referenceNumber };
     }
 
@@ -708,9 +739,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     if (createdCaseId) {
       const caseId = createdCaseId;
-      caseDeleted = await tryDelete("Case.delete", () =>
-        client.models.Case.delete({ id: caseId }),
-      );
+      caseDeleted = await tryDelete("Case.delete", () => client.models.Case.delete({ id: caseId }));
     }
 
     if (claimedReferenceNumber && caseDeleted) {

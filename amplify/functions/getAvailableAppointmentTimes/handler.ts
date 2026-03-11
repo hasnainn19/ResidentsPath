@@ -13,6 +13,8 @@ import {
 } from "../../../shared/formSchema";
 
 const ddb = new DynamoDBClient({});
+const BOOKED_APPOINTMENT_SLOT_STATE = "BOOKED";
+const PENDING_APPOINTMENT_SLOT_STATE = "PENDING";
 
 function getEnquiriesStateTableName() {
   const tableName = process.env.ENQUIRIES_STATE_TABLE;
@@ -38,16 +40,36 @@ async function listClaimedAppointmentTimes(departmentId: string, dateIso: string
         ":pk": { S: pk },
       },
       ConsistentRead: true,
-      ProjectionExpression: "sk",
+      ProjectionExpression: "sk, #status, expiresAt",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
     }),
   );
 
   const times = new Set<string>();
+  const nowSeconds = Math.floor(Date.now() / 1000);
 
   // Loop through the results and extract the time from the sort key of each claimed appointment slot
   for (const item of result.Items ?? []) {
     const sk = item.sk?.S;
     if (!sk?.startsWith("TIME#")) continue;
+
+    const status = item.status?.S;
+    const expiresAtRaw = item.expiresAt?.N;
+    const expiresAt = typeof expiresAtRaw === "string" ? Number(expiresAtRaw) : NaN;
+
+    if (Number.isFinite(expiresAt) && expiresAt <= nowSeconds) {
+      continue;
+    }
+
+    if (
+      status &&
+      status !== BOOKED_APPOINTMENT_SLOT_STATE &&
+      status !== PENDING_APPOINTMENT_SLOT_STATE
+    ) {
+      continue;
+    }
 
     const time = sk.slice("TIME#".length);
     if (isBookableAppointmentTime(time)) {
