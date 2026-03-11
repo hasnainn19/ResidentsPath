@@ -54,7 +54,10 @@ const StaffDashboard = () => {
     },
     {
       icon: HourglassBottomIcon,
-      value: dashboardStats.longestWaitTime,
+      value:
+        dashboardStats.longestWaitTime != null
+          ? `${dashboardStats.longestWaitTime} mins`
+          : "N/A",
       label: "Longest Wait Time",
     },
   ];
