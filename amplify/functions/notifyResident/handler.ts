@@ -1,10 +1,20 @@
 import type { DynamoDBStreamHandler } from "aws-lambda";
-import { getAmplifyClient } from "../utils/amplifyClient";
+import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { endUserMessagingClient } from "../utils/endUserMessagingClient";
 import { SendTextMessageCommand } from "@aws-sdk/client-pinpoint-sms-voice-v2";
 import { sesClient } from "../utils/sesClient";
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
+
+async function getCase(client: AmplifyClient, caseId: string) {
+    const { data: caseData } = await client.models.Case.get({ id: caseId });
+    return caseData ?? null;
+}
+
+async function getUser(client: AmplifyClient, userId: string) {
+    const { data: user } = await client.models.User.get({ id: userId });
+    return user ?? null;
+}
 
 async function sendSms(phoneNumber: string, ticketNumber: string, message: string): Promise<void> {
     const SMS_ORIGINATION_IDENTITY = process.env.SMS_ORIGINATION_IDENTITY;
@@ -100,17 +110,13 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             continue;
         }
 
-        const { data: caseData } = await client.models.Case.get({id: caseId});
+        const caseData = await getCase(client, caseId);
         if (!caseData) {
             console.error(`notifyResident: Case with ID ${caseId} not found.`);
             continue;
         }
-        if (!caseData.userId) {
-            console.error(`notifyResident: Case with ID ${caseId} does not have a userId.`);
-            continue;
-        }
 
-        const { data: user } = await client.models.User.get({id: caseData.userId});
+        const user = await getUser(client, caseData.userId);
         if (!user) {
             console.error(`notifyResident: User with ID ${caseData.userId} not found.`);
             continue;
