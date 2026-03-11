@@ -76,11 +76,17 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         // If they have a phone number, we contact them via SMS using End User Messaging
         if (phoneNumber) {
+            const SMS_ORIGINATION_IDENTITY = process.env.SMS_ORIGINATION_IDENTITY;
+            if (!SMS_ORIGINATION_IDENTITY) {
+                console.error("notifyResident: SMS_ORIGINATION_IDENTITY environment variable is not set.");
+                continue;
+            }
+
             try {
                 await endUserMessagingClient.send(new SendTextMessageCommand({
                     DestinationPhoneNumber: phoneNumber,
                     MessageBody: message,
-                    OriginationIdentity: process.env.SMS_ORIGINATION_IDENTITY,
+                    OriginationIdentity: SMS_ORIGINATION_IDENTITY,
                     MessageType: "TRANSACTIONAL",
                 }));
                 console.log(`notifyResident: SMS sent for ticket ${ticketNumber} to phone number ${phoneNumber}`);
