@@ -210,7 +210,7 @@ function trimToUndef(value: unknown) {
   return t.length ? t : undefined;
 }
 
-function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
+export function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
   if (!value) return undefined;
 
   const country = value.trim().toUpperCase();

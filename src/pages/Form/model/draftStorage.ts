@@ -5,6 +5,7 @@
 import type { FormData } from "./formFieldTypes";
 import { initialFormData } from "./initialState";
 import { ENQUIRIES_BY_TOPLEVEL } from "../data/enquiries";
+import { getSupportedPhoneCountry } from "../../../../shared/formSchema";
 
 export type FormDraftV1 = {
   version: 1;
@@ -43,6 +44,8 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
       continue;
     }
   }
+
+  out.phoneCountry = getSupportedPhoneCountry(out.phoneCountry) ?? "GB";
 
   if (out.topLevel && out.topLevel !== "Other") {
     const options = ENQUIRIES_BY_TOPLEVEL[out.topLevel] || [];

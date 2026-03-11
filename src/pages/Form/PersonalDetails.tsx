@@ -43,6 +43,7 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/formFieldTypes";
 import {
+  getSupportedPhoneCountry,
   UI_OPTIONS,
   isValidEmail,
   isValidUkPostcode,
@@ -146,7 +147,7 @@ export default function PersonalDetails() {
 
   const dialOptions = useMemo(() => buildDialOptions(), []);
 
-  const phoneCountry = (formData.phoneCountry || "GB") as CountryCode;
+  const phoneCountry = getSupportedPhoneCountry(formData.phoneCountry) ?? "GB";
   const dialCode = "+" + getCountryCallingCode(phoneCountry);
   const normalisedPhone = formData.phone
     ? normalisePhoneToE164(formData.phone, phoneCountry)
