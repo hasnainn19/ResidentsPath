@@ -3,6 +3,7 @@ import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
 import { getTicketInfo } from '../functions/getTicketInfo/resource';
+import { notifyResident } from '../functions/notifyResident/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -300,6 +301,7 @@ const schema = a.
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
+    allow.resource(notifyResident),
 ]);
 export type Schema = ClientSchema<typeof schema>;
 
