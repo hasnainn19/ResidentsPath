@@ -42,7 +42,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         const ticketNumber = newImage.ticketNumber;
 
         if (!caseId || !ticketNumber) {
-            console.error("notifyResident:Missing caseId or ticketNumber in DynamoDB record:", { newImage, oldImage });
+            console.error("notifyResident: Missing caseId or ticketNumber in DynamoDB record:", { newImage, oldImage });
             continue;
         }
 
