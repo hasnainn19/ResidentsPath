@@ -10,23 +10,12 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import * as QRCode from "qrcode";
 import { generateClient } from "aws-amplify/data";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Container,
-  Divider,
-  Paper,
-  Snackbar,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { Alert, Box, Container, Paper, Snackbar, Stack, Typography } from "@mui/material";
 
 import type { Schema } from "../../../amplify/data/resource";
 import NavBar from "../../components/NavBar";
-import WithTTS from "../../components/FormPageComponents/WithTTS";
+import ReceiptBody from "../../components/SubmissionReceiptComponents/ReceiptBody";
+import ReceiptHeaderCard from "../../components/SubmissionReceiptComponents/ReceiptHeaderCard";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 type Receipt = {
@@ -83,12 +72,6 @@ export default function SubmissionReceipt() {
 
   const isAppointment = receipt?.receiptType === "APPOINTMENT";
 
-  useEffect(() => {
-    setReceipt(routeReceipt);
-    setLoading(!routeReceipt);
-    setErrorMessage(null);
-  }, [routeReceipt]);
-
   let submittedAt = "";
 
   if (receipt?.createdAt) {
@@ -135,6 +118,10 @@ export default function SubmissionReceipt() {
     let cancelled = false;
 
     async function loadReceipt() {
+      setReceipt(routeReceipt);
+      setLoading(!routeReceipt);
+      setErrorMessage(null);
+
       if (!referenceNumber) {
         setReceipt(null);
         setErrorMessage("No case reference was provided.");
@@ -320,8 +307,14 @@ export default function SubmissionReceipt() {
 
   const referenceToShow = receipt?.referenceNumber || referenceNumber || undefined;
 
+  const receiptHeading = isAppointment
+    ? "Appointment receipt"
+    : receipt?.ticketNumber
+      ? "Ticket receipt"
+      : "Queue receipt";
+
   let chipLabel = "Receipt";
-  let heading = "Submission receipt";
+  let heading = "Receipt details";
   let introText = "Use your case reference to view this receipt again.";
 
   if (loading) {
@@ -330,11 +323,11 @@ export default function SubmissionReceipt() {
     introText = "Please wait while we load your receipt.";
   } else if (isAppointment) {
     chipLabel = "Appointment confirmed";
-    heading = "Your appointment is booked";
+    heading = receiptHeading;
     introText = "Keep these details safe. You may need them when you arrive at reception.";
   } else if (receipt) {
     chipLabel = "Queue receipt";
-    heading = "Your request has been submitted";
+    heading = receiptHeading;
     introText = "Keep these details safe so you can check your queue status later.";
   }
 
@@ -345,151 +338,17 @@ export default function SubmissionReceipt() {
       <Container maxWidth="md" sx={{ py: { xs: 2, sm: 3, md: 5 } }}>
         {/* Receipt details*/}
         <Stack spacing={{ xs: 2.5, md: 3 }}>
-          <Paper
-            variant="outlined"
-            sx={{
-              p: { xs: 2, sm: 3, md: 4 },
-              borderRadius: 3,
-              bgcolor: "background.paper",
-            }}
-          >
-            <Stack spacing={{ xs: 2.5, md: 3 }}>
-              <Stack
-                direction={{ xs: "column", md: "row" }}
-                justifyContent="space-between"
-                alignItems={{ xs: "stretch", md: "stretch" }}
-                spacing={{ xs: 2, md: 3 }}
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Chip
-                    label={chipLabel}
-                    color={isAppointment ? "success" : "primary"}
-                    sx={{ mb: 2, fontWeight: 700, maxWidth: "100%" }}
-                  />
-
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 900,
-                      mb: 1.5,
-                      lineHeight: 1.1,
-                      fontSize: { xs: "1.9rem", sm: "2.125rem" },
-                      overflowWrap: "anywhere",
-                    }}
-                  >
-                    {heading}
-                  </Typography>
-
-                  <Typography color="text.secondary" sx={{ maxWidth: { xs: "100%", md: 620 } }}>
-                    {introText}
-                  </Typography>
-                </Box>
-
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    width: { xs: "100%", md: 280 },
-                    minWidth: 0,
-                    p: { xs: 2, sm: 2.5 },
-                    borderRadius: 2.5,
-                    bgcolor: "background.default",
-                  }}
-                >
-                  {/* Case reference number */}
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                    Case reference number
-                  </Typography>
-
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 900,
-                      letterSpacing: 1,
-                      overflowWrap: "anywhere",
-                      mb: 2,
-                      fontSize: { xs: "1.35rem", sm: "1.5rem" },
-                    }}
-                  >
-                    {referenceToShow || "-"}
-                  </Typography>
-
-                  {/* Ticket number */}
-                  {!isAppointment && receipt?.ticketNumber ? (
-                    <>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                        Ticket number
-                      </Typography>
-
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, mb: 2, overflowWrap: "anywhere" }}
-                      >
-                        {receipt.ticketNumber}
-                      </Typography>
-                    </>
-                  ) : null}
-
-                  {/* Appointment info */}
-                  {isAppointment && receipt?.appointmentTime ? (
-                    <>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                        Appointment time
-                      </Typography>
-
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 800, mb: 2, overflowWrap: "anywhere" }}
-                      >
-                        {receipt.appointmentTime}
-                      </Typography>
-                    </>
-                  ) : null}
-
-                  {/* Copy/print buttons */}
-                  <Stack spacing={1.25}>
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      onClick={() => copyValue("Case reference number", referenceToShow)}
-                      disabled={!referenceToShow}
-                      fullWidth
-                    >
-                      Copy reference number
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="contained"
-                      onClick={() => window.print()}
-                      fullWidth
-                    >
-                      Print or save
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Stack>
-
-              <Alert
-                severity="info"
-                variant="outlined"
-                sx={(theme) => {
-                  const accent = theme.palette.primary.main;
-                  return {
-                    borderRadius: 2,
-                    py: 1.5,
-                    borderColor: accent,
-                    bgcolor: alpha(accent, 0.08),
-                    "& .MuiAlert-message": { width: "100%" },
-                    "& .MuiAlert-icon": { color: accent },
-                    color: theme.palette.primary.main,
-                  };
-                }}
-              >
-                Write down or save your case reference number
-                {!isAppointment && receipt?.ticketNumber ? " and ticket number now." : " now."}
-              </Alert>
-            </Stack>
-          </Paper>
+          <ReceiptHeaderCard
+            chipLabel={chipLabel}
+            heading={heading}
+            introText={introText}
+            isAppointment={isAppointment}
+            referenceToShow={referenceToShow}
+            ticketNumber={receipt?.ticketNumber}
+            appointmentTime={receipt?.appointmentTime}
+            onCopyReference={() => copyValue("Case reference number", referenceToShow)}
+            onPrint={() => window.print()}
+          />
 
           {/* Loading/errors */}
           {loading ? (
@@ -506,211 +365,22 @@ export default function SubmissionReceipt() {
 
           {/* Main receipt body */}
           {receipt ? (
-            <WithTTS copy={{ label: "Submission receipt", tts: ttsText }} titleVariant="h6">
-              <Stack spacing={{ xs: 2.5, md: 3 }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 2.5, md: 3 }}>
-                  <Paper
-                    variant="outlined"
-                    sx={{ flex: 1, p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}
-                  >
-                    <Stack spacing={{ xs: 2.5, md: 3 }}>
-                      {!isAppointment ? (
-                        <>
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                              Ticket number
-                            </Typography>
-                            <Typography
-                              variant="h2"
-                              sx={{
-                                fontWeight: 900,
-                                lineHeight: 1,
-                                fontSize: { xs: "3rem", sm: "3.75rem" },
-                                overflowWrap: "anywhere",
-                              }}
-                            >
-                              {receipt.ticketNumber || "-"}
-                            </Typography>
-                          </Box>
-
-                          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
-                            <Button
-                              type="button"
-                              variant="outlined"
-                              onClick={() => copyValue("Ticket number", receipt.ticketNumber)}
-                              disabled={!receipt.ticketNumber}
-                              fullWidth
-                            >
-                              Copy ticket number
-                            </Button>
-
-                            <Button
-                              type="button"
-                              variant="contained"
-                              onClick={() => nav("/referencepage")}
-                              disabled={!receipt.ticketNumber}
-                              fullWidth
-                            >
-                              Check queue status
-                            </Button>
-                          </Stack>
-                        </>
-                      ) : (
-                        <Stack spacing={2.5}>
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                              Appointment date
-                            </Typography>
-                            <Typography
-                              variant="h5"
-                              sx={{ fontWeight: 800, overflowWrap: "anywhere" }}
-                            >
-                              {appointmentDate || "Not available"}
-                            </Typography>
-                          </Box>
-
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                              Appointment time
-                            </Typography>
-                            <Typography
-                              variant="h5"
-                              sx={{ fontWeight: 800, overflowWrap: "anywhere" }}
-                            >
-                              {receipt.appointmentTime || "Not available"}
-                            </Typography>
-                          </Box>
-
-                          <Button
-                            type="button"
-                            variant="outlined"
-                            onClick={() =>
-                              copyValue(
-                                "Appointment details",
-                                [appointmentDate, receipt.appointmentTime]
-                                  .filter(Boolean)
-                                  .join(" "),
-                              )
-                            }
-                            fullWidth
-                          >
-                            Copy appointment details
-                          </Button>
-                        </Stack>
-                      )}
-
-                      {receipt.departmentName || submittedAt ? <Divider /> : null}
-
-                      {/* Department name and submission info */}
-                      <Stack spacing={1.5}>
-                        {receipt.departmentName ? (
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                              Department
-                            </Typography>
-                            <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
-                              {receipt.departmentName}
-                            </Typography>
-                          </Box>
-                        ) : null}
-
-                        {submittedAt ? (
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                              Submitted
-                            </Typography>
-                            <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
-                              {submittedAt}
-                            </Typography>
-                          </Box>
-                        ) : null}
-                      </Stack>
-                    </Stack>
-                  </Paper>
-
-                  <Paper
-                    variant="outlined"
-                    sx={{
-                      width: { xs: "100%", md: 320 },
-                      p: { xs: 2.5, sm: 3 },
-                      borderRadius: 3,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                    }}
-                  >
-                    {/* QR code */}
-                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
-                      Receipt QR code
-                    </Typography>
-
-                    <Typography color="text.secondary" sx={{ mb: 2.5 }}>
-                      {isAppointment
-                        ? "Scan this at a kiosk or reception when you arrive for a quick check-in."
-                        : "Keep this with your case reference and ticket details for a quick check-in."}
-                    </Typography>
-
-                    {qrCodeUrl ? (
-                      <Box
-                        component="img"
-                        src={qrCodeUrl}
-                        alt="Receipt QR code"
-                        sx={{
-                          width: "100%",
-                          maxWidth: 220,
-                          height: "auto",
-                          aspectRatio: "1 / 1",
-                          display: "block",
-                          mb: 2,
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          width: "100%",
-                          maxWidth: 220,
-                          aspectRatio: "1 / 1",
-                          border: 1,
-                          borderColor: "divider",
-                          borderRadius: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mb: 2,
-                          bgcolor: "background.default",
-                        }}
-                      >
-                        <Typography color="text.secondary">QR unavailable</Typography>
-                      </Box>
-                    )}
-
-                    <Typography variant="body2" color="text.secondary">
-                      You can still use your case reference number if the QR code is not available.
-                    </Typography>
-                  </Paper>
-                </Stack>
-
-                <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
-                  <Stack spacing={1.5}>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                      What to keep
-                    </Typography>
-                    <Typography color="text.secondary">
-                      Make sure you keep your case reference number
-                      {!isAppointment && receipt.ticketNumber
-                        ? " and ticket number."
-                        : "."}
-                    </Typography>
-                    <Typography color="text.secondary">
-                      {isAppointment
-                        ? "When you arrive, have your case reference number or QR code ready."
-                        : "Use your ticket number or QR code on the reference page to check your position and wait time."}
-                    </Typography>
-                  </Stack>
-                </Paper>
-              </Stack>
-            </WithTTS>
+            <ReceiptBody
+              receipt={receipt}
+              isAppointment={isAppointment}
+              appointmentDate={appointmentDate}
+              submittedAt={submittedAt}
+              qrCodeUrl={qrCodeUrl}
+              ttsText={ttsText}
+              onCopyTicket={() => copyValue("Ticket number", receipt.ticketNumber)}
+              onCheckQueueStatus={() => nav("/referencepage")}
+              onCopyAppointmentDetails={() =>
+                copyValue(
+                  "Appointment details",
+                  [appointmentDate, receipt.appointmentTime].filter(Boolean).join(" "),
+                )
+              }
+            />
           ) : null}
         </Stack>
       </Container>
