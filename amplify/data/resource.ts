@@ -292,6 +292,7 @@ const schema = a.
     .authorization((allow) => [
       allow.guest(), 
       allow.authenticated(),
+      allow.authenticated("identityPool")
     ]) // Allow both guests and authenticated users to submit enquiries
     .handler(a.handler.function(submitEnquiry)),
 
@@ -309,6 +310,7 @@ const schema = a.
     .authorization((allow) => [
       allow.guest(),
       allow.authenticated(),
+      allow.authenticated("identityPool")
     ])
     .handler(a.handler.function(getAvailableAppointmentTimes)),
 })
