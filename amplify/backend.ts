@@ -5,12 +5,13 @@ import { postConfirmation } from './functions/postConfirmation/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
-import { Table, AttributeType, BillingMode, CfnTable, StreamViewType } from "aws-cdk-lib/aws-dynamodb";
+import { Table, AttributeType, BillingMode, StreamViewType } from "aws-cdk-lib/aws-dynamodb";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { FilterCriteria, FilterRule, StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+
 
 
 /**
@@ -85,11 +86,9 @@ backend.submitEnquiry.addEnvironment(
  * Access the Ticket table and enable DynamoDB streams 
  * Amplify doesn't expose stream config directly so we go through the underlying CloudFormation resource to set it up
  */
-const ticketTable = backend.data.resources.tables["Ticket"];
-const cfnTicketTable = ticketTable.node.defaultChild as CfnTable;
-cfnTicketTable.streamSpecification = {
+backend.data.resources.cfnResources.amplifyDynamoDbTables["Ticket"].streamSpecification = {
   streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
-}
+};
 
 /**
  * Attach the Ticket stream to the Lambda.
@@ -97,6 +96,7 @@ cfnTicketTable.streamSpecification = {
  * 
  * Further filters can be added that target the dynamoDB record's new and old images
  */
+const ticketTable = backend.data.resources.tables["Ticket"];
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,
