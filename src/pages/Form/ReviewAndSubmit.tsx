@@ -55,26 +55,8 @@ export default function ReviewAndSubmit() {
         return;
       }
 
-      if (!result.referenceNumber) {
-        setSubmitError("Submission succeeded but no case reference was returned.");
-        return;
-      }
-
-      const receiptType =
-        formData.proceed === "BOOK_APPOINTMENT" ? "APPOINTMENT" : "QUEUE";
-
       clearSavedDraft();
-      nav(`/receipts/${encodeURIComponent(result.referenceNumber)}`, {
-        state: {
-          receipt: {
-            referenceNumber: result.referenceNumber,
-            receiptType,
-            ticketNumber: result.ticketNumber || undefined,
-            appointmentDateIso: formData.appointmentDateIso || undefined,
-            appointmentTime: formData.appointmentTime || undefined,
-          },
-        },
-      });
+      nav("/referencepage");
     } catch (e) {
       console.error("Failed to submit enquiry", e);
       setSubmitError("Submission failed. Please try again.");

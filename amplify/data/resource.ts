@@ -1,6 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
-import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
@@ -94,7 +93,6 @@ const schema = a.
       tickets: a.hasMany("Ticket", "caseId"),
       appointments: a.hasMany("Appointment", "caseId"),
     })
-    .secondaryIndexes((index) => [index("referenceNumber")])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Only staff can access cases directly
     ]),
@@ -143,7 +141,6 @@ const schema = a.
       case: a.belongsTo("Case", "caseId"),
       department: a.belongsTo("Department", "departmentId"),
     })
-    .secondaryIndexes((index) => [index("caseId")])
     .authorization((allow) => [
       allow.groups(["Staff"]), // Staff can see all tickets
     ]),
@@ -190,7 +187,6 @@ const schema = a.
 			user: a.belongsTo("User", "userId"),
 			case: a.belongsTo("Case", "caseId"),
 		})
-    .secondaryIndexes((index) => [index("caseId")])
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
@@ -317,36 +313,10 @@ const schema = a.
       allow.authenticated(),
     ])
     .handler(a.handler.function(getAvailableAppointmentTimes)),
-
-  getSubmissionReceipt: a
-    .query()
-    .arguments({
-      referenceNumber: a.string().required(),
-    })
-    .returns(
-      a.customType({
-        found: a.boolean().required(),
-        errorMessage: a.string(),
-        createdAt: a.datetime(),
-        referenceNumber: a.string(),
-        receiptType: a.string(),
-        ticketNumber: a.string(),
-        appointmentDateIso: a.string(),
-        appointmentTime: a.string(),
-        departmentName: a.string(),
-      }),
-    )
-    .authorization((allow) => [
-      allow.guest(),
-      allow.authenticated("identityPool"),
-      allow.authenticated(), 
-    ])
-    .handler(a.handler.function(getSubmissionReceipt)),
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
   allow.resource(getAvailableAppointmentTimes).to(["query"]),
-  allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
