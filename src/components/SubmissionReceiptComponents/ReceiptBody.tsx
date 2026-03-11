@@ -3,21 +3,11 @@ import { Paper, Stack, Typography } from "@mui/material";
 import WithTTS from "../FormPageComponents/WithTTS";
 import ReceiptDetailsCard from "./ReceiptDetailsCard";
 import ReceiptQrCard from "./ReceiptQrCard";
+import type { ReceiptDetailsCardProps } from "./ReceiptDetailsCard";
 
-type ReceiptBodyProps = {
-  receipt: {
-    ticketNumber?: string;
-    appointmentTime?: string;
-    departmentName?: string;
-  };
-  isAppointment: boolean;
-  appointmentDate: string;
-  submittedAt: string;
+type ReceiptBodyProps = ReceiptDetailsCardProps & {
   qrCodeUrl: string | null;
   ttsText: string;
-  onCopyTicket: () => void;
-  onCheckQueueStatus: () => void;
-  onCopyAppointmentDetails: () => void;
 };
 
 export default function ReceiptBody({

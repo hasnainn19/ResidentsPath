@@ -1,11 +1,13 @@
 import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
 
-type ReceiptDetailsCardProps = {
-  receipt: {
-    ticketNumber?: string;
-    appointmentTime?: string;
-    departmentName?: string;
-  };
+type ReceiptSummary = {
+  ticketNumber?: string;
+  appointmentTime?: string;
+  departmentName?: string;
+};
+
+export type ReceiptDetailsCardProps = {
+  receipt: ReceiptSummary;
   isAppointment: boolean;
   appointmentDate: string;
   submittedAt: string;

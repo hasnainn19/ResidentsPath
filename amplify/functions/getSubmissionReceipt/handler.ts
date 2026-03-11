@@ -2,14 +2,24 @@ import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { DepartmentLabelById } from "../../../shared/formSchema";
 
+function errorResponse(errorMessage: string) {
+  return {
+    found: false as const,
+    errorMessage,
+  };
+}
+
 export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async (event) => {
-  const referenceNumber = event.arguments.referenceNumber.trim().toUpperCase();
+  const rawReferenceNumber = event.arguments.referenceNumber;
+
+  if (!rawReferenceNumber) {
+    return errorResponse("No case reference was provided.");
+  }
+
+  const referenceNumber = rawReferenceNumber.trim().toUpperCase();
 
   if (!referenceNumber) {
-    return {
-      found: false,
-      errorMessage: "No case reference was provided.",
-    };
+    return errorResponse("No case reference was provided.");
   }
 
   const client = await getAmplifyClient();
@@ -19,19 +29,13 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
 
   if (caseLookup.errors?.length) {
     console.error("getSubmissionReceipt: case lookup failed", caseLookup.errors);
-    return {
-      found: false,
-      errorMessage: "We could not load that receipt right now.",
-    };
+    return errorResponse("We could not load that receipt right now.");
   }
 
   const caseRecord = caseLookup.data?.[0];
 
   if (!caseRecord?.id || !caseRecord.userId) {
-    return {
-      found: false,
-      errorMessage: "We could not find a receipt for that case reference.",
-    };
+    return errorResponse("We could not find a receipt for that case reference.");
   }
 
   const userLookup = await client.models.User.get({
@@ -40,19 +44,13 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
 
   if (userLookup.errors?.length) {
     console.error("getSubmissionReceipt: user lookup failed", userLookup.errors);
-    return {
-      found: false,
-      errorMessage: "We could not load that receipt right now.",
-    };
+    return errorResponse("We could not load that receipt right now.");
   }
 
   const userRecord = userLookup.data;
 
   if (!userRecord?.id) {
-    return {
-      found: false,
-      errorMessage: "We could not find a receipt for that case reference.",
-    };
+    return errorResponse("We could not find a receipt for that case reference.");
   }
 
   // If the user is registered, require that the user is logged in and is the owner of the receipt
@@ -62,11 +60,9 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
       identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
 
     if (!sub || sub !== userRecord.id) {
-      return {
-        found: false,
-        errorMessage:
-          "We could not find a receipt for that case reference. If this receipt is linked to your account, please log in and try again.",
-      };
+      return errorResponse(
+        "We could not find a receipt for that case reference. If this receipt is linked to your account, please log in and try again.",
+      );
     }
   }
 
@@ -84,20 +80,14 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
       ticketErrors: ticketLookup.errors,
       appointmentErrors: appointmentLookup.errors,
     });
-    return {
-      found: false,
-      errorMessage: "We could not load that receipt right now.",
-    };
+    return errorResponse("We could not load that receipt right now.");
   }
 
   const ticket = ticketLookup.data?.[0];
   const appointment = appointmentLookup.data?.[0];
 
   if (!ticket && !appointment) {
-    return {
-      found: false,
-      errorMessage: "We could not find receipt details for that case reference.",
-    };
+    return errorResponse("We could not find receipt details for that case reference.");
   }
 
   return {
