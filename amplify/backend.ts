@@ -110,10 +110,6 @@ backend.notifyResident.resources.lambda.addEventSource(
           NewImage: {
             position: { N: FilterRule.isEqual("0") }, // Trigger when position changes to 0
           },
-          OldImage: {
-            // Would also want to filter where position was already 0, but FilterRule doesn't have a notEqual operator
-            // position: { N: FilterRule.isNotEqual("0") },
-          },
         },
       }),
     ]
