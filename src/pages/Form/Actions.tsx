@@ -12,9 +12,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Button,
-  Divider,
-  List,
-  ListItem,
   Paper,
   Stack,
   Typography,
@@ -38,8 +35,8 @@ import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
-import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import BookingPanel from "../../components/BookingPanel";
+import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
 
 function clampInt(n: number, min: number, max: number): number {
@@ -151,13 +148,11 @@ export default function Actions() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
 
-  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
-
-  const selectedEnquiry = enquirySelectionState.selectedEnquiry;
-  const selfServiceLinks = selectedEnquiry?.selfServiceLinks || [];
-
   const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
   const showBooking = formData.proceed === "BOOK_APPOINTMENT";
+  const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
+  const bookingDepartmentId =
+    formData.routedDepartment || enquirySelectionState.selectedEnquiry?.department;
 
   const queueStatus = useMemo(() => getQueueStatusStub(), []);
   const typicalMid = Math.round((queueStatus.typicalWaitMin + queueStatus.typicalWaitMax) / 2);
@@ -223,71 +218,26 @@ export default function Actions() {
       step={3}
       totalSteps={4}
       title="Council service request"
-      subtitle="Online options and next steps"
-      onBack={() => nav("/form/enquiry-selection")}
+      subtitle="Next steps"
+      onBack={() => nav("/form/personal-details")}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 2 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: { xs: 0, sm: 4 },
+          borderRadius: { xs: 0, sm: 2 },
+          borderWidth: { xs: 0, sm: 1 },
+          bgcolor: { xs: "transparent", sm: "background.paper" },
+        }}
+      >
         <Typography fontWeight={800} sx={{ mb: 2 }}>
           Actions and next steps
         </Typography>
 
         <Stack spacing={4}>
-          {/* Self-service */}
-          <WithTTS
-            copy={{
-              label: "Online self-service options",
-              tts:
-                selfServiceLinks.length > 0
-                  ? "Online self-service options are available. Use the links to complete your request online."
-                  : "No online self-service options are listed for this choice.",
-            }}
-            titleVariant="h6"
-          >
-            {selfServiceLinks.length > 0 ? (
-              <List sx={{ pl: 0 }}>
-                {selfServiceLinks.map((l) => (
-                  <ListItem key={l.href} sx={{ px: 0 }}>
-                    <Button
-                      component="a"
-                      href={l.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      variant="outlined"
-                      sx={{ textTransform: "none" }}
-                      fullWidth
-                    >
-                      {l.label}
-                    </Button>
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Alert
-                severity="info"
-                variant="outlined"
-                sx={(theme) => {
-                  const accent = theme.palette.primary.main;
-                  return {
-                    borderRadius: 2,
-                    py: 1.5,
-                    borderColor: accent,
-                    bgcolor: alpha(accent, 0.08),
-                    "& .MuiAlert-message": { width: "100%" },
-                    "& svg": { color: accent },
-                    color: theme.palette.primary.main,
-                  };
-                }}
-              >
-                No online options are listed for this enquiry yet.
-              </Alert>
-            )}
-          </WithTTS>
-
-          <Divider />
-
           {/* Queue */}
           {showQueue && (
             <WithTTS
@@ -342,7 +292,7 @@ export default function Actions() {
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
                         gap: 1.5,
                       }}
                     >
@@ -388,14 +338,14 @@ export default function Actions() {
 
                         {!hasReminderContact ? (
                           <Alert severity="info" variant="outlined">
-                            To get a reminder, add a phone number or email in Step 1.
+                            To get a reminder, add a phone number or email in Step 2.
                           </Alert>
                         ) : null}
 
                         <Stack
-                          direction="row"
+                          direction={{ xs: "column", sm: "row" }}
                           spacing={1}
-                          alignItems="center"
+                          alignItems={{ xs: "stretch", sm: "center" }}
                           justifyContent="space-between"
                         >
                           <Typography variant="body2" color="text.secondary">
@@ -408,7 +358,7 @@ export default function Actions() {
                             variant="contained"
                             onClick={handleSetReminder}
                             disabled={!hasReminderContact || !computedReminderAt}
-                            sx={{ whiteSpace: "nowrap" }}
+                            sx={{ width: { xs: "100%", sm: "auto" } }}
                           >
                             Set reminder
                           </Button>
@@ -462,6 +412,7 @@ export default function Actions() {
               titleVariant="h6"
             >
               <BookingPanel
+                departmentId={bookingDepartmentId || undefined}
                 onConfirm={(dateIso, time) => {
                   setFormData((p) => ({
                     ...p,
@@ -481,7 +432,7 @@ export default function Actions() {
             onAdvanceClick={() => nav("/form/review-and-submit")}
             advanceDisabled={(showQueue && joinTiming === "later") || bookingIncomplete}
             showPrevious
-            onPrevious={() => nav("/form/enquiry-selection")}
+            onPrevious={() => nav("/form/personal-details")}
           />
         </Stack>
       </Paper>

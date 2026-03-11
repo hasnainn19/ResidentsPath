@@ -6,6 +6,7 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { Table, AttributeType, BillingMode, StreamViewType } from "aws-cdk-lib/aws-dynamodb";
+import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
@@ -21,11 +22,13 @@ const backend = defineBackend({
 	auth,
 	data,
 	postConfirmation,
-    submitEnquiry,
-    getTicketInfo,
-    calculateDepartmentQueue,
-    notifyResident,
+  submitEnquiry,
+  getTicketInfo,
+  calculateDepartmentQueue,
+  notifyResident,
+  getAvailableAppointmentTimes,
 });
+
 
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups
@@ -52,33 +55,27 @@ backend.postConfirmation.resources.lambda.addToRolePolicy(
 );
 
 
-// Create a DynamoDB table to keep track of daily ticket numbers for the submitEnquiry function
-// to ensure unique ticket numbers without race conditions
-const ticketCounterTable = new Table(backend.stack, "TicketCounterTable", {
-  partitionKey: { name: "counterId", type: AttributeType.STRING },
+/**
+ * Create a DynamoDB table to keep track of daily ticket numbers, claimed ticket numbers,
+ * and claimed case reference numbers for the submitEnquiry function
+ */
+const enquiriesStateTable = new Table(backend.stack, "EnquiriesStateTable", {
+  partitionKey: { name: "pk", type: AttributeType.STRING },
+  sortKey: { name: "sk", type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
   timeToLiveAttribute: "expiresAt",
 });
+enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
+enquiriesStateTable.grantReadData(backend.getAvailableAppointmentTimes.resources.lambda);
 
-
-// Table to track claimed ticket numbers for each service day
-// This allows ticket numbers to be reused if the main counter reaches 1000
-// A function to release claimed tickets on completion will need to be implemented elsewhere
-// (This needs to be linked to ticket completion and deletion so ticket numbers are actually released)
-const ticketNumberClaimsTable = new Table(backend.stack, "TicketNumberClaimsTable", {
-  partitionKey: { name: "queueId", type: AttributeType.STRING },
-  sortKey: { name: "ticketNumber", type: AttributeType.STRING },
-  billingMode: BillingMode.PAY_PER_REQUEST,
-  timeToLiveAttribute: "expiresAt",
-});
-
-ticketCounterTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
-ticketNumberClaimsTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
-
-backend.submitEnquiry.addEnvironment("TICKET_COUNTER_TABLE", ticketCounterTable.tableName);
 backend.submitEnquiry.addEnvironment(
-  "TICKET_NUMBER_CLAIMS_TABLE",
-  ticketNumberClaimsTable.tableName,
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
+backend.getAvailableAppointmentTimes.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
 );
 
 
@@ -132,8 +129,10 @@ backend.notifyResident.resources.lambda.addToRolePolicy(
   })
 );
 
-// SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
-// The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
+/**
+ * SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
+ * The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
+ */
 backend.notifyResident.addEnvironment("SMS_ORIGINATION_IDENTITY", "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB");
 
 backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
