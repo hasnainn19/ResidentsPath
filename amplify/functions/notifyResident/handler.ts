@@ -6,6 +6,60 @@ import { SendTextMessageCommand } from "@aws-sdk/client-pinpoint-sms-voice-v2";
 import { sesClient } from "../utils/sesClient";
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
 
+async function sendSms(phoneNumber: string, ticketNumber: string, message: string): Promise<void> {
+    const SMS_ORIGINATION_IDENTITY = process.env.SMS_ORIGINATION_IDENTITY;
+    if (!SMS_ORIGINATION_IDENTITY) {
+        console.error("notifyResident: SMS_ORIGINATION_IDENTITY environment variable is not set.");
+        return;
+    }
+
+    try {
+        await endUserMessagingClient.send(new SendTextMessageCommand({
+            DestinationPhoneNumber: phoneNumber,
+            MessageBody: message,
+            OriginationIdentity: SMS_ORIGINATION_IDENTITY,
+            MessageType: "TRANSACTIONAL",
+        }));
+        console.log(`notifyResident: SMS sent for ticket ${ticketNumber} to phone number ${phoneNumber}`);
+    } 
+    catch (error) {
+        console.error("notifyResident: Error sending SMS:", error);
+    }
+}
+
+async function sendEmail(email: string, ticketNumber: string, message: string): Promise<void> {
+    const senderEmail = process.env.SENDER_EMAIL;
+    if (!senderEmail) {
+        console.error("notifyResident: SENDER_EMAIL environment variable is not set.");
+        return;
+    }
+
+    try {
+        await sesClient.send(new SendEmailCommand({
+            FromEmailAddress: senderEmail,
+            Destination: {
+                ToAddresses: [email],
+            },
+            Content: {
+                Simple: {
+                    Subject: {
+                        Data: "Your ticket is now being served",
+                    },
+                    Body: {
+                        Text: {
+                            Data: message,
+                        },
+                    },
+                },
+            },
+        }));
+        console.log(`notifyResident: Email sent for ticket ${ticketNumber} to email ${email}`);
+    } 
+    catch (error) {
+        console.error("notifyResident: Error sending email:", error);
+    }
+}
+
 /**
  * Lambda function to send notifications to residents based on changes to their ticket in the queue.
  * 
@@ -76,57 +130,11 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         // If they have a phone number, we contact them via SMS using End User Messaging
         if (phoneNumber) {
-            const SMS_ORIGINATION_IDENTITY = process.env.SMS_ORIGINATION_IDENTITY;
-            if (!SMS_ORIGINATION_IDENTITY) {
-                console.error("notifyResident: SMS_ORIGINATION_IDENTITY environment variable is not set.");
-                continue;
-            }
-
-            try {
-                await endUserMessagingClient.send(new SendTextMessageCommand({
-                    DestinationPhoneNumber: phoneNumber,
-                    MessageBody: message,
-                    OriginationIdentity: SMS_ORIGINATION_IDENTITY,
-                    MessageType: "TRANSACTIONAL",
-                }));
-                console.log(`notifyResident: SMS sent for ticket ${ticketNumber} to phone number ${phoneNumber}`);
-            }
-            catch (error) {
-                console.error("notifyResident: Error sending SMS:", error);
-            }
+            await sendSms(phoneNumber, ticketNumber, message);
         }
         // If they don't have a phone number but have an email, we contact them via email using SES
         else if (email) {
-            const senderEmail = process.env.SENDER_EMAIL;
-            if (!senderEmail) {
-                console.error("notifyResident: SENDER_EMAIL environment variable is not set.");
-                continue;
-            }
-            
-            try {
-                await sesClient.send(new SendEmailCommand({
-                    FromEmailAddress: senderEmail,
-                    Destination: {
-                        ToAddresses: [email],
-                    },
-                    Content: {
-                        Simple: {
-                            Subject: {
-                                Data: "Your ticket is now being served",
-                            },
-                            Body: {
-                                Text: {
-                                    Data: message,
-                                },
-                            },
-                        },
-                    },
-                }));
-                console.log(`notifyResident: Email sent for ticket ${ticketNumber} to email ${email}`);
-            } 
-            catch (error) {
-                console.error("notifyResident: Error sending email:", error);
-            }
+            await sendEmail(email, ticketNumber, message);
         }
     }
 };
