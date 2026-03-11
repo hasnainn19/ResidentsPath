@@ -4,6 +4,11 @@
  * The schema is used both in the frontend form and in the backend API handler to ensure consistent validation and data handling.
  */
 
+import {
+  isSupportedCountry,
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from "libphonenumber-js";
 import { z } from "zod";
 
 export const DEPARTMENTS = [
@@ -205,8 +210,32 @@ function trimToUndef(value: unknown) {
   return t.length ? t : undefined;
 }
 
-function normalisePhone(value: string) {
-  return value.trim();
+function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
+  if (!value) return undefined;
+
+  const country = value.trim().toUpperCase();
+  if (!country.length) return undefined;
+
+  if (!isSupportedCountry(country as CountryCode)) return undefined;
+  return country as CountryCode;
+}
+
+export function normalisePhoneToE164(value: string, phoneCountry?: string) {
+  const trimmed = value.trim();
+  if (!trimmed.length) return undefined;
+
+  const candidate = trimmed.startsWith("00") ? `+${trimmed.slice(2)}` : trimmed;
+  const supportedCountry = getSupportedPhoneCountry(phoneCountry);
+
+  const parsed = candidate.startsWith("+")
+    ? parsePhoneNumberFromString(candidate)
+    : supportedCountry
+      ? parsePhoneNumberFromString(candidate, supportedCountry)
+      : undefined;
+
+  if (!parsed || !parsed.isValid()) return undefined;
+
+  return parsed.number;
 }
 
 export function normaliseUkPostcode(value: string) {
@@ -380,7 +409,10 @@ const otherFreeText = (maxLen: number) =>
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine((s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s), "Contains invalid control characters");
+    .refine(
+      (s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s),
+      "Contains invalid control characters",
+    );
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
@@ -461,15 +493,28 @@ export const formSchema = z
       .refine((v) => (v ? isValidUkPostcode(v) : true), "Postcode format is invalid"),
 
     contactMethod: z.preprocess(trimToUndef, ContactMethodEnum.optional()),
-    email: z
-      .preprocess(
-        (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
-        z.string().email().max(FIELD_TEXT_CONSTRAINTS.email.maxLen).optional(),
-      ),
-    phoneCountry: z.preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_COUNTRY_MAX).optional()),
+    email: z.preprocess(
+      (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
+      z.string().email().max(FIELD_TEXT_CONSTRAINTS.email.maxLen).optional(),
+    ),
+    phoneCountry: z.preprocess(
+      (v) => {
+        if (typeof v !== "string") return v;
+
+        const trimmed = v.trim();
+        return trimmed ? trimmed.toUpperCase() : undefined;
+      },
+      z
+        .string()
+        .max(HYGIENE.PHONE_COUNTRY_MAX)
+        .refine(
+          (v) => getSupportedPhoneCountry(v) !== undefined,
+          "Phone country must be a supported country code",
+        )
+        .optional(),
+    ),
     phone: z
       .preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_MAX_CHARS).optional())
-      .transform((v) => (v ? normalisePhone(v) : v))
       .refine((v) => (v ? isValidPhoneChars(v) : true), "Phone contains invalid characters")
       .refine(
         (v) => (v ? countDigits(v) >= 7 && countDigits(v) <= 15 : true),
@@ -721,6 +766,20 @@ export const formSchema = z
       }
     }
 
+    if (
+      v.phone &&
+      isValidPhoneChars(v.phone) &&
+      countDigits(v.phone) >= 7 &&
+      countDigits(v.phone) <= 15 &&
+      !normalisePhoneToE164(v.phone, v.phoneCountry)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["phone"],
+        message: "Phone must be a valid phone number",
+      });
+    }
+
     if (v.enquiry === "OTHER") {
       if (!v.otherEnquiryText) {
         ctx.addIssue({
@@ -729,16 +788,23 @@ export const formSchema = z
           message: "Details are required when Other is selected",
         });
       }
-    }
-    else {
+    } else {
       if (v.otherEnquiryText) {
         ctx.addIssue({
-          code: "custom", 
+          code: "custom",
           path: ["otherEnquiryText"],
           message: "otherEnquiryText must only be provided when enquiry is OTHER",
         });
       }
     }
+  })
+  .transform((v) => {
+    const normalisedPhone = v.phone ? normalisePhoneToE164(v.phone, v.phoneCountry) : undefined;
+
+    return {
+      ...v,
+      phone: normalisedPhone ?? v.phone,
+    };
   });
 
 export type formInput = z.infer<typeof formSchema>;

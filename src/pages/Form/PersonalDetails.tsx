@@ -44,9 +44,9 @@ import { useFormWizard } from "../../context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/formFieldTypes";
 import {
   UI_OPTIONS,
-  countDigits,
   isValidEmail,
   isValidUkPostcode,
+  normalisePhoneToE164,
   normaliseUkPostcode,
 } from "../../../shared/formSchema";
 import StepActions from "../../components/FormPageComponents/StepActions";
@@ -148,11 +148,14 @@ export default function PersonalDetails() {
 
   const phoneCountry = (formData.phoneCountry || "GB") as CountryCode;
   const dialCode = "+" + getCountryCallingCode(phoneCountry);
+  const normalisedPhone = formData.phone
+    ? normalisePhoneToE164(formData.phone, phoneCountry)
+    : undefined;
 
   // UI edits the national part, state stores the full number with dial code
   const nationalDigits =
-    formData.phone && formData.phone.startsWith(dialCode)
-      ? digitsOnly(formData.phone.slice(dialCode.length))
+    (normalisedPhone ?? formData.phone) && (normalisedPhone ?? formData.phone).startsWith(dialCode)
+      ? digitsOnly((normalisedPhone ?? formData.phone).slice(dialCode.length))
       : "";
 
   // Soft length cap to prevent very long inputs
@@ -202,11 +205,10 @@ export default function PersonalDetails() {
   const emailRaw = (formData.email ?? "").trim();
   const emailInvalid = provideDetails === "yes" && emailRaw !== "" && !isValidEmail(emailRaw);
 
-  const phoneDigitsCount = countDigits(formData.phone ?? "");
   const phoneInvalid =
     provideDetails === "yes" &&
-    phoneDigitsCount > 0 &&
-    (phoneDigitsCount < 7 || phoneDigitsCount > 15);
+    formData.phone.trim() !== "" &&
+    !normalisedPhone;
 
   const needsPhoneForContactMethod =
     provideDetails === "yes" &&
