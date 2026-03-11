@@ -648,8 +648,8 @@ export default function SubmissionReceipt() {
 
                     <Typography color="text.secondary" sx={{ mb: 2.5 }}>
                       {isAppointment
-                        ? "Show this at reception if you are asked to check in."
-                        : "Keep this with your case reference and ticket details."}
+                        ? "Scan this at a kiosk or reception when you arrive for a quick check-in."
+                        : "Keep this with your case reference and ticket details for a quick check-in."}
                     </Typography>
 
                     {qrCodeUrl ? (
@@ -705,7 +705,7 @@ export default function SubmissionReceipt() {
                     </Typography>
                     <Typography color="text.secondary">
                       {isAppointment
-                        ? "When you arrive at reception, have your case reference number or QR code ready."
+                        ? "When you arrive, have your case reference number or QR code ready."
                         : "Use your ticket number or QR code on the reference page to check your position and wait time."}
                     </Typography>
                   </Stack>
