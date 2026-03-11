@@ -9,7 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 interface QueueRowProps {
-  serviceName: string;
+  departmentName: string;
   waitingCount: number;
   longestWait: number;
   priorityCaseCount: number;
@@ -19,7 +19,7 @@ interface QueueRowProps {
 }
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
-  serviceName,
+  departmentName,
   waitingCount,
   longestWait,
   priorityCaseCount,
@@ -30,14 +30,14 @@ const QueueRow = ({
   const navigate = useNavigate();
 
   const handleAdjustClick = () => {
-    const params = new URLSearchParams({ serviceName });
+    const params = new URLSearchParams({ departmentName });
     navigate(`/staff/queues?${params.toString()}`);
   };
 
   return (
     <TableRow hover>
       <TableCell>
-        <Typography fontWeight={500}>{serviceName}</Typography>
+        <Typography fontWeight={500}>{departmentName}</Typography>
       </TableCell>
 
       <TableCell>{waitingCount}</TableCell>

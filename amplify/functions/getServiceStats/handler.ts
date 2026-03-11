@@ -74,7 +74,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const results = departments.map((d) => ({
-    serviceName: d.name ?? "",
+    departmentName: d.name ?? "",
     waitingCount: getWaitingCount(d.id),
     longestWait: getLongestWait(d.id),
     priorityCaseCount: getPriorityCaseCount(d.id),

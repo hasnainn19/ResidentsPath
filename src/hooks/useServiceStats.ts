@@ -3,7 +3,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 
 interface ServiceStats {
-  serviceName: string;
+  departmentName: string;
   waitingCount: number;
   longestWait: number;
   priorityCaseCount: number;
@@ -24,7 +24,7 @@ const useServiceStats = () => {
         const result = (data.data ?? [])
           .filter((d) => d != null)
           .map((d) => ({
-            serviceName: d.serviceName,
+            departmentName: d.departmentName,
             waitingCount: d.waitingCount,
             longestWait: d.longestWait,
             priorityCaseCount: d.priorityCaseCount,
@@ -33,8 +33,8 @@ const useServiceStats = () => {
             availableStaff: d.availableStaff,
           }))
           .filter((d) => {
-            if (seen.has(d.serviceName)) return false;
-            seen.add(d.serviceName);
+            if (seen.has(d.departmentName)) return false;
+            seen.add(d.departmentName);
             return true;
           });
         setServiceStats(result);

@@ -137,19 +137,21 @@ const StaffDashboard = () => {
             <TableHead>
               <TableRow>
                 <TableCell
-                  onClick={() => handleSort("serviceName")}
+                  onClick={() => handleSort("departmentName")}
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "serviceName"
+                      sortColumn === "departmentName"
                         ? "secondary.main"
                         : "inherit",
                     fontWeight:
-                      sortColumn === "serviceName" ? "bold" : "normal",
+                      sortColumn === "departmentName" ? "bold" : "normal",
                     color:
-                      sortColumn === "serviceName" ? "primary.main" : "inherit",
+                      sortColumn === "departmentName"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Service
@@ -222,7 +224,7 @@ const StaffDashboard = () => {
 
             <TableBody>
               {getSortedQueues().map((queue) => (
-                <QueueRow key={queue.serviceName} {...queue} />
+                <QueueRow key={queue.departmentName} {...queue} />
               ))}
             </TableBody>
           </Table>

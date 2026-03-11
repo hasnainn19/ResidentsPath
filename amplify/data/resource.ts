@@ -217,7 +217,7 @@ const schema = a
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
     ServiceStat: a.customType({
-      serviceName: a.string().required(),
+      departmentName: a.string().required(),
       waitingCount: a.integer().required(),
       longestWait: a.integer().required(),
       priorityCaseCount: a.integer().required(),
