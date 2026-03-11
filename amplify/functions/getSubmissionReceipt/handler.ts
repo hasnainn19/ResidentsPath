@@ -13,9 +13,8 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
   }
 
   const client = await getAmplifyClient();
-  const caseLookup = await client.models.Case.list({
-    filter: { referenceNumber: { eq: referenceNumber } },
-    limit: 1,
+  const caseLookup = await client.models.Case.listCaseByReferenceNumber({
+    referenceNumber,
   });
 
   if (caseLookup.errors?.length) {
@@ -72,13 +71,11 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
   }
 
   const [ticketLookup, appointmentLookup] = await Promise.all([
-    client.models.Ticket.list({
-      filter: { caseId: { eq: caseRecord.id } },
-      limit: 1,
+    client.models.Ticket.listTicketByCaseId({
+      caseId: caseRecord.id,
     }),
-    client.models.Appointment.list({
-      filter: { caseId: { eq: caseRecord.id } },
-      limit: 1,
+    client.models.Appointment.listAppointmentByCaseId({
+      caseId: caseRecord.id,
     }),
   ]);
 
@@ -92,7 +89,6 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
       errorMessage: "We could not load that receipt right now.",
     };
   }
-
 
   const ticket = ticketLookup.data?.[0];
   const appointment = appointmentLookup.data?.[0];

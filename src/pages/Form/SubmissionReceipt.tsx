@@ -154,7 +154,6 @@ export default function SubmissionReceipt() {
           { referenceNumber },
           { authMode },
         );
-
         if (cancelled) {
           return;
         }
