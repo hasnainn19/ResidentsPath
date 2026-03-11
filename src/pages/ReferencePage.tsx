@@ -10,8 +10,7 @@ import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
+import { useCheckTicketNumber } from "../hooks/useCheckTicketNumber";
 
 
 const ReferencePage = () => {
@@ -21,22 +20,24 @@ const ReferencePage = () => {
     // const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
     const navigate = useNavigate();
-    const [ foundCaseId, setFoundCaseId ] = useState<string | null>(null);
-    const [ ticketNoError, setTicketNoError ] = useState('');
-
+    const { foundCaseId, ticketNoError, checkTicket, isChecking } = useCheckTicketNumber();
 
     function handleQRScanner() {
-        if (scanning || startingRef.current) return;
-
+        if (scanning || startingRef.current) {
+            return;
+        }
         startingRef.current = true;
         setScanning(true);
-    
     }
 
 
     useEffect(() => {
-        if (!scanning) return;
-        if (scannerRef.current) return;
+        if (!scanning) {
+            return;
+        }
+        if (scannerRef.current) {
+            return;
+        }
 
         const scanner = new Html5Qrcode("qr-reader");
         scannerRef.current = scanner;
@@ -81,27 +82,8 @@ const ReferencePage = () => {
             });
     }
 
-    const client = generateClient<Schema>({ authMode: "userPool" });
-
-
     const handleCheckStatus = async () => {
-        try{
-            const { data: ticketData, errors: ticketErrors } = await client.queries.checkTicketNumber({ ticketNumber: refNo });
-            if (ticketErrors && ticketErrors.length > 0) {
-                setTicketNoError(ticketErrors[0].message);
-                return;
-            }
-            if (!ticketData) {
-                return;
-            }
-            const id = ticketData.caseId;
-            setFoundCaseId(id);
-
-        }
-        catch(errors){
-            setTicketNoError(`Failed to fetch ticket: ${errors}`);
-            return;
-        }
+        await checkTicket(refNo);
     }
 
     useEffect(() => {
@@ -146,7 +128,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth value={refNo} id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} />
                                 <Tooltip title="Check your status" placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatus} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
                                     </Button>
                                 </Tooltip>
