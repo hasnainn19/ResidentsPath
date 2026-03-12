@@ -44,7 +44,7 @@ const StaffDashboard = () => {
     },
     {
       icon: PriorityHighIcon,
-      value: dashboardStats.urgentCount,
+      value: dashboardStats.priorityCount,
       label: "Urgent Cases",
     },
     {

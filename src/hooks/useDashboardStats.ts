@@ -6,7 +6,7 @@ interface StaffDashboardStats {
   waitingCount: number;
   steppedOutCount: number;
   staffCount: number;
-  urgentCount: number;
+  priorityCount: number;
   longestWaitTime: number;
 }
 
@@ -15,7 +15,7 @@ const useDashboardStats = () => {
     waitingCount: 0,
     steppedOutCount: 0,
     staffCount: 0,
-    urgentCount: 0,
+    priorityCount: 0,
     longestWaitTime: 0,
   });
 
@@ -28,7 +28,7 @@ const useDashboardStats = () => {
           waitingCount: data.data?.waitingCount ?? 0,
           steppedOutCount: data.data?.steppedOutCount ?? 0,
           staffCount: data.data?.staffCount ?? 0,
-          urgentCount: data.data?.urgentCount ?? 0,
+          priorityCount: data.data?.urgentCount ?? 0,
           longestWaitTime: data.data?.longestWaitTime ?? 0,
         });
       });
