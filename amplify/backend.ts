@@ -5,10 +5,14 @@ import { postConfirmation } from './functions/postConfirmation/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Aws } from 'aws-cdk-lib';
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
+import { Table, AttributeType, BillingMode, StreamViewType } from "aws-cdk-lib/aws-dynamodb";
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
-import { Table, AttributeType, BillingMode } from "aws-cdk-lib/aws-dynamodb";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
+import { notifyResident } from "./functions/notifyResident/resource";
+import { FilterCriteria, FilterRule, StartingPosition } from 'aws-cdk-lib/aws-lambda';
+import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+
 
 
 /**
@@ -18,11 +22,13 @@ const backend = defineBackend({
 	auth,
 	data,
 	postConfirmation,
-    submitEnquiry,
-    getTicketInfo,
-    calculateDepartmentQueue,
+  submitEnquiry,
+  getTicketInfo,
+  calculateDepartmentQueue,
+  notifyResident,
   getAvailableAppointmentTimes,
 });
+
 
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups
@@ -47,15 +53,18 @@ backend.postConfirmation.resources.lambda.addToRolePolicy(
 		],
 	})
 );
-// Create a DynamoDB table to keep track of daily ticket numbers, claimed ticket numbers,
-// and claimed case reference numbers for the submitEnquiry function
+
+
+/**
+ * Create a DynamoDB table to keep track of daily ticket numbers, claimed ticket numbers,
+ * and claimed case reference numbers for the submitEnquiry function
+ */
 const enquiriesStateTable = new Table(backend.stack, "EnquiriesStateTable", {
   partitionKey: { name: "pk", type: AttributeType.STRING },
   sortKey: { name: "sk", type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
   timeToLiveAttribute: "expiresAt",
 });
-
 enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
 enquiriesStateTable.grantReadData(backend.getAvailableAppointmentTimes.resources.lambda);
 
@@ -68,3 +77,62 @@ backend.getAvailableAppointmentTimes.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
 );
+
+
+/**
+ * Access the Ticket table and enable DynamoDB streams 
+ * Amplify doesn't expose stream config directly so we go through the underlying CloudFormation resource to set it up
+ */
+backend.data.resources.cfnResources.amplifyDynamoDbTables["Ticket"].streamSpecification = {
+  streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
+};
+
+/**
+ * Attach the Ticket stream to the Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY events
+ * 
+ * Further filters can be added that target the dynamoDB record's new and old images
+ */
+const ticketTable = backend.data.resources.tables["Ticket"];
+backend.notifyResident.resources.lambda.addEventSource(
+  new DynamoEventSource(ticketTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          // Filter for when the record's data changes to something specific
+          NewImage: {
+            position: { N: FilterRule.isEqual("0") }, // Trigger when position changes to 0
+          },
+        },
+      }),
+    ]
+  })
+);
+
+// Grant the Lambda permission to send SMS via End User Messaging
+backend.notifyResident.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["sms-voice:SendTextMessage"],
+    resources: ["arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB"],
+  })
+);
+
+// Grant the Lambda permission to send emails via SES
+backend.notifyResident.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["ses:SendEmail"],
+    resources: ["*"],
+  })
+);
+
+/**
+ * SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
+ * The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
+ */
+backend.notifyResident.addEnvironment("SMS_ORIGINATION_IDENTITY", "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB");
+
+backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
