@@ -47,8 +47,8 @@ const ReferencePage = () => {
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
-                    setRefNo(decodedText);
                     stopScanner();
+                    checkTicket(decodedText);
                 },
                 (err) => console.error(err)
                 )
@@ -81,6 +81,8 @@ const ReferencePage = () => {
             setScanning(false);
             });
     }
+
+
 
     const handleCheckStatus = async () => {
         await checkTicket(refNo);
