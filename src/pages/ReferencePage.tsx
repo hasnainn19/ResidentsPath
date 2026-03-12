@@ -134,8 +134,8 @@ const ReferencePage = () => {
             <Grid container spacing={3} sx={{ justifyContent: "center", height: '80%' }}>
                 <Grid sx={{ display: 'flex', height: '100%'}} size={5.5}>
                     <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1, borderRadius: 3, height: '100%' }}>
-                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 4}}>
-                            <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark' , mb: 2 }}>
+                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                            <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.dark' }}>
                                 <SearchRoundedIcon />
                             </Avatar>
                             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700}}>
@@ -162,20 +162,20 @@ const ReferencePage = () => {
 
                 <Grid sx={{ display: 'flex', height: '100%' }} size={5.5}>
                     <Card sx={{ display: 'flex', flexDirection: 'column', flex: 1,  borderRadius: 3 }}>
-                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' , p: 4 }}>
-                            <Avatar sx={{ bgcolor: 'primary.dark' , mb: 2 }}>
+                        <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' , p: 3 }}>
+                            <Avatar sx={{ bgcolor: 'primary.dark'  }}>
                             <QrCode2OutlinedIcon />
                             </Avatar>
                             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
                                 Scan QR Code
                             </Typography>
-                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700 }}>
                                 Click to use the camera to scan your QR code:
                             </Typography>
                             <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan your QR code.'/>
                         </CardContent>
 
-                        <CardActions sx={{ px: 3, pb: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, height:'100%'}}>
+                        <CardActions sx={{ px: 2, pb: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, height:'100%'}}>
                             <Box sx={{  width: '100%', height: '100%', mx: 'auto', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column'}}>
                                 <ScanButton onClick={handleQRScanner} >
                                     {!scanning && (
