@@ -42,6 +42,10 @@ export const router = createBrowserRouter([
     element: <RequireAuth><BookingPage /></RequireAuth>,
   },
   {
+    path: "/receipts",
+    element: <SubmissionReceipt />,
+  },
+  {
     path: "/receipts/:referenceNumber",
     element: <SubmissionReceipt />,
   },

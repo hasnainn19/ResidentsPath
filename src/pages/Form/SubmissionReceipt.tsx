@@ -97,18 +97,14 @@ export default function SubmissionReceipt() {
   let qrPayload = "";
 
   if (receipt) {
-    const parts = [`type=${receipt.receiptType}`, `ref=${receipt.referenceNumber}`];
+    const parts = [`${receipt.receiptType}`];
 
     if (receipt.ticketNumber) {
-      parts.push(`ticket=${receipt.ticketNumber}`);
+      parts.push(`${receipt.ticketNumber}`);
     }
 
-    if (receipt.appointmentDateIso) {
-      parts.push(`date=${receipt.appointmentDateIso}`);
-    }
-
-    if (receipt.appointmentTime) {
-      parts.push(`time=${receipt.appointmentTime}`);
+    if (receipt.receiptType === "APPOINTMENT" && receipt.appointmentDateIso && receipt.appointmentTime) {
+      parts.push(`${receipt.referenceNumber}`);
     }
 
     qrPayload = parts.join("|");

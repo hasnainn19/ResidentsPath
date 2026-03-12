@@ -2,6 +2,8 @@ import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { DepartmentLabelById } from "../../../shared/formSchema";
 
+const client = await getAmplifyClient();
+
 function errorResponse(errorMessage: string) {
   return {
     found: false as const,
@@ -9,20 +11,7 @@ function errorResponse(errorMessage: string) {
   };
 }
 
-export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async (event) => {
-  const rawReferenceNumber = event.arguments.referenceNumber;
-
-  if (!rawReferenceNumber) {
-    return errorResponse("No case reference was provided.");
-  }
-
-  const referenceNumber = rawReferenceNumber.trim().toUpperCase();
-
-  if (!referenceNumber) {
-    return errorResponse("No case reference was provided.");
-  }
-
-  const client = await getAmplifyClient();
+async function getCase(referenceNumber: string) {
   const caseLookup = await client.models.Case.listCaseByReferenceNumber({
     referenceNumber,
   });
@@ -38,8 +27,15 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     return errorResponse("We could not find a receipt for that case reference.");
   }
 
+  return {
+    found: true as const,
+    caseRecord,
+  };
+}
+
+async function getUser(userId: string) {
   const userLookup = await client.models.User.get({
-    id: caseRecord.userId,
+    id: userId,
   });
 
   if (userLookup.errors?.length) {
@@ -53,25 +49,37 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     return errorResponse("We could not find a receipt for that case reference.");
   }
 
-  // If the user is registered, require that the user is logged in and is the owner of the receipt
-  if (userRecord.isRegistered) {
-    const identity = event.identity;
-    const sub =
-      identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
+  return {
+    found: true as const,
+    userRecord,
+  };
+}
 
-    if (!sub || sub !== userRecord.id) {
-      return errorResponse(
-        "We could not find a receipt for that case reference. If this receipt is linked to your account, please log in and try again.",
-      );
-    }
+function validateRegisteredUserAccess(
+  sub: string | null,
+  userRecord: { id: string; isRegistered?: boolean | null },
+) {
+  // If the user is registered, require that the user is logged in and is the owner of the receipt
+  if (!userRecord.isRegistered) {
+    return null;
   }
 
+  if (!sub || sub !== userRecord.id) {
+    return errorResponse(
+      "We could not find a receipt for that case reference. If this receipt is linked to your account, please log in and try again.",
+    );
+  }
+
+  return null;
+}
+
+async function getReceiptDetails(caseId: string) {
   const [ticketLookup, appointmentLookup] = await Promise.all([
     client.models.Ticket.listTicketByCaseId({
-      caseId: caseRecord.id,
+      caseId,
     }),
     client.models.Appointment.listAppointmentByCaseId({
-      caseId: caseRecord.id,
+      caseId,
     }),
   ]);
 
@@ -89,6 +97,49 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
   if (!ticket && !appointment) {
     return errorResponse("We could not find receipt details for that case reference.");
   }
+
+  return {
+    found: true as const,
+    ticket,
+    appointment,
+  };
+}
+
+export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async (event) => {
+  const referenceNumber = event.arguments.referenceNumber?.trim().toUpperCase() ?? "";
+
+  const caseLookup = await getCase(referenceNumber);
+
+  if (!caseLookup.found) {
+    return caseLookup;
+  }
+
+  const { caseRecord } = caseLookup;
+  const userLookup = await getUser(caseRecord.userId);
+
+  if (!userLookup.found) {
+    return userLookup;
+  }
+
+  const { userRecord } = userLookup;
+
+  const sub =
+    event.identity && typeof event.identity === "object" && "sub" in event.identity
+      ? (event.identity.sub as string)
+      : null;
+  const accessError = validateRegisteredUserAccess(sub, userRecord);
+
+  if (accessError) {
+    return accessError;
+  }
+
+  const receiptDetails = await getReceiptDetails(caseRecord.id);
+
+  if (!receiptDetails.found) {
+    return receiptDetails;
+  }
+
+  const { appointment, ticket } = receiptDetails;
 
   return {
     found: true,
