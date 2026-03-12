@@ -24,7 +24,6 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const[showStepOutAlert, setShowStepOutAlert]=useState(false);
     const[stepOut, setStepOut]=useState(false);
-    const { caseId } = useParams<{ caseId: string }>();
 
 
     const handleStepOut = () => {

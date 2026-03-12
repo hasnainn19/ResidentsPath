@@ -10,17 +10,17 @@ import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
-import { useCheckTicketNumber } from "../hooks/useCheckTicketNumber";
+import { useCheckReferenceNumber } from "../hooks/useCheckReferenceNumber";
 
 
 const ReferencePage = () => {
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [ scanning, setScanning ] = useState(false);
     const [ refNo, setRefNo ] = useState('');
-    // const [ qrScanError, setQrScanError] = useState('');
+    const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
     const navigate = useNavigate();
-    const { foundCaseId, ticketNoError, checkTicket, isChecking } = useCheckTicketNumber();
+    const { foundCaseId, refNoError, checkRefNo, isChecking } = useCheckReferenceNumber();
 
     function handleQRScanner() {
         if (scanning || startingRef.current) {
@@ -28,14 +28,12 @@ const ReferencePage = () => {
         }
         startingRef.current = true;
         setScanning(true);
+        setQrScanError('');
     }
 
 
     useEffect(() => {
-        if (!scanning) {
-            return;
-        }
-        if (scannerRef.current) {
+        if (!scanning || scannerRef.current) {
             return;
         }
 
@@ -48,13 +46,14 @@ const ReferencePage = () => {
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
                     stopScanner();
-                    checkTicket(decodedText);
+                    checkRefNo(decodedText);
                 },
-                (err) => console.error(err)
-                )
-            .catch(() => {
+                () => {}
+            )
+            .catch((errors) => {
                 scannerRef.current = null;
                 setScanning(false);
+                setQrScanError(`Error occured while scanning QR Code: ${errors}`);
             })
             .finally(() => {
                 startingRef.current = false; 
@@ -82,10 +81,8 @@ const ReferencePage = () => {
             });
     }
 
-
-
     const handleCheckStatus = async () => {
-        await checkTicket(refNo);
+        await checkRefNo(refNo);
     }
 
     useEffect(() => {
@@ -98,9 +95,14 @@ const ReferencePage = () => {
     <>
         <Navbar />
         <Container maxWidth="lg"  sx={{ py: 6, textAlign: 'center', height:'85vh'  }}>
-            {ticketNoError && (
-                <Alert  severity="error" color="error" onClose={() => {}}>
-                    {ticketNoError}
+            {refNoError && (
+                <Alert  severity="error" color="error" >
+                    {refNoError}
+                </Alert>
+            )}
+            {qrScanError && (
+                <Alert severity="warning" onClose={() => setQrScanError('')}>
+                    {qrScanError}
                 </Alert>
             )}
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
@@ -128,7 +130,7 @@ const ReferencePage = () => {
 
                         <CardActions sx={{ px: 4, pb: 4}}>
                             <Box sx={{ mt: 'auto', width: '100%' }}>
-                                <TextField fullWidth value={refNo} id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} />
+                                <TextField fullWidth value={refNo} id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title="Check your status" placement="top">
                                     <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
