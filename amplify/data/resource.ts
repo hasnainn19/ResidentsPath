@@ -220,6 +220,7 @@ const schema = a
       departmentName: a.string().required(),
       waitingCount: a.integer().required(),
       longestWait: a.integer().required(),
+      averageWait: a.integer().required(),
       priorityCaseCount: a.integer().required(),
       standardCaseCount: a.integer().required(),
       steppedOutCount: a.integer().required(),

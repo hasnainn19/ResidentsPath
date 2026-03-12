@@ -8,6 +8,7 @@ interface StaffDashboardStats {
   staffCount: number;
   priorityCount: number;
   longestWaitTime: number;
+  averageWaitTime: number;
 }
 
 const useDashboardStats = () => {
@@ -17,6 +18,7 @@ const useDashboardStats = () => {
     staffCount: 0,
     priorityCount: 0,
     longestWaitTime: 0,
+    averageWaitTime: 0,
   });
 
   useEffect(() => {
@@ -30,6 +32,7 @@ const useDashboardStats = () => {
           staffCount: data.data?.staffCount ?? 0,
           priorityCount: data.data?.priorityCount ?? 0,
           longestWaitTime: data.data?.longestWaitTime ?? 0,
+          averageWaitTime: data.data?.averageWaitTime ?? 0,
         });
       });
     };

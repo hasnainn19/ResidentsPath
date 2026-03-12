@@ -194,6 +194,24 @@ const StaffDashboard = () => {
                 >
                   Longest Wait
                 </TableCell>
+                <TableCell
+                  onClick={() => handleSort("averageWait")}
+                  sx={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                    whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "averageWait"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "averageWait" ? "bold" : "normal",
+                    color:
+                      sortColumn === "averageWait" ? "primary.main" : "inherit",
+                  }}
+                >
+                  Average Wait
+                </TableCell>
                 <TableCell sx={{ whiteSpace: "nowrap" }}>Priority</TableCell>
                 <TableCell
                   onClick={() => handleSort("steppedOutCount")}

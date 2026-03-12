@@ -35,9 +35,22 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const getLongestWait = (departmentId: string) => {
-    const waiting = tickets.filter((t) => t.departmentId === departmentId);
+    const waiting = tickets
+      .filter((t) => t.departmentId === departmentId)
+      .map((t) => t.estimatedWaitTimeUpper);
     if (waiting.length === 0) return 0;
-    return Math.max(...waiting.map((t) => t.estimatedWaitTimeUpper || 0));
+    return Math.max(...waiting);
+  };
+
+  const getAverageWait = (departmentId: string) => {
+    const waiting = tickets
+      .filter((t) => t.departmentId === departmentId)
+      .map((t) =>
+        Math.floor((t.estimatedWaitTimeLower + t.estimatedWaitTimeUpper) / 2),
+      );
+    if (waiting.length === 0) return 0;
+    const sum = waiting.reduce((a, b) => a + b);
+    return Math.floor(sum / waiting.length);
   };
 
   const getPriorityCaseCount = (departmentId: string) => {
@@ -68,6 +81,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     departmentName: d.name ?? "",
     waitingCount: getWaitingCount(d.id),
     longestWait: getLongestWait(d.id),
+    averageWait: getAverageWait(d.id),
     priorityCaseCount: getPriorityCaseCount(d.id),
     standardCaseCount: getStandardCaseCount(d.id),
     steppedOutCount: getSteppedOutCount(d.id),
