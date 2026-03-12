@@ -1,12 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Button, Stack, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NavBar from '../components/NavBar';
 
+// const languages = [
+//     { value: "en", text: "English" },
+//     { value: "cy", text: "Welsh" },
+// 	{ value: "pl", text: "Polish" },
+// 	{ value: "pa", text: "Punjabi" },
+// 	{ value: "fa", text: "Persian" },
+// ];
+
 export default function LandingPage() {
 	const navigate = useNavigate();
 	const { isAuthenticated, isLoading, givenName } = useAuth();
+  	const { t } = useTranslation();
 
 	// Show loading spinner while checking authentication status
 	if (isLoading) {
@@ -15,6 +25,7 @@ export default function LandingPage() {
 
 	return (
 		<>
+			<NavBar />
 			{/* Show navbar if authenticated */}
 			{isAuthenticated && <NavBar />}
 
@@ -23,12 +34,12 @@ export default function LandingPage() {
 				<Box sx={{ textAlign: 'center', mb: 6 }}>
 					<Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
 						{isAuthenticated
-							? (givenName ? `Welcome back, ${givenName}` : 'Welcome back')
-							: 'Welcome to ResidentsPath'
+							? (givenName ? `${t("landing-welcome-back")}, ${givenName}` : '{t("landing-welcome-back")}')
+							: `${t("landing-welcome")}`
 						}
 					</Typography>
 					<Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-						Hounslow Council Queue Management System
+						{t("landing-welcome-back")}
 					</Typography>
 				</Box>
 
@@ -82,10 +93,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Continue as Visitor
+										{t("landing-continue-as")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										No account needed. Get help immediately and check queue status.
+										{t("landing-no-account")}
 									</Typography>
 									<Button
 										variant="contained"
@@ -93,7 +104,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/referencepage')}
 									>
-										Continue as Visitor
+										{t("landing-continue-as")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -102,10 +113,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Sign In or Create Account
+										{t("landing-sign-in")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Access your account to book appointments and track your past visits.
+										{t("landing-access")}
 									</Typography>
 									<Button
 										variant="outlined"
@@ -113,7 +124,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/auth')}
 									>
-										Sign In / Register
+										{t("landing-register")}
 									</Button>
 								</CardContent>
 							</Card>
