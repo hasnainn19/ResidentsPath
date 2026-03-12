@@ -31,15 +31,11 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const getWaitingCount = (departmentId: string) => {
-    return tickets.filter(
-      (t) => !t.steppedOut && t.departmentId === departmentId,
-    ).length;
+    return tickets.filter((t) => t.departmentId === departmentId).length;
   };
 
   const getLongestWait = (departmentId: string) => {
-    const waiting = tickets.filter(
-      (t) => !t.steppedOut && t.departmentId === departmentId,
-    );
+    const waiting = tickets.filter((t) => t.departmentId === departmentId);
     if (waiting.length === 0) return 0;
     return Math.max(...waiting.map((t) => t.estimatedWaitTimeUpper || 0));
   };
@@ -47,18 +43,14 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   const getPriorityCaseCount = (departmentId: string) => {
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
-      return (
-        !t.steppedOut && t.departmentId === departmentId && c?.priority === true
-      );
+      return t.departmentId === departmentId && c?.priority === true;
     }).length;
   };
 
   const getStandardCaseCount = (departmentId: string) => {
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
-      return (
-        !t.steppedOut && t.departmentId === departmentId && c?.priority !== true
-      );
+      return t.departmentId === departmentId && c?.priority !== true;
     }).length;
   };
 
@@ -69,8 +61,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const getAvailableStaff = (departmentId: string) => {
-    return staff.filter((s) => s.departmentId === departmentId && s.isAvailable)
-      .length;
+    return staff.filter((s) => s.departmentId === departmentId).length;
   };
 
   const results = departments.map((d) => ({
