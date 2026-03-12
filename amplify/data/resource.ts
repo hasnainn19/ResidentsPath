@@ -1,10 +1,13 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
+import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from "../functions/postConfirmation/resource";
 import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
+import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
+
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
  */
@@ -332,12 +335,32 @@ const schema = a
         allow.authenticated("identityPool"),
       ]) // Allow both guests and authenticated users to submit enquiries
       .handler(a.handler.function(submitEnquiry)),
+
+    getAvailableAppointmentTimes: a
+      .query()
+      .arguments({
+        departmentId: a.id().required(),
+        dateIso: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          availableTimes: a.string().array().required(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(getAvailableAppointmentTimes)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
+    allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
+    allow.resource(notifyResident),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
   ]);

@@ -28,14 +28,11 @@ export type DisabilityType = "" | NonNullable<formInput["disabilityType"]>;
 
 export type SpecificOption = { value: string; label: string };
 
-export type SelfServiceLink = { label: string; href: string };
-
 export type EnquiryItem = {
   value: string;
   label: string;
   department: DepartmentId;
   specifics?: SpecificOption[];
-  selfServiceLinks?: SelfServiceLink[];
 
   askChildrenQs?: boolean;
   askVulnerabilityQs?: boolean;

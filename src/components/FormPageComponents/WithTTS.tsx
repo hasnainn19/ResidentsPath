@@ -32,8 +32,16 @@ export default function WithTTS(props: {
 
   return (
     <Box sx={props.sx}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Typography variant={titleVariant} sx={{ fontWeight: 800 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        sx={{ mb: 1, flexWrap: { xs: "wrap", sm: "nowrap" }, columnGap: 1, rowGap: 0.75 }}
+      >
+        <Typography
+          variant={titleVariant}
+          sx={{ fontWeight: 800, flex: 1, minWidth: 0, pr: { xs: 1, sm: 0 } }}
+        >
           {props.copy.label}
           {props.required ? (
             <Box component="span" sx={{ color: "error.main", ml: 0.5 }} aria-hidden>
@@ -42,7 +50,11 @@ export default function WithTTS(props: {
           ) : null}
         </Typography>
 
-        {t ? <TextToSpeechButton text={t} /> : null}
+        {t ? (
+          <Box sx={{ flexShrink: 0, ml: { xs: 0, sm: 2 } }}>
+            <TextToSpeechButton text={t} />
+          </Box>
+        ) : null}
       </Stack>
 
       {props.children}

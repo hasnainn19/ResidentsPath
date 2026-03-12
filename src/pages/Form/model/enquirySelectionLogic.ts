@@ -2,48 +2,23 @@
  * Helper rules used by the Enquiry Selection step.
  *
  * This keeps Enquiry Selection readable by moving shared rules into one place:
- * - Work out which enquiry options to show (including the General Services rules).
+ * - Work out which enquiry options to show.
  * - Decide whether the user is allowed to continue.
  * - Clear answers that no longer make sense after changing an earlier choice, so old values do
  *   not carry over into a different path.
  */
 
 import type { EnquiryItem, FormData, Proceed, Urgency } from "./formFieldTypes";
-import {
-  ENQUIRIES_BY_GENERAL_SERVICES_SECTION,
-  ENQUIRIES_BY_TOPLEVEL,
-  GENERAL_SERVICES_DIRECT_ITEMS,
-} from "../data/enquiries";
-
-function stripPrefix(value: string, prefix: string): string {
-  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
-}
+import { ENQUIRIES_BY_TOPLEVEL } from "../data/enquiries";
 
 // Given the current FormData, this builds a simple context object used in multiple steps to decide:
 // - Which enquiry is currently selected, and whether it has a "more detail" dropdown.
 // - Whether the current selection is complete enough to move forward.
 // - Which follow up sections should appear (children, disability/sensory, household size,
 //   domestic abuse).
-export function getEnquiryOptions(topLevel: string, choice: string): EnquiryItem[] {
+export function getEnquiryOptions(topLevel: string, _choice: string): EnquiryItem[] {
   if (!topLevel) return [];
-
-  if (topLevel !== "GeneralServices") {
-    return ENQUIRIES_BY_TOPLEVEL[topLevel] || [];
-  }
-
-  if (!choice) return [];
-
-  if (choice.startsWith("section:")) {
-    const sectionId = stripPrefix(choice, "section:");
-    return ENQUIRIES_BY_GENERAL_SERVICES_SECTION[sectionId] || [];
-  }
-
-  if (choice.startsWith("direct:")) {
-    const id = stripPrefix(choice, "direct:");
-    return GENERAL_SERVICES_DIRECT_ITEMS.filter((x) => x.value === id);
-  }
-
-  return [];
+  return ENQUIRIES_BY_TOPLEVEL[topLevel] || [];
 }
 
 export function computeCanGoNext(
@@ -102,26 +77,19 @@ export function applyTopLevelChange(prev: FormData, nextTopLevel: string): FormD
     return { ...next, routedDepartment: "GENERAL_CUSTOMER_SERVICES" };
   }
 
-  return next;
-}
-
-export function applyGeneralServicesChoiceChange(prev: FormData, nextChoice: string): FormData {
-  const nextState = resetFormInfo({ ...prev, generalServicesChoice: nextChoice });
-
-  // "direct:" options map straight to an enquiry (skip the extra enquiry dropdown)
-  if (nextChoice.startsWith("direct:")) {
-    const id = stripPrefix(nextChoice, "direct:");
-    const match = GENERAL_SERVICES_DIRECT_ITEMS.find((x) => x.value === id);
-
-    return {
-      ...nextState,
-      enquiryId: id,
-      routedDepartment: match?.department ?? "",
-    };
+  if (nextTopLevel !== "") {
+    const options = ENQUIRIES_BY_TOPLEVEL[nextTopLevel] || [];
+    if (options.length === 1) {
+      const only = options[0];
+      return {
+        ...next,
+        enquiryId: only.value,
+        routedDepartment: only.department ?? "",
+      };
+    }
   }
 
-  // Section choices do not map directly to an enquiry, so just reset the enquiry fields and show the dropdown
-  return nextState;
+  return next;
 }
 
 // Wipe follow up answers when enquiry changes

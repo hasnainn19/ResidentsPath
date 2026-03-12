@@ -4,7 +4,7 @@
 
 import type { FormData } from "./formFieldTypes";
 import { getEnquirySelectionState } from "./getEnquirySelectionState";
-import type { formInput } from "../../../../shared/formSchema";
+import { normalisePhoneToE164, type formInput } from "../../../../shared/formSchema";
 
 type SupportNeeds = NonNullable<NonNullable<formInput["supportNeeds"]>[number]>;
 
@@ -51,6 +51,8 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const proceed = getProceedBackend(data.proceed);
 
   const contactMethod = optionalValue(data.contactMethod);
+  const phoneCountry = trimOrUndef(data.phoneCountry);
+  const phone = trimOrUndef(data.phone);
 
   const safeToContact =
     sel.showDomesticAbuseQs && data.domesticAbuse ? optionalValue(data.safeToContact) : undefined;
@@ -72,8 +74,8 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     preferredName: trimOrUndef(data.preferredName),
 
     email: trimOrUndef(data.email),
-    phoneCountry: trimOrUndef(data.phoneCountry),
-    phone: trimOrUndef(data.phone),
+    phoneCountry,
+    phone: phone ? normalisePhoneToE164(phone, phoneCountry) ?? phone : undefined,
 
     addressLine1: trimOrUndef(data.addressLine1),
     addressLine2: trimOrUndef(data.addressLine2),

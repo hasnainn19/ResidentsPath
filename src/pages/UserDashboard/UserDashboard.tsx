@@ -72,7 +72,7 @@ export default function UserDashboard() {
                 return;
             }
             // calculate department wait times
-            const { data: calcResult, errors: calcErrors} = await client.queries.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
+            const { data: calcResult, errors: calcErrors} = await client.mutations.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
             
             if (calcErrors && calcErrors.length > 0) {
                 setErrors(calcErrors[0].message);

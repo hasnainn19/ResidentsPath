@@ -58,3 +58,5 @@ export async function getAmplifyClient() {
     await ensureConfigured();
     return generateClient<Schema>({ authMode: "iam" });
 }
+
+export type AmplifyClient = ReturnType<typeof generateClient<Schema>>;
