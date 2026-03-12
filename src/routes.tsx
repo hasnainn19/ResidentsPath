@@ -14,6 +14,7 @@ import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
 import UserDashboard from "./pages/UserDashboard";
+import CheckInConfirmation from "./pages/CheckInConfirmation";
 
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <RequireAuth><BookingPage /></RequireAuth>,
+  },  
+  {
+    path: "/checkinpage",
+    element: <CheckInConfirmation />,
   },
   {
     path: "/staff",
