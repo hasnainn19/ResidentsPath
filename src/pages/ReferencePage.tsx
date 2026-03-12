@@ -28,7 +28,7 @@ const ReferencePage = () => {
         }
         startingRef.current = true;
         setScanning(true);
-        setQrScanError('');
+        // setQrScanError('');
     }
 
 
@@ -46,7 +46,22 @@ const ReferencePage = () => {
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
                     stopScanner();
-                    checkRefNo(decodedText);
+
+                    const decodedTextParts = decodedText.trim().split("|");
+
+                    if (decodedTextParts.length !== 2) {
+                        setQrScanError("Invalid QR code format");
+                        return;
+                    }
+
+                    const [type, value] = decodedTextParts;
+
+                    if (type !== "QUEUE" && type !== "APPOINTMENT") {
+                        setQrScanError("Incorrect QR Code Prefix");
+                        return;
+                    }
+
+                    checkRefNo(value, type);
                 },
                 () => {}
             )
@@ -94,14 +109,14 @@ const ReferencePage = () => {
     return (
     <>
         <Navbar />
-        <Container maxWidth="lg"  sx={{ py: 6, textAlign: 'center', height:'85vh'  }}>
+        <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center', height:'85vh' }}>
             {refNoError && (
                 <Alert  severity="error" color="error" >
                     {refNoError}
                 </Alert>
             )}
             {qrScanError && (
-                <Alert severity="warning" onClose={() => setQrScanError('')}>
+                <Alert severity="warning" color="warning" onClose={() => setQrScanError('')}>
                     {qrScanError}
                 </Alert>
             )}
@@ -109,7 +124,7 @@ const ReferencePage = () => {
                 Use one of the following methods
             </Typography>
             <Typography variant="h4" component="h2"  gutterBottom sx={{ fontWeight: 700 , mb: 4 }}>
-                Check your queue details OR check in for an appointment
+                Check your queue details OR Check in for an appointment
                 <TextToSpeechButton text='Use one of the following methods to either check your queue details or check in for an appointment'/>
             </Typography>
             <Grid container spacing={3} sx={{ justifyContent: "center", height: '80%' }}>
@@ -123,9 +138,9 @@ const ReferencePage = () => {
                                 Manual Entry
                             </Typography>
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                                Enter your reference code here:
+                                Enter your ticket number OR appointment reference code here:
                             </Typography>
-                            <TextToSpeechButton text='For manual entry, enter your reference number in the text field and press the button to check your status.'/>
+                            <TextToSpeechButton text='For manual entry, enter your ticket number to see your queue details or enter your appointment reference code to check in for an appointment.'/>
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4}}>
@@ -151,9 +166,9 @@ const ReferencePage = () => {
                                 Scan QR Code
                             </Typography>
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                                Click to use the camera to scan the QR code:
+                                Click to use the camera to scan your QR code:
                             </Typography>
-                            <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan the QR code.'/>
+                            <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan your QR code.'/>
                         </CardContent>
 
                         <CardActions sx={{ px: 3, pb: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, height:'100%'}}>

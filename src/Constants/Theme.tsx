@@ -23,7 +23,7 @@ const theme = createTheme({
       dark: "#9df07d",
     },
     warning: {
-      main: "#fdfde9",
+      main: "#ed6c02",
     },
     background: {
       default: "#f7f7f7",
