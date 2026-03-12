@@ -21,16 +21,50 @@ const ReferencePage = () => {
     const startingRef = useRef(false);
     const navigate = useNavigate();
     const { foundCaseId, refNoError, checkRefNo, isChecking } = useCheckReferenceNumber();
+    const [ refPageError, setRefPageError] = useState('');
 
+
+    const handleCheckStatus = async () => {
+        await checkRefNo(refNo);
+    }
+    
     function handleQRScanner() {
         if (scanning || startingRef.current) {
             return;
         }
         startingRef.current = true;
         setScanning(true);
-        // setQrScanError('');
     }
 
+    function stopScanner() {
+        const scanner = scannerRef.current;
+
+        if (!scanner) {
+            setScanning(false);
+            startingRef.current = false;
+            return;
+        }
+
+        scanner
+            .stop()
+            .catch(() => {}) 
+            .finally(() => {
+            scanner.clear();
+            scannerRef.current = null;
+            startingRef.current = false;
+            setScanning(false);
+            });
+    }
+
+    useEffect(() => {
+        setRefPageError(refNoError);
+    }, [refNoError]);
+
+    useEffect(() => {
+        if (foundCaseId) {
+            navigate(`/userdashboard/${foundCaseId}`);
+        }
+    }, [foundCaseId]);
 
     useEffect(() => {
         if (!scanning || scannerRef.current) {
@@ -76,43 +110,13 @@ const ReferencePage = () => {
     }, [scanning]);
 
 
-    function stopScanner() {
-        const scanner = scannerRef.current;
-
-        if (!scanner) {
-            setScanning(false);
-            startingRef.current = false;
-            return;
-        }
-
-        scanner
-            .stop()
-            .catch(() => {}) 
-            .finally(() => {
-            scanner.clear();
-            scannerRef.current = null;
-            startingRef.current = false;
-            setScanning(false);
-            });
-    }
-
-    const handleCheckStatus = async () => {
-        await checkRefNo(refNo);
-    }
-
-    useEffect(() => {
-        if (foundCaseId) {
-            navigate(`/userdashboard/${foundCaseId}`);
-        }
-    }, [foundCaseId]);
-
     return (
     <>
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center', height:'85vh' }}>
-            {refNoError && (
-                <Alert  severity="error" color="error" >
-                    {refNoError}
+            {refPageError && (
+                <Alert  severity="error" color="error" onClose={() => setRefPageError('')}>
+                    {refPageError}
                 </Alert>
             )}
             {qrScanError && (
@@ -138,14 +142,14 @@ const ReferencePage = () => {
                                 Manual Entry
                             </Typography>
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                                Enter your ticket number OR appointment reference code here:
+                                Enter your ticket number OR appointment reference number here:
                             </Typography>
-                            <TextToSpeechButton text='For manual entry, enter your ticket number to see your queue details or enter your appointment reference code to check in for an appointment.'/>
+                            <TextToSpeechButton text='For manual entry, enter your ticket number to see your queue details or enter your appointment reference number to check in for an appointment.'/>
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4}}>
                             <Box sx={{ mt: 'auto', width: '100%' }}>
-                                <TextField fullWidth value={refNo} id="outlined-search" label="Reference code" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
+                                <TextField fullWidth value={refNo} id="outlined-search" label="Ticket/Appointment Number" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title="Check your status" placement="top">
                                     <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
