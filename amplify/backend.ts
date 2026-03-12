@@ -94,6 +94,9 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Ticket"].streamSpecif
  * Further filters can be added that target the dynamoDB record's new and old images
  */
 const ticketTable = backend.data.resources.tables["Ticket"];
+ticketTable.grantReadData(backend.submitEnquiry.resources.lambda);
+backend.submitEnquiry.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
+
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,

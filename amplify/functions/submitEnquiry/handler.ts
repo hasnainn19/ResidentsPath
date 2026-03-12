@@ -18,6 +18,8 @@ import {
   UpdateItemCommand,
   PutItemCommand,
   DeleteItemCommand,
+  ScanCommand,
+  type ScanCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { getAmplifyClient } from "../utils/amplifyClient";
 
@@ -94,6 +96,12 @@ function getEnquiriesStateTableName() {
   return tableName;
 }
 
+function getTicketTableName() {
+  const tableName = process.env.TICKET_TABLE_NAME;
+  if (!tableName) throw new Error("TICKET_TABLE_NAME is not set");
+  return tableName;
+}
+
 function getCaseReferenceClaimKey(referenceNumber: string) {
   return {
     pk: `CASE_REFERENCE#${referenceNumber}`,
@@ -112,6 +120,13 @@ function getTicketClaimKey(queueId: string, ticketNumber: string) {
   return {
     pk: `QUEUE#${queueId}`,
     sk: `TICKET#${ticketNumber}`,
+  };
+}
+
+function getQueuePositionLockKey(serviceDayQueueKey: string) {
+  return {
+    pk: `QUEUE_POSITION#${serviceDayQueueKey}`,
+    sk: "LOCK",
   };
 }
 
@@ -207,6 +222,11 @@ type AppointmentSlotClaim = {
   time: string;
 };
 type AppointmentSlotState = "PENDING" | "BOOKED";
+type QueuePositionLock = {
+  serviceDayQueueKey: string;
+  ownerToken: string;
+  serviceDay: string;
+};
 
 const DepartmentCodeById: Record<DepartmentId, string> = {
   HOMELESSNESS: "H",
@@ -298,6 +318,150 @@ async function releaseAppointmentSlot(slot: AppointmentSlotClaim) {
       },
     }),
   );
+}
+
+// Claim a position in the queue for a department by inserting a lock record into the enquiries state table
+// This avoids race conditions when allocating the next queue position
+async function claimQueuePositionLock(departmentId: DepartmentId): Promise<QueuePositionLock> {
+  const tableName = getEnquiriesStateTableName();
+  const serviceDay = getDate();
+  const serviceDayQueueKey = `${serviceDay}#${departmentId}`;
+  const key = getQueuePositionLockKey(serviceDayQueueKey);
+  // Generate a random token to identify the owner of the lock, which will be used to ensure only the owner can release it
+  const ownerToken = randomBytes(12).toString("hex");
+
+  // Try to claim the lock by inserting a record. If the record already exists, it means another process has claimed the lock,
+  // so wait and try again at most 20 times
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+
+    try {
+      await ddb.send(
+        new PutItemCommand({
+          TableName: tableName,
+          Item: {
+            pk: { S: key.pk },
+            sk: { S: key.sk },
+            ownerToken: { S: ownerToken },
+            allocatedAt: { N: String(Date.now()) },
+            // Expire the lock after 30 seconds to prevent deadlocks in case the process crashes before releasing it
+            expiresAt: { N: String(nowInSeconds + 30) },
+          },
+          ConditionExpression: "attribute_not_exists(pk) OR expiresAt < :now",
+          ExpressionAttributeValues: {
+            ":now": { N: String(nowInSeconds) },
+          },
+        }),
+      );
+
+      return {
+        serviceDayQueueKey,
+        ownerToken,
+        serviceDay,
+      };
+    } catch (e: any) {
+      const name = typeof e?.name === "string" ? e.name : "";
+      // If the error is a ConditionalCheckFailedException, it means the lock is currently held by another process, so wait and try again
+      if (name !== "ConditionalCheckFailedException") {
+        throw e;
+      }
+    }
+
+    if (attempt < 19) {
+      // jitter to prevent multiple lambdas from retrying at the same time and getting stuck
+      const jitter = randomBytes(1)[0] % 25;
+
+      // Wait for a short time before trying again so as not to submit too many requests to DynamoDB in a short time
+      // Waits for 50ms on the first attempt, increases by 25ms for each subsequent attempt, and adds a small jitter
+      await new Promise((resolve) => setTimeout(resolve, 50 + attempt * 25 + jitter));
+    }
+  }
+
+  throw new Error(`Failed to claim queue position lock for ${departmentId}`);
+}
+
+async function releaseQueuePositionLock(lock: QueuePositionLock) {
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
+  if (!tableName) {
+    return;
+  }
+
+  const key = getQueuePositionLockKey(lock.serviceDayQueueKey);
+
+  try {
+    await ddb.send(
+      new DeleteItemCommand({
+        TableName: tableName,
+        Key: {
+          pk: { S: key.pk },
+          sk: { S: key.sk },
+        },
+        ConditionExpression: "ownerToken = :ownerToken",
+        ExpressionAttributeValues: {
+          ":ownerToken": { S: lock.ownerToken },
+        },
+      }),
+    );
+  } catch (e: any) {
+    const name = typeof e?.name === "string" ? e.name : "";
+    if (name === "ConditionalCheckFailedException") {
+      return;
+    }
+
+    throw e;
+  }
+}
+
+// Get the next position in the queue for a department by scanning the Ticket table for tickets in the same department and service day, and finding the maximum position among them
+async function getNextQueuePosition(
+  departmentId: DepartmentId,
+  serviceDay: string,
+): Promise<number> {
+  const tableName = getTicketTableName();
+  let furthestBackPosition = -1;
+  // exclusiveStartKey is used for paginating through the results of the scan, as DynamoDB may not return all matching items in a single response if there are many
+  let exclusiveStartKey: ScanCommandInput["ExclusiveStartKey"];
+
+  do {
+    const result = await ddb.send(
+      new ScanCommand({
+        TableName: tableName,
+        // Use consistent read to ensure we see the most recent data
+        ConsistentRead: true,
+        ExclusiveStartKey: exclusiveStartKey,
+        ProjectionExpression: "#position, createdAt",
+        // Filter for tickets in the same department and with status WAITING
+        FilterExpression: "departmentId = :departmentId AND #status = :waiting",
+        ExpressionAttributeNames: {
+          "#position": "position",
+          "#status": "status",
+        },
+        ExpressionAttributeValues: {
+          ":departmentId": { S: departmentId },
+          ":waiting": { S: "WAITING" },
+        },
+      }),
+    );
+
+    for (const item of result.Items ?? []) {
+      // For each ticket, check if it belongs to the same service day by looking at createdAt 
+      const createdAt = item.createdAt?.S ?? null;
+      const createdAtMs = createdAt ? Date.parse(createdAt) : Number.NaN;
+      const hasValidCreatedAt = Number.isFinite(createdAtMs);
+      const ticketServiceDay = hasValidCreatedAt ? getDate(new Date(createdAtMs)) : null;
+      const positionRaw = item.position?.N;
+      const position = typeof positionRaw === "string" ? Number(positionRaw) : Number.NaN;
+
+      if (ticketServiceDay === serviceDay && Number.isFinite(position) && position >= 0) {
+        furthestBackPosition = Math.max(furthestBackPosition, position);
+      }
+    }
+
+    // If LastEvaluatedKey is present in the result, it means there are more items to scan, so set exclusiveStartKey to that key to get the next page of results in the next iteration
+    exclusiveStartKey = result.LastEvaluatedKey;
+  } while (exclusiveStartKey);
+
+  return furthestBackPosition + 1;
 }
 
 // Atomically increment and retrieve the next ticket index for a queue from DynamoDB, ensuring uniqueness without race conditions
@@ -566,6 +730,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
   let claimedAppointmentSlot: AppointmentSlotClaim | null = null;
+  let claimedQueuePositionLock: QueuePositionLock | null = null;
 
   let ticketFailure: SubmitEnquiryResult | null = null;
   let appointmentFailure: SubmitEnquiryResult | null = null;
@@ -679,13 +844,19 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     claimedQueueId = alloc.queueId;
     claimedTicketDigits = alloc.ticketDigits;
 
-    // If not booking an appointment, create a ticket for the case (Placeholders used for ticket fields)
+    claimedQueuePositionLock = await claimQueuePositionLock(validated.departmentId);
+    const nextQueuePosition = await getNextQueuePosition(
+      validated.departmentId,
+      claimedQueuePositionLock.serviceDay,
+    );
+
+    // If not booking an appointment, create a ticket for the case.
     const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
       caseId: createdCaseId,
       departmentId: validated.departmentId,
       ticketNumber: alloc.ticketNumber,
       status: "WAITING",
-      position: -1,
+      position: nextQueuePosition,
       estimatedWaitTimeLower: -1,
       estimatedWaitTimeUpper: -1,
     });
@@ -696,6 +867,12 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     }
 
     createdTicketId = ticketData.id;
+    if (claimedQueuePositionLock) {
+      await tryDelete("QueuePositionLock.delete", () =>
+        releaseQueuePositionLock(claimedQueuePositionLock!),
+      );
+      claimedQueuePositionLock = null;
+    }
     return { ok: true, referenceNumber, ticketNumber: alloc.ticketNumber };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -718,6 +895,12 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
       await tryDelete("TicketNumberClaims.delete", () =>
         releaseTicketNumber(queueId, ticketDigits),
+      );
+    }
+
+    if (claimedQueuePositionLock) {
+      await tryDelete("QueuePositionLock.delete", () =>
+        releaseQueuePositionLock(claimedQueuePositionLock!),
       );
     }
 
