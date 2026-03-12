@@ -42,9 +42,4 @@ export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
       const caseIDs = new Set(cases.map((c) => c.id));
       return tickets.filter((t) => caseIDs.has(t.caseId)).length;
     })(),
-    longestWaitTime:
-      tickets.length > 0
-        ? Math.max(...tickets.map((t) => t.estimatedWaitTimeUpper || 0))
-        : 0,
-  };
 };

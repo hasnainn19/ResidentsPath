@@ -214,7 +214,6 @@ const schema = a
           steppedOutCount: a.integer().required(),
           staffCount: a.integer().required(),
           priorityCount: a.integer().required(),
-          longestWaitTime: a.integer().required(),
         }),
       )
       .authorization((allow) => [allow.groups(["Staff"])])
