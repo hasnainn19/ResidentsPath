@@ -28,7 +28,7 @@ const useDashboardStats = () => {
           waitingCount: data.data?.waitingCount ?? 0,
           steppedOutCount: data.data?.steppedOutCount ?? 0,
           staffCount: data.data?.staffCount ?? 0,
-          priorityCount: data.data?.urgentCount ?? 0,
+          priorityCount: data.data?.priorityCount ?? 0,
           longestWaitTime: data.data?.longestWaitTime ?? 0,
         });
       });
