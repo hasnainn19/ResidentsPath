@@ -7,7 +7,6 @@ interface StaffDashboardStats {
   steppedOutCount: number;
   staffCount: number;
   priorityCount: number;
-  longestWaitTime: number;
 }
 
 const useDashboardStats = () => {
@@ -16,7 +15,6 @@ const useDashboardStats = () => {
     steppedOutCount: 0,
     staffCount: 0,
     priorityCount: 0,
-    longestWaitTime: 0,
   });
 
   useEffect(() => {
@@ -29,7 +27,6 @@ const useDashboardStats = () => {
           steppedOutCount: data.data?.steppedOutCount ?? 0,
           staffCount: data.data?.staffCount ?? 0,
           priorityCount: data.data?.priorityCount ?? 0,
-          longestWaitTime: data.data?.longestWaitTime ?? 0,
         });
       });
     };

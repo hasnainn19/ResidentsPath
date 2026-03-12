@@ -107,9 +107,9 @@ const StaffDashboard = () => {
         >
           Overview
         </Typography>
-        <Grid container spacing={2} columns={15} sx={{ mb: 4 }}>
+        <Grid container spacing={2} columns={16} sx={{ mb: 4 }}>
           {stats.map((stat, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
               <StatCard {...stat} />
             </Grid>
           ))}
