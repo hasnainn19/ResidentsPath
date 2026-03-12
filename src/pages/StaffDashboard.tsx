@@ -18,187 +18,39 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
-import React from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
+import useDashboardStats from "../hooks/useDashboardStats";
+import useServiceStats from "../hooks/useServiceStats";
+import { useState } from "react";
 
 // Main staff dashboard page, providing an overview of key metrics and current service queues. It utilizes the StatCard component to display important statistics and the QueueRow component to list active queues with their respective details and actions.
 const StaffDashboard = () => {
-  const [sortColumn, setSortColumn] = React.useState<string | null>(null);
-  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const dashboardStats = useDashboardStats();
+  const queues = useServiceStats();
 
-  const lastUpdated = "2026-02-16 14:00";
   const stats = [
     {
       icon: GroupsIcon,
-      value: 67,
+      value: dashboardStats.waitingCount,
       label: "Waiting in reception",
-      change: 12,
-      isPositive: true,
-      lastUpdated,
     },
     {
       icon: ExitToAppIcon,
-      value: 23,
+      value: dashboardStats.steppedOutCount,
       label: "Stepped Out",
-      change: 8,
-      isPositive: true,
-      lastUpdated,
     },
     {
       icon: PriorityHighIcon,
-      value: 13,
+      value: dashboardStats.priorityCount,
       label: "Urgent Cases",
-      change: -2,
-      isPositive: false,
-      lastUpdated,
     },
     {
       icon: SupervisorAccountIcon,
-      value: "2",
+      value: dashboardStats.staffCount,
       label: "Available Staff",
-      change: 5,
-      isPositive: true,
-      lastUpdated,
-    },
-    {
-      icon: HourglassBottomIcon,
-      value: "55m",
-      label: "Longest Wait Time",
-      change: 5,
-      isPositive: true,
-      lastUpdated,
-    },
-  ];
-
-  const queues = [
-    {
-      service: "Benefits and financial support",
-      waiting: 12,
-      longestWaitTime: 15,
-      priorityBreakdown: { Standard: 2, Priority: 5 },
-      steppedOut: 3,
-      availableStaff: 1,
-    },
-    {
-      service: "Births, deaths and ceremonies",
-      waiting: 0,
-      longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0 },
-      steppedOut: 0,
-      availableStaff: 2,
-    },
-    {
-      service: "Business and licensing",
-      waiting: 5,
-      longestWaitTime: 25,
-      priorityBreakdown: { Standard: 3, Priority: 1 },
-      steppedOut: 2,
-      availableStaff: 3,
-    },
-    {
-      service: "Community hub and libraries",
-      waiting: 18,
-      longestWaitTime: 10,
-      priorityBreakdown: { Standard: 5, Priority: 8 },
-      steppedOut: 4,
-      availableStaff: 4,
-    },
-    {
-      service: "Community safety and support",
-      waiting: 7,
-      longestWaitTime: 8,
-      priorityBreakdown: { Standard: 1, Priority: 3 },
-      steppedOut: 1,
-      availableStaff: 5,
-    },
-    {
-      service: "Council and elections",
-      waiting: 0,
-      longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0 },
-      steppedOut: 0,
-      availableStaff: 6,
-    },
-    {
-      service: "Council Tax",
-      waiting: 14,
-      longestWaitTime: 20,
-      priorityBreakdown: { Standard: 4, Priority: 6 },
-      steppedOut: 2,
-      availableStaff: 7,
-    },
-    {
-      service: "Environment",
-      waiting: 3,
-      longestWaitTime: 5,
-      priorityBreakdown: { Standard: 2, Priority: 1 },
-      steppedOut: 1,
-      availableStaff: 8,
-    },
-    {
-      service: "Housing",
-      waiting: 9,
-      longestWaitTime: 12,
-      priorityBreakdown: { Standard: 2, Priority: 4 },
-      steppedOut: 2,
-      availableStaff: 9,
-    },
-    {
-      service: "Jobs, careers and adult education",
-      waiting: 0,
-      longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0 },
-      steppedOut: 0,
-      availableStaff: 10,
-    },
-    {
-      service: "Leisure, parks and sports",
-      waiting: 4,
-      longestWaitTime: 6,
-      priorityBreakdown: { Standard: 3, Priority: 1 },
-      steppedOut: 1,
-      availableStaff: 11,
-    },
-    {
-      service: "Parking, transport and streets",
-      waiting: 11,
-      longestWaitTime: 18,
-      priorityBreakdown: { Standard: 5, Priority: 4 },
-      steppedOut: 3,
-      availableStaff: 12,
-    },
-    {
-      service: "Planning and building",
-      waiting: 6,
-      longestWaitTime: 14,
-      priorityBreakdown: { Standard: 2, Priority: 2 },
-      steppedOut: 1,
-      availableStaff: 1,
-    },
-    {
-      service: "Schools, nurseries and education",
-      waiting: 2,
-      longestWaitTime: 3,
-      priorityBreakdown: { Standard: 1, Priority: 1 },
-      steppedOut: 0,
-      availableStaff: 2,
-    },
-    {
-      service: "Social care and health",
-      waiting: 16,
-      longestWaitTime: 22,
-      priorityBreakdown: { Standard: 3, Priority: 6 },
-      steppedOut: 4,
-      availableStaff: 3,
-    },
-    {
-      service: "Waste and recycling",
-      waiting: 0,
-      longestWaitTime: null,
-      priorityBreakdown: { Standard: 0, Priority: 0 },
-      steppedOut: 0,
-      availableStaff: 4,
     },
   ];
 
@@ -255,9 +107,9 @@ const StaffDashboard = () => {
         >
           Overview
         </Typography>
-        <Grid container spacing={2} columns={15} sx={{ mb: 4 }}>
+        <Grid container spacing={2} columns={16} sx={{ mb: 4 }}>
           {stats.map((stat, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
               <StatCard {...stat} />
             </Grid>
           ))}
@@ -277,69 +129,98 @@ const StaffDashboard = () => {
             <TableHead>
               <TableRow>
                 <TableCell
-                  onClick={() => handleSort("service")}
+                  onClick={() => handleSort("departmentName")}
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "service" ? "secondary.main" : "inherit",
-                    fontWeight: sortColumn === "service" ? "bold" : "normal",
+                      sortColumn === "departmentName"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "departmentName" ? "bold" : "normal",
                     color:
-                      sortColumn === "service" ? "primary.main" : "inherit",
+                      sortColumn === "departmentName"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Service
                 </TableCell>
                 <TableCell
-                  onClick={() => handleSort("waiting")}
+                  onClick={() => handleSort("waitingCount")}
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "waiting" ? "secondary.main" : "inherit",
-                    fontWeight: sortColumn === "waiting" ? "bold" : "normal",
+                      sortColumn === "waitingCount"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "waitingCount" ? "bold" : "normal",
                     color:
-                      sortColumn === "waiting" ? "primary.main" : "inherit",
+                      sortColumn === "waitingCount"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Waiting
                 </TableCell>
                 <TableCell
-                  onClick={() => handleSort("longestWaitTime")}
+                  onClick={() => handleSort("longestWait")}
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "longestWaitTime"
+                      sortColumn === "longestWait"
                         ? "secondary.main"
                         : "inherit",
                     fontWeight:
-                      sortColumn === "longestWaitTime" ? "bold" : "normal",
+                      sortColumn === "longestWait" ? "bold" : "normal",
                     color:
-                      sortColumn === "longestWaitTime"
-                        ? "primary.main"
-                        : "inherit",
+                      sortColumn === "longestWait" ? "primary.main" : "inherit",
                   }}
                 >
                   Longest Wait
                 </TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap" }}>Priority</TableCell>
                 <TableCell
-                  onClick={() => handleSort("steppedOut")}
+                  onClick={() => handleSort("averageWait")}
                   sx={{
                     cursor: "pointer",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                     backgroundColor:
-                      sortColumn === "steppedOut"
+                      sortColumn === "averageWait"
                         ? "secondary.main"
                         : "inherit",
-                    fontWeight: sortColumn === "steppedOut" ? "bold" : "normal",
+                    fontWeight:
+                      sortColumn === "averageWait" ? "bold" : "normal",
                     color:
-                      sortColumn === "steppedOut" ? "primary.main" : "inherit",
+                      sortColumn === "averageWait" ? "primary.main" : "inherit",
+                  }}
+                >
+                  Average Wait
+                </TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>Priority</TableCell>
+                <TableCell
+                  onClick={() => handleSort("steppedOutCount")}
+                  sx={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                    whiteSpace: "nowrap",
+                    backgroundColor:
+                      sortColumn === "steppedOutCount"
+                        ? "secondary.main"
+                        : "inherit",
+                    fontWeight:
+                      sortColumn === "steppedOutCount" ? "bold" : "normal",
+                    color:
+                      sortColumn === "steppedOutCount"
+                        ? "primary.main"
+                        : "inherit",
                   }}
                 >
                   Stepped Out
@@ -353,7 +234,7 @@ const StaffDashboard = () => {
 
             <TableBody>
               {getSortedQueues().map((queue) => (
-                <QueueRow key={queue.service} {...queue} />
+                <QueueRow key={queue.departmentName} {...queue} />
               ))}
             </TableBody>
           </Table>
