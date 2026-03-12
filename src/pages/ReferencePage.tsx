@@ -106,7 +106,7 @@ const ReferencePage = () => {
                 </Alert>
             )}
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
-                Use one of the following methods to see more details
+                Use one of the following methods
             </Typography>
             <Typography variant="h4" component="h2"  gutterBottom sx={{ fontWeight: 700 , mb: 4 }}>
                 Check your queue details OR check in for an appointment

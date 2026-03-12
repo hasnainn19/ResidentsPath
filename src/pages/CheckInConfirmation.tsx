@@ -22,23 +22,31 @@ const CheckInConfirmationPage = () => {
                     severity="success"
                     variant="outlined"
                     sx={{
-                    borderColor: "primary.main",  // purple border
-                    bgcolor: "secondary.light",     // light purple background
-                    color: "primary.dark",        // darker purple text
-                    borderRadius: 3,
-                    py: 4,                        // larger padding
-                    px: 6,
-                    fontSize: "1.5rem",           // large text
-                    width: "100%",
-                    "& .MuiAlert-title": { fontSize: "2rem", fontWeight: 700 },
-                    "& .MuiAlert-icon": {  color: "primary.main"  },
+                        borderColor: "primary.main",  // purple border
+                        bgcolor: "secondary.light",     // light purple background
+                        color: "primary.dark",        // darker purple text
+                        borderRadius: 3,
+                        py: 4,                        // larger padding
+                        px: 6,
+                        fontSize: "1.5rem",           // large text
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        textAlign: "center",
+                        "& .MuiAlert-title": {  fontWeight: 700 },
+                        "& .MuiAlert-icon": {  color: "primary.main", fontSize: "2rem"  },
                     }}
                 >
-                  <AlertTitle>Check in confirmed</AlertTitle>
-                    You have successfully booked in!
-              </Alert>
-              </Box>
+                    <AlertTitle>Check in Confirmed</AlertTitle>
+                        You have successfully checked in for your appoitment!
+                    <Box  sx={{ mt: 2 }}>
+                        <TextToSpeechButton text='Check in Confirmed. You have successfully checked in for your appoitment!'/>
+                    </Box>
+                </Alert>
+            </Box> 
         </Container>
+        
     </>
   );
 };
