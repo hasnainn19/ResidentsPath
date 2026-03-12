@@ -52,14 +52,6 @@ const StaffDashboard = () => {
       value: dashboardStats.staffCount,
       label: "Available Staff",
     },
-    {
-      icon: HourglassBottomIcon,
-      value:
-        dashboardStats.longestWaitTime != null
-          ? `${dashboardStats.longestWaitTime} mins`
-          : "N/A",
-      label: "Longest Wait Time",
-    },
   ];
 
   const handleSort = (column: string) => {

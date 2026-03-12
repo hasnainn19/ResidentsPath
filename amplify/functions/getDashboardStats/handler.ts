@@ -38,7 +38,7 @@ export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
     waitingCount: tickets.length,
     steppedOutCount: tickets.filter((t) => t.steppedOut === true).length,
     staffCount: staff.length,
-    urgentCount: (() => {
+    priorityCount: (() => {
       const caseIDs = new Set(cases.map((c) => c.id));
       return tickets.filter((t) => caseIDs.has(t.caseId)).length;
     })(),

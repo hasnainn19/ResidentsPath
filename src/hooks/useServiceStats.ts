@@ -6,6 +6,7 @@ interface ServiceStats {
   departmentName: string;
   waitingCount: number;
   longestWait: number;
+  averageWait: number;
   priorityCaseCount: number;
   standardCaseCount: number;
   steppedOutCount: number;
@@ -27,6 +28,7 @@ const useServiceStats = () => {
             departmentName: d.departmentName,
             waitingCount: d.waitingCount,
             longestWait: d.longestWait,
+            averageWait: d.averageWait,
             priorityCaseCount: d.priorityCaseCount,
             standardCaseCount: d.standardCaseCount,
             steppedOutCount: d.steppedOutCount,
