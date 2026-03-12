@@ -210,7 +210,7 @@ const schema = a
           waitingCount: a.integer().required(),
           steppedOutCount: a.integer().required(),
           staffCount: a.integer().required(),
-          urgentCount: a.integer().required(),
+          priorityCount: a.integer().required(),
           longestWaitTime: a.integer().required(),
         }),
       )

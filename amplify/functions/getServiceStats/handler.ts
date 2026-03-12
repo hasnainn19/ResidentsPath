@@ -23,7 +23,11 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   const { data: staff } = await client.models.Staff.list({
     filter: { isAvailable: { eq: true } },
   });
-  const { data: cases } = await client.models.Case.list();
+  const { data: cases } = await client.models.Case.list({
+    filter: {
+      or: [{ status: { eq: "OPEN" } }, { status: { eq: "IN_PROGRESS" } }],
+    },
+  });
   const { data: departments } = await client.models.Department.list();
 
   const getCase = (caseId: string) => {
