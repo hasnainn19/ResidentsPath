@@ -4,6 +4,7 @@ import { AccountCircle } from '@mui/icons-material';
 import { signOut } from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import LanguageSupportButton from './LanguageSupportButton';
 
 
 export default function NavBar() {
@@ -135,6 +136,10 @@ export default function NavBar() {
 							))}
 						</Menu>
 					</Box>
+
+					<Tooltip title="Select language">
+						<LanguageSupportButton />
+					</Tooltip>
 				</Stack>
 			</Toolbar>
 		</AppBar>
