@@ -2,12 +2,11 @@
  * Actions and next steps.
  *
  * Shows:
- * - Self-service links (when available for the selected enquiry)
  * - Queue status and option to join the digital queue or get a reminder to join later
  * - Embedded booking panel when the resident chooses to book an appointment
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
@@ -29,6 +28,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { generateClient } from "aws-amplify/data";
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import StepActions from "../../components/FormPageComponents/StepActions";
@@ -37,7 +37,9 @@ import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import BookingPanel from "../../components/BookingPanel";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
+import type { Schema } from "../../../amplify/data/resource";
 import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
+import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 function clampInt(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.trunc(n)));
@@ -52,10 +54,10 @@ function formatTimeGb(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" }).format(d);
 }
 
-function busyFromTypicalWait(mins: number): BusyLevel {
-  if (mins < 30) return "quiet";
-  if (mins <= 60) return "average";
-  if (mins <= 120) return "busy";
+function busyFromQueueCount(queueCount: number): BusyLevel {
+  if (queueCount <= 3) return "quiet";
+  if (queueCount <= 8) return "average";
+  if (queueCount <= 15) return "busy";
   return "veryBusy";
 }
 
@@ -73,11 +75,27 @@ function busySeverity(level: BusyLevel): "success" | "info" | "warning" | "error
   return "error";
 }
 
+function buildQueueCountText(queueCount: number): string {
+  if (queueCount === 0) {
+    return "There is currently nobody in this queue.";
+  }
+
+  if (queueCount === 1) {
+    return "There is currently 1 person in this queue.";
+  }
+
+  return `There are currently ${queueCount} people in this queue.`;
+}
+
+function buildQueueBusyText(level: BusyLevel): string {
+  return `This queue is ${busyLabel(level).toLowerCase()}.`;
+}
+
 function buildQueueTts(status: QueueStatus, level: BusyLevel): string {
   return (
-    `Queue status. ` +
-    `Hounslow House is ${busyLabel(level).toLowerCase()} right now. ` +
-    `Typical wait is about ${status.typicalWaitMin} to ${status.typicalWaitMax} minutes. ` +
+    `Queue information. ` +
+    `${buildQueueCountText(status.queueCount)} ` +
+    `${buildQueueBusyText(level)} ` +
     `Last updated at ${formatTimeGb(new Date(status.updatedAtIso))}. ` +
     `Some urgent or vulnerable cases may be seen sooner.`
   );
@@ -135,33 +153,83 @@ function OptionTile({ title, description, selected, onClick }: OptionTileProps) 
   );
 }
 
-function getQueueStatusStub(): QueueStatus {
-  const now = new Date();
-  return {
-    typicalWaitMin: 45,
-    typicalWaitMax: 75,
-    updatedAtIso: now.toISOString(),
-  };
-}
-
 export default function Actions() {
   const nav = useNavigate();
   const { formData, setFormData, handleSave } = useFormWizard();
+  const client = useMemo(() => generateClient<Schema>(), []);
 
   const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
   const showBooking = formData.proceed === "BOOK_APPOINTMENT";
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
-  const bookingDepartmentId =
+  const selectedDepartmentId =
     formData.routedDepartment || enquirySelectionState.selectedEnquiry?.department;
-
-  const queueStatus = useMemo(() => getQueueStatusStub(), []);
-  const typicalMid = Math.round((queueStatus.typicalWaitMin + queueStatus.typicalWaitMax) / 2);
-  const busy = busyFromTypicalWait(typicalMid);
+  const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
+  const [queueStatusLoading, setQueueStatusLoading] = useState(false);
+  const [queueStatusError, setQueueStatusError] = useState<string | null>(null);
+  const busy = busyFromQueueCount(queueStatus?.queueCount ?? 0);
 
   const [joinTiming, setJoinTiming] = useState<"now" | "later">("now");
   const timeOptionsToday = useMemo(() => buildTimeOptionsToday(new Date(), 8), []);
   const [laterTimeToday, setLaterTimeToday] = useState<string>(timeOptionsToday[0] ?? "");
   const [confirmReminderOpen, setConfirmReminderOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadQueueStatus() {
+      if (!showQueue || !selectedDepartmentId) {
+        setQueueStatus(null);
+        setQueueStatusError(null);
+        setQueueStatusLoading(false);
+        return;
+      }
+
+      setQueueStatusLoading(true);
+      setQueueStatusError(null);
+
+      try {
+        const authMode = await getDataAuthMode();
+        const response = await client.queries.getDepartmentQueueStatus(
+          { departmentId: selectedDepartmentId },
+          { authMode },
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        if (response.errors?.length || !response.data) {
+          console.error("getDepartmentQueueStatus returned errors", response.errors);
+          setQueueStatus(null);
+          setQueueStatusError("Unable to load the current queue size right now.");
+          setQueueStatusLoading(false);
+          return;
+        }
+
+        setQueueStatus({
+          queueCount: Math.max(0, response.data.queueCount ?? 0),
+          updatedAtIso: response.data.updatedAtIso || new Date().toISOString(),
+        });
+        setQueueStatusLoading(false);
+      } catch (error) {
+        console.error("Failed to load queue status", error);
+
+        if (cancelled) {
+          return;
+        }
+
+        setQueueStatus(null);
+        setQueueStatusError("Unable to load the current queue size right now.");
+        setQueueStatusLoading(false);
+      }
+    }
+
+    loadQueueStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [client, selectedDepartmentId, showQueue]);
 
   const hasReminderContact =
     formData.provideDetails === "yes" &&
@@ -242,43 +310,77 @@ export default function Actions() {
           {showQueue && (
             <WithTTS
               copy={{
-                label: "Digital queue status",
-                tts: buildQueueTts(queueStatus, busy),
+                label: "Digital queue information",
+                tts: queueStatus
+                  ? buildQueueTts(queueStatus, busy)
+                  : queueStatusLoading
+                    ? "Queue status is loading."
+                    : "Queue status is unavailable right now.",
               }}
               titleVariant="h6"
             >
               <Stack spacing={2}>
-                <Alert
-                  severity={busySeverity(busy)}
-                  variant="outlined"
-                  sx={(theme) => {
-                    const pal = theme.palette[busySeverity(busy)];
-                    const accent = pal.dark || pal.main;
+                {!selectedDepartmentId ? (
+                  <Alert severity="info" variant="outlined">
+                    Select a service to see the current queue size.
+                  </Alert>
+                ) : queueStatusLoading ? (
+                  <Alert
+                    severity="info"
+                    variant="outlined"
+                    sx={(theme) => {
+                      const accent = theme.palette.primary.main;
 
-                    return {
-                      borderRadius: 2,
-                      border: "2px solid",
-                      borderColor: accent,
-                      borderLeftWidth: 8,
-                      bgcolor: alpha(accent, 0.1),
-                      "& .MuiAlert-icon": { color: accent },
-                      "& .MuiAlert-message": { width: "100%" },
-                    };
-                  }}
-                >
-                  <Stack spacing={0.5}>
-                    <Typography fontWeight={800}>
-                      The queue is currently: {busyLabel(busy)}
-                    </Typography>
-                    <Typography variant="body2">
-                      Typical wait if you join now: {queueStatus.typicalWaitMin} to{" "}
-                      {queueStatus.typicalWaitMax} minutes
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Some urgent or vulnerable cases may be seen sooner.
-                    </Typography>
-                  </Stack>
-                </Alert>
+                      return {
+                        borderRadius: 2,
+                        border: "2px solid",
+                        borderColor: accent,
+                        borderLeftWidth: 8,
+                        bgcolor: alpha(accent, 0.1),
+                        "& .MuiAlert-icon": { color: accent },
+                        "& .MuiAlert-message": { width: "100%" },
+                      };
+                    }}
+                  >
+                    Loading the current queue information...
+                  </Alert>
+                ) : queueStatusError ? (
+                  <Alert severity="warning" variant="outlined">
+                    {queueStatusError}
+                  </Alert>
+                ) : queueStatus ? (
+                  <Alert
+                    severity={busySeverity(busy)}
+                    variant="outlined"
+                    sx={(theme) => {
+                      const pal = theme.palette[busySeverity(busy)];
+                      const accent = pal.dark || pal.main;
+
+                      return {
+                        borderRadius: 2,
+                        border: "2px solid",
+                        borderColor: accent,
+                        borderLeftWidth: 8,
+                        bgcolor: alpha(accent, 0.1),
+                        "& .MuiAlert-icon": { color: accent },
+                        "& .MuiAlert-message": { width: "100%" },
+                      };
+                    }}
+                  >
+                    <Stack spacing={0.5}>
+                      <Typography fontWeight={800}>
+                        {buildQueueCountText(queueStatus.queueCount)}
+                      </Typography>
+                      <Typography variant="body2">{buildQueueBusyText(busy)}</Typography>
+                      <Typography variant="body2">
+                        Last updated: {formatTimeGb(new Date(queueStatus.updatedAtIso))}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Some urgent or vulnerable cases may be seen sooner.
+                      </Typography>
+                    </Stack>
+                  </Alert>
+                ) : null}
 
                 <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
                   <Stack spacing={1.5}>
@@ -412,7 +514,7 @@ export default function Actions() {
               titleVariant="h6"
             >
               <BookingPanel
-                departmentId={bookingDepartmentId || undefined}
+                departmentId={selectedDepartmentId || undefined}
                 onConfirm={(dateIso, time) => {
                   setFormData((p) => ({
                     ...p,

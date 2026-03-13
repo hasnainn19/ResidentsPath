@@ -121,8 +121,7 @@ export type FormData = {
 export type BusyLevel = "quiet" | "average" | "busy" | "veryBusy";
 
 export type QueueStatus = {
-  typicalWaitMin: number;
-  typicalWaitMax: number;
+  queueCount: number;
   updatedAtIso: string;
 };
 

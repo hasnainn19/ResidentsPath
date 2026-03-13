@@ -8,6 +8,7 @@ import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { Table, AttributeType, BillingMode, StreamViewType } from "aws-cdk-lib/aws-dynamodb";
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
+import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
@@ -25,6 +26,7 @@ const backend = defineBackend({
 	postConfirmation,
   submitEnquiry,
   getTicketInfo,
+  getDepartmentQueueStatus,
   calculateDepartmentQueue,
   notifyResident,
   cleanupEnquiryState,

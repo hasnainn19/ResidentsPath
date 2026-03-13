@@ -4,6 +4,7 @@ import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointme
 import { postConfirmation } from '../functions/postConfirmation/resource';
 import { calculateDepartmentQueue } from '../functions/calculateDepartmentQueue/resource';
 import { getTicketInfo } from '../functions/getTicketInfo/resource';
+import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
 import { notifyResident } from '../functions/notifyResident/resource';
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 
@@ -195,33 +196,49 @@ const schema = a.
 
 
 	// Custom queries and mutations (lambdas defined in amplify/functions)
+
+  getDepartmentQueueStatus: a
+    .query()
+    .arguments({
+      departmentId: a.id().required()
+    })
+    .returns(a.customType({
+            queueCount: a.integer().required(),
+            updatedAtIso: a.string().required(),
+    }))
+    .authorization((allow) => [
+            allow.guest(),
+            allow.authenticated(),
+            allow.authenticated("identityPool")
+        ])
+    .handler(a.handler.function(getDepartmentQueueStatus)),
     
-    getTicketInfo: a
-        .query()
-		.arguments({
-			caseId: a.string().required()
-		})
-		.returns(a.customType({
+  getTicketInfo: a
+    .query()
+    .arguments({
+      caseId: a.string().required()
+    })
+    .returns(a.customType({
             departmentId: a.id(),
             position: a.integer(),
             estimatedWaitTimeLower: a.integer(),
             estimatedWaitTimeUpper: a.integer(),
-		}))
-		.authorization((allow) => [
+    }))
+    .authorization((allow) => [
             allow.guest(), 
         ]) 
-		.handler(a.handler.function(getTicketInfo)),
+    .handler(a.handler.function(getTicketInfo)),
 
-    calculateDepartmentQueue: a
-        .mutation()
-        .arguments({
-			departmentId: a.string().required()
-		})
-        .returns(a.boolean())
-        .authorization((allow) => [
-            allow.guest(), 
-        ]) 
-        .handler(a.handler.function(calculateDepartmentQueue)),
+  calculateDepartmentQueue: a
+    .mutation()
+    .arguments({
+  departmentId: a.string().required()
+  })
+    .returns(a.boolean())
+    .authorization((allow) => [
+        allow.guest(), 
+    ]) 
+    .handler(a.handler.function(calculateDepartmentQueue)),
 
 	submitEnquiry: a
     .mutation()
@@ -318,6 +335,7 @@ const schema = a.
 })
 .authorization((allow) => [
 	allow.resource(submitEnquiry).to(["query", "mutate"]), 
+  allow.resource(getDepartmentQueueStatus).to(["query"]),
   allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
