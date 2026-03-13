@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
+import { DepartmentCodeById } from "../../shared/departmentCodes";
 
-const TICKET_PREFIXES = ["CH", "CT", "H", "A", "C", "G"] as const;
+
+const TICKET_PREFIXES = Object.values(DepartmentCodeById);
 
 // checks if reference number starts with the ticket prefix
 function isTicketReference(ref: string): boolean {

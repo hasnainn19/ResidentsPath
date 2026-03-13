@@ -38,6 +38,7 @@ import {
   runCleanup,
   tryCleanup,
 } from "../utils/runCleanup";
+import { DepartmentCodeById } from "../../../shared/departmentCodes";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
@@ -121,15 +122,6 @@ async function allocateCaseReferenceNumber() {
 }
 
 type DepartmentId = ReturnType<typeof formSchema.parse>["departmentId"];
-
-const DepartmentCodeById: Record<DepartmentId, string> = {
-  HOMELESSNESS: "H",
-  ADULTS_DUTY: "A",
-  CHILDRENS_DUTY: "C",
-  COMMUNITY_HUB_ADVISOR: "CH",
-  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "CT",
-  GENERAL_CUSTOMER_SERVICES: "G",
-};
 
 function getDepartmentCode(departmentId: DepartmentId): string {
   const code = DepartmentCodeById[departmentId];
