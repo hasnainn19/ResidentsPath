@@ -88,7 +88,7 @@ function buildQueueCountText(queueCount: number): string {
 }
 
 function buildQueueBusyText(level: BusyLevel): string {
-  return `This queue is ${busyLabel(level).toLowerCase()}.`;
+  return `Current queue level: ${busyLabel(level)}.`;
 }
 
 function buildQueueTts(status: QueueStatus, level: BusyLevel): string {
