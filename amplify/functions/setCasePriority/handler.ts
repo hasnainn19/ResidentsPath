@@ -1,0 +1,32 @@
+import type { Schema } from "../../data/resource";
+import { getAmplifyClient } from "../utils/amplifyClient";
+
+/**
+ * Lambda function to set a case's priority status.
+ *
+ * Accepts a caseId and a priority boolean. Sets the case to Priority (true)
+ * or Standard (false).
+ *
+ * @param event.arguments.caseId   - ID of the case to update
+ * @param event.arguments.priority - true for Priority, false for Standard
+ * @returns true if the update was successful
+ */
+
+const client = await getAmplifyClient();
+
+export const handler: Schema["setCasePriority"]["functionHandler"] = async (event) => {
+  const { caseId, priority } = event.arguments;
+
+  if (!caseId || priority == null) {
+    throw new Error("caseId and priority are required");
+  }
+
+  const { data: caseRecord } = await client.models.Case.get({ id: caseId });
+  if (!caseRecord) {
+    throw new Error(`Case ${caseId} not found`);
+  }
+
+  await client.models.Case.update({ id: caseId, priority });
+
+  return true;
+};

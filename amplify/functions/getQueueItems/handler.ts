@@ -59,6 +59,7 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
 
     return {
       ticketId: ticket.id,
+      caseId: ticket.caseId,
       ticketNumber: ticket.ticketNumber,
       department: dept?.name ?? ticket.departmentId,
       title: caseRecord?.referenceNumber ?? ticket.ticketNumber,
@@ -66,6 +67,7 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
         .filter(Boolean)
         .join(" — "),
       priority: caseRecord?.priority ?? false,
+      flag: caseRecord?.flag ?? false,
       position: ticket.position ?? 1,
       notes: ticket.notes ?? null,
     };

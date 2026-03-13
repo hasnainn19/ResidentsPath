@@ -19,11 +19,13 @@ type CaseStatus = "Priority" | "Standard";
 
 interface CaseItem {
   id: string; // ticket UUID — used as the React key and passed to adjustQueuePosition
+  caseId: string;
   ticketNumber: string;
   department: string;
   title: string;
   description: string;
   status: CaseStatus;
+  isFlagged: boolean;
   position: number;
   notes: string | null;
 }
@@ -38,11 +40,13 @@ const StaffQueuePage = () => {
 
   const cases: CaseItem[] = items.map((item) => ({
     id: item.ticketId,
+    caseId: item.caseId,
     ticketNumber: item.ticketNumber,
     department: item.department,
     title: item.title,
     description: item.description,
     status: item.priority ? "Priority" : "Standard",
+    isFlagged: item.flag,
     position: item.position,
     notes: item.notes,
   }));

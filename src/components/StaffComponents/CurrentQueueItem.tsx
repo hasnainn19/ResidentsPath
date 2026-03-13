@@ -32,11 +32,13 @@ const client = generateClient<Schema>({ authMode: "userPool" });
 interface CurrentQueueItemProps {
   caseItem: {
     id: string;
+    caseId: string;
     ticketNumber: string;
     department: string;
     title: string;
     description: string;
     status: "Priority" | "Standard";
+    isFlagged: boolean;
     position: number;
     notes: string | null;
   };
@@ -48,7 +50,7 @@ interface CurrentQueueItemProps {
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const { showPosition, caseItem, totalPositions, handleSelectPosition, handleMarkSeen } =
     props;
-  const [isFlagged, setIsFlagged] = useState(false);
+  const [isFlagged, setIsFlagged] = useState(caseItem.isFlagged);
   const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -67,12 +69,20 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
       <CardContent>
         <Stack direction="row" justifyContent="space-between">
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Stack direction="row" spacing={1} mb={1}>
+            <Stack direction="row" spacing={1} mb={1} alignItems="center">
               <Chip
                 label={localStatus}
                 color={statusColorMap[localStatus]}
                 size="small"
               />
+              {isFlagged && (
+                <Chip
+                  label="Safeguarding"
+                  color="warning"
+                  size="small"
+                  icon={<FlagIcon fontSize="small" />}
+                />
+              )}
               <Typography variant="caption" color="text.secondary">
                 #{caseItem.ticketNumber}
               </Typography>
@@ -118,15 +128,35 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 open={Boolean(priorityAnchor)}
                 onClose={() => setPriorityAnchor(null)}
               >
-                <MenuItem onClick={() => {
-                  setLocalStatus(localStatus === "Standard" ? "Priority" : "Standard");
+                <MenuItem onClick={async () => {
+                  const newStatus = localStatus === "Standard" ? "Priority" : "Standard";
                   setPriorityAnchor(null);
+                  try {
+                    await client.mutations.setCasePriority({
+                      caseId: caseItem.caseId,
+                      priority: newStatus === "Priority",
+                    });
+                    setLocalStatus(newStatus);
+                  } catch (e) {
+                    console.error("CurrentQueueItem: setCasePriority failed", e);
+                  }
                 }}>
                   {localStatus === "Standard" ? "Set to Priority" : "Set to Standard"}
                 </MenuItem>
               </Menu>
-              <Tooltip title="Flag this case">
-                <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
+              <Tooltip title={isFlagged ? "Clear safeguarding flag" : "Flag for safeguarding"}>
+                <IconButton size="small" onClick={async () => {
+                  const newFlagged = !isFlagged;
+                  try {
+                    await client.mutations.flagCaseSafeguarding({
+                      caseId: caseItem.caseId,
+                      flagged: newFlagged,
+                    });
+                    setIsFlagged(newFlagged);
+                  } catch (e) {
+                    console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
+                  }
+                }}>
                   <FlagIcon color={isFlagged ? "error" : "disabled"} />
                 </IconButton>
               </Tooltip>

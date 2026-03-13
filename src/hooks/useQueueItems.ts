@@ -4,11 +4,13 @@ import type { Schema } from "../../amplify/data/resource";
 
 export interface QueueItem {
   ticketId: string;
+  caseId: string;
   ticketNumber: string;
   department: string;
   title: string;
   description: string;
   priority: boolean;
+  flag: boolean;
   position: number;
   notes: string | null;
 }

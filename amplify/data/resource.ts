@@ -11,6 +11,8 @@ import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { adjustQueuePosition } from "../functions/adjustQueuePosition/resource";
 import { getQueueItems } from "../functions/getQueueItems/resource";
 import { markTicketSeen } from "../functions/markTicketSeen/resource";
+import { setCasePriority } from "../functions/setCasePriority/resource";
+import { flagCaseSafeguarding } from "../functions/flagCaseSafeguarding/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -221,11 +223,13 @@ const schema = a
       .handler(a.handler.function(getDashboardStats)),
     QueueItem: a.customType({
       ticketId: a.id().required(),
+      caseId: a.id().required(),
       ticketNumber: a.string().required(),
       department: a.string().required(),
       title: a.string().required(),
       description: a.string().required(),
       priority: a.boolean().required(),
+      flag: a.boolean().required(),
       position: a.integer().required(),
       notes: a.string(),
     }),
@@ -297,6 +301,26 @@ const schema = a
       .returns(a.boolean())
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(markTicketSeen)),
+
+    setCasePriority: a
+      .mutation()
+      .arguments({
+        caseId: a.string().required(),
+        priority: a.boolean().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(setCasePriority)),
+
+    flagCaseSafeguarding: a
+      .mutation()
+      .arguments({
+        caseId: a.string().required(),
+        flagged: a.boolean().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(flagCaseSafeguarding)),
 
     submitEnquiry: a
       .mutation()
@@ -429,6 +453,8 @@ const schema = a
     allow.resource(adjustQueuePosition),
     allow.resource(getQueueItems),
     allow.resource(markTicketSeen),
+    allow.resource(setCasePriority),
+    allow.resource(flagCaseSafeguarding),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

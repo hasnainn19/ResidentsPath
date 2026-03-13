@@ -10,6 +10,8 @@ import { getServiceStats } from "./functions/getServiceStats/resource";
 import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
 import { getQueueItems } from "./functions/getQueueItems/resource";
 import { markTicketSeen } from "./functions/markTicketSeen/resource";
+import { setCasePriority } from "./functions/setCasePriority/resource";
+import { flagCaseSafeguarding } from "./functions/flagCaseSafeguarding/resource";
 import {
   Table,
   AttributeType,
@@ -44,6 +46,8 @@ const backend = defineBackend({
   adjustQueuePosition,
   getQueueItems,
   markTicketSeen,
+  setCasePriority,
+  flagCaseSafeguarding,
 });
 
 /**
