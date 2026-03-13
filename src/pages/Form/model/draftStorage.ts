@@ -4,6 +4,8 @@
 
 import type { FormData } from "./formFieldTypes";
 import { initialFormData } from "./initialState";
+import { ENQUIRIES_BY_TOPLEVEL } from "../data/enquiries";
+import { getSupportedPhoneCountry } from "../../../../shared/formSchema";
 
 export type FormDraftV1 = {
   version: 1;
@@ -43,6 +45,26 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
     }
   }
 
+  out.phoneCountry = getSupportedPhoneCountry(out.phoneCountry) ?? "GB";
+
+  if (out.topLevel && out.topLevel !== "Other") {
+    const options = ENQUIRIES_BY_TOPLEVEL[out.topLevel] || [];
+    if (options.length === 1) {
+      const only = options[0];
+      out.enquiryId = only.value;
+      out.routedDepartment = only.department ?? "";
+    } else if (out.enquiryId) {
+      const match = options.find((x) => x.value === out.enquiryId);
+      if (match?.department) {
+        out.routedDepartment = match.department;
+      } else {
+        out.enquiryId = "";
+        out.specificDetailId = "";
+        out.routedDepartment = "";
+      }
+    }
+  }
+
   return out;
 }
 
@@ -58,7 +80,7 @@ export function loadDraft(storage: Storage): FormDraftV1 | null {
     const lastPath =
       typeof (parsed as any).lastPath === "string"
         ? (parsed as any).lastPath
-        : "/form/personal-details";
+        : "/form/enquiry-selection";
     const updatedAt =
       typeof (parsed as any).updatedAt === "number" ? (parsed as any).updatedAt : Date.now();
 

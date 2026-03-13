@@ -10,7 +10,7 @@
  */
 
 import { Box, Button, Divider, Stack } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 type StepActionsProps = {
   onSave: () => void;
@@ -37,9 +37,9 @@ export default function StepActions(props: StepActionsProps) {
 
   return (
     <Box sx={{ pt: 2 }}>
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: { xs: 2.5, sm: 3 } }} />
 
-      <Stack direction="row" spacing={2}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1.5, sm: 2 }}>
         <Button type="button" variant="outlined" color="primary" fullWidth onClick={onSave}>
           Save and continue later
         </Button>
@@ -56,14 +56,26 @@ export default function StepActions(props: StepActionsProps) {
         </Button>
       </Stack>
 
-      {showPrevious && (
-        <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-          <Button type="button" onClick={onPrevious} sx={{ textTransform: "none" }}>
-            <ArrowBackIcon sx={{ mr: 1 }} /> Previous
-          </Button>
-          <Box />
-        </Stack>
-      )}
+      {showPrevious ? (
+        <>
+          <Box sx={{ display: { xs: "block", sm: "none" }, mt: 1.5 }}>
+            <Button type="button" onClick={onPrevious} sx={{ textTransform: "none", ml: -1 }}>
+              <ArrowBackIcon sx={{ mr: 1 }} /> Previous
+            </Button>
+          </Box>
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            sx={{ display: { xs: "none", sm: "flex" }, mt: 2 }}
+          >
+            <Button type="button" onClick={onPrevious} sx={{ textTransform: "none" }}>
+              <ArrowBackIcon sx={{ mr: 1 }} /> Previous
+            </Button>
+            <Box />
+          </Stack>
+        </>
+      ) : null}
     </Box>
   );
 }
