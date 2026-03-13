@@ -7,6 +7,8 @@ import { Aws } from "aws-cdk-lib";
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
 import { getDashboardStats } from "./functions/getDashboardStats/resource";
 import { getServiceStats } from "./functions/getServiceStats/resource";
+import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
+import { getQueueItems } from "./functions/getQueueItems/resource";
 import {
   Table,
   AttributeType,
@@ -38,6 +40,8 @@ const backend = defineBackend({
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
+  adjustQueuePosition,
+  getQueueItems,
 });
 
 /**

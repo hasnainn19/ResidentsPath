@@ -27,7 +27,8 @@ import { useState } from "react";
 interface CurrentQueueItemProps {
   caseItem: {
     id: string;
-    service: string;
+    ticketNumber: string;
+    department: string;
     title: string;
     description: string;
     status: "Priority" | "Standard";
@@ -65,7 +66,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 size="small"
               />
               <Typography variant="caption" color="text.secondary">
-                #{caseItem.id}
+                #{caseItem.ticketNumber}
               </Typography>
             </Stack>
 
@@ -131,7 +132,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                   <Select
                     labelId={`move-position-label-${caseItem.id}`}
                     label="Move to position"
-                    value={String(Math.min(caseItem.position, totalPositions))}
+                    value={String(caseItem.position)}
                     onChange={(event) =>
                       handleSelectPosition(
                         caseItem.id,

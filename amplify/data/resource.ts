@@ -8,6 +8,8 @@ import { getTicketInfo } from "../functions/getTicketInfo/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
+import { adjustQueuePosition } from "../functions/adjustQueuePosition/resource";
+import { getQueueItems } from "../functions/getQueueItems/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -216,6 +218,23 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
+    QueueItem: a.customType({
+      ticketId: a.id().required(),
+      ticketNumber: a.string().required(),
+      department: a.string().required(),
+      title: a.string().required(),
+      description: a.string().required(),
+      priority: a.boolean().required(),
+      position: a.integer().required(),
+    }),
+    getQueueItems: a
+      .query()
+      .arguments({
+        departmentName: a.string(),
+      })
+      .returns(a.ref("QueueItem").array())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getQueueItems)),
     ServiceStat: a.customType({
       departmentName: a.string().required(),
       waitingCount: a.integer().required(),
@@ -257,6 +276,16 @@ const schema = a
       .returns(a.boolean())
       .authorization((allow) => [allow.guest()])
       .handler(a.handler.function(calculateDepartmentQueue)),
+
+    adjustQueuePosition: a
+      .mutation()
+      .arguments({
+        ticketId: a.string().required(),
+        newPosition: a.integer().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(adjustQueuePosition)),
 
     submitEnquiry: a
       .mutation()
@@ -386,6 +415,8 @@ const schema = a
     allow.resource(notifyResident),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
+    allow.resource(adjustQueuePosition),
+    allow.resource(getQueueItems),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

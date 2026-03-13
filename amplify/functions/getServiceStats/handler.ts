@@ -11,7 +11,7 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
-  const { data: tickets } = await client.models.Ticket.list({
+  const { data: rawTickets } = await client.models.Ticket.list({
     filter: {
       status: { eq: "WAITING" },
       createdAt: {
@@ -20,17 +20,20 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
       },
     },
   });
-  const { data: staff } = await client.models.Staff.list({
+  const tickets = rawTickets.filter(Boolean);
+  const { data: rawStaff } = await client.models.Staff.list({
     filter: { isAvailable: { eq: true } },
   });
+  const staff = rawStaff.filter(Boolean);
   const todayCaseIds = new Set(tickets.map((t) => t.caseId));
-  const { data: allCases } = await client.models.Case.list({
+  const { data: rawCases } = await client.models.Case.list({
     filter: {
       or: [{ status: { eq: "OPEN" } }, { status: { eq: "IN_PROGRESS" } }],
     },
   });
-  const cases = allCases.filter((c) => todayCaseIds.has(c.id));
-  const { data: departments } = await client.models.Department.list();
+  const cases = rawCases.filter(Boolean).filter((c) => todayCaseIds.has(c.id));
+  const { data: rawDepartments } = await client.models.Department.list();
+  const departments = rawDepartments.filter(Boolean);
 
   const getCase = (caseId: string) => {
     return cases.find((c) => c.id === caseId);
