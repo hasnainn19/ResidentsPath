@@ -19,6 +19,9 @@ const useQueueItems = (departmentName: string) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let createSub: { unsubscribe: () => void } | null = null;
+    let updateSub: { unsubscribe: () => void } | null = null;
+
     const fetchItems = async () => {
       setLoading(true);
       try {
@@ -35,14 +38,28 @@ const useQueueItems = (departmentName: string) => {
       }
     };
 
-    fetchItems();
+    const init = async () => {
+      await fetchItems();
 
-    const updateSub = client.models.Ticket.onUpdate().subscribe({ next: fetchItems });
-    const createSub = client.models.Ticket.onCreate().subscribe({ next: fetchItems });
+      // Resolve departmentId so subscriptions only fire for this department
+      let filter: { departmentId: { eq: string } } | undefined;
+      if (departmentName) {
+        const { data: depts } = await client.models.Department.list({
+          filter: { name: { eq: departmentName } },
+        });
+        const departmentId = depts[0]?.id;
+        if (departmentId) filter = { departmentId: { eq: departmentId } };
+      }
+
+      createSub = client.models.Ticket.onCreate({ filter }).subscribe({ next: fetchItems });
+      updateSub = client.models.Ticket.onUpdate({ filter }).subscribe({ next: fetchItems });
+    };
+
+    init();
 
     return () => {
-      updateSub.unsubscribe();
-      createSub.unsubscribe();
+      createSub?.unsubscribe();
+      updateSub?.unsubscribe();
     };
   }, [departmentName]);
 
