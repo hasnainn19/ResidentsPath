@@ -208,6 +208,33 @@ const schema = a
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
+    getDashboardStats: a
+      .query()
+      .returns(
+        a.customType({
+          waitingCount: a.integer().required(),
+          steppedOutCount: a.integer().required(),
+          staffCount: a.integer().required(),
+          priorityCount: a.integer().required(),
+        }),
+      )
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getDashboardStats)),
+    ServiceStat: a.customType({
+      departmentName: a.string().required(),
+      waitingCount: a.integer().required(),
+      longestWait: a.integer().required(),
+      averageWait: a.integer().required(),
+      priorityCaseCount: a.integer().required(),
+      standardCaseCount: a.integer().required(),
+      steppedOutCount: a.integer().required(),
+      availableStaff: a.integer().required(),
+    }),
+    getServiceStats: a
+      .query()
+      .returns(a.ref("ServiceStat").array())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getServiceStats)),
 
 
 	// Custom queries and mutations (lambdas defined in amplify/functions)
