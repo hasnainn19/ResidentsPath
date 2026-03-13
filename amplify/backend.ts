@@ -82,6 +82,9 @@ enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
 enquiriesStateTable.grantReadData(
   backend.getAvailableAppointmentTimes.resources.lambda,
 );
+enquiriesStateTable.grantReadData(
+  backend.getDepartmentQueueStatus.resources.lambda,
+);
 enquiriesStateTable.grantReadWriteData(backend.cleanupEnquiryState.resources.lambda);
 
 backend.submitEnquiry.addEnvironment(
@@ -90,6 +93,11 @@ backend.submitEnquiry.addEnvironment(
 );
 
 backend.getAvailableAppointmentTimes.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
+backend.getDepartmentQueueStatus.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
 );

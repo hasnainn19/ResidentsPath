@@ -1,6 +1,7 @@
 import {
   DeleteItemCommand,
   DynamoDBClient,
+  GetItemCommand,
   PutItemCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
@@ -248,14 +249,49 @@ export async function releaseQueuePosition(serviceDayQueueKey: string) {
         },
       }),
     );
-  } catch (e: any) {
-    const name = typeof e?.name === "string" ? e.name : "";
+  } catch (e: unknown) {
+    const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
     if (name === "ConditionalCheckFailedException") {
       return;
     }
 
     throw e;
   }
+}
+
+// Gets the current queue position count (the number of waiting tickets)
+export async function getQueuePositionCount(serviceDayQueueKey: string) {
+  const tableName = getEnquiriesStateTableName();
+  const key = getQueuePositionCounterKey(serviceDayQueueKey);
+
+  const res = await ddb.send(
+    new GetItemCommand({
+      TableName: tableName,
+      Key: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+      },
+      ProjectionExpression: "#activeCount",
+      ExpressionAttributeNames: {
+        "#activeCount": "activeCount",
+      },
+      ConsistentRead: true,
+    }),
+  );
+
+  const activeCountStr = res.Item?.activeCount?.N;
+
+  if (activeCountStr === undefined) {
+    return 0;
+  }
+
+  const activeCount = Number(activeCountStr);
+
+  if (!Number.isFinite(activeCount) || activeCount < 0) {
+    throw new Error("Queue position counter did not return a valid value");
+  }
+
+  return activeCount;
 }
 
 // Attempt to claim a ticket number for a queue by inserting a record into the enquiries state table
