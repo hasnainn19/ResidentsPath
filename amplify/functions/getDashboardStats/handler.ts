@@ -42,4 +42,5 @@ export const handler: Schema["getDashboardStats"]["functionHandler"] = async (
       const caseIDs = new Set(cases.map((c) => c.id));
       return tickets.filter((t) => caseIDs.has(t.caseId)).length;
     })(),
+  };
 };
