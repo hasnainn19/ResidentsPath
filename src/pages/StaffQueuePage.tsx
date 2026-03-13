@@ -34,7 +34,8 @@ const client = generateClient<Schema>({ authMode: "userPool" });
 
 const StaffQueuePage = () => {
   const [searchParams] = useSearchParams();
-  const selectedDepartmentName = searchParams.get("departmentName")?.trim() || "";
+  const selectedDepartmentName =
+    searchParams.get("departmentName")?.trim() || "";
 
   const { items, loading } = useQueueItems(selectedDepartmentName);
 
@@ -73,7 +74,7 @@ const StaffQueuePage = () => {
 
   const queueTitle = selectedDepartmentName
     ? selectedDepartmentName.replace(/_/g, " ")
-    : "Case Management";
+    : "Manage Tickets";
 
   const handleMarkSeen = async (caseId: string) => {
     try {
