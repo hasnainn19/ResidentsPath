@@ -107,6 +107,12 @@ const ReferencePage = () => {
             .finally(() => {
                 startingRef.current = false; 
             });
+
+        return () => {
+             if (scannerRef.current) {
+                 stopScanner();
+             }
+         };
     }, [scanning]);
 
 

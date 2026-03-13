@@ -286,18 +286,6 @@ const schema = a
             allow.authenticated("identityPool")
         ])
     .handler(a.handler.function(getDepartmentQueueStatus)),
-    
-
-  calculateDepartmentQueue: a
-    .mutation()
-    .arguments({
-  departmentId: a.string().required()
-  })
-    .returns(a.boolean())
-    .authorization((allow) => [
-        allow.guest(), 
-    ]) 
-    .handler(a.handler.function(calculateDepartmentQueue)),
 
     submitEnquiry: a
       .mutation()
