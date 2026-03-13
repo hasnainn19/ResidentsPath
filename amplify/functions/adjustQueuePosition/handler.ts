@@ -32,6 +32,10 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
     throw new Error(`Ticket ${ticketId} not found`);
   }
 
+  if (ticket.status !== "WAITING") {
+    throw new Error(`Ticket ${ticketId} is not in WAITING status`);
+  }
+
   const { departmentId } = ticket;
 
   // Fetch today's tickets for the department
