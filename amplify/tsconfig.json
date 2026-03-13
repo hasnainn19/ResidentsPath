@@ -8,21 +8,10 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "incremental": true,
     "paths": {
-      "$amplify/*": ["../.amplify/generated/*"]
+      "$amplify/*": [
+        "../.amplify/generated/*"
+      ]
     }
-  },
-  "include": [
-    "data",
-    "functions",
-    "auth",
-    "storage"
-  ],
-  "exclude": [
-    "node_modules",
-    ".amplify",
-    "dist",
-    "build"
-  ]
+  }
 }
