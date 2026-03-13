@@ -123,7 +123,7 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamS
 
 /**
  * Attach the Ticket, Case, and Appointment streams to the Lambda.
- * The filter tells AWS to only invoke the Lambda for MODIFY events
+ * The filter tells AWS to only invoke the Lambda for MODIFY or REMOVE events
  *
  * Further filters can be added that target the dynamoDB record's new and old images
  */
