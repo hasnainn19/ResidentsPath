@@ -45,13 +45,17 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
 
   if (!tickets || tickets.length === 0) return [];
 
-  // Fetch open/in-progress cases and join in JS
-  const { data: allCases } = await client.models.Case.list({
-    filter: {
-      or: [{ status: { eq: "OPEN" } }, { status: { eq: "IN_PROGRESS" } }],
-    },
-  });
-  const caseMap = new Map(allCases.filter(Boolean).map((c) => [c.id, c]));
+  // Fetch only the cases referenced by the returned tickets
+  const caseIds = [...new Set(tickets.map((t) => t.caseId))];
+  const caseResults = await Promise.all(
+    caseIds.map((id) => client.models.Case.get({ id })),
+  );
+  const caseMap = new Map(
+    caseResults
+      .map((r) => r.data)
+      .filter(Boolean)
+      .map((c) => [c!.id, c!]),
+  );
 
   const items = tickets.map((ticket) => {
     const caseRecord = caseMap.get(ticket.caseId);

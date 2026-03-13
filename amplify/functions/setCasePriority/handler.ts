@@ -21,11 +21,6 @@ export const handler: Schema["setCasePriority"]["functionHandler"] = async (even
     throw new Error("caseId and priority are required");
   }
 
-  const { data: caseRecord } = await client.models.Case.get({ id: caseId });
-  if (!caseRecord) {
-    throw new Error(`Case ${caseId} not found`);
-  }
-
   await client.models.Case.update({ id: caseId, priority });
 
   return true;

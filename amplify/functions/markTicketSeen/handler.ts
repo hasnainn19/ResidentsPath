@@ -58,26 +58,18 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (event
   const waitingTickets = (allTickets ?? [])
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
-  const { data: department } = await client.models.Department.get({
-    id: ticket.departmentId,
-  });
-  const estWaitingTime = department?.estimatedWaitingTime ?? 30;
-
   // Shift down all tickets that were below the completed ticket
   for (const t of waitingTickets) {
     if ((t.position ?? 0) > completedPosition) {
-      const newPosition = (t.position ?? 0) - 1;
-      const lower = Math.round(estWaitingTime * (newPosition - 1));
-      const upper = lower + 20;
-
       await client.models.Ticket.update({
         id: t.id,
-        position: newPosition,
-        estimatedWaitTimeLower: lower,
-        estimatedWaitTimeUpper: upper,
+        position: (t.position ?? 0) - 1,
       });
     }
   }
+
+  // Recalculate wait times using the shared calculateDepartmentQueue logic
+  await client.mutations.calculateDepartmentQueue({ departmentId: ticket.departmentId });
 
   return true;
 };

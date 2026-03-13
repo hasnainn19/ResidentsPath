@@ -21,11 +21,6 @@ export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] = async 
     throw new Error("caseId and flagged are required");
   }
 
-  const { data: caseRecord } = await client.models.Case.get({ id: caseId });
-  if (!caseRecord) {
-    throw new Error(`Case ${caseId} not found`);
-  }
-
   await client.models.Case.update({ id: caseId, flag: flagged });
 
   return true;
