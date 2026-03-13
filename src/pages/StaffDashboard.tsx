@@ -16,7 +16,6 @@ import {
   ExitToApp as ExitToAppIcon,
   PriorityHigh as PriorityHighIcon,
   SupervisorAccount as SupervisorAccountIcon,
-  HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";

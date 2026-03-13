@@ -35,6 +35,7 @@ export default function UserDashboard() {
     const [ waitTimeUpper, setWaitTimeUpper ] = useState(0);
 
 
+
     const handleStepOut = () => {
         setStepOut(true);
         setShowStepOutAlert(true);
@@ -160,7 +161,7 @@ export default function UserDashboard() {
                                     </Item>
                                 </Grid>
                                 <Grid size={12}>
-                                    <Item sx={{ textAlign: 'left', backgroundColor:'warning.main'}}>
+                                    <Item sx={{ textAlign: 'left', backgroundColor:'warning.light'}}>
                                         <Stack direction='row' alignItems='flex-start'>
                                             <DangerousIcon sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>Please note

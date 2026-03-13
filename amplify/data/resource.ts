@@ -9,6 +9,7 @@ import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
+import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 
 /**
@@ -155,7 +156,10 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
         department: a.belongsTo("Department", "departmentId"),
       })
-      .secondaryIndexes((index) => [index("caseId")])
+      .secondaryIndexes((index) => [
+        index("caseId"),
+        index("ticketNumber"),
+      ])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
       ]),
@@ -234,6 +238,36 @@ const schema = a
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getServiceStats)),
 
+    getTicketInfo: a
+      .query()
+      .arguments({
+        caseId: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          departmentId: a.id(),
+          position: a.integer(),
+          estimatedWaitTimeLower: a.integer(),
+          estimatedWaitTimeUpper: a.integer(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(), 
+        allow.authenticated(),
+        ]) 
+      .handler(a.handler.function(getTicketInfo)),
+
+    calculateDepartmentQueue: a
+      .mutation()
+      .arguments({
+        departmentId: a.string().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [
+        allow.guest(), 
+        allow.authenticated(),
+        ])       
+        .handler(a.handler.function(calculateDepartmentQueue)),
 
 	// Custom queries and mutations (lambdas defined in amplify/functions)
 
@@ -252,33 +286,6 @@ const schema = a
             allow.authenticated("identityPool")
         ])
     .handler(a.handler.function(getDepartmentQueueStatus)),
-    
-  getTicketInfo: a
-    .query()
-    .arguments({
-      caseId: a.string().required()
-    })
-    .returns(a.customType({
-            departmentId: a.id(),
-            position: a.integer(),
-            estimatedWaitTimeLower: a.integer(),
-            estimatedWaitTimeUpper: a.integer(),
-    }))
-    .authorization((allow) => [
-            allow.guest(), 
-        ]) 
-    .handler(a.handler.function(getTicketInfo)),
-
-  calculateDepartmentQueue: a
-    .mutation()
-    .arguments({
-  departmentId: a.string().required()
-  })
-    .returns(a.boolean())
-    .authorization((allow) => [
-        allow.guest(), 
-    ]) 
-    .handler(a.handler.function(calculateDepartmentQueue)),
 
     submitEnquiry: a
       .mutation()
@@ -397,6 +404,22 @@ const schema = a
         allow.authenticated("identityPool"),
       ])
       .handler(a.handler.function(getSubmissionReceipt)),
+
+    checkTicketNumber: a
+        .query()
+        .arguments({
+        ticketNumber: a.string().required(),
+        })
+        .returns(
+        a.customType({
+            caseId: a.string().required(),
+        }),
+        )
+        .authorization((allow) => [
+        allow.guest(), 
+        allow.authenticated(),
+        ])    
+        .handler(a.handler.function(checkTicketNumber)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
@@ -410,6 +433,7 @@ const schema = a
     allow.resource(cleanupEnquiryState),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
+    allow.resource(checkTicketNumber),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

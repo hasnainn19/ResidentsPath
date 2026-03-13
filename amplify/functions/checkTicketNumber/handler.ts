@@ -1,0 +1,51 @@
+import { type Schema } from "../../data/resource";
+
+import { getAmplifyClient } from "../utils/amplifyClient";
+
+
+/**
+ * Lambda function to check if a ticket number exists in the database
+ *
+ * @param event.arguments.ticketNumber - The ticket number to look up
+ * @returns Object containing case id of the ticket
+ */
+export const handler: Schema["checkTicketNumber"]["functionHandler"] = async (event) => {
+    const client = await getAmplifyClient();
+
+    const { ticketNumber } = event.arguments;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+
+    const { data: tickets } = await client.models.Ticket.listTicketByTicketNumber({
+        ticketNumber
+    });
+
+    if (!tickets?.length) {
+    throw new Error(`No ticket found with ticket number: ${ticketNumber}`);
+    }
+
+    const ticket = tickets.find((t) => {
+        if (!t.createdAt) return false;
+
+        const created = new Date(t.createdAt);
+
+        return (
+        t.status === "WAITING" &&
+        created >= startOfDay &&
+        created <= endOfDay
+        );
+    });
+
+    if (!ticket) {
+        throw new Error(`No ticket found for today with ticket number: ${ticketNumber}`);
+    }
+
+
+    return {
+        caseId: ticket.caseId,
+    };
+};
