@@ -263,8 +263,11 @@ const schema = a
         departmentId: a.string().required(),
       })
       .returns(a.boolean())
-      .authorization((allow) => [allow.guest()])
-      .handler(a.handler.function(calculateDepartmentQueue)),
+      .authorization((allow) => [
+        allow.guest(), 
+        allow.authenticated(),
+        ])       
+        .handler(a.handler.function(calculateDepartmentQueue)),
 
     submitEnquiry: a
       .mutation()
