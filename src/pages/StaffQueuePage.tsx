@@ -76,9 +76,9 @@ const StaffQueuePage = () => {
     ? selectedDepartmentName.replace(/_/g, " ")
     : "Manage Tickets";
 
-  const handleMarkSeen = async (caseId: string) => {
+  const handleMarkSeen = async (ticketId: string) => {
     try {
-      await client.mutations.markTicketSeen({ ticketId: caseId });
+      await client.mutations.markTicketSeen({ ticketId });
     } catch (e) {
       console.error("StaffQueuePage: markTicketSeen failed", e);
     }
