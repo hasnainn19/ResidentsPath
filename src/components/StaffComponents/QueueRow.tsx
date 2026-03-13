@@ -60,10 +60,10 @@ const QueueRow = ({
           <Chip
             label={`Standard: ${standardCaseCount}`}
             size="small"
-            color="warning"
             sx={{
               fontWeight: "bold",
               bgcolor: "warning.light",
+              color:"text",
             }}
           />
         </Box>

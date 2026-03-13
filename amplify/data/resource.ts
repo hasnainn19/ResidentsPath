@@ -5,6 +5,7 @@ import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointme
 import { postConfirmation } from "../functions/postConfirmation/resource";
 import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
+import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
@@ -13,6 +14,8 @@ import { getQueueItems } from "../functions/getQueueItems/resource";
 import { markTicketSeen } from "../functions/markTicketSeen/resource";
 import { setCasePriority } from "../functions/setCasePriority/resource";
 import { flagCaseSafeguarding } from "../functions/flagCaseSafeguarding/resource";
+import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
+import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -158,7 +161,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
         department: a.belongsTo("Department", "departmentId"),
       })
-      .secondaryIndexes((index) => [index("caseId")])
+      .secondaryIndexes((index) => [index("caseId"), index("ticketNumber")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
       ]),
@@ -196,7 +199,13 @@ const schema = a
         time: a.time().required(),
 
         // Appointment status
-        status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
+        status: a.enum([
+          "SCHEDULED",
+          "CONFIRMED",
+          "CANCELLED",
+          "COMPLETED",
+          "NO_SHOW",
+        ]),
 
         // Additional information
         notes: a.string(),
@@ -256,7 +265,6 @@ const schema = a
       .returns(a.ref("ServiceStat").array())
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getServiceStats)),
-    // Custom queries and mutations (lambdas defined in amplify/functions)
 
     getTicketInfo: a
       .query()
@@ -271,7 +279,7 @@ const schema = a
           estimatedWaitTimeUpper: a.integer(),
         }),
       )
-      .authorization((allow) => [allow.guest()])
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(getTicketInfo)),
 
     calculateDepartmentQueue: a
@@ -280,8 +288,28 @@ const schema = a
         departmentId: a.string().required(),
       })
       .returns(a.boolean())
-      .authorization((allow) => [allow.guest()])
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(calculateDepartmentQueue)),
+
+    // Custom queries and mutations (lambdas defined in amplify/functions)
+
+    getDepartmentQueueStatus: a
+      .query()
+      .arguments({
+        departmentId: a.id().required(),
+      })
+      .returns(
+        a.customType({
+          queueCount: a.integer().required(),
+          updatedAtIso: a.string().required(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(getDepartmentQueueStatus)),
 
     adjustQueuePosition: a
       .mutation()
@@ -439,15 +467,30 @@ const schema = a
         allow.authenticated("identityPool"),
       ])
       .handler(a.handler.function(getSubmissionReceipt)),
+
+    checkTicketNumber: a
+      .query()
+      .arguments({
+        ticketNumber: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          caseId: a.string().required(),
+        }),
+      )
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(checkTicketNumber)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
+    allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
     allow.resource(notifyResident),
+    allow.resource(cleanupEnquiryState),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
     allow.resource(adjustQueuePosition),
@@ -455,6 +498,7 @@ const schema = a
     allow.resource(markTicketSeen),
     allow.resource(setCasePriority),
     allow.resource(flagCaseSafeguarding),
+    allow.resource(checkTicketNumber),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

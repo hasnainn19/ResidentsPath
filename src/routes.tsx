@@ -19,6 +19,7 @@ import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
+import CheckInConfirmation from "./pages/CheckInConfirmation";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <RequireAuth><BookingPage /></RequireAuth>,
+  },  
+  {
+    path: "/checkinpage",
+    element: <CheckInConfirmation />,
   },
   {
     path: "/receipts",
