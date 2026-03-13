@@ -5,11 +5,12 @@ import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointme
 import { postConfirmation } from "../functions/postConfirmation/resource";
 import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
+import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
-
+import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -201,14 +202,14 @@ const schema = a
         // Additional information
         notes: a.string(),
 
-        // Relationships
-        user: a.belongsTo("User", "userId"),
-        case: a.belongsTo("Case", "caseId"),
-      })
+			// Relationships
+			user: a.belongsTo("User", "userId"),
+			case: a.belongsTo("Case", "caseId"),
+		})
       .secondaryIndexes((index) => [index("caseId")])
-      .authorization((allow) => [
-        allow.groups(["Staff"]), // Only staff can access appointments directly
-      ]),
+		.authorization((allow) => [
+			allow.groups(["Staff"]), // Only staff can access appointments directly
+		]),
     getDashboardStats: a
       .query()
       .returns(
@@ -236,7 +237,6 @@ const schema = a
       .returns(a.ref("ServiceStat").array())
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getServiceStats)),
-    // Custom queries and mutations (lambdas defined in amplify/functions)
 
     getTicketInfo: a
       .query()
@@ -268,6 +268,36 @@ const schema = a
         allow.authenticated(),
         ])       
         .handler(a.handler.function(calculateDepartmentQueue)),
+
+	// Custom queries and mutations (lambdas defined in amplify/functions)
+
+  getDepartmentQueueStatus: a
+    .query()
+    .arguments({
+      departmentId: a.id().required()
+    })
+    .returns(a.customType({
+            queueCount: a.integer().required(),
+            updatedAtIso: a.string().required(),
+    }))
+    .authorization((allow) => [
+            allow.guest(),
+            allow.authenticated(),
+            allow.authenticated("identityPool")
+        ])
+    .handler(a.handler.function(getDepartmentQueueStatus)),
+    
+
+  calculateDepartmentQueue: a
+    .mutation()
+    .arguments({
+  departmentId: a.string().required()
+  })
+    .returns(a.boolean())
+    .authorization((allow) => [
+        allow.guest(), 
+    ]) 
+    .handler(a.handler.function(calculateDepartmentQueue)),
 
     submitEnquiry: a
       .mutation()
@@ -405,12 +435,14 @@ const schema = a
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
+  allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
     allow.resource(notifyResident),
+    allow.resource(cleanupEnquiryState),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
     allow.resource(checkTicketNumber),

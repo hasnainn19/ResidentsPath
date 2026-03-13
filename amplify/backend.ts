@@ -15,8 +15,10 @@ import {
 } from "aws-cdk-lib/aws-dynamodb";
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
+import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/resource";
 import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
+import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
 import {
   FilterCriteria,
   FilterRule,
@@ -33,8 +35,10 @@ const backend = defineBackend({
   postConfirmation,
   submitEnquiry,
   getTicketInfo,
+  getDepartmentQueueStatus,
   calculateDepartmentQueue,
   notifyResident,
+  cleanupEnquiryState,
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
@@ -78,6 +82,10 @@ enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
 enquiriesStateTable.grantReadData(
   backend.getAvailableAppointmentTimes.resources.lambda,
 );
+enquiriesStateTable.grantReadData(
+  backend.getDepartmentQueueStatus.resources.lambda,
+);
+enquiriesStateTable.grantReadWriteData(backend.cleanupEnquiryState.resources.lambda);
 
 backend.submitEnquiry.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
@@ -89,23 +97,43 @@ backend.getAvailableAppointmentTimes.addEnvironment(
   enquiriesStateTable.tableName,
 );
 
+backend.getDepartmentQueueStatus.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
+backend.cleanupEnquiryState.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
 /**
- * Access the Ticket table and enable DynamoDB streams
+ * Access the Ticket, Case, and Appointment tables and enable DynamoDB streams
  * Amplify doesn't expose stream config directly so we go through the underlying CloudFormation resource to set it up
  */
-backend.data.resources.cfnResources.amplifyDynamoDbTables[
-  "Ticket"
-].streamSpecification = {
+backend.data.resources.cfnResources.amplifyDynamoDbTables["Ticket"].streamSpecification = {
+  streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
+};
+backend.data.resources.cfnResources.amplifyDynamoDbTables["Case"].streamSpecification = {
+  streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
+};
+backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamSpecification = {
   streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
 };
 
 /**
- * Attach the Ticket stream to the Lambda.
- * The filter tells AWS to only invoke the Lambda for MODIFY events
+ * Attach the Ticket, Case, and Appointment streams to the Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY or REMOVE events
  *
  * Further filters can be added that target the dynamoDB record's new and old images
  */
 const ticketTable = backend.data.resources.tables["Ticket"];
+const caseTable = backend.data.resources.tables["Case"];
+const appointmentTable = backend.data.resources.tables["Appointment"];
+backend.cleanupEnquiryState.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
+backend.cleanupEnquiryState.addEnvironment("CASE_TABLE_NAME", caseTable.tableName);
+backend.cleanupEnquiryState.addEnvironment("APPOINTMENT_TABLE_NAME", appointmentTable.tableName);
+
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,
@@ -121,8 +149,56 @@ backend.notifyResident.resources.lambda.addEventSource(
           },
         },
       }),
+    ]
+  })
+);
+
+backend.cleanupEnquiryState.resources.lambda.addEventSource(
+  new DynamoEventSource(ticketTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+      }),
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("REMOVE"),
+      }),
     ],
-  }),
+  })
+);
+
+backend.cleanupEnquiryState.resources.lambda.addEventSource(
+  new DynamoEventSource(caseTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+      }),
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("REMOVE"),
+      }),
+    ],
+  })
+);
+
+backend.cleanupEnquiryState.resources.lambda.addEventSource(
+  new DynamoEventSource(appointmentTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+      }),
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("REMOVE"),
+      }),
+    ],
+  })
 );
 
 // Grant the Lambda permission to send SMS via End User Messaging
