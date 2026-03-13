@@ -39,9 +39,9 @@ const CheckInConfirmationPage = () => {
                     }}
                 >
                     <AlertTitle>Check in Confirmed</AlertTitle>
-                        You have successfully checked in for your appoitment!
+                        You have successfully checked in for your appointment!
                     <Box  sx={{ mt: 2 }}>
-                        <TextToSpeechButton text='Check in Confirmed. You have successfully checked in for your appoitment!'/>
+                        <TextToSpeechButton text='Check in Confirmed. You have successfully checked in for your appointment!'/>
                     </Box>
                 </Alert>
             </Box> 
