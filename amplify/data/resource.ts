@@ -227,6 +227,7 @@ const schema = a
       description: a.string().required(),
       priority: a.boolean().required(),
       position: a.integer().required(),
+      notes: a.string(),
     }),
     getQueueItems: a
       .query()

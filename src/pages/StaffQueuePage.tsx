@@ -25,6 +25,7 @@ interface CaseItem {
   description: string;
   status: CaseStatus;
   position: number;
+  notes: string | null;
 }
 
 const client = generateClient<Schema>({ authMode: "userPool" });
@@ -43,6 +44,7 @@ const StaffQueuePage = () => {
     description: item.description,
     status: item.priority ? "Priority" : "Standard",
     position: item.position,
+    notes: item.notes,
   }));
 
   const [search, setSearch] = useState("");

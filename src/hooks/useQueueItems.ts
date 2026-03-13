@@ -10,6 +10,7 @@ export interface QueueItem {
   description: string;
   priority: boolean;
   position: number;
+  notes: string | null;
 }
 
 const client = generateClient<Schema>({ authMode: "userPool" });

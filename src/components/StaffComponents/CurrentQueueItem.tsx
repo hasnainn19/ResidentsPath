@@ -23,6 +23,11 @@ import {
 import FlagIcon from "@mui/icons-material/Flag";
 import EditIcon from "@mui/icons-material/Edit";
 import { useState } from "react";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../../amplify/data/resource";
+import ConfirmChangeModal from "./ConfirmChangeModal";
+
+const client = generateClient<Schema>({ authMode: "userPool" });
 
 interface CurrentQueueItemProps {
   caseItem: {
@@ -33,6 +38,7 @@ interface CurrentQueueItemProps {
     description: string;
     status: "Priority" | "Standard";
     position: number;
+    notes: string | null;
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
@@ -46,7 +52,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(caseItem.notes ?? "");
+  const [confirmNotesOpen, setConfirmNotesOpen] = useState(false);
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -191,11 +198,24 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setNotesOpen(false)}>
+          <Button
+            variant="contained"
+            onClick={() => setConfirmNotesOpen(true)}
+          >
             Save
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmChangeModal
+        open={confirmNotesOpen}
+        handleClose={() => setConfirmNotesOpen(false)}
+        handleConfirm={async () => {
+          await client.models.Ticket.update({ id: caseItem.id, notes });
+          setConfirmNotesOpen(false);
+          setNotesOpen(false);
+        }}
+      />
     </Card>
   );
 };
