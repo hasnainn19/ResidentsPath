@@ -34,11 +34,12 @@ export default function ResumeFromSave() {
   const draft = loadDraft(localStorage);
 
   if (!draft) {
-    return <Navigate to="/form/personal-details" replace />;
+    return <Navigate to="/form/enquiry-selection" replace />;
   }
 
   const lastPath = draft.lastPath;
-  const safeTarget = lastPath && lastPath.startsWith("/form/") ? lastPath : "/form/personal-details";
+  const safeTarget =
+    lastPath && lastPath.startsWith("/form/") ? lastPath : "/form/enquiry-selection";
   const savedAt = formatSavedTime(draft.updatedAt);
 
   const handleContinue = () => {
@@ -49,7 +50,7 @@ export default function ResumeFromSave() {
   const handleStartNew = () => {
     clearDraft(localStorage);
     setFormData(initialFormData);
-    nav("/form/personal-details", { replace: true });
+    nav("/form/enquiry-selection", { replace: true });
   };
 
   return (
@@ -57,21 +58,27 @@ export default function ResumeFromSave() {
       step={1}
       totalSteps={4}
       title="Continue your saved form?"
-      subtitle={savedAt ? `We found a saved form from ${savedAt}.` : "We found a saved form on this device."}
+      subtitle={
+        savedAt ? `We found a saved form from ${savedAt}.` : "We found a saved form on this device."
+      }
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
       <Stack spacing={3}>
-        <Typography variant="body1">You can continue where you left off, or start a new form.</Typography>
+        <Typography variant="body1">
+          You can continue where you left off, or start a new form.
+        </Typography>
 
-        <Alert severity="info">Starting a new form will delete the saved answers on this device.</Alert>
+        <Alert severity="info">
+          Starting a new form will delete the saved answers on this device.
+        </Alert>
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-          <Button variant="contained" onClick={handleContinue}>
+          <Button variant="contained" onClick={handleContinue} fullWidth>
             Continue saved form
           </Button>
-          <Button variant="outlined" onClick={handleStartNew}>
+          <Button variant="outlined" onClick={handleStartNew} fullWidth>
             Start new form
           </Button>
         </Stack>

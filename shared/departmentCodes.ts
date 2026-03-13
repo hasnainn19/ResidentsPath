@@ -1,0 +1,8 @@
+export const DepartmentCodeById = {
+  HOMELESSNESS: "H",
+  ADULTS_DUTY: "A",
+  COMMUNITY_HUB_ADVISOR: "CH",
+  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "CT",
+  GENERAL_CUSTOMER_SERVICES: "G",
+  CHILDRENS_DUTY: "C",
+} as const;

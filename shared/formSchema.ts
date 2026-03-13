@@ -4,6 +4,11 @@
  * The schema is used both in the frontend form and in the backend API handler to ensure consistent validation and data handling.
  */
 
+import {
+  isSupportedCountry,
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from "libphonenumber-js";
 import { z } from "zod";
 
 export const DEPARTMENTS = [
@@ -205,8 +210,36 @@ function trimToUndef(value: unknown) {
   return t.length ? t : undefined;
 }
 
-function normalisePhone(value: string) {
-  return value.trim();
+export function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
+  if (!value) return undefined;
+
+  const country = value.trim().toUpperCase();
+  if (!country.length) return undefined;
+
+  if (!isSupportedCountry(country as CountryCode)) return undefined;
+  return country as CountryCode;
+}
+
+export function normalisePhoneToE164(value: string, phoneCountry?: string) {
+  const trimmed = value.trim();
+  if (!trimmed.length){ 
+    return undefined;
+  }
+
+  const candidate = trimmed.startsWith("00") ? `+${trimmed.slice(2)}` : trimmed;
+  const supportedCountry = getSupportedPhoneCountry(phoneCountry);
+
+  const parsed = candidate.startsWith("+")
+    ? parsePhoneNumberFromString(candidate)
+    : supportedCountry
+      ? parsePhoneNumberFromString(candidate, supportedCountry)
+      : undefined;
+
+  if (!parsed || !parsed.isValid()){ 
+    return undefined;
+  }
+
+  return parsed.number;
 }
 
 export function normaliseUkPostcode(value: string) {
@@ -215,7 +248,7 @@ export function normaliseUkPostcode(value: string) {
   return `${compact.slice(0, -3)} ${compact.slice(-3)}`;
 }
 
-function isValidIsoDate(value: string) {
+export function isValidIsoDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
 
   const y = Number(value.slice(0, 4));
@@ -255,6 +288,106 @@ function isValidTimeHHmm(value: string) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
 }
 
+export const APPOINTMENT_SLOT_START = "09:30";
+export const APPOINTMENT_SLOT_END = "16:30";
+export const APPOINTMENT_SLOT_INTERVAL_MINUTES = 30;
+export const APPOINTMENT_SLOT_VALIDATION_MESSAGE =
+  `appointmentTime must be a ${APPOINTMENT_SLOT_INTERVAL_MINUTES}-minute slot between ` +
+  `${APPOINTMENT_SLOT_START} and ${APPOINTMENT_SLOT_END}`;
+export const APPOINTMENT_MUST_BE_FUTURE_MESSAGE = "Appointments must be in the future";
+
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function minutesToTime(value: number) {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+// Get all bookable appointment times for a given date (all time slots in intervals of APPOINTMENT_SLOT_INTERVAL_MINUTES) within the defined start and end times
+export function isBookableAppointmentTime(value: string) {
+  if (!isValidTimeHHmm(value)) return false;
+
+  const totalMinutes = timeToMinutes(value);
+  return (
+    totalMinutes >= timeToMinutes(APPOINTMENT_SLOT_START) &&
+    totalMinutes <= timeToMinutes(APPOINTMENT_SLOT_END) &&
+    totalMinutes % APPOINTMENT_SLOT_INTERVAL_MINUTES === 0
+  );
+}
+
+export function getBookableAppointmentTimes() {
+  const times: string[] = [];
+
+  for (
+    let totalMinutes = timeToMinutes(APPOINTMENT_SLOT_START);
+    totalMinutes <= timeToMinutes(APPOINTMENT_SLOT_END);
+    totalMinutes += APPOINTMENT_SLOT_INTERVAL_MINUTES
+  ) {
+    times.push(minutesToTime(totalMinutes));
+  }
+
+  return times;
+}
+
+type AppointmentCurrentDateTime = {
+  dateIso: string;
+  time: string;
+};
+
+export function getCurrentAppointmentDateTime(now = new Date()): AppointmentCurrentDateTime {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  const hour = parts.find((part) => part.type === "hour")?.value;
+  const minute = parts.find((part) => part.type === "minute")?.value;
+
+  if (!year || !month || !day || !hour || !minute) {
+    throw new Error("Failed to compute current appointment date and time");
+  }
+
+  return {
+    dateIso: `${year}-${month}-${day}`,
+    time: `${hour}:${minute}`,
+  };
+}
+
+// Check if the given appointment date and time is in the future
+export function isFutureAppointmentDateTime(dateIso: string, time: string, now = new Date()) {
+  if (!isValidIsoDate(dateIso) || !isBookableAppointmentTime(time)) return false;
+
+  const current = getCurrentAppointmentDateTime(now);
+
+  if (dateIso !== current.dateIso) {
+    return dateIso > current.dateIso;
+  }
+
+  return time > current.time;
+}
+
+// Get all bookable appointment times for a given date that are in the future
+export function getFutureBookableAppointmentTimes(dateIso: string, now = new Date()) {
+  if (!isValidIsoDate(dateIso)) return [];
+
+  return getBookableAppointmentTimes().filter((time) =>
+    isFutureAppointmentDateTime(dateIso, time, now),
+  );
+}
+
 export function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -280,7 +413,10 @@ const otherFreeText = (maxLen: number) =>
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine((s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s), "Contains invalid control characters");
+    .refine(
+      (s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s),
+      "Contains invalid control characters",
+    );
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
@@ -304,7 +440,11 @@ export const formSchema = z
     ),
     appointmentTime: z.preprocess(
       trimToUndef,
-      z.string().refine(isValidTimeHHmm, "appointmentTime must be HH:mm").optional(),
+      z
+        .string()
+        .refine(isValidTimeHHmm, "appointmentTime must be HH:mm")
+        .refine(isBookableAppointmentTime, APPOINTMENT_SLOT_VALIDATION_MESSAGE)
+        .optional(),
     ),
 
     firstName: z.preprocess(
@@ -357,15 +497,28 @@ export const formSchema = z
       .refine((v) => (v ? isValidUkPostcode(v) : true), "Postcode format is invalid"),
 
     contactMethod: z.preprocess(trimToUndef, ContactMethodEnum.optional()),
-    email: z
-      .preprocess(
-        (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
-        z.string().email().max(FIELD_TEXT_CONSTRAINTS.email.maxLen).optional(),
-      ),
-    phoneCountry: z.preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_COUNTRY_MAX).optional()),
+    email: z.preprocess(
+      (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
+      z.string().email().max(FIELD_TEXT_CONSTRAINTS.email.maxLen).optional(),
+    ),
+    phoneCountry: z.preprocess(
+      (v) => {
+        if (typeof v !== "string") return v;
+
+        const trimmed = v.trim();
+        return trimmed ? trimmed.toUpperCase() : undefined;
+      },
+      z
+        .string()
+        .max(HYGIENE.PHONE_COUNTRY_MAX)
+        .refine(
+          (v) => getSupportedPhoneCountry(v) !== undefined,
+          "Phone country must be a supported country code",
+        )
+        .optional(),
+    ),
     phone: z
       .preprocess(trimToUndef, z.string().max(HYGIENE.PHONE_MAX_CHARS).optional())
-      .transform((v) => (v ? normalisePhone(v) : v))
       .refine((v) => (v ? isValidPhoneChars(v) : true), "Phone contains invalid characters")
       .refine(
         (v) => (v ? countDigits(v) >= 7 && countDigits(v) <= 15 : true),
@@ -435,6 +588,19 @@ export const formSchema = z
           code: "custom",
           path: ["appointmentTime"],
           message: "appointmentTime is required for appointment",
+        });
+      }
+      if (
+        v.appointmentDateIso &&
+        v.appointmentTime &&
+        isValidIsoDate(v.appointmentDateIso) &&
+        isBookableAppointmentTime(v.appointmentTime) &&
+        !isFutureAppointmentDateTime(v.appointmentDateIso, v.appointmentTime)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["appointmentTime"],
+          message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
         });
       }
     } else {
@@ -604,6 +770,20 @@ export const formSchema = z
       }
     }
 
+    if (
+      v.phone &&
+      isValidPhoneChars(v.phone) &&
+      countDigits(v.phone) >= 7 &&
+      countDigits(v.phone) <= 15 &&
+      !normalisePhoneToE164(v.phone, v.phoneCountry)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["phone"],
+        message: "Phone must be a valid phone number",
+      });
+    }
+
     if (v.enquiry === "OTHER") {
       if (!v.otherEnquiryText) {
         ctx.addIssue({
@@ -612,16 +792,23 @@ export const formSchema = z
           message: "Details are required when Other is selected",
         });
       }
-    }
-    else {
+    } else {
       if (v.otherEnquiryText) {
         ctx.addIssue({
-          code: "custom", 
+          code: "custom",
           path: ["otherEnquiryText"],
           message: "otherEnquiryText must only be provided when enquiry is OTHER",
         });
       }
     }
+  })
+  .transform((v) => {
+    const normalisedPhone = v.phone ? normalisePhoneToE164(v.phone, v.phoneCountry) : undefined;
+
+    return {
+      ...v,
+      phone: normalisedPhone ?? v.phone,
+    };
   });
 
 export type formInput = z.infer<typeof formSchema>;
