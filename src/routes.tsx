@@ -10,6 +10,7 @@ import FormLayout from "./pages/Form/FormLayout";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
+import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
@@ -39,6 +40,14 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <RequireAuth><BookingPage /></RequireAuth>,
+  },
+  {
+    path: "/receipts",
+    element: <SubmissionReceipt />,
+  },
+  {
+    path: "/receipts/:referenceNumber",
+    element: <SubmissionReceipt />,
   },
   {
     path: "/staff",

@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { submitEnquiry } from "../functions/submitEnquiry/resource";
+import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from "../functions/postConfirmation/resource";
 import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
@@ -98,6 +99,7 @@ const schema = a
         tickets: a.hasMany("Ticket", "caseId"),
         appointments: a.hasMany("Appointment", "caseId"),
       })
+      .secondaryIndexes((index) => [index("referenceNumber")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Only staff can access cases directly
       ]),
@@ -153,6 +155,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
         department: a.belongsTo("Department", "departmentId"),
       })
+      .secondaryIndexes((index) => [index("caseId")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
       ]),
@@ -190,13 +193,7 @@ const schema = a
         time: a.time().required(),
 
         // Appointment status
-        status: a.enum([
-          "SCHEDULED",
-          "CONFIRMED",
-          "CANCELLED",
-          "COMPLETED",
-          "NO_SHOW",
-        ]),
+        status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
 
         // Additional information
         notes: a.string(),
@@ -205,6 +202,7 @@ const schema = a
 			user: a.belongsTo("User", "userId"),
 			case: a.belongsTo("Case", "caseId"),
 		})
+      .secondaryIndexes((index) => [index("caseId")])
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
@@ -374,11 +372,37 @@ const schema = a
         allow.authenticated("identityPool"),
       ])
       .handler(a.handler.function(getAvailableAppointmentTimes)),
+
+    getSubmissionReceipt: a
+      .query()
+      .arguments({
+        referenceNumber: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          found: a.boolean().required(),
+          errorMessage: a.string(),
+          createdAt: a.datetime(),
+          referenceNumber: a.string(),
+          receiptType: a.string(),
+          ticketNumber: a.string(),
+          appointmentDateIso: a.string(),
+          appointmentTime: a.string(),
+          departmentName: a.string(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(getSubmissionReceipt)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
   allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
+    allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
     allow.resource(calculateDepartmentQueue),
     allow.resource(getTicketInfo),
