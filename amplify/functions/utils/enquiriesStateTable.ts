@@ -42,6 +42,13 @@ function getAppointmentSlotClaimKey(departmentId: string, dateIso: string, time:
   };
 }
 
+function getQueuePositionCounterKey(serviceDayQueueKey: string) {
+  return {
+    pk: `QUEUE_POSITION#${serviceDayQueueKey}`,
+    sk: "COUNTER",
+  };
+}
+
 export function daysFromNowInSeconds(days: number): number {
   return Math.floor(Date.now() / 1000) + days * 24 * 60 * 60;
 }
@@ -174,6 +181,81 @@ export async function releaseAppointmentSlot(slot: AppointmentSlotClaim) {
       },
     }),
   );
+}
+
+// Atomically increment the number of waiting tickets for a queue and return the
+// next queue position for a new ticket.
+export async function claimQueuePosition(serviceDayQueueKey: string) {
+  const tableName = getEnquiriesStateTableName();
+  const key = getQueuePositionCounterKey(serviceDayQueueKey);
+  const allocatedAt = String(Date.now());
+
+  const res = await ddb.send(
+    new UpdateItemCommand({
+      TableName: tableName,
+      Key: {
+        pk: { S: key.pk },
+        sk: { S: key.sk },
+      },
+      UpdateExpression:
+        "SET allocatedAt = if_not_exists(allocatedAt, :allocatedAt), expiresAt = :expiresAt ADD #activeCount :one",
+      ExpressionAttributeNames: {
+        "#activeCount": "activeCount",
+      },
+      ExpressionAttributeValues: {
+        ":allocatedAt": { N: allocatedAt },
+        ":expiresAt": { N: String(daysFromNowInSeconds(3)) },
+        ":one": { N: "1" },
+      },
+      ReturnValues: "UPDATED_NEW",
+    }),
+  );
+
+  const activeCountStr = res.Attributes?.activeCount?.N;
+  const activeCount = typeof activeCountStr === "string" ? Number(activeCountStr) : NaN;
+
+  if (!Number.isFinite(activeCount) || activeCount < 1) {
+    throw new Error("Queue position counter did not return a valid value");
+  }
+
+  return activeCount - 1;
+}
+
+export async function releaseQueuePosition(serviceDayQueueKey: string) {
+  const tableName = process.env.ENQUIRIES_STATE_TABLE;
+  if (!tableName) return;
+
+  const key = getQueuePositionCounterKey(serviceDayQueueKey);
+
+  try {
+    await ddb.send(
+      new UpdateItemCommand({
+        TableName: tableName,
+        Key: {
+          pk: { S: key.pk },
+          sk: { S: key.sk },
+        },
+        UpdateExpression: "SET expiresAt = :expiresAt ADD #activeCount :minusOne",
+        ConditionExpression:
+          "attribute_exists(pk) AND attribute_exists(sk) AND #activeCount > :zero",
+        ExpressionAttributeNames: {
+          "#activeCount": "activeCount",
+        },
+        ExpressionAttributeValues: {
+          ":expiresAt": { N: String(daysFromNowInSeconds(3)) },
+          ":minusOne": { N: "-1" },
+          ":zero": { N: "0" },
+        },
+      }),
+    );
+  } catch (e: any) {
+    const name = typeof e?.name === "string" ? e.name : "";
+    if (name === "ConditionalCheckFailedException") {
+      return;
+    }
+
+    throw e;
+  }
 }
 
 // Attempt to claim a ticket number for a queue by inserting a record into the enquiries state table

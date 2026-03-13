@@ -122,8 +122,6 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamS
 const ticketTable = backend.data.resources.tables["Ticket"];
 const caseTable = backend.data.resources.tables["Case"];
 const appointmentTable = backend.data.resources.tables["Appointment"];
-ticketTable.grantReadData(backend.submitEnquiry.resources.lambda);
-backend.submitEnquiry.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
 backend.cleanupEnquiryState.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
 backend.cleanupEnquiryState.addEnvironment("CASE_TABLE_NAME", caseTable.tableName);
 backend.cleanupEnquiryState.addEnvironment("APPOINTMENT_TABLE_NAME", appointmentTable.tableName);

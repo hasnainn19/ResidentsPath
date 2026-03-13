@@ -6,11 +6,22 @@ import {
   getDate,
   releaseAppointmentSlot,
   releaseCaseReferenceNumber,
+  releaseQueuePosition,
   releaseTicketNumber,
 } from "../utils/enquiriesStateTable";
 import { logModelErrors, runCleanup, tryCleanup } from "../utils/runCleanup";
 
 type StreamItem = Record<string, unknown>;
+type AppointmentListPage = {
+  data?: Array<{ id: string; date?: string | null; time?: string | null }> | null;
+  errors?: unknown[];
+  nextToken?: string | null;
+};
+type TicketListPage = {
+  data?: Array<{ id: string }> | null;
+  errors?: unknown[];
+  nextToken?: string | null;
+};
 
 function unmarshallImage(image?: Record<string, AttributeValue>) {
   if (!image) return null;
@@ -37,11 +48,38 @@ function getTicketClaimInfo(ticket: StreamItem) {
   };
 }
 
+function getQueuePositionClaimInfo(ticket: StreamItem) {
+  const departmentId = typeof ticket.departmentId === "string" ? ticket.departmentId : null;
+  const createdAt = typeof ticket.createdAt === "string" ? ticket.createdAt : null;
+
+  if (!departmentId || !createdAt) {
+    return null;
+  }
+
+  const createdAtMs = Date.parse(createdAt);
+
+  if (!Number.isFinite(createdAtMs)) {
+    return null;
+  }
+
+  return {
+    queuePositionKey: `${getDate(new Date(createdAtMs))}#${departmentId}`,
+  };
+}
+
 async function releaseTicketNumberClaim(ticket: StreamItem) {
   const claim = getTicketClaimInfo(ticket);
   if (!claim) return false;
 
   await releaseTicketNumber(claim.queueId, claim.ticketDigits);
+  return true;
+}
+
+async function releaseQueuePositionClaim(ticket: StreamItem) {
+  const claim = getQueuePositionClaimInfo(ticket);
+  if (!claim) return false;
+
+  await releaseQueuePosition(claim.queuePositionKey);
   return true;
 }
 
@@ -94,15 +132,24 @@ async function deleteRelatedAppointments(
   caseId: string,
   departmentId: string | null,
 ) {
-  const { data: appointments, errors } = await client.models.Appointment.list({
-    filter: {
-      caseId: { eq: caseId },
-    },
-  });
+  const appointments: NonNullable<AppointmentListPage["data"]> = [];
+  let nextToken: string | null | undefined = null;
 
-  logModelErrors("cleanupEnquiryState: Appointment.list failed", errors);
+  do {
+    const response: AppointmentListPage = await client.models.Appointment.list({
+      filter: {
+        caseId: { eq: caseId },
+      },
+      nextToken,
+    });
 
-  for (const appointment of appointments ?? []) {
+    logModelErrors("cleanupEnquiryState: Appointment.list failed", response.errors);
+
+    appointments.push(...(response.data ?? []));
+    nextToken = response.nextToken;
+  } while (nextToken);
+
+  for (const appointment of appointments) {
     // Delete the appointment, if it fails do not release the slot
     if (
       !(await tryCleanup("cleanupEnquiryState: Appointment.delete failed", () =>
@@ -118,8 +165,11 @@ async function deleteRelatedAppointments(
 
     // If appointment was successfully deleted, release the claimed slot
     if (departmentId && appointment.date && appointment.time) {
+      const date = appointment.date;
+      const time = appointment.time;
+
       await tryCleanup("cleanupEnquiryState: AppointmentSlotClaims.delete failed", () =>
-        releaseAppointmentSlotForDetails(departmentId, appointment.date, appointment.time),
+        releaseAppointmentSlotForDetails(departmentId, date, time),
       );
     }
   }
@@ -127,15 +177,25 @@ async function deleteRelatedAppointments(
 
 // Deletes all tickets related to a case
 async function deleteRelatedTickets(client: AmplifyClient, caseId: string) {
-  const { data: tickets, errors } = await client.models.Ticket.list({
-    filter: {
-      caseId: { eq: caseId },
-    },
-  });
+  const tickets: NonNullable<TicketListPage["data"]> = [];
+  let nextToken: string | null | undefined = null;
 
-  logModelErrors("cleanupEnquiryState: Ticket.list failed", errors);
+  do {
+    const response: TicketListPage = await client.models.Ticket.list({
+      filter: {
+        caseId: { eq: caseId },
+      },
+      nextToken,
+    });
 
-  for (const ticket of tickets ?? []) {
+    logModelErrors("cleanupEnquiryState: Ticket.list failed", response.errors);
+
+    tickets.push(...(response.data ?? []));
+    nextToken = response.nextToken;
+  } while (nextToken);
+
+  for (const ticket of tickets) {
+    // Successful deletes emit Ticket REMOVE events, which release claimed digits and queue positions.
     await tryCleanup("cleanupEnquiryState: Ticket.delete failed", () =>
       runCleanup(
         "cleanupEnquiryState: Ticket.delete failed",
@@ -160,6 +220,9 @@ async function handleTicketRecord(record: DynamoDBRecord) {
       await tryCleanup("cleanupEnquiryState: TicketNumberClaims.delete failed", () =>
         releaseTicketNumberClaim(newImage),
       );
+      await tryCleanup("cleanupEnquiryState: QueuePositionCounter.update failed", () =>
+        releaseQueuePositionClaim(newImage),
+      );
     }
     return;
   }
@@ -168,6 +231,11 @@ async function handleTicketRecord(record: DynamoDBRecord) {
     await tryCleanup("cleanupEnquiryState: TicketNumberClaims.delete failed", () =>
       releaseTicketNumberClaim(oldImage),
     );
+    if (oldImage.status === "WAITING") {
+      await tryCleanup("cleanupEnquiryState: QueuePositionCounter.update failed", () =>
+        releaseQueuePositionClaim(oldImage),
+      );
+    }
   }
 }
 
