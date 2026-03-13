@@ -44,7 +44,7 @@ interface CurrentQueueItemProps {
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
-  handleMarkSeen: (caseId: string) => void;
+  handleMarkSeen: (ticketId: string) => void;
   showPosition: boolean;
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
@@ -53,9 +53,12 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const [isFlagged, setIsFlagged] = useState(caseItem.isFlagged);
   const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
+  const [prioritySaving, setPrioritySaving] = useState(false);
+  const [flagSaving, setFlagSaving] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notes, setNotes] = useState(caseItem.notes ?? "");
   const [confirmNotesOpen, setConfirmNotesOpen] = useState(false);
+  const [confirmSeenOpen, setConfirmSeenOpen] = useState(false);
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -128,9 +131,10 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 open={Boolean(priorityAnchor)}
                 onClose={() => setPriorityAnchor(null)}
               >
-                <MenuItem onClick={async () => {
+                <MenuItem disabled={prioritySaving} onClick={async () => {
                   const newStatus = localStatus === "Standard" ? "Priority" : "Standard";
                   setPriorityAnchor(null);
+                  setPrioritySaving(true);
                   try {
                     await client.mutations.setCasePriority({
                       caseId: caseItem.caseId,
@@ -139,26 +143,33 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                     setLocalStatus(newStatus);
                   } catch (e) {
                     console.error("CurrentQueueItem: setCasePriority failed", e);
+                  } finally {
+                    setPrioritySaving(false);
                   }
                 }}>
                   {localStatus === "Standard" ? "Set to Priority" : "Set to Standard"}
                 </MenuItem>
               </Menu>
               <Tooltip title={isFlagged ? "Clear safeguarding flag" : "Flag for safeguarding"}>
-                <IconButton size="small" onClick={async () => {
-                  const newFlagged = !isFlagged;
-                  try {
-                    await client.mutations.flagCaseSafeguarding({
-                      caseId: caseItem.caseId,
-                      flagged: newFlagged,
-                    });
-                    setIsFlagged(newFlagged);
-                  } catch (e) {
-                    console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
-                  }
-                }}>
-                  <FlagIcon color={isFlagged ? "error" : "disabled"} />
-                </IconButton>
+                <span>
+                  <IconButton size="small" disabled={flagSaving} onClick={async () => {
+                    const newFlagged = !isFlagged;
+                    setFlagSaving(true);
+                    try {
+                      await client.mutations.flagCaseSafeguarding({
+                        caseId: caseItem.caseId,
+                        flagged: newFlagged,
+                      });
+                      setIsFlagged(newFlagged);
+                    } catch (e) {
+                      console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
+                    } finally {
+                      setFlagSaving(false);
+                    }
+                  }}>
+                    <FlagIcon color={isFlagged ? "error" : "disabled"} />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
             <Stack spacing={1.5} alignItems="stretch">
@@ -190,7 +201,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
-                onClick={() => handleMarkSeen(caseItem.id)}
+                onClick={() => setConfirmSeenOpen(true)}
               >
                 Mark as Seen
               </Button>
@@ -244,6 +255,15 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           await client.models.Ticket.update({ id: caseItem.id, notes });
           setConfirmNotesOpen(false);
           setNotesOpen(false);
+        }}
+      />
+
+      <ConfirmChangeModal
+        open={confirmSeenOpen}
+        handleClose={() => setConfirmSeenOpen(false)}
+        handleConfirm={async () => {
+          setConfirmSeenOpen(false);
+          handleMarkSeen(caseItem.id);
         }}
       />
     </Card>
