@@ -10,6 +10,7 @@ import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { adjustQueuePosition } from "../functions/adjustQueuePosition/resource";
 import { getQueueItems } from "../functions/getQueueItems/resource";
+import { markTicketSeen } from "../functions/markTicketSeen/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -287,6 +288,15 @@ const schema = a
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(adjustQueuePosition)),
 
+    markTicketSeen: a
+      .mutation()
+      .arguments({
+        ticketId: a.string().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(markTicketSeen)),
+
     submitEnquiry: a
       .mutation()
       .arguments({
@@ -417,6 +427,7 @@ const schema = a
     allow.resource(getDashboardStats),
     allow.resource(adjustQueuePosition),
     allow.resource(getQueueItems),
+    allow.resource(markTicketSeen),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

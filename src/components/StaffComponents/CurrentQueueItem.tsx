@@ -36,10 +36,11 @@ interface CurrentQueueItemProps {
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
+  handleMarkSeen: (caseId: string) => void;
   showPosition: boolean;
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
-  const { showPosition, caseItem, totalPositions, handleSelectPosition } =
+  const { showPosition, caseItem, totalPositions, handleSelectPosition, handleMarkSeen } =
     props;
   const [isFlagged, setIsFlagged] = useState(false);
   const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
@@ -152,6 +153,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
+                onClick={() => handleMarkSeen(caseItem.id)}
               >
                 Mark as Seen
               </Button>

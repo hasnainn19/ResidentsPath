@@ -69,6 +69,14 @@ const StaffQueuePage = () => {
     ? selectedDepartmentName.replace(/_/g, " ")
     : "Case Management";
 
+  const handleMarkSeen = async (caseId: string) => {
+    try {
+      await client.mutations.markTicketSeen({ ticketId: caseId });
+    } catch (e) {
+      console.error("StaffQueuePage: markTicketSeen failed", e);
+    }
+  };
+
   const handleSelectPosition = (caseId: string, newPosition: number) => {
     setPendingPositionChange({ caseId, position: newPosition });
     setConfirmModalOpen(true);
@@ -146,6 +154,7 @@ const StaffQueuePage = () => {
               caseItem={caseItem}
               totalPositions={cases.length}
               handleSelectPosition={handleSelectPosition}
+              handleMarkSeen={handleMarkSeen}
               showPosition={showPosition}
             />
           ))}
