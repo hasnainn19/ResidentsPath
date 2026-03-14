@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import type { Schema } from '../../../amplify/data/resource';
+import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
-import TextToSpeechButton from '../../components/TextToSpeechButton';
-import NavBar from '../../components/NavBar';
+import TextToSpeechButton from '../components/TextToSpeechButton';
+import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
 
 

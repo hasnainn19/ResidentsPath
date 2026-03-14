@@ -14,7 +14,7 @@ import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
-import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import UserDashboard from "./pages/UserDashboard";
 import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
