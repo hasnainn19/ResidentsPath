@@ -180,7 +180,7 @@ backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
 
 /**
  * Attach the Ticket stream to the onTicketCompleted Lambda.
- * The filter tells AWS to only invoke the Lambda for MODIFY events
+ * The filter tells AWS to only invoke the Lambda for MODIFY and INSERT events
  */
 backend.onTicketCompleted.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
@@ -191,6 +191,10 @@ backend.onTicketCompleted.resources.lambda.addEventSource(
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
       }),
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("INSERT"), // new ticket creations
+      }),
+
     ],
   })
 );
