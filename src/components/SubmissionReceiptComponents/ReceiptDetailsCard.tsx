@@ -2,6 +2,7 @@ import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
 
 type ReceiptSummary = {
   ticketNumber?: string;
+  bookingReferenceNumber?: string;
   appointmentTime?: string;
   departmentName?: string;
 };
@@ -73,21 +74,40 @@ export default function ReceiptDetailsCard({
           <Stack spacing={2.5}>
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                Appointment date
+                Appointment reference number
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800, overflowWrap: "anywhere" }}>
-                {appointmentDate || "Not available"}
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  fontSize: { xs: "3rem", sm: "3.75rem" },
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {receipt.bookingReferenceNumber || "-"}
               </Typography>
             </Box>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                Appointment time
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 800, overflowWrap: "anywhere" }}>
-                {receipt.appointmentTime || "Not available"}
-              </Typography>
-            </Box>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                  Appointment date
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                  {appointmentDate || "Not available"}
+                </Typography>
+              </Box>
+
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                  Appointment time
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                  {receipt.appointmentTime || "Not available"}
+                </Typography>
+              </Box>
+            </Stack>
 
             <Button type="button" variant="outlined" onClick={onCopyAppointmentDetails} fullWidth>
               Copy appointment details

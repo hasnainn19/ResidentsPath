@@ -44,12 +44,15 @@ export default function ReceiptBody({
               What to keep
             </Typography>
             <Typography color="text.secondary">
-              Make sure you keep your case reference number
-              {!isAppointment && receipt.ticketNumber ? " and ticket number." : "."}
+              {isAppointment
+                ? "Make sure you keep your appointment reference number and case reference number."
+                : `Make sure you keep your case reference number${
+                    receipt.ticketNumber ? " and ticket number." : "."
+                  }`}
             </Typography>
             <Typography color="text.secondary">
               {isAppointment
-                ? "When you arrive, have your case reference number or QR code ready."
+                ? "When you arrive, have your appointment reference number or QR code ready."
                 : "Use your ticket number or QR code on the reference page to check your position and wait time."}
             </Typography>
           </Stack>

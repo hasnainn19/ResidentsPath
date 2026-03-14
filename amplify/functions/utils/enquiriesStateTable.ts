@@ -22,9 +22,11 @@ export function getEnquiriesStateTableName() {
   return tableName;
 }
 
-function getCaseReferenceClaimKey(referenceNumber: string) {
+type ReferenceClaimType = "CASE" | "BOOKING";
+
+function getReferenceClaimKey(referenceType: ReferenceClaimType, referenceNumber: string) {
   return {
-    pk: `CASE_REFERENCE#${referenceNumber}`,
+    pk: `${referenceType}_REFERENCE#${referenceNumber}`,
     sk: "CLAIM",
   };
 }
@@ -72,9 +74,9 @@ export function getDate(d = new Date()): string {
 }
 
 // Attempt to claim a reference number by inserting a record into the enquiries state table
-export async function claimCaseReferenceNumber(referenceNumber: string) {
+async function claimReferenceNumber(referenceType: ReferenceClaimType, referenceNumber: string) {
   const tableName = getEnquiriesStateTableName();
-  const key = getCaseReferenceClaimKey(referenceNumber);
+  const key = getReferenceClaimKey(referenceType, referenceNumber);
 
   await ddb.send(
     new PutItemCommand({
@@ -90,11 +92,11 @@ export async function claimCaseReferenceNumber(referenceNumber: string) {
 }
 
 // Release a claimed reference number by deleting the corresponding record from the enquiries state table
-export async function releaseCaseReferenceNumber(referenceNumber: string) {
+async function releaseReferenceNumber(referenceType: ReferenceClaimType, referenceNumber: string) {
   const tableName = process.env.ENQUIRIES_STATE_TABLE;
   if (!tableName) return;
 
-  const key = getCaseReferenceClaimKey(referenceNumber);
+  const key = getReferenceClaimKey(referenceType, referenceNumber);
 
   await ddb.send(
     new DeleteItemCommand({
@@ -105,6 +107,22 @@ export async function releaseCaseReferenceNumber(referenceNumber: string) {
       },
     }),
   );
+}
+
+export async function claimCaseReferenceNumber(referenceNumber: string) {
+  await claimReferenceNumber("CASE", referenceNumber);
+}
+
+export async function releaseCaseReferenceNumber(referenceNumber: string) {
+  await releaseReferenceNumber("CASE", referenceNumber);
+}
+
+export async function claimBookingReferenceNumber(referenceNumber: string) {
+  await claimReferenceNumber("BOOKING", referenceNumber);
+}
+
+export async function releaseBookingReferenceNumber(referenceNumber: string) {
+  await releaseReferenceNumber("BOOKING", referenceNumber);
 }
 
 // Calculate an expiry time for a booked appointment slot, which is the end of the day of the

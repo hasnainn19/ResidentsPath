@@ -65,7 +65,7 @@ export default function ReceiptQrCard({ isAppointment, qrCodeUrl }: ReceiptQrCar
       )}
 
       <Typography variant="body2" color="text.secondary">
-        You can still use your case reference number if the QR code is not available.
+        You can still use your {isAppointment ? "appointment reference" : "ticket"} number if the QR code is not available.
       </Typography>
     </Paper>
   );

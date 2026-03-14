@@ -1,6 +1,23 @@
 import { Html5Qrcode } from "html5-qrcode";
 import { useRef, useState, useEffect } from "react";
-import { Alert, Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
+import {
+    Alert,
+    Tooltip,
+    Container,
+    Grid,
+    Box,
+    TextField,
+    Button,
+    Card,
+    CardContent,
+    CardActions,
+    Typography,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
@@ -11,7 +28,12 @@ import TextToSpeechButton from "../components/TextToSpeechButton";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
 import { useCheckReferenceNumber } from "../hooks/useCheckReferenceNumber";
+import { useAppointmentReferenceActions } from "../hooks/useAppointmentReferenceActions";
 
+type ReferencePageStatus = {
+    severity: "success" | "info" | "warning";
+    text: string;
+} | null;
 
 const ReferencePage = () => {
     const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -20,11 +42,31 @@ const ReferencePage = () => {
     const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
     const navigate = useNavigate();
-    const { foundCaseId, refNoError, checkRefNo, isChecking } = useCheckReferenceNumber();
+    const {
+        foundCaseId,
+        appointmentReferenceNumber,
+        clearAppointmentReference,
+        refNoError,
+        checkRefNo,
+        isChecking,
+    } = useCheckReferenceNumber();
     const [ refPageError, setRefPageError] = useState('');
+    const [ actionStatus, setActionStatus ] = useState<ReferencePageStatus>(null);
+    const {
+        canCheckInAppointments,
+        isCheckingIn,
+        isCancelling,
+        checkInAppointmentReference,
+        cancelAppointmentReference,
+    } = useAppointmentReferenceActions();
+    const checkRefNoRef = useRef(checkRefNo);
 
+    useEffect(() => {
+        checkRefNoRef.current = checkRefNo;
+    }, [checkRefNo]);
 
     const handleCheckStatus = async () => {
+        setActionStatus(null);
         await checkRefNo(refNo);
     }
     
@@ -64,7 +106,68 @@ const ReferencePage = () => {
         if (foundCaseId) {
             navigate(`/userdashboard/${foundCaseId}`);
         }
-    }, [foundCaseId]);
+    }, [foundCaseId, navigate]);
+
+    function handleCloseAppointmentDialog() {
+        clearAppointmentReference();
+    }
+
+    async function handleCancelAppointment() {
+        if (!appointmentReferenceNumber) {
+            return;
+        }
+
+        setActionStatus(null);
+        const result = await cancelAppointmentReference(appointmentReferenceNumber);
+
+        if (result.ok) {
+            clearAppointmentReference();
+            setRefNo('');
+            setActionStatus({
+                severity: result.alreadyCancelled ? "info" : "success",
+                text: result.alreadyCancelled
+                    ? "This appointment has already been cancelled."
+                    : "Your appointment has been cancelled.",
+            });
+            return;
+        }
+
+        setActionStatus({
+            severity: "warning",
+            text: result.errorMessage || "We could not cancel that appointment right now.",
+        });
+    }
+
+    async function handleCheckInAppointment() {
+        if (!appointmentReferenceNumber) {
+            return;
+        }
+
+        setActionStatus(null);
+        const result = await checkInAppointmentReference(appointmentReferenceNumber);
+
+        if (result.alreadyCheckedIn) {
+            clearAppointmentReference();
+            setRefNo('');
+            setActionStatus({
+                severity: "info",
+                text: "This appointment has already been checked in.",
+            });
+            return;
+        }
+
+        if (result.checkedIn) {
+            clearAppointmentReference();
+            setRefNo('');
+            navigate("/checkinpage");
+            return;
+        }
+
+        setActionStatus({
+            severity: "warning",
+            text: result.errorMessage || "We could not check in that appointment right now.",
+        });
+    }
 
     useEffect(() => {
         if (!scanning || scannerRef.current) {
@@ -95,7 +198,7 @@ const ReferencePage = () => {
                         return;
                     }
 
-                    checkRefNo(value, type);
+                    checkRefNoRef.current(value, type);
                 },
                 () => {}
             )
@@ -120,6 +223,11 @@ const ReferencePage = () => {
     <>
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center', height:'85vh' }}>
+            {actionStatus && (
+                <Alert severity={actionStatus.severity} onClose={() => setActionStatus(null)}>
+                    {actionStatus.text}
+                </Alert>
+            )}
             {refPageError && (
                 <Alert  severity="error" color="error" onClose={() => setRefPageError('')}>
                     {refPageError}
@@ -157,7 +265,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth value={refNo} id="outlined-search" label="Ticket/Appointment Number" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title="Check your status" placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
                                     </Button>
                                 </Tooltip>
@@ -209,6 +317,95 @@ const ReferencePage = () => {
                 </Grid>
             </Grid>
         </Container>
+
+        <Dialog
+            open={Boolean(appointmentReferenceNumber)}
+            onClose={handleCloseAppointmentDialog}
+            fullWidth
+            maxWidth="md"
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 3,
+                        width: "min(92vw, 760px)",
+                        minHeight: 360,
+                    },
+                },
+            }}
+        >
+            <DialogTitle sx={{ px: 4, pt: 4, pb: 1, fontSize: "2.2rem", fontWeight: 700 }}>
+                Appointment options
+            </DialogTitle>
+            <DialogContent sx={{ px: 4, pb: 2 }}>
+                <DialogContentText sx={{ fontSize: "1.2rem", lineHeight: 1.5 }}>
+                    What would you like to do with appointment {appointmentReferenceNumber}?
+                </DialogContentText>
+                {!canCheckInAppointments && (
+                    <DialogContentText sx={{ mt: 2, fontSize: "1.1rem", lineHeight: 1.5 }}>
+                        Check-in is only available at Hounslow House.
+                    </DialogContentText>
+                )}
+            </DialogContent>
+            <DialogActions
+                sx={{
+                    px: 4,
+                    pb: 4,
+                    pt: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    gap: 1.5,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "grid",
+                        gridTemplateColumns: canCheckInAppointments
+                            ? { xs: "1fr", sm: "1fr 1fr" }
+                            : "1fr",
+                        gap: 1.5,
+                        width: "100%",
+                    }}
+                >
+                <Button
+                    color="error"
+                    onClick={handleCancelAppointment}
+                    disabled={isCheckingIn || isCancelling}
+                    size="large"
+                    variant="contained"
+                    sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
+                >
+                    Cancel appointment
+                </Button>
+                {canCheckInAppointments && (
+                    <Button
+                        variant="contained"
+                        onClick={handleCheckInAppointment}
+                        disabled={isCheckingIn || isCancelling}
+                        size="large"
+                        sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
+                    >
+                        Check in
+                    </Button>
+                )}
+                </Box>
+                <Button
+                    onClick={handleCloseAppointmentDialog}
+                    disabled={isCheckingIn || isCancelling}
+                    size="large"
+                    sx={{
+                        alignSelf: "center",
+                        minWidth: 180,
+                        minHeight: 48,
+                        px: 3,
+                        fontSize: "1rem",
+                        mt: 0.5,
+                    }}
+                >
+                    Go back
+                </Button>
+            </DialogActions>
+        </Dialog>
     </>
     );
 };

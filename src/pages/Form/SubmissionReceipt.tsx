@@ -21,6 +21,7 @@ import { getDataAuthMode } from "../../utils/getDataAuthMode";
 type Receipt = {
   createdAt?: string;
   referenceNumber: string;
+  bookingReferenceNumber?: string;
   receiptType: "QUEUE" | "APPOINTMENT";
   ticketNumber?: string;
   appointmentDateIso?: string;
@@ -32,7 +33,7 @@ export default function SubmissionReceipt() {
   const nav = useNavigate();
   const location = useLocation();
 
-  // Get the reference number from the URL
+  // Get the case reference number from the URL
   const { referenceNumber: routeReferenceNumber = "" } = useParams();
 
   const client = useMemo(() => generateClient<Schema>(), []);
@@ -61,6 +62,7 @@ export default function SubmissionReceipt() {
     return {
       ...candidate,
       referenceNumber: candidateReferenceNumber,
+      bookingReferenceNumber: candidate.bookingReferenceNumber?.trim().toUpperCase(),
     };
   }, [location.state, referenceNumber]);
 
@@ -97,17 +99,13 @@ export default function SubmissionReceipt() {
   let qrPayload = "";
 
   if (receipt) {
-    const parts = [`${receipt.receiptType}`];
-
-    if (receipt.ticketNumber) {
-      parts.push(`${receipt.ticketNumber}`);
+    if (receipt.receiptType === "APPOINTMENT") {
+      qrPayload = receipt.bookingReferenceNumber
+        ? ["APPOINTMENT", receipt.bookingReferenceNumber].join("|")
+        : "";
+    } else {
+      qrPayload = receipt.ticketNumber ? ["QUEUE", receipt.ticketNumber].join("|") : "";
     }
-
-    if (receipt.receiptType === "APPOINTMENT" && receipt.appointmentDateIso && receipt.appointmentTime) {
-      parts.push(`${receipt.referenceNumber}`);
-    }
-
-    qrPayload = parts.join("|");
   }
 
   useEffect(() => {
@@ -185,6 +183,7 @@ export default function SubmissionReceipt() {
         setReceipt({
           createdAt: data.createdAt || undefined,
           referenceNumber: data.referenceNumber,
+          bookingReferenceNumber: data.bookingReferenceNumber || undefined,
           receiptType,
           ticketNumber: data.ticketNumber || undefined,
           appointmentDateIso: data.appointmentDateIso || undefined,
@@ -276,6 +275,10 @@ export default function SubmissionReceipt() {
         `Your case reference number is ${receipt.referenceNumber}.`,
       ];
 
+      if (receipt.bookingReferenceNumber) {
+        parts.push(`Your appointment reference number is ${receipt.bookingReferenceNumber}.`);
+      }
+
       if (appointmentDate) {
         parts.push(`Your appointment is on ${appointmentDate}.`);
       }
@@ -284,6 +287,12 @@ export default function SubmissionReceipt() {
         parts.push(`at ${receipt.appointmentTime}.`);
       }
 
+      parts.push(
+        "To check in on the day of your appointment, go to the reference page at Hounslow House and enter your appointment reference number or scan this QR code.",
+      );
+      parts.push(
+        "If you need to cancel your appointment, go to the reference page and enter your appointment reference number or scan this QR code.",
+      );
       parts.push("Please keep these details safe.");
       ttsText = parts.join(" ");
     } else {
@@ -300,8 +309,6 @@ export default function SubmissionReceipt() {
       ttsText = parts.join(" ");
     }
   }
-
-  const referenceToShow = receipt?.referenceNumber || referenceNumber || undefined;
 
   const receiptHeading = isAppointment
     ? "Appointment receipt"
@@ -339,10 +346,14 @@ export default function SubmissionReceipt() {
             heading={heading}
             introText={introText}
             isAppointment={isAppointment}
-            referenceToShow={referenceToShow}
+            caseReferenceNumber={receipt?.referenceNumber}
+            appointmentReferenceNumber={receipt?.bookingReferenceNumber}
             ticketNumber={receipt?.ticketNumber}
             appointmentTime={receipt?.appointmentTime}
-            onCopyReference={() => copyValue("Case reference number", referenceToShow)}
+            onCopyCaseReference={() => copyValue("Case reference number", receipt?.referenceNumber)}
+            onCopyAppointmentReference={() =>
+              copyValue("Appointment reference number", receipt?.bookingReferenceNumber)
+            }
             onPrint={() => window.print()}
           />
 
@@ -373,7 +384,9 @@ export default function SubmissionReceipt() {
               onCopyAppointmentDetails={() =>
                 copyValue(
                   "Appointment details",
-                  [appointmentDate, receipt.appointmentTime].filter(Boolean).join(" "),
+                  [appointmentDate, receipt.appointmentTime, receipt.bookingReferenceNumber]
+                    .filter(Boolean)
+                    .join(" "),
                 )
               }
             />
