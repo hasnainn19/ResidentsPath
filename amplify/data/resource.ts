@@ -50,7 +50,8 @@ const schema = a
         appointments: a.hasMany("Appointment", "userId"),
       })
       .authorization((allow) => [
-        allow.groups(["Staff"]), // Only staff can access user data directly
+        allow.groups(["Staff"]),
+        allow.ownerDefinedIn("id").to(["read", "update"]),
       ]),
 
     // Case - represents an issue or matter that a resident needs help with
