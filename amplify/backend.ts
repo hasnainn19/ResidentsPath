@@ -121,19 +121,16 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamS
   streamViewType: StreamViewType.NEW_AND_OLD_IMAGES,
 };
 
-/**
- * Attach the Ticket, Case, and Appointment streams to the Lambda.
- * The filter tells AWS to only invoke the Lambda for MODIFY or REMOVE events
- *
- * Further filters can be added that target the dynamoDB record's new and old images
- */
 const ticketTable = backend.data.resources.tables["Ticket"];
 const caseTable = backend.data.resources.tables["Case"];
 const appointmentTable = backend.data.resources.tables["Appointment"];
-backend.cleanupEnquiryState.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
-backend.cleanupEnquiryState.addEnvironment("CASE_TABLE_NAME", caseTable.tableName);
-backend.cleanupEnquiryState.addEnvironment("APPOINTMENT_TABLE_NAME", appointmentTable.tableName);
 
+/**
+ * Attach the Ticket stream to the Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY events
+ *
+ * Further filters can be added that target the dynamoDB record's new and old images
+ */
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,
@@ -153,6 +150,41 @@ backend.notifyResident.resources.lambda.addEventSource(
   })
 );
 
+// Grant the Lambda permission to send SMS via End User Messaging
+backend.notifyResident.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["sms-voice:SendTextMessage"],
+    resources: [
+      "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
+    ],
+  }),
+);
+
+// Grant the Lambda permission to send emails via SES
+backend.notifyResident.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["ses:SendEmail"],
+    resources: ["*"],
+  }),
+);
+
+/**
+ * SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
+ * The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
+ */
+backend.notifyResident.addEnvironment(
+  "SMS_ORIGINATION_IDENTITY",
+  "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
+);
+backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
+
+
+/**
+ * Attach the Ticket, Case, and Appointment streams to the Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY or REMOVE events
+ *
+ * Further filters can be added that target the dynamoDB record's new and old images
+ */
 backend.cleanupEnquiryState.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,
@@ -201,31 +233,6 @@ backend.cleanupEnquiryState.resources.lambda.addEventSource(
   })
 );
 
-// Grant the Lambda permission to send SMS via End User Messaging
-backend.notifyResident.resources.lambda.addToRolePolicy(
-  new PolicyStatement({
-    actions: ["sms-voice:SendTextMessage"],
-    resources: [
-      "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
-    ],
-  }),
-);
-
-// Grant the Lambda permission to send emails via SES
-backend.notifyResident.resources.lambda.addToRolePolicy(
-  new PolicyStatement({
-    actions: ["ses:SendEmail"],
-    resources: ["*"],
-  }),
-);
-
-/**
- * SMS origination identity is the ARN of the sender ID that is registered in AWS End User Messaging for sending SMS messages.
- * The Lambda specifies it when sending SMS, ensuring that messages are sent from the registered sender ID.
- */
-backend.notifyResident.addEnvironment(
-  "SMS_ORIGINATION_IDENTITY",
-  "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
-);
-
-backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
+backend.cleanupEnquiryState.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
+backend.cleanupEnquiryState.addEnvironment("CASE_TABLE_NAME", caseTable.tableName);
+backend.cleanupEnquiryState.addEnvironment("APPOINTMENT_TABLE_NAME", appointmentTable.tableName);
