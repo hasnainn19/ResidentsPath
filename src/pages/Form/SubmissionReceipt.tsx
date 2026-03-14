@@ -315,6 +315,8 @@ export default function SubmissionReceipt() {
     : receipt?.ticketNumber
       ? "Ticket receipt"
       : "Queue receipt";
+  const headerCaseReferenceNumber = receipt?.referenceNumber || referenceNumber;
+  const headerAppointmentReferenceNumber = receipt?.bookingReferenceNumber;
 
   let chipLabel = "Receipt";
   let heading = "Receipt details";
@@ -346,12 +348,14 @@ export default function SubmissionReceipt() {
             heading={heading}
             introText={introText}
             isAppointment={isAppointment}
-            caseReferenceNumber={receipt?.referenceNumber}
-            appointmentReferenceNumber={receipt?.bookingReferenceNumber}
+            caseReferenceNumber={headerCaseReferenceNumber}
+            appointmentReferenceNumber={headerAppointmentReferenceNumber}
             ticketNumber={receipt?.ticketNumber}
-            onCopyCaseReference={() => copyValue("Case reference number", receipt?.referenceNumber)}
+            onCopyCaseReference={() =>
+              copyValue("Case reference number", headerCaseReferenceNumber)
+            }
             onCopyAppointmentReference={() =>
-              copyValue("Appointment reference number", receipt?.bookingReferenceNumber)
+              copyValue("Appointment reference number", headerAppointmentReferenceNumber)
             }
             onPrint={() => window.print()}
           />
