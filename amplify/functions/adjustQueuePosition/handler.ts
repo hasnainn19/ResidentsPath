@@ -72,12 +72,14 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
   others.splice(clamped - 1, 0, ticket);
 
   // Write updated positions for every waiting ticket
-  for (let i = 0; i < others.length; i++) {
-    await client.models.Ticket.update({
-      id: others[i].id,
-      position: i + 1,
-    });
-  }
+  await Promise.all(
+    others.map((ticket, i) =>
+      client.models.Ticket.update({
+        id: ticket.id,
+        position: i + 1,
+      }),
+    ),
+  );
 
   // Recalculate wait times using calculateDepartmentQueue
   await client.mutations.calculateDepartmentQueue({ departmentId });

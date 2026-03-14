@@ -13,7 +13,9 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 
 const client = await getAmplifyClient();
 
-export const handler: Schema["markTicketSeen"]["functionHandler"] = async (event) => {
+export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
+  event,
+) => {
   const { ticketId } = event.arguments;
 
   if (!ticketId) {
@@ -55,21 +57,26 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (event
     },
   });
 
-  const waitingTickets = (allTickets ?? [])
-    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  const waitingTickets = (allTickets ?? []).sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0),
+  );
 
   // Shift down all tickets that were below the completed ticket
-  for (const t of waitingTickets) {
-    if ((t.position ?? 0) > completedPosition) {
-      await client.models.Ticket.update({
-        id: t.id,
-        position: (t.position ?? 0) - 1,
-      });
-    }
-  }
+  await Promise.all(
+    waitingTickets
+      .filter((t) => (t.position ?? 0) > completedPosition)
+      .map((t) =>
+        client.models.Ticket.update({
+          id: t.id,
+          position: (t.position ?? 0) - 1,
+        }),
+      ),
+  );
 
   // Recalculate wait times using the shared calculateDepartmentQueue logic
-  await client.mutations.calculateDepartmentQueue({ departmentId: ticket.departmentId });
+  await client.mutations.calculateDepartmentQueue({
+    departmentId: ticket.departmentId,
+  });
 
   return true;
 };
