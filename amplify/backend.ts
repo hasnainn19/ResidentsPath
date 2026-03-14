@@ -19,6 +19,7 @@ import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/r
 import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
+import { handleSteppedOut } from "./functions/handleSteppedOut/resource";
 import {
   FilterCriteria,
   FilterRule,
@@ -42,6 +43,7 @@ const backend = defineBackend({
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
+  handleSteppedOut,
 });
 
 /**

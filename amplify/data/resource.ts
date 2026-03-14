@@ -11,6 +11,7 @@ import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
+import { handleSteppedOut } from "../functions/handleSteppedOut/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -250,10 +251,12 @@ const schema = a
       })
       .returns(
         a.customType({
+          ticketId: a.id().required(),
           departmentId: a.id().required(),
           position: a.integer().required(),
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
+          steppedOut: a.boolean().required(),
         }),
       )
       .authorization((allow) => [
@@ -262,21 +265,34 @@ const schema = a
         ])
       .handler(a.handler.function(getTicketInfo)),
 
-  getDepartmentQueueStatus: a
-    .query()
-    .arguments({
-      departmentId: a.id().required()
-    })
-    .returns(a.customType({
-            queueCount: a.integer().required(),
-            updatedAtIso: a.string().required(),
-    }))
-    .authorization((allow) => [
-            allow.guest(),
-            allow.authenticated(),
-            allow.authenticated("identityPool")
-        ])
-    .handler(a.handler.function(getDepartmentQueueStatus)),
+    handleSteppedOut: a
+      .mutation()
+      .arguments({
+        ticketId: a.id().required(),
+        steppedOut: a.boolean().required(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+      ])
+      .handler(a.handler.function(handleSteppedOut)),
+
+    getDepartmentQueueStatus: a
+      .query()
+      .arguments({
+        departmentId: a.id().required()
+      })
+      .returns(a.customType({
+              queueCount: a.integer().required(),
+              updatedAtIso: a.string().required(),
+      }))
+      .authorization((allow) => [
+              allow.guest(),
+              allow.authenticated(),
+              allow.authenticated("identityPool")
+          ])
+      .handler(a.handler.function(getDepartmentQueueStatus)),
 
     submitEnquiry: a
       .mutation()
@@ -425,6 +441,7 @@ const schema = a
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
     allow.resource(checkTicketNumber),
+    allow.resource(handleSteppedOut),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

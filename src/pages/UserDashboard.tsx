@@ -27,21 +27,28 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
-    const[showStepOutAlert, setShowStepOutAlert]=useState(false);
-    const[stepOut, setStepOut]=useState(false);
-    const[errors, setErrors] = useState('');
+    const [showStepOutAlert, setShowStepOutAlert]=useState(false);
+    const [stepOut, setStepOut]=useState(false);
+    const [errors, setErrors] = useState('');
+    const [ticketId, setTicketId] = useState<string | null>(null);
     const [queuePosition, setQueuePosition] = useState(0); 
-    const [ waitTimeLower, setWaitTimeLower ] = useState(0);
-    const [ waitTimeUpper, setWaitTimeUpper ] = useState(0);
+    const [waitTimeLower, setWaitTimeLower] = useState(0);
+    const [waitTimeUpper, setWaitTimeUpper] = useState(0);
 
 
 
-    const handleStepOut = () => {
+    const handleStepOut = async () => {
+        if (!ticketId) return;
+
+        await client.mutations.handleSteppedOut({ ticketId: ticketId, steppedOut: true });
         setStepOut(true);
         setShowStepOutAlert(true);
     };
 
-    const handleReturned = () => {
+    const handleReturned = async () => {
+        if (!ticketId) return;
+
+        await client.mutations.handleSteppedOut({ ticketId: ticketId, steppedOut: false });
         setStepOut(false);
         setShowStepOutAlert(false);
     };
@@ -76,9 +83,11 @@ export default function UserDashboard() {
                 return;
             }
 
+            setTicketId(ticketInfo.ticketId);
             setQueuePosition(ticketInfo.position);
             setWaitTimeLower(ticketInfo.estimatedWaitTimeLower);
             setWaitTimeUpper(ticketInfo.estimatedWaitTimeUpper);
+            setStepOut(ticketInfo.steppedOut);
 
         } 
         catch (err) {
