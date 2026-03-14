@@ -39,19 +39,35 @@ export default function UserDashboard() {
 
     const handleStepOut = async () => {
         if (!ticketId) return;
-
-        await client.mutations.handleSteppedOut({ ticketId: ticketId, steppedOut: true });
-        setStepOut(true);
-        setShowStepOutAlert(true);
+        try {
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: true });
+            if (stepOutErrors && stepOutErrors.length > 0) {
+                setErrors(stepOutErrors[0].message);
+                return;
+            }
+            setStepOut(true);
+            setShowStepOutAlert(true);
+        } catch (error) {
+            setErrors(`Failed to step out: ${error}`);
+        }
     };
 
     const handleReturned = async () => {
         if (!ticketId) return;
-
-        await client.mutations.handleSteppedOut({ ticketId: ticketId, steppedOut: false });
-        setStepOut(false);
-        setShowStepOutAlert(false);
+        try {
+            const { errors: returnedErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: false });
+            if (returnedErrors && returnedErrors.length > 0) {
+                setErrors(returnedErrors[0].message);
+                return;
+            }
+            setStepOut(false);
+            setShowStepOutAlert(false);
+        } 
+        catch (error) {
+            setErrors(`Failed to update: ${error}`);
+        }
     };
+
 
     useEffect(() => {
         fetchTicketQueueInfo();
@@ -90,8 +106,8 @@ export default function UserDashboard() {
             setStepOut(ticketInfo.steppedOut);
 
         } 
-        catch (err) {
-            setErrors(`Failed to fetch tickets: ${err}`);
+        catch (error) {
+            setErrors(`Failed to fetch tickets: ${error}`);
         }
     }
 
