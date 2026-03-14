@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import StopIcon from '@mui/icons-material/Stop';
-
+import { useTranslation } from 'react-i18next'
 
 type TextToSpeechButtonProps = {
   text: string;
@@ -31,6 +31,7 @@ type TextToSpeechButtonProps = {
 export default function TextToSpeechButton({text}: TextToSpeechButtonProps) {
     const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const {  t: translate } = useTranslation();
 
     useEffect(() => {
         const loadVoices = () => {
@@ -65,7 +66,7 @@ export default function TextToSpeechButton({text}: TextToSpeechButtonProps) {
   return (
     <Button onClick={speak} sx={{display:'inline-flex', ml:1}}>
       {isSpeaking ? <StopIcon /> : <VolumeUpIcon />}
-      {isSpeaking ? "Stop" : "Read"}
+      {isSpeaking ? `${translate("general-stop")}` : `${translate("general-read")}`}
     </Button>
   );
 }

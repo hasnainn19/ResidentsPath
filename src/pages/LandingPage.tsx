@@ -1,22 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Button, Stack, Card, CardContent } from '@mui/material';
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NavBar from '../components/NavBar';
 
-// const languages = [
-//     { value: "en", text: "English" },
-//     { value: "cy", text: "Welsh" },
-// 	{ value: "pl", text: "Polish" },
-// 	{ value: "pa", text: "Punjabi" },
-// 	{ value: "fa", text: "Persian" },
-// ];
-
 export default function LandingPage() {
 	const navigate = useNavigate();
 	const { isAuthenticated, isLoading, givenName } = useAuth();
-  	const { t } = useTranslation();
+  	const {  t: translate } = useTranslation();
 
 	// Show loading spinner while checking authentication status
 	if (isLoading) {
@@ -34,12 +26,12 @@ export default function LandingPage() {
 				<Box sx={{ textAlign: 'center', mb: 6 }}>
 					<Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
 						{isAuthenticated
-							? (givenName ? `${t("landing-welcome-back")}, ${givenName}` : '{t("landing-welcome-back")}')
-							: `${t("landing-welcome")}`
+							? (givenName ? `${translate("landing-welcome-back")}, ${givenName}` : `${translate("landing-welcome-back")}`)
+							: `${translate("landing-welcome")}`
 						}
 					</Typography>
 					<Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-						{t("landing-welcome-back")}
+						{translate("landing-welcome-back")}
 					</Typography>
 				</Box>
 
@@ -51,10 +43,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Queue Information and Appointment Check-in
+										{translate("landing-queue-info")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Check in to your appointment or view your current queue status.
+										{translate("landing-check-in-to")}
 									</Typography>
 									<Button
 										variant="contained"
@@ -62,7 +54,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/referencepage')}
 									>
-										Check In
+										{translate("landing-check")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -71,10 +63,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Book an Appointment
+										{translate("landing-book")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Schedule an appointment with a department.
+										{translate("landing-schedule")}
 									</Typography>
 									<Button
 										variant="outlined"
@@ -82,7 +74,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/bookingpage')}
 									>
-										Book Appointment
+										{translate("landing-book")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -93,10 +85,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										{t("landing-continue-as")}
+										{translate("landing-continue-as")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										{t("landing-no-account")}
+										{translate("landing-no-account")}
 									</Typography>
 									<Button
 										variant="contained"
@@ -104,7 +96,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/referencepage')}
 									>
-										{t("landing-continue-as")}
+										{translate("landing-continue-as")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -113,10 +105,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										{t("landing-sign-in")}
+										{translate("landing-sign-in")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										{t("landing-access")}
+										{translate("landing-access")}
 									</Typography>
 									<Button
 										variant="outlined"
@@ -124,7 +116,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/auth')}
 									>
-										{t("landing-register")}
+										{translate("landing-register")}
 									</Button>
 								</CardContent>
 							</Card>
