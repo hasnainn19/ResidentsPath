@@ -42,7 +42,7 @@ export async function getAppointmentReferenceDetails(
     return {
       found: false,
       errorCode: "INVALID_REFERENCE",
-      errorMessage: "Please enter an appointment reference number in the format APT-ABC123.",
+      errorMessage: "Please enter an appointment reference number in the format APT-ABC234.",
     };
   }
 

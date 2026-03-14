@@ -27,7 +27,7 @@ export function useAppointmentReferenceActions() {
     if (!isBookingReferenceNumber(referenceNumber)) {
       return {
         ok: false,
-        errorMessage: "Enter an appointment reference number in the format APT-ABC123.",
+        errorMessage: "Enter an appointment reference number in the format APT-ABC234.",
       };
     }
 
@@ -85,7 +85,7 @@ export function useAppointmentReferenceActions() {
     if (!isBookingReferenceNumber(referenceNumber)) {
       return {
         ok: false,
-        errorMessage: "Enter an appointment reference number in the format APT-ABC123.",
+        errorMessage: "Enter an appointment reference number in the format APT-ABC234.",
       };
     }
 
