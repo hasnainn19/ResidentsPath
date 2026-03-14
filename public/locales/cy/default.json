@@ -46,6 +46,17 @@
     "userdash-to":"i",
     "userdash-wait":"Amcangyfrifir yr amseroedd aros a gallant amrywio. Gall achosion brys gael blaenoriaeth a'u gweld o'ch blaen.",
     "userdash-we":"Rydym yn gwerthfawrogi eich amynedd a'ch dealltwriaeth.",
-    "userdash-you":"Rydych chi yn y ciw!"
+    "userdash-you":"Rydych chi yn y ciw!",
+    "Bpanel-app":"Appointment selection saved",
+    "Bpanel-at":"at",
+    "Bpanel-cl":"Clear",
+    "Bpanel-clear":"Clear appointment selection",
+    "Bpanel-conf":"Confirm",
+    "Bpanel-confirm":"Confirm your appointment",
+    "Bpanel-no":"No appointment time selected.",
+    "Bpanel-ok":"OK",
+    "Bpanel-select":"Select the date:",
+    "Bpanel-time":"Select a time below:",
+    "Bpanel-your":"Your selected appointment time is"
 
 }

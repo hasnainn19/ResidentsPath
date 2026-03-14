@@ -46,5 +46,16 @@
     "userdash-to":"to",
     "userdash-wait":"Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.",
     "userdash-we":"We appreciate your patience and understanding.",
-    "userdash-you":"You are in the queue!"
+    "userdash-you":"You are in the queue!",
+    "Bpanel-app":"Appointment selection saved",
+    "Bpanel-at":"at",
+    "Bpanel-cl":"Clear",
+    "Bpanel-clear":"Clear appointment selection",
+    "Bpanel-conf":"Confirm",
+    "Bpanel-confirm":"Confirm your appointment",
+    "Bpanel-no":"No appointment time selected.",
+    "Bpanel-ok":"OK",
+    "Bpanel-select":"Select the date:",
+    "Bpanel-time":"Select a time below:",
+    "Bpanel-your":"Your selected appointment time is"
 }

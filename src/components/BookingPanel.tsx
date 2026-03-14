@@ -24,6 +24,7 @@ import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import HistoryToggleOffOutlinedIcon from "@mui/icons-material/HistoryToggleOffOutlined";
+import { useTranslation } from 'react-i18next';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 
 type Props = {
@@ -34,6 +35,7 @@ export default function BookingPanel(props: Props) {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [selectedTime, setSelectedTime] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const {  t: translate } = useTranslation();
 
   const prettyDate = selectedDate ? selectedDate.format("D MMMM YYYY") : "";
 
@@ -80,7 +82,7 @@ export default function BookingPanel(props: Props) {
                   <CalendarMonthOutlinedIcon />
                 </Avatar>
                 <Typography variant="h5" color="text.primary" sx={{ ml: 3, fontWeight: 700 }}>
-                  Select the date:
+                  {translate("Bpanel-select")}
                   <TextToSpeechButton text="Select the date" />
                 </Typography>
               </Box>
@@ -109,7 +111,7 @@ export default function BookingPanel(props: Props) {
                   <ScheduleOutlinedIcon />
                 </Avatar>
                 <Typography variant="h5" color="text.primary" sx={{ fontWeight: 700 }}>
-                  Select a time below:
+                  {translate("Bpanel-time")}
                   <TextToSpeechButton text="Select a time below" />
                 </Typography>
               </Box>
@@ -150,25 +152,25 @@ export default function BookingPanel(props: Props) {
 
               <TextToSpeechButton
                 text={
-                  selectedTime ? `Your selected appointment time is ${selectedTime}.` : "No appointment time selected."
+                  selectedTime ? `${translate("Bpanel-your")} ${selectedTime}.` : translate("Bpanel-no")
                 }
               />
 
               <CardActions>
-                <Tooltip title="Clear appointment selection" placement="top">
+                <Tooltip title={translate("Bpanel-clear")} placement="top">
                   <Button variant="outlined" onClick={handleClear}>
-                    Clear
+                    {translate("Bpanel-cl")}
                   </Button>
                 </Tooltip>
 
-                <Tooltip title="Confirm your appointment" placement="top">
+                <Tooltip title={translate("Bpanel-confirm")} placement="top">
                   <Button
                     variant="contained"
                     disabled={!selectedTime}
                     onClick={handleConfirm}
                     sx={{ bgColor: "secondary" }}
                   >
-                    Confirm
+                    {translate("Bpanel-conf")}
                   </Button>
                 </Tooltip>
 
@@ -186,17 +188,17 @@ export default function BookingPanel(props: Props) {
       </Card>
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} aria-labelledby="appointment-confirmed-title">
-        <DialogTitle id="appointment-confirmed-title">Appointment selection saved</DialogTitle>
+        <DialogTitle id="appointment-confirmed-title">{translate("Bpanel-app")}</DialogTitle>
 
         <DialogContent dividers>
           <Typography variant="body1">
-            {prettyDate} at {selectedTime}
+            {prettyDate} {translate("Bpanel-at")} {selectedTime}
           </Typography>
         </DialogContent>
 
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} variant="contained">
-            OK
+            {translate("Bpanel-ok")}
           </Button>
         </DialogActions>
       </Dialog>

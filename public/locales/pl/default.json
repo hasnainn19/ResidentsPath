@@ -46,5 +46,16 @@
     "userdash-to":"Do",
     "userdash-wait":"Czas oczekiwania jest szacowany i może się różnić. Pilne przypadki mogą zostać potraktowane priorytetowo i rozpatrzone przed Tobą.",
     "userdash-we":"Dziękujemy za cierpliwość i zrozumienie.",
-    "userdash-you":"Jesteś w kolejce!"
+    "userdash-you":"Jesteś w kolejce!",
+    "Bpanel-app":"Wybór terminu zapisany",
+    "Bpanel-at":"Na",
+    "Bpanel-cl":"Jasne",
+    "Bpanel-clear":"Wyczyść wybór spotkania",
+    "Bpanel-conf":"Potwierdzać",
+    "Bpanel-confirm":"Potwierdź swoją wizytę",
+    "Bpanel-no":"Nie wybrano terminu spotkania.",
+    "Bpanel-ok":"OK",
+    "Bpanel-select":"Wybierz datę:",
+    "Bpanel-time":"Wybierz godzinę poniżej:",
+    "Bpanel-your":"Wybrany przez Ciebie czas wizyty to"
 }

@@ -18,7 +18,6 @@ import {
   SupervisorAccount as SupervisorAccountIcon,
   HourglassBottom as HourglassBottomIcon,
 } from "@mui/icons-material";
-import { useTranslation } from 'react-i18next';
 import React from "react";
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
@@ -27,7 +26,6 @@ import QueueRow from "../components/StaffComponents/QueueRow";
 const StaffDashboard = () => {
   const [sortColumn, setSortColumn] = React.useState<string | null>(null);
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
-  const {  t: translate } = useTranslation();
 
   const lastUpdated = "2026-02-16 14:00";
   const stats = [
