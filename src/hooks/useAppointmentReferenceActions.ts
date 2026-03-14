@@ -18,7 +18,7 @@ export function useAppointmentReferenceActions() {
     if (isCheckingIn) {
       return {
         ok: false,
-        errorMessage: "We are already checking in that appointment.",
+        errorMessage: "Check-in in progress, please wait",
       };
     }
 
@@ -76,7 +76,7 @@ export function useAppointmentReferenceActions() {
     if (isCancelling) {
       return {
         ok: false,
-        errorMessage: "This appointment is already being cancelled.",
+        errorMessage: "Cancellation in progress, please wait",
       };
     }
 

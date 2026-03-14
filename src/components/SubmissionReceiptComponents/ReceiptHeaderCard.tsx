@@ -69,20 +69,20 @@ export default function ReceiptHeaderCard({
               <Alert
                 severity="info"
                 variant="outlined"
-                sx={(theme) => ({
+                sx={({ palette: { primary, text } }) => ({
                   mt: 2.5,
                   maxWidth: { xs: "100%", md: 620 },
                   alignItems: "flex-start",
                   borderRadius: 3,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.28)}`,
-                  borderLeft: `6px solid ${theme.palette.primary.main}`,
-                  bgcolor: alpha(theme.palette.primary.light, 0.32),
-                  color: theme.palette.text.primary,
-                  boxShadow: `0 10px 24px ${alpha(theme.palette.primary.dark, 0.12)}`,
+                  border: `1px solid ${alpha(primary.main, 0.28)}`,
+                  borderLeft: `6px solid ${primary.main}`,
+                  bgcolor: alpha(primary.light, 0.32),
+                  color: text.primary,
+                  boxShadow: `0 10px 24px ${alpha(primary.dark, 0.12)}`,
                   "& .MuiAlert-message": { width: "100%" },
                   "& .MuiAlert-icon": {
                     mt: 0.25,
-                    color: theme.palette.primary.main,
+                    color: primary.main,
                   },
                 })}
               >
@@ -98,11 +98,11 @@ export default function ReceiptHeaderCard({
                     <Chip
                       label="Important"
                       size="small"
-                      sx={(theme) => ({
+                      sx={({ palette: { primary } }) => ({
                         fontWeight: 700,
-                        bgcolor: alpha(theme.palette.primary.main, 0.12),
-                        color: theme.palette.primary.dark,
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.24)}`,
+                        bgcolor: alpha(primary.main, 0.12),
+                        color: primary.dark,
+                        border: `1px solid ${alpha(primary.main, 0.24)}`,
                       })}
                     />
                   </Stack>
@@ -141,20 +141,20 @@ export default function ReceiptHeaderCard({
               <Alert
                 severity="info"
                 variant="outlined"
-                sx={(theme) => ({
+                sx={({ palette: { primary, text } }) => ({
                   mt: 2.5,
                   maxWidth: { xs: "100%", md: 620 },
                   alignItems: "flex-start",
                   borderRadius: 3,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.22)}`,
-                  borderLeft: `6px solid ${theme.palette.primary.main}`,
-                  bgcolor: alpha(theme.palette.primary.light, 0.22),
-                  color: theme.palette.text.primary,
-                  boxShadow: `0 10px 24px ${alpha(theme.palette.primary.dark, 0.1)}`,
+                  border: `1px solid ${alpha(primary.main, 0.22)}`,
+                  borderLeft: `6px solid ${primary.main}`,
+                  bgcolor: alpha(primary.light, 0.22),
+                  color: text.primary,
+                  boxShadow: `0 10px 24px ${alpha(primary.dark, 0.1)}`,
                   "& .MuiAlert-message": { width: "100%" },
                   "& .MuiAlert-icon": {
                     mt: 0.25,
-                    color: theme.palette.primary.main,
+                    color: primary.main,
                   },
                 })}
               >
@@ -172,11 +172,12 @@ export default function ReceiptHeaderCard({
                       position and estimated wait time.
                     </Typography>
                     <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
-                      After entering your ticket number or scanning the QR code on the reference page, you can choose to
-                      step out and receive updates.
+                      After entering your ticket number or scanning the QR code on the reference
+                      page, you can choose to step out and receive updates.
                     </Typography>
                     <Typography component="li" variant="body2">
-                      When you are called, have your ticket number ready to show to reception or staff.
+                      When you are called, have your ticket number ready to show to reception or
+                      staff.
                     </Typography>
                   </Box>
                 </Stack>
@@ -271,11 +272,11 @@ export default function ReceiptHeaderCard({
         <Alert
           severity="info"
           variant="outlined"
-          sx={(theme) => ({
+          sx={({ palette: { primary } }) => ({
             borderRadius: 2,
             py: 1.5,
             borderColor: "primary.main",
-            bgcolor: alpha(theme.palette.primary.main, 0.08),
+            bgcolor: alpha(primary.main, 0.08),
             "& .MuiAlert-message": { width: "100%" },
             "& .MuiAlert-icon": { color: "primary.main" },
             color: "primary.main",

@@ -12,11 +12,6 @@ import {
     CardContent,
     CardActions,
     Typography,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
 } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -25,6 +20,7 @@ import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
+import AppointmentOptionsDialog from "../components/ReferencePageComponents/AppointmentOptionsDialog";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
 import { useCheckReferenceNumber } from "../hooks/useCheckReferenceNumber";
@@ -218,7 +214,6 @@ const ReferencePage = () => {
          };
     }, [scanning]);
 
-
     return (
     <>
         <Navbar />
@@ -318,94 +313,15 @@ const ReferencePage = () => {
             </Grid>
         </Container>
 
-        <Dialog
-            open={Boolean(appointmentReferenceNumber)}
+        <AppointmentOptionsDialog
+            appointmentReferenceNumber={appointmentReferenceNumber}
+            canCheckInAppointments={canCheckInAppointments}
+            isCheckingIn={isCheckingIn}
+            isCancelling={isCancelling}
             onClose={handleCloseAppointmentDialog}
-            fullWidth
-            maxWidth="md"
-            slotProps={{
-                paper: {
-                    sx: {
-                        borderRadius: 3,
-                        width: "min(92vw, 760px)",
-                        minHeight: 360,
-                    },
-                },
-            }}
-        >
-            <DialogTitle sx={{ px: 4, pt: 4, pb: 1, fontSize: "2.2rem", fontWeight: 700 }}>
-                Appointment options
-            </DialogTitle>
-            <DialogContent sx={{ px: 4, pb: 2 }}>
-                <DialogContentText sx={{ fontSize: "1.2rem", lineHeight: 1.5 }}>
-                    What would you like to do with appointment {appointmentReferenceNumber}?
-                </DialogContentText>
-                {!canCheckInAppointments && (
-                    <DialogContentText sx={{ mt: 2, fontSize: "1.1rem", lineHeight: 1.5 }}>
-                        Check-in is only available at Hounslow House.
-                    </DialogContentText>
-                )}
-            </DialogContent>
-            <DialogActions
-                sx={{
-                    px: 4,
-                    pb: 4,
-                    pt: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "stretch",
-                    gap: 1.5,
-                }}
-            >
-                <Box
-                    sx={{
-                        display: "grid",
-                        gridTemplateColumns: canCheckInAppointments
-                            ? { xs: "1fr", sm: "1fr 1fr" }
-                            : "1fr",
-                        gap: 1.5,
-                        width: "100%",
-                    }}
-                >
-                <Button
-                    color="error"
-                    onClick={handleCancelAppointment}
-                    disabled={isCheckingIn || isCancelling}
-                    size="large"
-                    variant="contained"
-                    sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
-                >
-                    Cancel appointment
-                </Button>
-                {canCheckInAppointments && (
-                    <Button
-                        variant="contained"
-                        onClick={handleCheckInAppointment}
-                        disabled={isCheckingIn || isCancelling}
-                        size="large"
-                        sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
-                    >
-                        Check in
-                    </Button>
-                )}
-                </Box>
-                <Button
-                    onClick={handleCloseAppointmentDialog}
-                    disabled={isCheckingIn || isCancelling}
-                    size="large"
-                    sx={{
-                        alignSelf: "center",
-                        minWidth: 180,
-                        minHeight: 48,
-                        px: 3,
-                        fontSize: "1rem",
-                        mt: 0.5,
-                    }}
-                >
-                    Go back
-                </Button>
-            </DialogActions>
-        </Dialog>
+            onCancelAppointment={handleCancelAppointment}
+            onCheckInAppointment={handleCheckInAppointment}
+        />
     </>
     );
 };
