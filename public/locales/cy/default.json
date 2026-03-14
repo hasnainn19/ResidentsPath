@@ -32,6 +32,20 @@
     "auth-last":"Cyfenw",
     "auth-sign":"Mewngofnodwch i'ch cyfrif neu crëwch un newydd i gael mynediad at apwyntiadau ac olrhain eich ymweliadau blaenorol.",
     "general-read":"DARLLEN",
-    "general-stop":"STOPIO"
+    "general-stop":"STOPIO",
+    "userdash-est":"Amser aros amcangyfrifedig yw:",
+    "userdash-if":"Os oes angen i chi adael yr adeilad, gallwn anfon diweddariadau atoch wrth i'ch tro agosáu.",
+    "userdash-im":"Rydw i'n camu allan",
+    "userdash-min":"munudau",
+    "userdash-need":"Angen camu allan?",
+    "userdash-people":"pobl o'ch blaen",
+    "userdash-please":"Noder",
+    "userdash-ret":"Rydw i wedi dychwelyd - stopiwch ddiweddariadau",
+    "userdash-stepout":"Rydych chi wedi camu allan. Rydym wedi hysbysu'r staff a byddwch yn derbyn diweddariadau am eich amser aros amcangyfrifedig.",
+    "userdash-there":"Mae yna",
+    "userdash-to":"i",
+    "userdash-wait":"Amcangyfrifir yr amseroedd aros a gallant amrywio. Gall achosion brys gael blaenoriaeth a'u gweld o'ch blaen.",
+    "userdash-we":"Rydym yn gwerthfawrogi eich amynedd a'ch dealltwriaeth.",
+    "userdash-you":"Rydych chi yn y ciw!"
 
 }

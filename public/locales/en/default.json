@@ -32,5 +32,19 @@
     "auth-last":"Last Name",
     "auth-sign":"Sign in to your account or create a new one to access appointments and track your past visits.",
     "general-read":"READ",
-    "general-stop":"STOP"
+    "general-stop":"STOP",
+    "userdash-est":"Estimated waiting time is:",
+    "userdash-if":"If you need to leave the building, we can send you updates as your turn approaches.",
+    "userdash-im":"I'm stepping out",
+    "userdash-min":"minutes",
+    "userdash-need":"Need to step out?",
+    "userdash-people":"people ahead of you",
+    "userdash-please":"Please note",
+    "userdash-ret":"I've returned - stop updates",
+    "userdash-stepout":"You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.",
+    "userdash-there":"There are",
+    "userdash-to":"to",
+    "userdash-wait":"Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.",
+    "userdash-we":"We appreciate your patience and understanding.",
+    "userdash-you":"You are in the queue!"
 }

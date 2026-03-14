@@ -10,6 +10,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import ConfirmChangeModal from "../components/StaffComponents/ConfirmChangeModal";
 import CurrentQueueItem from "../components/StaffComponents/CurrentQueueItem";
+import { useTranslation } from 'react-i18next';
 
 type CaseStatus = "Priority" | "Standard";
 
@@ -70,6 +71,7 @@ const StaffQueuePage = () => {
   const selectedService = searchParams.get("service")?.trim() || "";
   const isValidDepartment = !!selectedService && validDepartments.includes(selectedService);
   const showPosition = isValidDepartment;
+  const {  t: translate } = useTranslation();
   const [search, setSearch] = useState("");
   const [cases, setCases] = useState<CaseItem[]>(mockCases);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -77,6 +79,7 @@ const StaffQueuePage = () => {
     caseId: string;
     position: number;
   } | null>(null);
+
 
   const serviceCases = useMemo(() => {
     return cases.filter(

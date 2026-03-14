@@ -32,5 +32,19 @@
     "auth-last":"Nazwisko",
     "auth-sign":"Zaloguj się na swoje konto lub utwórz nowe, aby uzyskać dostęp do harmonogramu wizyt i śledzić historię wizyt.",
     "general-read":"CZYTAĆ",
-    "general-stop":"ZATRZYMYWAĆ SIĘ"
+    "general-stop":"ZATRZYMYWAĆ SIĘ",
+    "userdash-est":"Szacowany czas oczekiwania wynosi:",
+    "userdash-if":"Jeśli musisz opuścić budynek, możemy wysłać Ci powiadomienia, gdy zbliży się Twoja kolej.",
+    "userdash-im":"Wychodzę",
+    "userdash-min":"protokół",
+    "userdash-need":"Musisz wyjść?",
+    "userdash-people":"ludzie przed tobą",
+    "userdash-please":"Proszę zwrócić uwagę",
+    "userdash-ret":"Wróciłem - zatrzymaj aktualizacje",
+    "userdash-stepout":"Wyszedłeś. Powiadomiliśmy personel i otrzymasz informacje o szacowanym czasie oczekiwania.",
+    "userdash-there":"Tam są",
+    "userdash-to":"Do",
+    "userdash-wait":"Czas oczekiwania jest szacowany i może się różnić. Pilne przypadki mogą zostać potraktowane priorytetowo i rozpatrzone przed Tobą.",
+    "userdash-we":"Dziękujemy za cierpliwość i zrozumienie.",
+    "userdash-you":"Jesteś w kolejce!"
 }
