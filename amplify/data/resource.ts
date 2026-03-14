@@ -3,7 +3,7 @@ import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from "../functions/postConfirmation/resource";
-import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
+import { onTicketCompleted } from "../functions/onTicketCompleted/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
@@ -236,7 +236,7 @@ const schema = a
       steppedOutCount: a.integer().required(),
       availableStaff: a.integer().required(),
     }),
-    
+
     getServiceStats: a
       .query()
       .returns(a.ref("ServiceStat").array())
@@ -418,7 +418,7 @@ const schema = a
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
-    allow.resource(calculateDepartmentQueue),
+    allow.resource(onTicketCompleted),
     allow.resource(getTicketInfo),
     allow.resource(notifyResident),
     allow.resource(cleanupEnquiryState),

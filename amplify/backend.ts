@@ -16,7 +16,7 @@ import {
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/resource";
-import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
+import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
 import {
@@ -36,7 +36,7 @@ const backend = defineBackend({
   submitEnquiry,
   getTicketInfo,
   getDepartmentQueueStatus,
-  calculateDepartmentQueue,
+  onTicketCompleted,
   notifyResident,
   cleanupEnquiryState,
   getAvailableAppointmentTimes,
@@ -179,10 +179,10 @@ backend.notifyResident.addEnvironment(
 backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
 
 /**
- * Attach the Ticket stream to the calculateDepartmentQueue Lambda.
+ * Attach the Ticket stream to the onTicketCompleted Lambda.
  * The filter tells AWS to only invoke the Lambda for MODIFY events
  */
-backend.calculateDepartmentQueue.resources.lambda.addEventSource(
+backend.onTicketCompleted.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
     startingPosition: StartingPosition.LATEST,
     batchSize: 10,
