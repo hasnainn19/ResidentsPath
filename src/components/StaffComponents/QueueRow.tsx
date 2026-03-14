@@ -12,6 +12,7 @@ interface QueueRowProps {
   departmentName: string;
   waitingCount: number;
   longestWait: number;
+  averageWait: number;
   priorityCaseCount: number;
   standardCaseCount: number;
   steppedOutCount: number;
@@ -22,6 +23,7 @@ const QueueRow = ({
   departmentName,
   waitingCount,
   longestWait,
+  averageWait,
   priorityCaseCount,
   standardCaseCount,
   steppedOutCount,
@@ -43,7 +45,7 @@ const QueueRow = ({
       <TableCell>{waitingCount}</TableCell>
 
       <TableCell>
-        {longestWait == null ? "--" : `${longestWait} mins`}
+        {longestWait == null || longestWait < 0 ? "--" : `${longestWait} mins`}
       </TableCell>
 
       <TableCell>
@@ -63,12 +65,15 @@ const QueueRow = ({
             sx={{
               fontWeight: "bold",
               bgcolor: "warning.light",
-              color:"text",
+              color: "text",
             }}
           />
         </Box>
       </TableCell>
 
+      <TableCell>
+        {averageWait == null || averageWait < 0 ? "--" : `${averageWait} mins`}
+      </TableCell>
       <TableCell>{steppedOutCount}</TableCell>
 
       <TableCell>{availableStaff}</TableCell>
