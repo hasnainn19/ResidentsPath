@@ -1,5 +1,7 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import type { DynamoDBStreamHandler } from "aws-lambda";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 /**
  * Lambda function to calculate and update the queue for a department.
@@ -122,16 +124,8 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
   }
 }
 
-
-export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
-  async (event) => {
-
-    const { departmentId } = event.arguments;
-
-    if (!departmentId) {
-      throw new Error("departmentId is required");
-    }
-
+async function recalculateDepartmentQueue(departmentId:string) {
+  
     let tickets = await getTodayTickets(departmentId);
 
     // Sort based on position in the queue 
@@ -168,4 +162,44 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
     await updateTickets(waitingTickets, estWaitingTime);
 
     return true;
+}
+
+export const handler: DynamoDBStreamHandler = async (event) => {
+  // We may receive a batch of updates, but we only need to recalculate once per department
+  // Use a Set to track which departments need recalculation
+  const departmentIds = new Set<string>();
+
+  for (const record of event.Records) {
+    if (record.eventName !== "MODIFY") {
+      continue;
+    }
+    if (!record.dynamodb?.NewImage || !record.dynamodb?.OldImage) {
+      continue;
+    }
+
+    const newImage = unmarshall(record.dynamodb.NewImage as any);
+    const oldImage = unmarshall(record.dynamodb.OldImage as any);
+
+    // Only trigger if the status has changed, as this is what affects the queue
+    if (newImage.status === oldImage.status) {
+      continue;
+    }
+
+    const departmentId = newImage.departmentId;
+    if (!departmentId) {
+      console.error("calculateDepartmentQueue: departmentId is missing in record", record);
+      continue;
+    }
+
+    departmentIds.add(departmentId);
+  }
+
+  for (const departmentId of departmentIds) {
+    try {
+      await recalculateDepartmentQueue(departmentId);
+    } 
+    catch (error) {
+      console.error(`recalculateDepartmentQueue: failed for department ${departmentId}`, error);
+    }
+  }
 };

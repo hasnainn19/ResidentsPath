@@ -48,6 +48,15 @@ export default function UserDashboard() {
 
     useEffect(() => {
         fetchTicketQueueInfo();
+
+        // Poll every 30 seconds for updates
+        // Could use subscriptions for real-time updates, but it may show a lot of flickering changes
+        // in the UI as the tickets are all updated.
+        const interval = setInterval(() => {
+            fetchTicketQueueInfo();
+        }, 30000); // refresh every 30 seconds
+
+        return () => clearInterval(interval); // cleanup on unmount
     }, []);
 
     const client = generateClient<Schema>({ authMode: "userPool" });
@@ -57,7 +66,6 @@ export default function UserDashboard() {
             if (!caseId) {
                 return;
             }
-            // get department id of ticket from case id
             const { data: ticketInfo, errors: ticketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
 
             if (ticketErrors && ticketErrors.length > 0) {
@@ -67,39 +75,13 @@ export default function UserDashboard() {
             if (!ticketInfo) {
                 return;
             }
-            const ticketDepartmentId = ticketInfo?.departmentId;
 
-            if (!ticketDepartmentId) {
-                return;
-            }
-            // calculate department wait times
-            const { data: calcResult, errors: calcErrors} = await client.mutations.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
-            
-            if (calcErrors && calcErrors.length > 0) {
-                setErrors(calcErrors[0].message);
-                return;
-            }
+            setQueuePosition(ticketInfo.position);
+            setWaitTimeLower(ticketInfo.estimatedWaitTimeLower);
+            setWaitTimeUpper(ticketInfo.estimatedWaitTimeUpper);
 
-            if (!calcResult) {
-                return;
-            }
-            // fetch new ticket information to display
-            const { data: newTicketInfo, errors: newTicketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
-
-            if (newTicketErrors && newTicketErrors.length > 0) {
-                setErrors(newTicketErrors[0].message);
-                return;
-            }
-
-            if (!newTicketInfo) {
-                return;
-            }
-
-            setQueuePosition(newTicketInfo?.position ?? 0);
-            setWaitTimeLower(newTicketInfo?.estimatedWaitTimeLower ?? 0);
-            setWaitTimeUpper(newTicketInfo?.estimatedWaitTimeUpper ?? 0);
-
-        } catch (err) {
+        } 
+        catch (err) {
             setErrors(`Failed to fetch tickets: ${err}`);
         }
     }

@@ -210,6 +210,9 @@ const schema = a
 		.authorization((allow) => [
 			allow.groups(["Staff"]), // Only staff can access appointments directly
 		]),
+
+    // Custom queries and mutations (lambdas defined in amplify/functions)
+
     getDashboardStats: a
       .query()
       .returns(
@@ -222,6 +225,7 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
+
     ServiceStat: a.customType({
       departmentName: a.string().required(),
       waitingCount: a.integer().required(),
@@ -232,6 +236,7 @@ const schema = a
       steppedOutCount: a.integer().required(),
       availableStaff: a.integer().required(),
     }),
+    
     getServiceStats: a
       .query()
       .returns(a.ref("ServiceStat").array())
@@ -245,31 +250,17 @@ const schema = a
       })
       .returns(
         a.customType({
-          departmentId: a.id(),
-          position: a.integer(),
-          estimatedWaitTimeLower: a.integer(),
-          estimatedWaitTimeUpper: a.integer(),
+          departmentId: a.id().required(),
+          position: a.integer().required(),
+          estimatedWaitTimeLower: a.integer().required(),
+          estimatedWaitTimeUpper: a.integer().required(),
         }),
       )
       .authorization((allow) => [
-        allow.guest(), 
+        allow.guest(),
         allow.authenticated(),
-        ]) 
+        ])
       .handler(a.handler.function(getTicketInfo)),
-
-    calculateDepartmentQueue: a
-      .mutation()
-      .arguments({
-        departmentId: a.string().required(),
-      })
-      .returns(a.boolean())
-      .authorization((allow) => [
-        allow.guest(), 
-        allow.authenticated(),
-        ])       
-        .handler(a.handler.function(calculateDepartmentQueue)),
-
-	// Custom queries and mutations (lambdas defined in amplify/functions)
 
   getDepartmentQueueStatus: a
     .query()
@@ -423,7 +414,7 @@ const schema = a
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
-  allow.resource(getDepartmentQueueStatus).to(["query"]),
+    allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),

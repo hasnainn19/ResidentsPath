@@ -178,6 +178,23 @@ backend.notifyResident.addEnvironment(
 );
 backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
 
+/**
+ * Attach the Ticket stream to the calculateDepartmentQueue Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY events
+ */
+backend.calculateDepartmentQueue.resources.lambda.addEventSource(
+  new DynamoEventSource(ticketTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+      }),
+    ],
+  })
+);
+
 
 /**
  * Attach the Ticket, Case, and Appointment streams to the Lambda.
