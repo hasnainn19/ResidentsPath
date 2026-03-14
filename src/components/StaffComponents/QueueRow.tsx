@@ -7,9 +7,11 @@ import {
   Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { DEPARTMENTS } from "../../../shared/formSchema";
 
 interface QueueRowProps {
   departmentName: string;
+  departmentId: string;
   waitingCount: number;
   longestWait: number;
   averageWait: number;
@@ -21,6 +23,7 @@ interface QueueRowProps {
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
   departmentName,
+  departmentId,
   waitingCount,
   longestWait,
   averageWait,
@@ -39,7 +42,12 @@ const QueueRow = ({
   return (
     <TableRow hover>
       <TableCell>
-        <Typography fontWeight={500}>{departmentName}</Typography>
+        <Typography fontWeight={500}>
+          {
+            DEPARTMENTS.find((department) => department.id == departmentId)
+              ?.label
+          }
+        </Typography>
       </TableCell>
 
       <TableCell>{waitingCount}</TableCell>
