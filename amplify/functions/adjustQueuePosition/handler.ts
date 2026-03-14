@@ -36,7 +36,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
     throw new Error(`Ticket ${ticketId} is not in WAITING status`);
   }
 
-  const { departmentId } = ticket;
+  const departmentId = ticket.departmentId;
 
   // Fetch today's tickets for the department
   const startOfDay = new Date();
