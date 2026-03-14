@@ -48,11 +48,20 @@ interface CurrentQueueItemProps {
   showPosition: boolean;
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
-  const { showPosition, caseItem, totalPositions, handleSelectPosition, handleMarkSeen } =
-    props;
+  const {
+    showPosition,
+    caseItem,
+    totalPositions,
+    handleSelectPosition,
+    handleMarkSeen,
+  } = props;
   const [isFlagged, setIsFlagged] = useState(caseItem.isFlagged);
-  const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
-  const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
+  const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(
+    caseItem.status,
+  );
+  const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(
+    null,
+  );
   const [prioritySaving, setPrioritySaving] = useState(false);
   const [flagSaving, setFlagSaving] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -78,14 +87,6 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 color={statusColorMap[localStatus]}
                 size="small"
               />
-              {isFlagged && (
-                <Chip
-                  label="Safeguarding"
-                  color="warning"
-                  size="small"
-                  icon={<FlagIcon fontSize="small" />}
-                />
-              )}
               <Typography variant="caption" color="text.secondary">
                 #{caseItem.ticketNumber}
               </Typography>
@@ -122,7 +123,10 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Tooltip title="Edit priority">
-                <IconButton size="small" onClick={(e) => setPriorityAnchor(e.currentTarget)}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => setPriorityAnchor(e.currentTarget)}
+                >
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -131,42 +135,64 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 open={Boolean(priorityAnchor)}
                 onClose={() => setPriorityAnchor(null)}
               >
-                <MenuItem disabled={prioritySaving} onClick={async () => {
-                  const newStatus = localStatus === "Standard" ? "Priority" : "Standard";
-                  setPriorityAnchor(null);
-                  setPrioritySaving(true);
-                  try {
-                    await client.mutations.setCasePriority({
-                      caseId: caseItem.caseId,
-                      priority: newStatus === "Priority",
-                    });
-                    setLocalStatus(newStatus);
-                  } catch (e) {
-                    console.error("CurrentQueueItem: setCasePriority failed", e);
-                  } finally {
-                    setPrioritySaving(false);
-                  }
-                }}>
-                  {localStatus === "Standard" ? "Set to Priority" : "Set to Standard"}
+                <MenuItem
+                  disabled={prioritySaving}
+                  onClick={async () => {
+                    const newStatus =
+                      localStatus === "Standard" ? "Priority" : "Standard";
+                    setPriorityAnchor(null);
+                    setPrioritySaving(true);
+                    try {
+                      await client.mutations.setCasePriority({
+                        caseId: caseItem.caseId,
+                        priority: newStatus === "Priority",
+                      });
+                      setLocalStatus(newStatus);
+                    } catch (e) {
+                      console.error(
+                        "CurrentQueueItem: setCasePriority failed",
+                        e,
+                      );
+                    } finally {
+                      setPrioritySaving(false);
+                    }
+                  }}
+                >
+                  {localStatus === "Standard"
+                    ? "Set to Priority"
+                    : "Set to Standard"}
                 </MenuItem>
               </Menu>
-              <Tooltip title={isFlagged ? "Clear safeguarding flag" : "Flag for safeguarding"}>
+              <Tooltip
+                title={
+                  isFlagged
+                    ? "Clear safeguarding flag"
+                    : "Flag for safeguarding"
+                }
+              >
                 <span>
-                  <IconButton size="small" disabled={flagSaving} onClick={async () => {
-                    const newFlagged = !isFlagged;
-                    setFlagSaving(true);
-                    try {
-                      await client.mutations.flagCaseSafeguarding({
-                        caseId: caseItem.caseId,
-                        flagged: newFlagged,
-                      });
-                      setIsFlagged(newFlagged);
-                    } catch (e) {
-                      console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
-                    } finally {
-                      setFlagSaving(false);
-                    }
-                  }}>
+                  <IconButton
+                    size="small"
+                    disabled={flagSaving}
+                    onClick={async () => {
+                      const newFlagged = !isFlagged;
+                      setFlagSaving(true);
+                      try {
+                        await client.mutations.flagCaseSafeguarding({
+                          caseId: caseItem.caseId,
+                          flagged: newFlagged,
+                        });
+                        setIsFlagged(newFlagged);
+                      } catch (e) {
+                        console.error(
+                          "CurrentQueueItem: flagCaseSafeguarding failed",
+                          e,
+                        );
+                      } finally {
+                        setFlagSaving(false);
+                      }
+                    }}
+                  >
                     <FlagIcon color={isFlagged ? "error" : "disabled"} />
                   </IconButton>
                 </span>
@@ -239,10 +265,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={() => setConfirmNotesOpen(true)}
-          >
+          <Button variant="contained" onClick={() => setConfirmNotesOpen(true)}>
             Save
           </Button>
         </DialogActions>
