@@ -123,7 +123,11 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const handleCloseConfirmNotes = () => setConfirmNotesOpen(false);
 
   const handleSaveNotes = async () => {
-    await client.models.Ticket.update({ id: caseItem.id, notes });
+    try {
+      await client.models.Ticket.update({ id: caseItem.id, notes });
+    } catch (error) {
+      console.error(`Failed to save note for case:${caseItem.caseId}`);
+    }
     setConfirmNotesOpen(false);
     setNotesOpen(false);
   };
@@ -183,10 +187,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Tooltip title="Edit priority">
-                <IconButton
-                  size="small"
-                  onClick={handleOpenPriorityMenu}
-                >
+                <IconButton size="small" onClick={handleOpenPriorityMenu}>
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
