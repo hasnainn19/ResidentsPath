@@ -79,11 +79,10 @@ const StaffNavbar = () => {
             url="/staff/queues"
           />
           <StaffNavItem
-            icon={<GroupsIcon />}
-            label="Current Staff"
+            icon={<WorkIcon />}
+            label="Case Management"
             url="/staff"
           />
-          <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
           <Accordion
