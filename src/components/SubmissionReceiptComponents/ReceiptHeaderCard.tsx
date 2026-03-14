@@ -9,7 +9,6 @@ type ReceiptHeaderCardProps = {
   caseReferenceNumber?: string;
   appointmentReferenceNumber?: string;
   ticketNumber?: string;
-  appointmentTime?: string;
   onCopyCaseReference: () => void;
   onCopyAppointmentReference: () => void;
   onPrint: () => void;
@@ -23,7 +22,6 @@ export default function ReceiptHeaderCard({
   caseReferenceNumber,
   appointmentReferenceNumber,
   ticketNumber,
-  appointmentTime,
   onCopyCaseReference,
   onCopyAppointmentReference,
   onPrint,
@@ -227,14 +225,14 @@ export default function ReceiptHeaderCard({
             ) : null}
 
             {/* Appointment info */}
-            {isAppointment && appointmentTime ? (
+            {isAppointment && appointmentReferenceNumber ? (
               <>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
-                  Appointment time
+                  Appointment reference number
                 </Typography>
 
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, overflowWrap: "anywhere" }}>
-                  {appointmentTime}
+                  {appointmentReferenceNumber}
                 </Typography>
               </>
             ) : null}

@@ -349,7 +349,6 @@ export default function SubmissionReceipt() {
             caseReferenceNumber={receipt?.referenceNumber}
             appointmentReferenceNumber={receipt?.bookingReferenceNumber}
             ticketNumber={receipt?.ticketNumber}
-            appointmentTime={receipt?.appointmentTime}
             onCopyCaseReference={() => copyValue("Case reference number", receipt?.referenceNumber)}
             onCopyAppointmentReference={() =>
               copyValue("Appointment reference number", receipt?.bookingReferenceNumber)
