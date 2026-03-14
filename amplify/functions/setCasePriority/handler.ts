@@ -14,14 +14,24 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 
 const client = await getAmplifyClient();
 
-export const handler: Schema["setCasePriority"]["functionHandler"] = async (event) => {
+export const handler: Schema["setCasePriority"]["functionHandler"] = async (
+  event,
+) => {
   const { caseId, priority } = event.arguments;
 
   if (!caseId || priority == null) {
-    throw new Error("caseId and priority are required");
+    console.error("caseId and priority are required");
+    return false;
   }
 
-  await client.models.Case.update({ id: caseId, priority });
+  try {
+    await client.models.Case.update({ id: caseId, priority });
+  } catch (error) {
+    console.error(
+      `Failed to update the priority level of case:${caseId} to ${priority}`,
+    );
+    return false;
+  }
 
   return true;
 };

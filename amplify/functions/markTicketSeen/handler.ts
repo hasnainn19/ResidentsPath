@@ -33,12 +33,16 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
 
   const completedPosition = ticket.position;
 
-  await client.models.Ticket.update({
-    id: ticketId,
-    status: "COMPLETED",
-    position: -1,
-    completedAt: new Date().toISOString(),
-  });
+  try {
+    await client.models.Ticket.update({
+      id: ticketId,
+      status: "COMPLETED",
+      position: -1,
+      completedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error(`Failed to update ticket:${ticketId}.`);
+  }
 
   // Fetch today's waiting tickets for the department
   const startOfDay = new Date();
@@ -62,16 +66,22 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
   );
 
   // Shift down all tickets that were below the completed ticket
-  await Promise.all(
-    waitingTickets
-      .filter((t) => (t.position ?? 0) > completedPosition)
-      .map((t) =>
-        client.models.Ticket.update({
-          id: t.id,
-          position: (t.position ?? 0) - 1,
-        }),
-      ),
-  );
+  try {
+    await Promise.all(
+      waitingTickets
+        .filter((t) => (t.position ?? 0) > completedPosition)
+        .map((t) =>
+          client.models.Ticket.update({
+            id: t.id,
+            position: (t.position ?? 0) - 1,
+          }),
+        ),
+    );
+  } catch (error) {
+    console.error(
+      `Failed to reposition tickets for department ${ticket.departmentId}`,
+    );
+  }
 
   // Recalculate wait times using the shared calculateDepartmentQueue logic
   await client.mutations.calculateDepartmentQueue({

@@ -14,14 +14,20 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 
 const client = await getAmplifyClient();
 
-export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] = async (event) => {
-  const { caseId, flagged } = event.arguments;
+export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] =
+  async (event) => {
+    const { caseId, flagged } = event.arguments;
 
-  if (!caseId || flagged == null) {
-    throw new Error("caseId and flagged are required");
-  }
+    if (!caseId || flagged == null) {
+      console.error("caseId and flagged are required");
+    }
 
-  await client.models.Case.update({ id: caseId, flag: flagged });
+    try {
+      await client.models.Case.update({ id: caseId, flag: flagged });
+    } catch (error) {
+      console.error(`Could not apply safeguarding flag for case:${caseId}`);
+      return false;
+    }
 
-  return true;
-};
+    return true;
+  };

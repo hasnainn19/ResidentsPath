@@ -52,34 +52,39 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
         ge: startOfDay.toISOString(),
         le: endOfDay.toISOString(),
       },
+      status: { eq: "WAITING" },
     },
   });
 
-  // Only reorder tickets that are still waiting
-  const waitingTickets = (allTickets ?? [])
-    .filter((t) => t.status === "WAITING")
-    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  // Reorder tickets
+  const orderedTickets = (allTickets ?? []).sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0),
+  );
 
-  if (waitingTickets.length === 0) {
+  if (orderedTickets.length === 0) {
     throw new Error(
       `No waiting tickets found for department ${departmentId} today`,
     );
   }
 
   // Remove the target ticket and re-insert at the requested 1-based position
-  const others = waitingTickets.filter((t) => t.id !== ticketId);
-  const clamped = Math.min(Math.max(1, newPosition), waitingTickets.length);
+  const others = orderedTickets.filter((t) => t.id !== ticketId);
+  const clamped = Math.min(Math.max(1, newPosition), orderedTickets.length);
   others.splice(clamped - 1, 0, ticket);
 
   // Write updated positions for every waiting ticket
-  await Promise.all(
-    others.map((ticket, i) =>
-      client.models.Ticket.update({
-        id: ticket.id,
-        position: i + 1,
-      }),
-    ),
-  );
+  try {
+    await Promise.all(
+      others.map((ticket, i) =>
+        client.models.Ticket.update({
+          id: ticket.id,
+          position: i + 1,
+        }),
+      ),
+    );
+  } catch (error) {
+    console.error(`Failed to adjust positions for ${departmentId}`);
+  }
 
   // Recalculate wait times using calculateDepartmentQueue
   await client.mutations.calculateDepartmentQueue({ departmentId });
