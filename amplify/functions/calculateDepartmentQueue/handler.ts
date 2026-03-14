@@ -132,13 +132,11 @@ export const handler: Schema["calculateDepartmentQueue"]["functionHandler"] =
       throw new Error("departmentId is required");
     }
 
-   let tickets = await getTodayTickets(departmentId);
-    // Sort tickets by time created
-    tickets.sort((a,b) =>
-      new Date(a.createdAt ?? 0).getTime() -
-      new Date(b.createdAt ?? 0).getTime()
-    );
+    let tickets = await getTodayTickets(departmentId);
 
+    // Sort based on position in the queue 
+    tickets.sort((a, b) => a.position - b.position)
+    
     // Waiting tickets
     const waitingTickets = tickets.filter(
       t => t.status === "WAITING"
