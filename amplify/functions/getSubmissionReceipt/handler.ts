@@ -1,76 +1,27 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { DepartmentLabelById } from "../../../shared/formSchema";
+import {
+  createFoundErrorResponse,
+  getCaseAccessErrorMessage,
+  loadAccessibleCaseByReference,
+} from "../utils/caseAccess";
 
 const client = await getAmplifyClient();
+const RECEIPT_ACCESS_MESSAGES = {
+  notFound: "We could not find a receipt for that case reference number.",
+  accessDenied:
+    "We could not find a receipt for that case reference number. If this receipt is linked to your account, please log in and try again.",
+  loadFailed: "We could not load that receipt right now.",
+} as const;
 
-function errorResponse(errorMessage: string) {
-  return {
-    found: false as const,
-    errorMessage,
-  };
-}
-
-async function getCase(referenceNumber: string) {
-  const caseLookup = await client.models.Case.listCaseByReferenceNumber({
-    referenceNumber,
-  });
-
-  if (caseLookup.errors?.length) {
-    console.error("getSubmissionReceipt: case lookup failed", caseLookup.errors);
-    return errorResponse("We could not load that receipt right now.");
-  }
-
-  const caseRecord = caseLookup.data?.[0];
-
-  if (!caseRecord?.id || !caseRecord.userId) {
-    return errorResponse("We could not find a receipt for that case reference.");
-  }
-
-  return {
-    found: true as const,
-    caseRecord,
-  };
-}
-
-async function getUser(userId: string) {
-  const userLookup = await client.models.User.get({
-    id: userId,
-  });
-
-  if (userLookup.errors?.length) {
-    console.error("getSubmissionReceipt: user lookup failed", userLookup.errors);
-    return errorResponse("We could not load that receipt right now.");
-  }
-
-  const userRecord = userLookup.data;
-
-  if (!userRecord?.id) {
-    return errorResponse("We could not find a receipt for that case reference.");
-  }
-
-  return {
-    found: true as const,
-    userRecord,
-  };
-}
-
-function validateRegisteredUserAccess(
-  sub: string | null,
-  userRecord: { id: string; isRegistered?: boolean | null },
-) {
-  // If the user is registered, require that the user is logged in and is the owner of the receipt
-  if (!userRecord.isRegistered) {
-    return null;
-  }
-
-  if (!sub || sub !== userRecord.id) {
-    return errorResponse(
-      "We could not find a receipt for that case reference. If this receipt is linked to your account, please log in and try again.",
-    );
-  }
-
-  return null;
+// Sorts items by createdAt descending and returns the latest item
+function getLatestByCreatedAt<T extends { createdAt?: string | null }>(items: T[]) {
+  return [...items].sort((a, b) => {
+    const aTime = Date.parse(a.createdAt ?? "");
+    const bTime = Date.parse(b.createdAt ?? "");
+    return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
+  })[0];
 }
 
 async function getReceiptDetails(caseId: string) {
@@ -88,50 +39,46 @@ async function getReceiptDetails(caseId: string) {
       ticketErrors: ticketLookup.errors,
       appointmentErrors: appointmentLookup.errors,
     });
-    return errorResponse("We could not load that receipt right now.");
+    return createFoundErrorResponse("We could not load that receipt right now.");
   }
 
-  const ticket = ticketLookup.data?.[0];
-  const appointment = appointmentLookup.data?.[0];
+  const tickets = (ticketLookup.data ?? []).filter(Boolean);
+  const appointments = (appointmentLookup.data ?? []).filter(Boolean);
 
-  if (!ticket && !appointment) {
-    return errorResponse("We could not find receipt details for that case reference.");
+  if (!tickets.length && !appointments.length) {
+    return createFoundErrorResponse(
+      "We could not find receipt details for that case reference number.",
+    );
   }
+
+  // If there are multiple tickets or appointments (due to follow-ups), show the most recent one
+  const latestTicket = getLatestByCreatedAt(tickets);
+  const latestAppointment = getLatestByCreatedAt(appointments);
 
   return {
     found: true as const,
-    ticket,
-    appointment,
+    ticket: latestTicket,
+    appointment: latestAppointment,
   };
 }
 
 export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async (event) => {
   const referenceNumber = event.arguments.referenceNumber?.trim().toUpperCase() ?? "";
 
-  const caseLookup = await getCase(referenceNumber);
+  const caseLookup = await loadAccessibleCaseByReference(
+    client,
+    event.identity,
+    referenceNumber,
+    "getSubmissionReceipt",
+  );
 
-  if (!caseLookup.found) {
-    return caseLookup;
+  if ("reason" in caseLookup) {
+    return createFoundErrorResponse(
+      getCaseAccessErrorMessage(caseLookup.reason, RECEIPT_ACCESS_MESSAGES),
+    );
   }
 
   const { caseRecord } = caseLookup;
-  const userLookup = await getUser(caseRecord.userId);
-
-  if (!userLookup.found) {
-    return userLookup;
-  }
-
-  const { userRecord } = userLookup;
-
-  const sub =
-    event.identity && typeof event.identity === "object" && "sub" in event.identity
-      ? (event.identity.sub as string)
-      : null;
-  const accessError = validateRegisteredUserAccess(sub, userRecord);
-
-  if (accessError) {
-    return accessError;
-  }
 
   const receiptDetails = await getReceiptDetails(caseRecord.id);
 
@@ -140,18 +87,31 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
   }
 
   const { appointment, ticket } = receiptDetails;
+  const ticketCreatedAtMs = Date.parse(ticket?.createdAt ?? "");
+  const appointmentCreatedAtMs = Date.parse(appointment?.createdAt ?? "");
+  const useAppointment =
+    appointment &&
+    (!ticket ||
+      (Number.isFinite(appointmentCreatedAtMs) ? appointmentCreatedAtMs : 0) >=
+        (Number.isFinite(ticketCreatedAtMs) ? ticketCreatedAtMs : 0));
 
   return {
     found: true,
-    createdAt: caseRecord.createdAt ?? undefined,
+    createdAt:
+      (useAppointment ? appointment?.createdAt : ticket?.createdAt) ??
+      caseRecord.createdAt ??
+      undefined,
     referenceNumber: caseRecord.referenceNumber ?? referenceNumber,
-    bookingReferenceNumber: appointment?.bookingReferenceNumber ?? undefined,
-    receiptType: appointment ? "APPOINTMENT" : "QUEUE",
-    ticketNumber: ticket?.ticketNumber ?? undefined,
-    appointmentDateIso: appointment?.date ?? undefined,
-    appointmentTime: appointment?.time ?? undefined,
+    bookingReferenceNumber: useAppointment
+      ? (appointment?.bookingReferenceNumber ?? undefined)
+      : undefined,
+    receiptType: useAppointment ? "APPOINTMENT" : "QUEUE",
+    ticketNumber: useAppointment ? undefined : (ticket?.ticketNumber ?? undefined),
+    appointmentDateIso: useAppointment ? (appointment?.date ?? undefined) : undefined,
+    appointmentTime: useAppointment ? (appointment?.time ?? undefined) : undefined,
     departmentName: caseRecord.departmentId
-      ? DepartmentLabelById[caseRecord.departmentId as keyof typeof DepartmentLabelById] ?? undefined
+      ? (DepartmentLabelById[caseRecord.departmentId as keyof typeof DepartmentLabelById] ??
+        undefined)
       : undefined,
   };
 };

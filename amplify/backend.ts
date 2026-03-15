@@ -5,6 +5,8 @@ import { postConfirmation } from "./functions/postConfirmation/resource";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Aws } from "aws-cdk-lib";
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
+import { submitCaseFollowUp } from "./functions/submitCaseFollowUp/resource";
+import { getCaseFollowUp } from "./functions/getCaseFollowUp/resource";
 import { getDashboardStats } from "./functions/getDashboardStats/resource";
 import { getServiceStats } from "./functions/getServiceStats/resource";
 import {
@@ -34,6 +36,8 @@ const backend = defineBackend({
   data,
   postConfirmation,
   submitEnquiry,
+  submitCaseFollowUp,
+  getCaseFollowUp,
   getTicketInfo,
   getDepartmentQueueStatus,
   calculateDepartmentQueue,
@@ -79,6 +83,7 @@ const enquiriesStateTable = new Table(backend.stack, "EnquiriesStateTable", {
   timeToLiveAttribute: "expiresAt",
 });
 enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
+enquiriesStateTable.grantReadWriteData(backend.submitCaseFollowUp.resources.lambda);
 enquiriesStateTable.grantReadData(
   backend.getAvailableAppointmentTimes.resources.lambda,
 );
@@ -88,6 +93,11 @@ enquiriesStateTable.grantReadData(
 enquiriesStateTable.grantReadWriteData(backend.cleanupEnquiryState.resources.lambda);
 
 backend.submitEnquiry.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
+backend.submitCaseFollowUp.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
 );

@@ -57,7 +57,7 @@ export default function ReviewAndSubmit() {
       }
 
       if (!result.referenceNumber) {
-        setSubmitError("Submission succeeded but no case reference was returned.");
+        setSubmitError("Submission succeeded but no case reference number was returned.");
         return;
       }
 

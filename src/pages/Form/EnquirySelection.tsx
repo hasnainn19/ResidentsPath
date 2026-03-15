@@ -35,11 +35,10 @@ import {
   Typography,
 } from "@mui/material";
 
-import MicIcon from "@mui/icons-material/Mic";
-
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
+import LongTextSection from "../../components/FormPageComponents/LongTextSection";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
@@ -192,7 +191,6 @@ export default function EnquirySelection() {
     py: { xs: 0.25, sm: 0 },
   } as const;
 
-  
   return (
     <FormStepLayout
       step={1}
@@ -667,64 +665,45 @@ export default function EnquirySelection() {
                   </FormControl>
 
                   {formData.urgentReason === "OTHER" && (
-                  <Stack spacing={1} sx={{ mt: 2 }}>
-                    <Typography component="label" htmlFor="urgent-reason-other" fontWeight={700}>
-                      Briefly describe why you need support sooner today
-                    </Typography>
+                    <Stack spacing={1} sx={{ mt: 2 }}>
+                      <Typography component="label" htmlFor="urgent-reason-other" fontWeight={700}>
+                        Briefly describe why you need support sooner today
+                      </Typography>
 
-                    <TextField
-                      id="urgent-reason-other"
-                      fullWidth
-                      required
-                      multiline
-                      minRows={3}
-                      placeholder="Tell us why this is urgent"
-                      value={formData.urgentReasonOtherText}
-                      onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
-                      slotProps={{
-                        htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen },
-                      }}
-                      helperText={countChars("urgentReasonOtherText", formData.urgentReasonOtherText)}
-                    />
-                  </Stack>
-                )}
+                      <TextField
+                        id="urgent-reason-other"
+                        fullWidth
+                        required
+                        multiline
+                        minRows={3}
+                        placeholder="Tell us why this is urgent"
+                        value={formData.urgentReasonOtherText}
+                        onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
+                        slotProps={{
+                          htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen },
+                        }}
+                        helperText={countChars(
+                          "urgentReasonOtherText",
+                          formData.urgentReasonOtherText,
+                        )}
+                      />
+                    </Stack>
+                  )}
                 </Box>
               )}
             </WithTTS>
 
             {/* Additional info */}
-            <WithTTS
+            <LongTextSection
               copy={{ label: labelOptional("additionalInfo"), tts: additionalInfoTts }}
               titleVariant="subtitle1"
-            >
-              <TextField
-                fullWidth
-                multiline
-                minRows={4}
-                placeholder="Add any details that might help us support you..."
-                value={formData.additionalInfo}
-                onChange={(e) => setField("additionalInfo", e.target.value)}
-                helperText={countChars("additionalInfo", formData.additionalInfo)}
-                slotProps={{ htmlInput: { maxLength: FIELD_META.additionalInfo.maxLen } }}
-              />
-
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                sx={{ mt: 1.5, flexWrap: "wrap", rowGap: 0.5 }}
-              >
-                <MicIcon fontSize="small" />
-                <Button
-                  type="button"
-                  size="small"
-                  onClick={handleVoiceInput}
-                  sx={{ textTransform: "none" }}
-                >
-                  Voice input
-                </Button>
-              </Stack>
-            </WithTTS>
+              value={formData.additionalInfo}
+              onChange={(value) => setField("additionalInfo", value)}
+              maxLength={FIELD_META.additionalInfo.maxLen ?? 0}
+              placeholder="Add any details that might help us support you..."
+              showVoiceInput
+              onVoiceInput={handleVoiceInput}
+            />
 
             {/* Proceed */}
             <Box sx={{ pt: 2 }}>
@@ -842,11 +821,7 @@ export default function EnquirySelection() {
             </WithTTS>
 
             {/* Navigation Buttons */}
-            <StepActions
-              onSave={handleSave}
-              advanceLabel="Continue"
-              advanceDisabled={!canGoNext}
-            />
+            <StepActions onSave={handleSave} advanceLabel="Continue" advanceDisabled={!canGoNext} />
           </Stack>
         </Box>
       </Paper>

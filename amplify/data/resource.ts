@@ -6,12 +6,14 @@ import { postConfirmation } from "../functions/postConfirmation/resource";
 import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
+import { getCaseFollowUp } from "../functions/getCaseFollowUp/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
 import { checkInAppointmentByReference } from "../functions/checkInAppointmentByReference/resource";
 import { cancelAppointmentByReference } from "../functions/cancelAppointmentByReference/resource";
+import { submitCaseFollowUp } from "../functions/submitCaseFollowUp/resource";
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 
 /**
@@ -101,10 +103,24 @@ const schema = a
         department: a.belongsTo("Department", "departmentId"),
         tickets: a.hasMany("Ticket", "caseId"),
         appointments: a.hasMany("Appointment", "caseId"),
+        caseUpdates: a.hasMany("CaseUpdate", "caseId"),
       })
       .secondaryIndexes((index) => [index("referenceNumber")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Only staff can access cases directly
+      ]),
+
+    // CaseUpdate - append-only updates added to an existing case
+    CaseUpdate: a
+      .model({
+        caseId: a.id().required(),
+        content: a.string().required(),
+
+        case: a.belongsTo("Case", "caseId"),
+      })
+      .secondaryIndexes((index) => [index("caseId")])
+      .authorization((allow) => [
+        allow.groups(["Staff"]),
       ]),
 
     // Department - service departments (Housing, Council Tax, etc)
@@ -291,6 +307,31 @@ const schema = a
         ])
     .handler(a.handler.function(getDepartmentQueueStatus)),
 
+    // Look up an existing case so it can be continued online
+    getCaseFollowUp: a
+      .query()
+      .arguments({
+        referenceNumber: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          found: a.boolean().required(),
+          errorMessage: a.string(),
+          referenceNumber: a.string(),
+          departmentId: a.id(),
+          departmentName: a.string(),
+          status: a.string(),
+          hasActiveWaitingTicket: a.boolean(),
+          hasReachedAppointmentLimit: a.boolean(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(getCaseFollowUp)),
+
     submitEnquiry: a
       .mutation()
       .arguments({
@@ -386,6 +427,35 @@ const schema = a
       .authorization((allow) => [allow.groups(["Staff", "HounslowHouseDevices"])])
       .handler(a.handler.function(checkInAppointmentByReference)),
 
+    // Create a new queue ticket or appointment against an existing case
+    submitCaseFollowUp: a
+      .mutation()
+      .arguments({
+        input: a.customType({
+          referenceNumber: a.string().required(),
+          caseUpdate: a.string(),
+          proceed: a.string().required(),
+          appointmentDateIso: a.string(),
+          appointmentTime: a.string(),
+        }),
+      })
+      .returns(
+        a.customType({
+          ok: a.boolean().required(),
+          referenceNumber: a.string(),
+          bookingReferenceNumber: a.string(),
+          ticketNumber: a.string(),
+          errorCode: a.string(),
+          errorMessage: a.string(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(submitCaseFollowUp)),
+
     cancelAppointmentByReference: a
       .mutation()
       .arguments({
@@ -402,11 +472,7 @@ const schema = a
           bookingReferenceNumber: a.string(),
         }),
       )
-      .authorization((allow) => [
-        allow.guest(),
-        allow.authenticated(),
-        allow.authenticated("identityPool"),
-      ])
+      .authorization((allow) => [allow.groups(["Staff", "HounslowHouseDevices"])])
       .handler(a.handler.function(cancelAppointmentByReference)),
 
     getAvailableAppointmentTimes: a
@@ -473,7 +539,9 @@ const schema = a
     allow.resource(submitEnquiry).to(["query", "mutate"]),
     allow.resource(checkInAppointmentByReference).to(["query", "mutate"]),
     allow.resource(cancelAppointmentByReference).to(["query", "mutate"]),
+    allow.resource(submitCaseFollowUp).to(["query", "mutate"]),
     allow.resource(getDepartmentQueueStatus).to(["query"]),
+    allow.resource(getCaseFollowUp).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),

@@ -19,7 +19,6 @@ import {
   MenuItem,
   Select,
   Box,
-  ButtonBase,
   Collapse,
   Dialog,
   DialogActions,
@@ -33,12 +32,13 @@ import { generateClient } from "aws-amplify/data";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
+import OptionTile from "../../components/FormPageComponents/OptionTile";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import BookingPanel from "../../components/BookingPanel";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
 import type { Schema } from "../../../amplify/data/resource";
-import type { BusyLevel, QueueStatus, OptionTileProps } from "./model/formFieldTypes";
+import type { BusyLevel, QueueStatus } from "./model/formFieldTypes";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 function clampInt(n: number, min: number, max: number): number {
@@ -117,40 +117,6 @@ function buildTimeOptionsToday(now: Date, limitHoursAhead: number): string[] {
   }
 
   return out;
-}
-
-// A tile component for selecting options (e.g. join queue now vs later)
-function OptionTile({ title, description, selected, onClick }: OptionTileProps) {
-  return (
-    <ButtonBase
-      onClick={onClick}
-      sx={{
-        width: "100%",
-        textAlign: "left",
-        borderRadius: 2,
-      }}
-    >
-      <Box
-        sx={(theme) => {
-          const accent = theme.palette.primary.main;
-          return {
-            width: "100%",
-            p: 2,
-            borderRadius: 2,
-            border: "1px solid",
-            borderColor: selected ? accent : theme.palette.divider,
-            bgcolor: selected ? alpha(accent, 0.08) : "transparent",
-            transition: "border-color 120ms ease, background-color 120ms ease",
-          };
-        }}
-      >
-        <Typography fontWeight={800}>{title}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
-      </Box>
-    </ButtonBase>
-  );
 }
 
 export default function Actions() {

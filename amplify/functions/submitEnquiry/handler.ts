@@ -13,41 +13,18 @@ import { randomBytes } from "crypto";
 import type { Schema } from "../../data/resource";
 import { generateClient } from "aws-amplify/data";
 import { formSchema } from "../../../shared/formSchema";
-import {
-  DynamoDBClient,
-  UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { claimCaseReferenceNumber, releaseCaseReferenceNumber } from "../utils/enquiriesStateTable";
 import {
-  claimAppointmentSlot,
-  claimBookingReferenceNumber,
-  claimCaseReferenceNumber,
-  claimQueuePosition,
-  claimTicketDigits,
-  daysFromNowInSeconds,
-  getDate,
-  getEnquiriesStateTableName,
-  markAppointmentSlotBooked,
-  releaseBookingReferenceNumber,
-  releaseAppointmentSlot,
-  releaseCaseReferenceNumber,
-  releaseQueuePosition,
-  releaseTicketNumber,
-  type AppointmentSlotClaim,
-} from "../utils/enquiriesStateTable";
-import {
-  logModelErrors,
-  runCleanup,
-  tryCleanup,
-} from "../utils/runCleanup";
-import { DepartmentCodeById } from "../../../shared/departmentCodes";
-import {
-  BOOKING_REFERENCE_DIGITS,
-  BOOKING_REFERENCE_LETTERS,
-  BOOKING_REFERENCE_PREFIX,
-  CASE_REFERENCE_CHARS,
-  CASE_REFERENCE_LETTERS,
-} from "../../../shared/referenceNumbers";
+  createAppointmentSubmission,
+  createQueueSubmission,
+  cleanupCreatedVisitResources,
+  type CreatedVisitResourcesState,
+  getErrorName,
+} from "../utils/submissionShared";
+import { getIdentityGroups, getIdentitySub } from "../utils/identityGroups";
+import { logModelErrors, runCleanup, tryCleanup } from "../utils/runCleanup";
+import { CASE_REFERENCE_CHARS, CASE_REFERENCE_LETTERS } from "../../../shared/referenceNumbers";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
@@ -80,30 +57,6 @@ function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Part
   return out;
 }
 
-function getIdentityGroups(identity: unknown): string[] {
-  if (!identity || typeof identity !== "object") {
-    return [];
-  }
-
-  if ("groups" in identity && Array.isArray(identity.groups)) {
-    return identity.groups.filter((group): group is string => typeof group === "string");
-  }
-
-  if ("claims" in identity && identity.claims && typeof identity.claims === "object") {
-    const claimGroups = (identity.claims as Record<string, unknown>)["cognito:groups"];
-
-    if (Array.isArray(claimGroups)) {
-      return claimGroups.filter((group): group is string => typeof group === "string");
-    }
-
-    if (typeof claimGroups === "string" && claimGroups.trim()) {
-      return [claimGroups];
-    }
-  }
-
-  return [];
-}
-
 // Generate a random string of given length from the provided character set, using crypto for randomness
 function cryptoRandomFrom(set: string, length: number): string {
   const bytes = randomBytes(length);
@@ -121,22 +74,6 @@ export function generateCaseReferenceNumber(): string {
   return `${prefix}-${suffix}`;
 }
 
-export function generateBookingReferenceNumber(): string {
-  const letters = cryptoRandomFrom(BOOKING_REFERENCE_LETTERS, 3);
-  const digits = cryptoRandomFrom(BOOKING_REFERENCE_DIGITS, 3);
-
-  return `${BOOKING_REFERENCE_PREFIX}-${letters}${digits}`;
-}
-
-const ddb = new DynamoDBClient({});
-
-function getTicketCounterKey(queueId: string) {
-  return {
-    pk: `QUEUE#${queueId}`,
-    sk: "COUNTER",
-  };
-}
-
 // Attempt to allocate a unique case reference number by generating random reference numbers
 // and trying to claim them until one succeeds or a maximum number of attempts is reached
 // This avoids race conditions and ensures uniqueness without needing to query the database for existing reference numbers
@@ -147,120 +84,15 @@ async function allocateCaseReferenceNumber() {
     try {
       await claimCaseReferenceNumber(referenceNumber);
       return referenceNumber;
-    } catch (e: unknown) {
-      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
+    } catch (error: unknown) {
+      const name = getErrorName(error);
       // If the error is a ConditionalCheckFailedException, it means the reference number is already claimed so continue the loop
       if (name === "ConditionalCheckFailedException") continue;
-      throw e;
+      throw error;
     }
   }
 
   throw new Error("Failed to allocate a unique case reference");
-}
-
-async function allocateBookingReferenceNumber() {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const referenceNumber = generateBookingReferenceNumber();
-
-    try {
-      await claimBookingReferenceNumber(referenceNumber);
-      return referenceNumber;
-    } catch (e: unknown) {
-      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
-      if (name === "ConditionalCheckFailedException") continue;
-      throw e;
-    }
-  }
-
-  throw new Error("Failed to allocate a unique booking reference");
-}
-
-type DepartmentId = ReturnType<typeof formSchema.parse>["departmentId"];
-
-function getDepartmentCode(departmentId: DepartmentId): string {
-  const code = DepartmentCodeById[departmentId];
-  if (!code) throw new Error(`No department code configured for ${departmentId}`);
-  return code;
-}
-
-// Atomically increment and retrieve the next ticket index for a queue from DynamoDB, ensuring uniqueness without race conditions
-async function getNextTicketIndex(queueId: string): Promise<number> {
-  const tableName = getEnquiriesStateTableName();
-  const key = getTicketCounterKey(queueId);
-
-  const res = await ddb.send(
-    new UpdateItemCommand({
-      TableName: tableName,
-      Key: {
-        pk: { S: key.pk },
-        sk: { S: key.sk },
-      },
-      UpdateExpression: "SET #next = if_not_exists(#next, :zero) + :one, expiresAt = :expiresAt",
-      ExpressionAttributeNames: { "#next": "next" },
-      ExpressionAttributeValues: {
-        ":zero": { N: "0" },
-        ":one": { N: "1" },
-        ":expiresAt": { N: String(daysFromNowInSeconds(3)) },
-      },
-      ReturnValues: "UPDATED_NEW",
-    }),
-  );
-
-  const nextStr = res.Attributes?.next?.N;
-  const next = typeof nextStr === "string" ? Number(nextStr) : NaN;
-  if (!Number.isFinite(next)) throw new Error("Ticket counter did not return a valid value");
-
-  return (next - 1) % 1000;
-}
-
-type AllocateDeptTicketNumberResult =
-  | {
-      ok: true;
-      queueId: string;
-      ticketNumber: string;
-      ticketDigits: string;
-    }
-  | {
-      ok: false;
-      errorCode: "CAPACITY";
-      errorMessage: string;
-    };
-
-// Atomically allocate a unique 3 digit ticket number for the current service day and department
-// TicketNumber is in the form "X000" where X represents the first (or first two) letter(s) of the department and 000 is a zero-padded number from 000 to 999
-async function allocateDeptTicketNumber(
-  departmentCode: string,
-): Promise<AllocateDeptTicketNumberResult> {
-  const serviceDay = getDate();
-  const queueId = `${serviceDay}#${departmentCode}`;
-
-  const start = await getNextTicketIndex(queueId);
-
-  for (let i = 0; i < 1000; i++) {
-    const idx = (start + i) % 1000;
-    const ticketDigits = String(idx).padStart(3, "0");
-
-    try {
-      await claimTicketDigits(queueId, ticketDigits);
-      return {
-        ok: true,
-        queueId,
-        ticketDigits,
-        ticketNumber: `${departmentCode}${ticketDigits}`,
-      };
-    } catch (e: unknown) {
-      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
-      // If the error is a ConditionalCheckFailedException, it means the ticket number is already claimed so continue the loop
-      if (name === "ConditionalCheckFailedException") continue;
-      throw e;
-    }
-  }
-
-  return {
-    ok: false,
-    errorCode: "CAPACITY",
-    errorMessage: "The queue is currently at capacity. Please try again later.",
-  };
 }
 
 // Update existing user details with new information from the form
@@ -313,8 +145,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   const client = await getAmplifyClient();
 
   const identity = event.identity;
-  const sub =
-    identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
+  const sub = getIdentitySub(identity);
   const identityGroups = getIdentityGroups(identity);
   const shouldCreateSeparateGuestUser =
     identityGroups.includes("Staff") || identityGroups.includes("HounslowHouseDevices");
@@ -353,7 +184,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   // If no user found, create a new guest user with the provided details
   if (!userId) {
     const userCreateInput = removeIrrelevantValues({
-      id: shouldCreateSeparateGuestUser ? undefined : sub ?? undefined,
+      id: shouldCreateSeparateGuestUser ? undefined : (sub ?? undefined),
       isRegistered: false,
 
       firstName: validated.firstName,
@@ -397,15 +228,16 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   const finalUserId = userId;
 
   let createdCaseId: string | null = null;
-  let createdAppointmentId: string | null = null;
-  let createdTicketId: string | null = null;
   let claimedReferenceNumber: string | null = null;
-  let claimedBookingReferenceNumber: string | null = null;
-
-  let claimedQueueId: string | null = null;
-  let claimedTicketDigits: string | null = null;
-  let claimedQueuePositionKey: string | null = null;
-  let claimedAppointmentSlot: AppointmentSlotClaim | null = null;
+  const createdVisitResources: CreatedVisitResourcesState = {
+    createdTicketId: null,
+    claimedQueueId: null,
+    claimedTicketDigits: null,
+    claimedQueuePositionKey: null,
+    createdAppointmentId: null,
+    claimedAppointmentSlot: null,
+    claimedBookingReferenceNumber: null,
+  };
 
   let ticketFailure: SubmitEnquiryResult | null = null;
   let appointmentFailure: SubmitEnquiryResult | null = null;
@@ -458,168 +290,70 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     // If the user chose to book an appointment, create an appointment linked to the case
     if (validated.proceed === "BOOK_APPOINTMENT") {
-      const appointmentSlot = {
-        departmentId: validated.departmentId,
-        dateIso: validated.appointmentDateIso!,
-        time: validated.appointmentTime!,
-      } satisfies AppointmentSlotClaim;
-      const bookingReferenceNumber = await allocateBookingReferenceNumber();
-      claimedBookingReferenceNumber = bookingReferenceNumber;
-
-      try {
-        // Attempt to claim the appointment slot to ensure it is not double-booked
-        await claimAppointmentSlot(appointmentSlot);
-        claimedAppointmentSlot = appointmentSlot;
-      } catch (e: unknown) {
-        const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
-
-        if (name === "ConditionalCheckFailedException") {
-          appointmentFailure = {
-            ok: false,
-            errorCode: "CONFLICT",
-            errorMessage:
-              "That appointment time is no longer available for this department. Please choose another slot.",
-          };
-          throw new Error("Appointment slot already claimed");
-        }
-
-        throw e;
-      }
-
-      const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
+      const appointmentResult = await createAppointmentSubmission({
+        client,
         caseId,
         userId: finalUserId,
-        bookingReferenceNumber,
-        date: appointmentSlot.dateIso,
-        time: appointmentSlot.time,
-        status: "SCHEDULED",
-        notes: null,
+        departmentId: validated.departmentId,
+        appointmentDateIso: validated.appointmentDateIso!,
+        appointmentTime: validated.appointmentTime!,
+        logPrefix: "submitEnquiry",
+        visitState: createdVisitResources,
       });
 
-      if (appointmentErrors?.length || !apptData?.id) {
-        logModelErrors("submitEnquiry: Appointment.create failed", appointmentErrors);
-        throw new Error("Failed to book appointment");
+      if (!appointmentResult.ok) {
+        appointmentFailure = {
+          ok: false,
+          errorCode: appointmentResult.errorCode,
+          errorMessage: appointmentResult.errorMessage,
+        };
+        throw new Error("Appointment slot already claimed");
       }
 
-      createdAppointmentId = apptData.id;
-      // Appointment successfully created, now mark the slot as booked
-      await markAppointmentSlotBooked(appointmentSlot);
       return {
         ok: true,
         referenceNumber,
-        bookingReferenceNumber,
+        bookingReferenceNumber: appointmentResult.bookingReferenceNumber,
       };
     }
 
-    const departmentCode = getDepartmentCode(validated.departmentId);
-    const alloc = await allocateDeptTicketNumber(departmentCode);
+    const queueResult = await createQueueSubmission({
+      client,
+      caseId,
+      departmentId: validated.departmentId,
+      logPrefix: "submitEnquiry",
+      visitState: createdVisitResources,
+    });
 
-    if (!alloc.ok) {
+    if (!queueResult.ok) {
       ticketFailure = {
         ok: false,
-        errorCode: alloc.errorCode,
-        errorMessage: alloc.errorMessage,
+        errorCode: queueResult.errorCode,
+        errorMessage: queueResult.errorMessage,
       };
       throw new Error("Ticket allocation failed");
     }
 
-    claimedQueueId = alloc.queueId;
-    claimedTicketDigits = alloc.ticketDigits;
-
-    claimedQueuePositionKey = `${getDate()}#${validated.departmentId}`;
-    const nextQueuePosition = await claimQueuePosition(claimedQueuePositionKey);
-
-    // If not booking an appointment, create a ticket for the case.
-    const { data: ticketData, errors: ticketErrors } = await client.models.Ticket.create({
-      caseId: createdCaseId,
-      departmentId: validated.departmentId,
-      ticketNumber: alloc.ticketNumber,
-      status: "WAITING",
-      position: nextQueuePosition,
-      estimatedWaitTimeLower: -1,
-      estimatedWaitTimeUpper: -1,
-    });
-
-    if (ticketErrors?.length || !ticketData?.id) {
-      logModelErrors("submitEnquiry: Ticket.create failed", ticketErrors);
-      throw new Error("Failed to create ticket");
-    }
-
-    createdTicketId = ticketData.id;
-    return { ok: true, referenceNumber, ticketNumber: alloc.ticketNumber };
+    return { ok: true, referenceNumber, ticketNumber: queueResult.ticketNumber };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("submitEnquiry: failed", {
       message: msg,
       createdGuestUserId: createdGuestUserId ?? undefined,
       createdCaseId: createdCaseId ?? undefined,
-      createdAppointmentId: createdAppointmentId ?? undefined,
-      createdTicketId: createdTicketId ?? undefined,
+      createdAppointmentId: createdVisitResources.createdAppointmentId ?? undefined,
+      createdTicketId: createdVisitResources.createdTicketId ?? undefined,
     });
 
-    if (createdTicketId) {
-      const ticketId = createdTicketId;
-      await tryCleanup("submitEnquiry: cleanup Ticket.delete failed", () =>
-        runCleanup(
-          "submitEnquiry: Ticket.delete failed",
-          `Failed to delete ticket ${ticketId}`,
-          () => client.models.Ticket.delete({ id: ticketId }),
-        ),
-      );
-    }
-
-    if (claimedQueueId && claimedTicketDigits) {
-      const queueId = claimedQueueId;
-      const ticketDigits = claimedTicketDigits;
-
-      await tryCleanup("submitEnquiry: cleanup TicketNumberClaims.delete failed", () =>
-        releaseTicketNumber(queueId, ticketDigits),
-      );
-    }
-
-    if (claimedQueuePositionKey && !createdTicketId) {
-      const queuePositionKey = claimedQueuePositionKey;
-      await tryCleanup("submitEnquiry: cleanup QueuePositionCounter.update failed", () =>
-        releaseQueuePosition(queuePositionKey),
-      );
-    }
-
-    let appointmentDeleted = !createdAppointmentId;
-
-    if (createdAppointmentId) {
-      const appointmentId = createdAppointmentId;
-      appointmentDeleted = await tryCleanup("submitEnquiry: cleanup Appointment.delete failed", () =>
-        runCleanup(
-          "submitEnquiry: Appointment.delete failed",
-          `Failed to delete appointment ${appointmentId}`,
-          () => client.models.Appointment.delete({ id: appointmentId }),
-        ),
-      );
-    }
-
-    if (claimedAppointmentSlot && appointmentDeleted) {
-      const slot = claimedAppointmentSlot;
-      await tryCleanup("submitEnquiry: cleanup AppointmentSlotClaims.delete failed", () =>
-        releaseAppointmentSlot(slot),
-      );
-    }
-
-    if (claimedBookingReferenceNumber && appointmentDeleted) {
-      const bookingReferenceNumber = claimedBookingReferenceNumber;
-      await tryCleanup("submitEnquiry: cleanup BookingReferenceClaims.delete failed", () =>
-        releaseBookingReferenceNumber(bookingReferenceNumber),
-      );
-    }
+    await cleanupCreatedVisitResources(client, createdVisitResources, "submitEnquiry");
 
     let caseDeleted = !createdCaseId;
 
     if (createdCaseId) {
       const caseId = createdCaseId;
       caseDeleted = await tryCleanup("submitEnquiry: cleanup Case.delete failed", () =>
-        runCleanup(
-          "submitEnquiry: Case.delete failed",
-          `Failed to delete case ${caseId}`,
-          () => client.models.Case.delete({ id: caseId }),
+        runCleanup("submitEnquiry: Case.delete failed", `Failed to delete case ${caseId}`, () =>
+          client.models.Case.delete({ id: caseId }),
         ),
       );
     }
