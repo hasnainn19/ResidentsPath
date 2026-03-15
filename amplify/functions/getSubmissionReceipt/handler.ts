@@ -145,6 +145,7 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     found: true,
     createdAt: caseRecord.createdAt ?? undefined,
     referenceNumber: caseRecord.referenceNumber ?? referenceNumber,
+    bookingReferenceNumber: appointment?.bookingReferenceNumber ?? undefined,
     receiptType: appointment ? "APPOINTMENT" : "QUEUE",
     ticketNumber: ticket?.ticketNumber ?? undefined,
     appointmentDateIso: appointment?.date ?? undefined,
