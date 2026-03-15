@@ -61,14 +61,14 @@ export default function ReviewAndSubmit() {
         return;
       }
 
-      const receiptType =
-        formData.proceed === "BOOK_APPOINTMENT" ? "APPOINTMENT" : "QUEUE";
+      const receiptType = formData.proceed === "BOOK_APPOINTMENT" ? "APPOINTMENT" : "QUEUE";
 
       clearSavedDraft();
       nav(`/receipts/${encodeURIComponent(result.referenceNumber)}`, {
         state: {
           receipt: {
             referenceNumber: result.referenceNumber,
+            bookingReferenceNumber: result.bookingReferenceNumber || undefined,
             receiptType,
             ticketNumber: result.ticketNumber || undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
