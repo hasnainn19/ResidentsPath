@@ -94,7 +94,8 @@ const StaffCaseManagementPage: React.FC = () => {
       (c) =>
         c.enquiry.toLowerCase().includes(q) ||
         (c.description ?? "").toLowerCase().includes(q) ||
-        c.referenceNumber.toLowerCase().includes(q),
+        c.referenceNumber.toLowerCase().includes(q) ||
+        (c.title ?? "").toLowerCase().includes(q),
     );
   }, [cases, search]);
 
@@ -216,7 +217,7 @@ const StaffCaseManagementPage: React.FC = () => {
                       gutterBottom
                       noWrap
                     >
-                      #{caseItem.referenceNumber}
+                      {caseItem.title} #{caseItem.referenceNumber}
                     </Typography>
 
                     <Divider sx={{ mb: 1 }} />

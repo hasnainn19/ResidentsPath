@@ -42,6 +42,9 @@ const StaffCaseDetails = () => {
   const [notesOpen, setNotesOpen] = useState(false);
   const [notesValue, setNotesValue] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [titleOpen, setTitleOpen] = useState(false);
+  const [titleValue, setTitleValue] = useState("");
+  const [savingTitle, setSavingTitle] = useState(false);
 
   const statusColorMap: Record<
     string,
@@ -66,6 +69,22 @@ const StaffCaseDetails = () => {
       setNotesOpen(false);
     } finally {
       setSavingNotes(false);
+    }
+  };
+
+  const openTitleModal = () => {
+    setTitleValue(c?.title ?? "");
+    setTitleOpen(true);
+  };
+
+  const handleSaveTitle = async () => {
+    if (!caseId) return;
+    setSavingTitle(true);
+    try {
+      await client.models.Case.update({ id: caseId, title: titleValue });
+      setTitleOpen(false);
+    } finally {
+      setSavingTitle(false);
     }
   };
 
@@ -127,11 +146,14 @@ const StaffCaseDetails = () => {
         alignItems="flex-start"
         mb={3}
       >
-        <Box>
+        <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography variant="h4" fontWeight={600}>
-            #{c.referenceNumber} &middot; {c.departmentId}
+            {c?.title} #{c.referenceNumber} &middot; {c.departmentId}
           </Typography>
-        </Box>
+          <IconButton size="small" onClick={openTitleModal} sx={{ mt: 0.25 }}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Stack>
 
         <Stack
           direction="row"
@@ -321,6 +343,36 @@ const StaffCaseDetails = () => {
             )}
           </Stack>
         </SectionCard>
+
+        <Dialog
+          open={titleOpen}
+          onClose={() => setTitleOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Set Case Title</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              fullWidth
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              sx={{ mt: 1 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setTitleOpen(false)} disabled={savingTitle}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSaveTitle}
+              disabled={savingTitle}
+            >
+              {savingTitle ? "Saving…" : "Save"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Dialog
           open={notesOpen}

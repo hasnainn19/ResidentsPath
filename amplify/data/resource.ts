@@ -68,6 +68,7 @@ const schema = a
         departmentId: a.id().required(),
 
         // Case information
+        title: a.string(),
         referenceNumber: a.string().required(),
         description: a.string(),
         status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
@@ -548,6 +549,7 @@ const schema = a
       .returns(
         a.customType({
           referenceNumber: a.string().required(),
+          title: a.string(),
           departmentId: a.string(),
           description: a.string(),
           status: a.string(),

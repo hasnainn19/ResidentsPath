@@ -42,6 +42,7 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
   // from plain objects, so we cast to satisfy the function handler signature.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return {
+    title: selectedCase?.title,
     referenceNumber: selectedCase.referenceNumber,
     departmentId: selectedCase?.departmentId,
     description: selectedCase?.description,

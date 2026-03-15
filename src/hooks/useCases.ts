@@ -10,6 +10,7 @@ const VALID_DEPARTMENT_IDS = new Set(DEPARTMENTS.map((d) => d.id));
 
 export interface CaseSummary {
   id: string;
+  title: string;
   referenceNumber: string;
   departmentId: DepartmentId;
   status: CaseStatus | null;
@@ -50,6 +51,7 @@ const useCases = (filters: CasesFilters = {}) => {
             (result.data ?? []).map((c: any) => ({
               id: c.id,
               referenceNumber: c.referenceNumber,
+              title: c.title,
               departmentId: (VALID_DEPARTMENT_IDS.has(c.departmentId)
                 ? c.departmentId
                 : "GENERAL_CUSTOMER_SERVICES") as DepartmentId,
