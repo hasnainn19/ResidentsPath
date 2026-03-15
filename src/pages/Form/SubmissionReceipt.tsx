@@ -10,7 +10,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import * as QRCode from "qrcode";
 import { generateClient } from "aws-amplify/data";
-import { Alert, Box, Container, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, Container, Divider, Paper, Snackbar, Typography } from "@mui/material";
 
 import type { Schema } from "../../../amplify/data/resource";
 import NavBar from "../../components/NavBar";
@@ -21,6 +21,7 @@ import { getDataAuthMode } from "../../utils/getDataAuthMode";
 type Receipt = {
   createdAt?: string;
   referenceNumber: string;
+  bookingReferenceNumber?: string;
   receiptType: "QUEUE" | "APPOINTMENT";
   ticketNumber?: string;
   appointmentDateIso?: string;
@@ -32,7 +33,7 @@ export default function SubmissionReceipt() {
   const nav = useNavigate();
   const location = useLocation();
 
-  // Get the reference number from the URL
+  // Get the case reference number from the URL
   const { referenceNumber: routeReferenceNumber = "" } = useParams();
 
   const client = useMemo(() => generateClient<Schema>(), []);
@@ -61,6 +62,7 @@ export default function SubmissionReceipt() {
     return {
       ...candidate,
       referenceNumber: candidateReferenceNumber,
+      bookingReferenceNumber: candidate.bookingReferenceNumber?.trim().toUpperCase(),
     };
   }, [location.state, referenceNumber]);
 
@@ -97,17 +99,13 @@ export default function SubmissionReceipt() {
   let qrPayload = "";
 
   if (receipt) {
-    const parts = [`${receipt.receiptType}`];
-
-    if (receipt.ticketNumber) {
-      parts.push(`${receipt.ticketNumber}`);
+    if (receipt.receiptType === "APPOINTMENT") {
+      qrPayload = receipt.bookingReferenceNumber
+        ? ["APPOINTMENT", receipt.bookingReferenceNumber].join("|")
+        : "";
+    } else {
+      qrPayload = receipt.ticketNumber ? ["QUEUE", receipt.ticketNumber].join("|") : "";
     }
-
-    if (receipt.receiptType === "APPOINTMENT" && receipt.appointmentDateIso && receipt.appointmentTime) {
-      parts.push(`${receipt.referenceNumber}`);
-    }
-
-    qrPayload = parts.join("|");
   }
 
   useEffect(() => {
@@ -185,6 +183,7 @@ export default function SubmissionReceipt() {
         setReceipt({
           createdAt: data.createdAt || undefined,
           referenceNumber: data.referenceNumber,
+          bookingReferenceNumber: data.bookingReferenceNumber || undefined,
           receiptType,
           ticketNumber: data.ticketNumber || undefined,
           appointmentDateIso: data.appointmentDateIso || undefined,
@@ -276,6 +275,10 @@ export default function SubmissionReceipt() {
         `Your case reference number is ${receipt.referenceNumber}.`,
       ];
 
+      if (receipt.bookingReferenceNumber) {
+        parts.push(`Your appointment reference number is ${receipt.bookingReferenceNumber}.`);
+      }
+
       if (appointmentDate) {
         parts.push(`Your appointment is on ${appointmentDate}.`);
       }
@@ -284,6 +287,12 @@ export default function SubmissionReceipt() {
         parts.push(`at ${receipt.appointmentTime}.`);
       }
 
+      parts.push(
+        "To check in on the day of your appointment, go to the reference page at Hounslow House and enter your appointment reference number or scan this QR code.",
+      );
+      parts.push(
+        "If you need to cancel your appointment, go to the reference page and enter your appointment reference number or scan this QR code.",
+      );
       parts.push("Please keep these details safe.");
       ttsText = parts.join(" ");
     } else {
@@ -301,13 +310,13 @@ export default function SubmissionReceipt() {
     }
   }
 
-  const referenceToShow = receipt?.referenceNumber || referenceNumber || undefined;
-
   const receiptHeading = isAppointment
     ? "Appointment receipt"
     : receipt?.ticketNumber
       ? "Ticket receipt"
       : "Queue receipt";
+  const headerCaseReferenceNumber = receipt?.referenceNumber || referenceNumber;
+  const headerAppointmentReferenceNumber = receipt?.bookingReferenceNumber;
 
   let chipLabel = "Receipt";
   let heading = "Receipt details";
@@ -329,56 +338,97 @@ export default function SubmissionReceipt() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <NavBar />
+      <Box sx={{ displayPrint: "none" }}>
+        <NavBar />
+      </Box>
 
-      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 3, md: 5 } }}>
-        {/* Receipt details*/}
-        <Stack spacing={{ xs: 2.5, md: 3 }}>
+      <Container
+        maxWidth="md"
+        sx={{
+          py: { xs: 2, sm: 3, md: 5 },
+          "@media print": {
+            maxWidth: "100%",
+            px: 0,
+            py: 0,
+          },
+        }}
+      >
+        <Paper
+          variant="outlined"
+          sx={{
+            borderRadius: 3,
+            overflow: "hidden",
+            bgcolor: "background.paper",
+            "@media print": {
+              borderRadius: 0,
+              boxShadow: "none",
+              breakInside: "avoid",
+            },
+          }}
+        >
           <ReceiptHeaderCard
             chipLabel={chipLabel}
             heading={heading}
             introText={introText}
             isAppointment={isAppointment}
-            referenceToShow={referenceToShow}
+            caseReferenceNumber={headerCaseReferenceNumber}
+            appointmentReferenceNumber={headerAppointmentReferenceNumber}
             ticketNumber={receipt?.ticketNumber}
-            appointmentTime={receipt?.appointmentTime}
-            onCopyReference={() => copyValue("Case reference number", referenceToShow)}
+            ttsText={ttsText}
+            onCopyCaseReference={() =>
+              copyValue("Case reference number", headerCaseReferenceNumber)
+            }
+            onCopyAppointmentReference={() =>
+              copyValue("Appointment reference number", headerAppointmentReferenceNumber)
+            }
             onPrint={() => window.print()}
           />
 
           {/* Loading/errors */}
           {loading ? (
-            <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
-              <Typography fontWeight={700}>Loading your receipt...</Typography>
-            </Paper>
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+                <Typography fontWeight={700}>Loading your receipt...</Typography>
+              </Box>
+            </>
           ) : null}
 
           {!loading && errorMessage ? (
-            <Alert severity="warning" variant="outlined">
-              {errorMessage}
-            </Alert>
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+                <Alert severity="warning" variant="outlined">
+                  {errorMessage}
+                </Alert>
+              </Box>
+            </>
           ) : null}
 
           {/* Main receipt body */}
           {receipt ? (
-            <ReceiptBody
-              receipt={receipt}
-              isAppointment={isAppointment}
-              appointmentDate={appointmentDate}
-              submittedAt={submittedAt}
-              qrCodeUrl={qrCodeUrl}
-              ttsText={ttsText}
-              onCopyTicket={() => copyValue("Ticket number", receipt.ticketNumber)}
-              onCheckQueueStatus={() => nav("/referencepage")}
-              onCopyAppointmentDetails={() =>
-                copyValue(
-                  "Appointment details",
-                  [appointmentDate, receipt.appointmentTime].filter(Boolean).join(" "),
-                )
-              }
-            />
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <ReceiptBody
+                receipt={receipt}
+                isAppointment={isAppointment}
+                appointmentDate={appointmentDate}
+                submittedAt={submittedAt}
+                qrCodeUrl={qrCodeUrl}
+                onCopyTicket={() => copyValue("Ticket number", receipt.ticketNumber)}
+                onCheckQueueStatus={() => nav("/referencepage")}
+                onCopyAppointmentDetails={() =>
+                  copyValue(
+                    "Appointment details",
+                    [appointmentDate, receipt.appointmentTime, receipt.bookingReferenceNumber]
+                      .filter(Boolean)
+                      .join(" "),
+                  )
+                }
+              />
+            </>
           ) : null}
-        </Stack>
+        </Paper>
       </Container>
 
       <Snackbar

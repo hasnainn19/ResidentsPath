@@ -7,11 +7,14 @@ import {
   Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { DEPARTMENTS } from "../../../shared/formSchema";
 
 interface QueueRowProps {
   departmentName: string;
+  departmentId: string;
   waitingCount: number;
   longestWait: number;
+  averageWait: number;
   priorityCaseCount: number;
   standardCaseCount: number;
   steppedOutCount: number;
@@ -20,8 +23,10 @@ interface QueueRowProps {
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
   departmentName,
+  departmentId,
   waitingCount,
   longestWait,
+  averageWait,
   priorityCaseCount,
   standardCaseCount,
   steppedOutCount,
@@ -37,13 +42,18 @@ const QueueRow = ({
   return (
     <TableRow hover>
       <TableCell>
-        <Typography fontWeight={500}>{departmentName}</Typography>
+        <Typography fontWeight={500}>
+          {
+            DEPARTMENTS.find((department) => department.id == departmentId)
+              ?.label
+          }
+        </Typography>
       </TableCell>
 
       <TableCell>{waitingCount}</TableCell>
 
       <TableCell>
-        {longestWait == null ? "--" : `${longestWait} mins`}
+        {longestWait == null || longestWait < 0 ? "--" : `${longestWait} mins`}
       </TableCell>
 
       <TableCell>
@@ -63,12 +73,15 @@ const QueueRow = ({
             sx={{
               fontWeight: "bold",
               bgcolor: "warning.light",
-              color:"text",
+              color: "text",
             }}
           />
         </Box>
       </TableCell>
 
+      <TableCell>
+        {averageWait == null || averageWait < 0 ? "--" : `${averageWait} mins`}
+      </TableCell>
       <TableCell>{steppedOutCount}</TableCell>
 
       <TableCell>{availableStaff}</TableCell>
