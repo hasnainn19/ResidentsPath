@@ -428,7 +428,7 @@ const schema = a
       })
       .returns(
         a.customType({
-          caseId: a.string().required(),
+          referenceNumber: a.string().required(),
           departmentId: a.string(),
           description: a.string(),
           status: a.string(),
