@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
-import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
+import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
-
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
+import ContactDetailsDialog from '../components/ContactDetailsDialog';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -31,14 +31,16 @@ export default function UserDashboard() {
     const [stepOut, setStepOut]=useState(false);
     const [errors, setErrors] = useState('');
     const [ticketId, setTicketId] = useState<string | null>(null);
-    const [queuePosition, setQueuePosition] = useState(0); 
+    const [queuePosition, setQueuePosition] = useState(0);
     const [waitTimeLower, setWaitTimeLower] = useState(0);
     const [waitTimeUpper, setWaitTimeUpper] = useState(0);
 
+    const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
 
-
-    const handleStepOut = async () => {
+    const handleStepOutConfirm = async (_contactMethod: 'SMS' | 'EMAIL', _contactValue: string) => {
+        setStepOutDialogOpen(false);
         if (!ticketId) return;
+
         try {
             const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: true });
             if (stepOutErrors && stepOutErrors.length > 0) {
@@ -47,13 +49,15 @@ export default function UserDashboard() {
             }
             setStepOut(true);
             setShowStepOutAlert(true);
-        } catch (error) {
+        } 
+        catch (error) {
             setErrors(`Failed to step out: ${error}`);
         }
     };
 
     const handleReturned = async () => {
         if (!ticketId) return;
+        
         try {
             const { errors: returnedErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: false });
             if (returnedErrors && returnedErrors.length > 0) {
@@ -161,7 +165,7 @@ export default function UserDashboard() {
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalkIcon />} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
+                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalkIcon />} onClick={() => setStepOutDialogOpen(true)} disabled={stepOut}>I'm stepping out</Button>
                                                 <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabledIcon />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
                                             </Stack>
                                         </Stack>
@@ -184,6 +188,12 @@ export default function UserDashboard() {
                     </Paper>
                 </Box>
             </Box>
+
+            <ContactDetailsDialog
+                open={stepOutDialogOpen}
+                onClose={() => setStepOutDialogOpen(false)}
+                onConfirm={handleStepOutConfirm}
+            />
         </>
     )
 }
