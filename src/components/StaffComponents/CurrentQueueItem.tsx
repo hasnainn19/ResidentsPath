@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
 import EditIcon from "@mui/icons-material/Edit";
-import React, { useState } from "react";
+import { useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import ConfirmChangeModal from "./ConfirmChangeModal";
