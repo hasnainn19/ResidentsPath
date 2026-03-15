@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Button, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Button, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputAdornment } from '@mui/material';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import SmsIcon from '@mui/icons-material/Sms';
 import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
 import { normalisePhoneToE164, isValidEmail } from '../../shared/formSchema';
 
 interface StepOutContactDialogProps {
@@ -104,11 +105,21 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                             onChange={(e) => setContactValue(e.target.value)}
                             onBlur={() => setContactTouched(true)}
                             error={contactInvalid}
-                            helperText={contactInvalid ? 'Enter a valid phone number.' : 'e.g. 07912 345678 or +44...'}
+                            helperText={contactInvalid ? 'Enter a valid phone number.' : prefillPhone ? 'Filled from your account information.' : 'e.g. 07912 345678 or +44...'}
                             fullWidth
                             autoComplete="tel"
-                            disabled={!!prefillPhone}
-                            slotProps={{ htmlInput: { inputMode: 'tel' } }}
+                            slotProps={{
+                                input: {
+                                    readOnly: !!prefillPhone,
+                                    endAdornment: prefillPhone ? (
+                                        <InputAdornment position="end">
+                                            <LockIcon fontSize="small" sx={{ color: 'text.disabled' }} />
+                                        </InputAdornment>
+                                    ) : undefined,
+                                },
+                                htmlInput: { inputMode: 'tel' },
+                            }}
+                            sx={prefillPhone ? { '& .MuiInputBase-root': { backgroundColor: 'action.hover' } } : undefined}
                         />
                     )}
                     {contactMethod === 'EMAIL' && (
@@ -119,11 +130,21 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                             onChange={(e) => setContactValue(e.target.value)}
                             onBlur={() => setContactTouched(true)}
                             error={contactInvalid}
-                            helperText={contactInvalid ? 'Enter a valid email address.' : ' '}
+                            helperText={contactInvalid ? 'Enter a valid email address.' : prefillEmail ? 'Filled from your account information.' : ' '}
                             fullWidth
                             autoComplete="email"
-                            disabled={!!prefillEmail}
-                            slotProps={{ htmlInput: { inputMode: 'email' } }}
+                            slotProps={{
+                                input: {
+                                    readOnly: !!prefillEmail,
+                                    endAdornment: prefillEmail ? (
+                                        <InputAdornment position="end">
+                                            <LockIcon fontSize="small" sx={{ color: 'text.disabled' }} />
+                                        </InputAdornment>
+                                    ) : undefined,
+                                },
+                                htmlInput: { inputMode: 'email' },
+                            }}
+                            sx={prefillEmail ? { '& .MuiInputBase-root': { backgroundColor: 'action.hover' } } : undefined}
                         />
                     )}
                 </Stack>
