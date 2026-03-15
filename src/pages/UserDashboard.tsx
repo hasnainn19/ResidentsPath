@@ -30,7 +30,8 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const { user } = useUser();
-    const [showStepOutAlert, setShowStepOutAlert]=useState(false);
+    const [showStepOutAlert, setShowStepOutAlert] = useState(false);
+    const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
     const [stepOut, setStepOut]=useState(false);
     const [errors, setErrors] = useState('');
     const [ticketId, setTicketId] = useState<string | null>(null);
@@ -101,6 +102,7 @@ export default function UserDashboard() {
                 return;
             }
             setNotificationsEnabled(true);
+            setShowNotificationsAlert(true);
         }
         catch (error) {
             setErrors(`Failed to enable notifications: ${error}`);
@@ -121,6 +123,7 @@ export default function UserDashboard() {
                 return;
             }
             setNotificationsEnabled(false);
+            setShowNotificationsAlert(false);
         }
         catch (error) {
             setErrors(`Failed to disable notifications: ${error}`);
@@ -193,6 +196,9 @@ export default function UserDashboard() {
             <NavBar />
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
+                    {showNotificationsAlert && (
+                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>Notifications enabled. We'll send you updates as your turn approaches.</Alert>
+                    )}
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
@@ -241,7 +247,7 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
-                                                    variant='contained'
+                                                    variant={notificationsEnabled ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={<NotificationsIcon />}
                                                     onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
@@ -262,7 +268,7 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
-                                                    variant='contained'
+                                                    variant={stepOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={stepOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
                                                     onClick={stepOut
