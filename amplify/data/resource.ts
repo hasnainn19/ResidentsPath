@@ -10,7 +10,8 @@ import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
-import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
+import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
+import { getCaseDetails } from "../functions/getCaseDetails/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -156,10 +157,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
         department: a.belongsTo("Department", "departmentId"),
       })
-      .secondaryIndexes((index) => [
-        index("caseId"),
-        index("ticketNumber"),
-      ])
+      .secondaryIndexes((index) => [index("caseId"), index("ticketNumber")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
       ]),
@@ -197,19 +195,25 @@ const schema = a
         time: a.time().required(),
 
         // Appointment status
-        status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
+        status: a.enum([
+          "SCHEDULED",
+          "CONFIRMED",
+          "CANCELLED",
+          "COMPLETED",
+          "NO_SHOW",
+        ]),
 
         // Additional information
         notes: a.string(),
 
-			// Relationships
-			user: a.belongsTo("User", "userId"),
-			case: a.belongsTo("Case", "caseId"),
-		})
+        // Relationships
+        user: a.belongsTo("User", "userId"),
+        case: a.belongsTo("Case", "caseId"),
+      })
       .secondaryIndexes((index) => [index("caseId")])
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can access appointments directly
-		]),
+      .authorization((allow) => [
+        allow.groups(["Staff"]), // Only staff can access appointments directly
+      ]),
     getDashboardStats: a
       .query()
       .returns(
@@ -251,10 +255,7 @@ const schema = a
           estimatedWaitTimeUpper: a.integer(),
         }),
       )
-      .authorization((allow) => [
-        allow.guest(), 
-        allow.authenticated(),
-        ]) 
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(getTicketInfo)),
 
     calculateDepartmentQueue: a
@@ -263,29 +264,28 @@ const schema = a
         departmentId: a.string().required(),
       })
       .returns(a.boolean())
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(calculateDepartmentQueue)),
+
+    // Custom queries and mutations (lambdas defined in amplify/functions)
+
+    getDepartmentQueueStatus: a
+      .query()
+      .arguments({
+        departmentId: a.id().required(),
+      })
+      .returns(
+        a.customType({
+          queueCount: a.integer().required(),
+          updatedAtIso: a.string().required(),
+        }),
+      )
       .authorization((allow) => [
-        allow.guest(), 
+        allow.guest(),
         allow.authenticated(),
-        ])       
-        .handler(a.handler.function(calculateDepartmentQueue)),
-
-	// Custom queries and mutations (lambdas defined in amplify/functions)
-
-  getDepartmentQueueStatus: a
-    .query()
-    .arguments({
-      departmentId: a.id().required()
-    })
-    .returns(a.customType({
-            queueCount: a.integer().required(),
-            updatedAtIso: a.string().required(),
-    }))
-    .authorization((allow) => [
-            allow.guest(),
-            allow.authenticated(),
-            allow.authenticated("identityPool")
-        ])
-    .handler(a.handler.function(getDepartmentQueueStatus)),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(getDepartmentQueueStatus)),
 
     submitEnquiry: a
       .mutation()
@@ -406,24 +406,62 @@ const schema = a
       .handler(a.handler.function(getSubmissionReceipt)),
 
     checkTicketNumber: a
-        .query()
-        .arguments({
+      .query()
+      .arguments({
         ticketNumber: a.string().required(),
-        })
-        .returns(
+      })
+      .returns(
         a.customType({
-            caseId: a.string().required(),
+          caseId: a.string().required(),
         }),
-        )
-        .authorization((allow) => [
-        allow.guest(), 
-        allow.authenticated(),
-        ])    
-        .handler(a.handler.function(checkTicketNumber)),
+      )
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(checkTicketNumber)),
+    caseTicketDetails: a.customType({
+      ticketId: a.string().required(),
+      ticketStatus: a.string().required(),
+    }),
+    getCaseDetails: a
+      .query()
+      .arguments({
+        caseId: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          caseId: a.string().required(),
+          departmentId: a.string(),
+          description: a.string(),
+          status: a.string(),
+          priority: a.boolean(),
+          flag: a.boolean(),
+          notes: a.string(),
+          enquiry: a.string(),
+          otherEnquiryText: a.string(),
+          childrenCount: a.string(),
+          householdSize: a.string(),
+          ageRange: a.string(),
+          hasDisabilityOrSensory: a.boolean(),
+          disabilityType: a.string(),
+          domesticAbuse: a.boolean(),
+          safeToContact: a.string(),
+          safeContactNotes: a.string(),
+          urgent: a.string(),
+          urgentReason: a.string(),
+          urgentReasonOtherText: a.string(),
+          supportNotes: a.string(),
+          supportNeeds: a.string(),
+          otherSupport: a.string(),
+          additionalInfo: a.string(),
+          name: a.string(),
+          tickets: a.ref("caseTicketDetails").array(),
+        }),
+      )
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getCaseDetails)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
-  allow.resource(getDepartmentQueueStatus).to(["query"]),
+    allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
@@ -434,6 +472,7 @@ const schema = a
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
     allow.resource(checkTicketNumber),
+    allow.resource(getCaseDetails),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 
