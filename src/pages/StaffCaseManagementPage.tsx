@@ -45,12 +45,12 @@ const STATUS_LABEL: Record<CaseStatus, string> = {
 
 const STATUS_COLOR: Record<
   CaseStatus,
-  "info" | "warning" | "success" | "default"
+  "success" | "warning" | "error" | "default"
 > = {
-  OPEN: "info",
-  IN_PROGRESS: "warning",
-  RESOLVED: "success",
-  CLOSED: "default",
+  OPEN: "success",
+  IN_PROGRESS: "success",
+  RESOLVED: "default",
+  CLOSED: "warning",
 };
 
 const DEPT_COLOR: Partial<
@@ -198,16 +198,14 @@ const StaffCaseManagementPage: React.FC = () => {
                           label="Priority"
                           color="error"
                           size="small"
-                          variant="outlined"
                         />
                       )}
                       {caseItem.flag && (
                         <Chip
                           icon={<FlagIcon />}
-                          label="Flagged"
+                          label="Safeguarding"
                           color="warning"
                           size="small"
-                          variant="outlined"
                         />
                       )}
                     </Stack>
