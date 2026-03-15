@@ -23,9 +23,9 @@ function median(values: number[]) {
 
   values.sort((a, b) => a - b);
 
-  const mid = Math.ceil(values.length / 2);
+  const mid = Math.floor(values.length / 2);
 
-  return values[mid-1]; // return index 2 for length 5
+  return values[mid];
 }
 
 /**
