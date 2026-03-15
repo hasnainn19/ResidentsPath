@@ -9,6 +9,11 @@ import { submitCaseFollowUp } from "./functions/submitCaseFollowUp/resource";
 import { getCaseFollowUp } from "./functions/getCaseFollowUp/resource";
 import { getDashboardStats } from "./functions/getDashboardStats/resource";
 import { getServiceStats } from "./functions/getServiceStats/resource";
+import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
+import { getQueueItems } from "./functions/getQueueItems/resource";
+import { markTicketSeen } from "./functions/markTicketSeen/resource";
+import { setCasePriority } from "./functions/setCasePriority/resource";
+import { flagCaseSafeguarding } from "./functions/flagCaseSafeguarding/resource";
 import {
   Table,
   AttributeType,
@@ -46,6 +51,11 @@ const backend = defineBackend({
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
+  adjustQueuePosition,
+  getQueueItems,
+  markTicketSeen,
+  setCasePriority,
+  flagCaseSafeguarding,
 });
 
 /**
