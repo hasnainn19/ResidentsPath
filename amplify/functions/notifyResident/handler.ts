@@ -155,13 +155,13 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         const { newImage, oldImage, caseId, ticketNumber } = validated;
 
-        const message = shouldNotifyResident(newImage, oldImage, ticketNumber);
-        if (!message) {
+        // Check if they have opted-in for notifications on this ticket
+        if (!newImage.notificationsEnabled) {
             continue;
         }
 
-        // Check if they have opted-in for notifications on this ticket
-        if (!newImage.notificationsEnabled) {
+        const message = shouldNotifyResident(newImage, oldImage, ticketNumber);
+        if (!message) {
             continue;
         }
 
