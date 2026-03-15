@@ -80,6 +80,30 @@ function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Part
   return out;
 }
 
+function getIdentityGroups(identity: unknown): string[] {
+  if (!identity || typeof identity !== "object") {
+    return [];
+  }
+
+  if ("groups" in identity && Array.isArray(identity.groups)) {
+    return identity.groups.filter((group): group is string => typeof group === "string");
+  }
+
+  if ("claims" in identity && identity.claims && typeof identity.claims === "object") {
+    const claimGroups = (identity.claims as Record<string, unknown>)["cognito:groups"];
+
+    if (Array.isArray(claimGroups)) {
+      return claimGroups.filter((group): group is string => typeof group === "string");
+    }
+
+    if (typeof claimGroups === "string" && claimGroups.trim()) {
+      return [claimGroups];
+    }
+  }
+
+  return [];
+}
+
 // Generate a random string of given length from the provided character set, using crypto for randomness
 function cryptoRandomFrom(set: string, length: number): string {
   const bytes = randomBytes(length);
@@ -291,12 +315,17 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   const identity = event.identity;
   const sub =
     identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
+  const identityGroups = getIdentityGroups(identity);
+  const shouldCreateSeparateGuestUser =
+    identityGroups.includes("Staff") || identityGroups.includes("HounslowHouseDevices");
 
   let userId: string | null = null;
   let createdGuestUserId: string | null = null;
 
-  // If the user is logged in, try to find their account in the User model by their Cognito sub
-  if (sub) {
+  // Staff and Hounslow House device accounts can submit on behalf of residents, so keep
+  // those submissions separate from the signed-in account and always create a guest user.
+  // Residents can still reuse their linked account details when they are signed in.
+  if (sub && !shouldCreateSeparateGuestUser) {
     try {
       const { data: user, errors } = await client.models.User.get({ id: sub });
 
@@ -324,7 +353,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   // If no user found, create a new guest user with the provided details
   if (!userId) {
     const userCreateInput = removeIrrelevantValues({
-      id: sub ?? undefined,
+      id: shouldCreateSeparateGuestUser ? undefined : sub ?? undefined,
       isRegistered: false,
 
       firstName: validated.firstName,
