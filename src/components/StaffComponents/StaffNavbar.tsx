@@ -1,21 +1,26 @@
-import {
-  Drawer,
-  List,
-  Toolbar,
-  Typography,
-  Box,
-  Avatar,
-  Accordion,
-  AccordionSummary,
-} from "@mui/material";
+import { Drawer, List, Toolbar, Typography, Box } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
+import { useAuth } from "../../hooks/useAuth";
+import { signOut } from "aws-amplify/auth";
+import { useNavigate } from "react-router-dom";
 const drawerWidth = 240;
 
 // This component represents the sidebar navigation for staff users, providing links to key sections of the dashboard such as the main dashboard, current cases, staff directory, and personal cases. It also includes a user profile section with an accordion for additional options like viewing the profile, audit logs, and logging out.
 const StaffNavbar = () => {
+  const { givenName, familyName } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -84,82 +89,21 @@ const StaffNavbar = () => {
           />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
-          <Accordion
-            sx={{
-              backgroundColor: "transparent",
-              color: "primary.contrastText",
-              boxShadow: "none",
-            }}
+          <Typography
+            variant="body1"
+            fontWeight={500}
+            sx={{ color: "primary.contrastText" }}
           >
-            <AccordionSummary
-              sx={{
-                px: 0,
-                py: 0,
-                margin: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                color: "primary.contrastText",
-              }}
-            >
-              <Avatar
-                src={"https://i.pravatar.cc/150?img=5"}
-                sx={{
-                  width: 50,
-                  height: 50,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  bgcolor: "secondary.main",
-                  color: "primary.contrastText",
-                }}
-              />
-              <Box sx={{ ml: 2 }}>
-                <Typography
-                  variant="body1"
-                  fontWeight={500}
-                  sx={{
-                    mt: 1,
-                    color: "primary.contrastText",
-                  }}
-                >
-                  Emily Rodriguez
-                </Typography>
-                <Typography color="text.contrastText">
-                  Council Services
-                </Typography>
-              </Box>
-            </AccordionSummary>
-            <Box
-              sx={{
-                backgroundColor: "primary.main",
-                padding: 0,
-                width: "100%",
-              }}
-            >
-              <List sx={{ padding: 2 }}>
-                <Typography
-                  variant="body2"
-                  color="text.contrastText"
-                  sx={{ mt: 0.5, fontStyle: "italic" }}
-                >
-                  View Profile
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.contrastText"
-                  sx={{ mt: 0.5, fontStyle: "italic" }}
-                >
-                  View Audit Logs
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.contrastText"
-                  sx={{ mt: 0.5, fontStyle: "italic" }}
-                >
-                  Logout
-                </Typography>
-              </List>
-            </Box>
-          </Accordion>
+            {givenName?.concat(" ", familyName ? familyName : "")}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.contrastText"
+            onClick={handleLogout}
+            sx={{ mt: 1, fontStyle: "italic", cursor: "pointer" }}
+          >
+            Logout
+          </Typography>
         </Box>
       </List>
     </Drawer>
