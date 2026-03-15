@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Button, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputAdornment } from '@mui/material';
-import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import SmsIcon from '@mui/icons-material/Sms';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import { normalisePhoneToE164, isValidEmail } from '../../shared/formSchema';
 
-interface StepOutContactDialogProps {
+interface ContactDetailsDialogProps {
     open: boolean;
     onClose: () => void;
     onConfirm: (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => void;
     prefillEmail?: string | null;
     prefillPhone?: string | null;
+    title: string;
+    description: string;
+    confirmLabel: string;
 }
 
-export default function ContactDetailsDialog({ open, onClose, onConfirm, prefillEmail, prefillPhone }: StepOutContactDialogProps) {
+export default function ContactDetailsDialog({ open, onClose, onConfirm, prefillEmail, prefillPhone, title, description, confirmLabel }: ContactDetailsDialogProps) {
     const [contactMethod, setContactMethod] = useState<'SMS' | 'EMAIL' | null>(null);
     const [contactValue, setContactValue] = useState('');
     const [contactTouched, setContactTouched] = useState(false);
@@ -74,11 +76,11 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-            <DialogTitle>How would you like to receive updates?</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <Stack spacing={2} sx={{ pt: 1 }}>
                     <Typography variant="body2" color="text.secondary">
-                        We'll notify you as your turn approaches so you can return in time.
+                        {description}
                     </Typography>
                     <Stack direction="row" spacing={1}>
                         <Button
@@ -153,11 +155,10 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                 <Button onClick={onClose}>Cancel</Button>
                 <Button
                     variant="contained"
-                    endIcon={<DirectionsWalkIcon />}
                     disabled={!contactMethod || !contactValueValid}
                     onClick={handleConfirm}
                 >
-                    Step out
+                    {confirmLabel}
                 </Button>
             </DialogActions>
         </Dialog>
