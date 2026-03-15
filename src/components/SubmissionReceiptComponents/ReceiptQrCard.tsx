@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 type ReceiptQrCardProps = {
   isAppointment: boolean;
@@ -7,16 +7,17 @@ type ReceiptQrCardProps = {
 
 export default function ReceiptQrCard({ isAppointment, qrCodeUrl }: ReceiptQrCardProps) {
   return (
-    <Paper
-      variant="outlined"
+    <Box
       sx={{
         width: { xs: "100%", md: 320 },
         p: { xs: 2.5, sm: 3 },
-        borderRadius: 3,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         textAlign: "center",
+        borderTop: { xs: 2, md: 0 },
+        borderLeft: { xs: 0, md: 2 },
+        borderColor: "grey.300",
       }}
     >
       {/* QR code */}
@@ -65,8 +66,9 @@ export default function ReceiptQrCard({ isAppointment, qrCodeUrl }: ReceiptQrCar
       )}
 
       <Typography variant="body2" color="text.secondary">
-        You can still use your {isAppointment ? "appointment reference" : "ticket"} number if the QR code is not available.
+        You can still use your {isAppointment ? "appointment reference" : "ticket"} number if the QR
+        code is not available.
       </Typography>
-    </Paper>
+    </Box>
   );
 }

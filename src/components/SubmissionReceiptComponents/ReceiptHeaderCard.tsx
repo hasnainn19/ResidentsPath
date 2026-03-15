@@ -1,5 +1,6 @@
-import { Alert, Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import TextToSpeechButton from "../TextToSpeechButton";
 
 type ReceiptHeaderCardProps = {
   chipLabel: string;
@@ -9,6 +10,7 @@ type ReceiptHeaderCardProps = {
   caseReferenceNumber?: string;
   appointmentReferenceNumber?: string;
   ticketNumber?: string;
+  ttsText?: string;
   onCopyCaseReference: () => void;
   onCopyAppointmentReference: () => void;
   onPrint: () => void;
@@ -22,20 +24,20 @@ export default function ReceiptHeaderCard({
   caseReferenceNumber,
   appointmentReferenceNumber,
   ticketNumber,
+  ttsText,
   onCopyCaseReference,
   onCopyAppointmentReference,
   onPrint,
 }: ReceiptHeaderCardProps) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: { xs: 2, sm: 3, md: 4 },
-        borderRadius: 3,
-        bgcolor: "background.paper",
-      }}
-    >
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
       <Stack spacing={{ xs: 2.5, md: 3 }}>
+        {ttsText ? (
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <TextToSpeechButton text={ttsText} />
+          </Box>
+        ) : null}
+
         <Stack
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
@@ -185,14 +187,15 @@ export default function ReceiptHeaderCard({
             )}
           </Box>
 
-          <Paper
-            variant="outlined"
+          <Box
             sx={{
               width: { xs: "100%", md: 280 },
               minWidth: 0,
               p: { xs: 2, sm: 2.5 },
               borderRadius: 2.5,
-              bgcolor: "background.default",
+              border: 1,
+              borderColor: "divider",
+              bgcolor: "background.paper",
             }}
           >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.75 }}>
@@ -266,7 +269,7 @@ export default function ReceiptHeaderCard({
                 Print or save
               </Button>
             </Stack>
-          </Paper>
+          </Box>
         </Stack>
 
         <Alert
@@ -289,6 +292,6 @@ export default function ReceiptHeaderCard({
               }`}
         </Alert>
       </Stack>
-    </Paper>
+    </Box>
   );
 }

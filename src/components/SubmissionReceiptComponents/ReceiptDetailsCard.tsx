@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 
 type ReceiptSummary = {
   ticketNumber?: string;
@@ -27,7 +27,7 @@ export default function ReceiptDetailsCard({
   onCopyAppointmentDetails,
 }: ReceiptDetailsCardProps) {
   return (
-    <Paper variant="outlined" sx={{ flex: 1, p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
+    <Box sx={{ flex: 1, minWidth: 0, p: { xs: 2.5, sm: 3 } }}>
       <Stack spacing={{ xs: 2.5, md: 3 }}>
         {!isAppointment ? (
           <>
@@ -115,7 +115,9 @@ export default function ReceiptDetailsCard({
           </Stack>
         )}
 
-        {receipt.departmentName || submittedAt ? <Divider /> : null}
+        {receipt.departmentName || submittedAt ? (
+          <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+        ) : null}
 
         {/* Department name and submission info */}
         <Stack spacing={1.5}>
@@ -135,11 +137,13 @@ export default function ReceiptDetailsCard({
               <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                 Submitted
               </Typography>
-              <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>{submittedAt}</Typography>
+              <Typography sx={{ fontWeight: 700, overflowWrap: "anywhere" }}>
+                {submittedAt}
+              </Typography>
             </Box>
           ) : null}
         </Stack>
       </Stack>
-    </Paper>
+    </Box>
   );
 }

@@ -10,7 +10,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import * as QRCode from "qrcode";
 import { generateClient } from "aws-amplify/data";
-import { Alert, Box, Container, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, Container, Divider, Paper, Snackbar, Typography } from "@mui/material";
 
 import type { Schema } from "../../../amplify/data/resource";
 import NavBar from "../../components/NavBar";
@@ -338,11 +338,34 @@ export default function SubmissionReceipt() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <NavBar />
+      <Box sx={{ displayPrint: "none" }}>
+        <NavBar />
+      </Box>
 
-      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 3, md: 5 } }}>
-        {/* Receipt details*/}
-        <Stack spacing={{ xs: 2.5, md: 3 }}>
+      <Container
+        maxWidth="md"
+        sx={{
+          py: { xs: 2, sm: 3, md: 5 },
+          "@media print": {
+            maxWidth: "100%",
+            px: 0,
+            py: 0,
+          },
+        }}
+      >
+        <Paper
+          variant="outlined"
+          sx={{
+            borderRadius: 3,
+            overflow: "hidden",
+            bgcolor: "background.paper",
+            "@media print": {
+              borderRadius: 0,
+              boxShadow: "none",
+              breakInside: "avoid",
+            },
+          }}
+        >
           <ReceiptHeaderCard
             chipLabel={chipLabel}
             heading={heading}
@@ -351,6 +374,7 @@ export default function SubmissionReceipt() {
             caseReferenceNumber={headerCaseReferenceNumber}
             appointmentReferenceNumber={headerAppointmentReferenceNumber}
             ticketNumber={receipt?.ticketNumber}
+            ttsText={ttsText}
             onCopyCaseReference={() =>
               copyValue("Case reference number", headerCaseReferenceNumber)
             }
@@ -362,39 +386,49 @@ export default function SubmissionReceipt() {
 
           {/* Loading/errors */}
           {loading ? (
-            <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
-              <Typography fontWeight={700}>Loading your receipt...</Typography>
-            </Paper>
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+                <Typography fontWeight={700}>Loading your receipt...</Typography>
+              </Box>
+            </>
           ) : null}
 
           {!loading && errorMessage ? (
-            <Alert severity="warning" variant="outlined">
-              {errorMessage}
-            </Alert>
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+                <Alert severity="warning" variant="outlined">
+                  {errorMessage}
+                </Alert>
+              </Box>
+            </>
           ) : null}
 
           {/* Main receipt body */}
           {receipt ? (
-            <ReceiptBody
-              receipt={receipt}
-              isAppointment={isAppointment}
-              appointmentDate={appointmentDate}
-              submittedAt={submittedAt}
-              qrCodeUrl={qrCodeUrl}
-              ttsText={ttsText}
-              onCopyTicket={() => copyValue("Ticket number", receipt.ticketNumber)}
-              onCheckQueueStatus={() => nav("/referencepage")}
-              onCopyAppointmentDetails={() =>
-                copyValue(
-                  "Appointment details",
-                  [appointmentDate, receipt.appointmentTime, receipt.bookingReferenceNumber]
-                    .filter(Boolean)
-                    .join(" "),
-                )
-              }
-            />
+            <>
+              <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+              <ReceiptBody
+                receipt={receipt}
+                isAppointment={isAppointment}
+                appointmentDate={appointmentDate}
+                submittedAt={submittedAt}
+                qrCodeUrl={qrCodeUrl}
+                onCopyTicket={() => copyValue("Ticket number", receipt.ticketNumber)}
+                onCheckQueueStatus={() => nav("/referencepage")}
+                onCopyAppointmentDetails={() =>
+                  copyValue(
+                    "Appointment details",
+                    [appointmentDate, receipt.appointmentTime, receipt.bookingReferenceNumber]
+                      .filter(Boolean)
+                      .join(" "),
+                  )
+                }
+              />
+            </>
           ) : null}
-        </Stack>
+        </Paper>
       </Container>
 
       <Snackbar
