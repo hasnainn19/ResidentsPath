@@ -194,10 +194,32 @@ export default function UserDashboard() {
                                     </Grid>
                                 </Stack>
                                 <Grid size={12}>
+                                    <Item sx={{ textAlign: 'left', backgroundColor: '#e8f5e9' }}>
+                                        <Stack spacing={1}>
+                                            <Typography variant='h6'>
+                                                Would you like to receive notification updates about your status in the queue?
+                                                <TextToSpeechButton text='Would you like to receive notification updates about your status in the queue? We can send you an SMS or email as your turn approaches.' />
+                                            </Typography>
+                                            <Typography variant='body1'>We can send you an SMS or email as your turn approaches.</Typography>
+                                            <Stack direction='row' spacing={2}>
+                                                <Button
+                                                    className='dashboardBtn'
+                                                    variant={notificationsEnabled ? 'contained' : 'outlined'}
+                                                    sx={{ borderColor: 'primary.main' }}
+                                                    endIcon={<NotificationsIcon />}
+                                                    onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
+                                                >
+                                                    {notificationsEnabled ? 'Stop notifications' : 'Get queue notifications'}
+                                                </Button>
+                                            </Stack>
+                                        </Stack>
+                                    </Item>
+                                </Grid>
+                                <Grid size={12}>
                                     <Item sx={{ textAlign: 'left', backgroundColor:'#e0eeff'}}>
                                         <Stack spacing={1}>
                                             <Typography variant='h6'>Need to step out?
-                                                <TextToSpeechButton text='If you need to leave the building, click the button on the left. We can send you updates as your turn approaches. Upon returning click the button on the right to stop receiving updates.'/>
+                                                <TextToSpeechButton text='If you need to leave the building, click the button below. We can send you updates as your turn approaches. Upon returning, click the button again.'/>
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
@@ -205,30 +227,13 @@ export default function UserDashboard() {
                                                     className='dashboardBtn'
                                                     variant='contained'
                                                     sx={{ borderColor: 'primary.main' }}
-                                                    endIcon={<DirectionsWalkIcon />}
-                                                    onClick={() => notificationsEnabled ? executeStepOut() : setStepOutDialogOpen(true)}
-                                                    disabled={stepOut}
+                                                    endIcon={stepOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
+                                                    onClick={stepOut
+                                                        ? handleReturned
+                                                        : () => notificationsEnabled ? executeStepOut() : setStepOutDialogOpen(true)
+                                                    }
                                                 >
-                                                    I'm stepping out
-                                                </Button>
-                                                <Button
-                                                    className='dashboardBtn'
-                                                    variant='contained'
-                                                    sx={{ borderColor: 'primary.main' }}
-                                                    endIcon={<CommentsDisabledIcon />}
-                                                    onClick={handleReturned}
-                                                    disabled={!stepOut}
-                                                >
-                                                    I've returned
-                                                </Button>
-                                                <Button
-                                                    className='dashboardBtn'
-                                                    variant='outlined'
-                                                    sx={{ borderColor: 'primary.main' }}
-                                                    endIcon={<NotificationsIcon />}
-                                                    onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
-                                                >
-                                                    {notificationsEnabled ? 'Stop notifications' : 'Get queue notifications'}
+                                                    {stepOut ? "I've returned" : "I'm stepping out"}
                                                 </Button>
                                             </Stack>
                                         </Stack>
@@ -264,7 +269,7 @@ export default function UserDashboard() {
             />
             <ContactDetailsDialog
                 title="Get queue notifications"
-                description="We'll notify you when your turn is approaching, even if you're still in the building."
+                description="We'll notify you when your turn is approaching."
                 confirmLabel="Enable notifications"
                 open={enableNotificationsDialogOpen}
                 onClose={() => setEnableNotificationsDialogOpen(false)}
