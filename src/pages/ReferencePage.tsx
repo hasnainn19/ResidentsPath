@@ -26,11 +26,6 @@ import { useNavigate } from 'react-router-dom';
 import { useCheckReferenceNumber } from "../hooks/useCheckReferenceNumber";
 import { useAppointmentReferenceActions } from "../hooks/useAppointmentReferenceActions";
 
-type ReferencePageStatus = {
-    severity: "success" | "info" | "warning";
-    text: string;
-} | null;
-
 const ReferencePage = () => {
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [ scanning, setScanning ] = useState(false);
@@ -47,9 +42,10 @@ const ReferencePage = () => {
         isChecking,
     } = useCheckReferenceNumber();
     const [ refPageError, setRefPageError] = useState('');
-    const [ actionStatus, setActionStatus ] = useState<ReferencePageStatus>(null);
     const {
+        actionStatus,
         canCheckInAppointments,
+        clearActionStatus,
         isCheckingIn,
         isCancelling,
         checkInAppointmentReference,
@@ -62,7 +58,7 @@ const ReferencePage = () => {
     }, [checkRefNo]);
 
     const handleCheckStatus = async () => {
-        setActionStatus(null);
+        clearActionStatus();
         await checkRefNo(refNo);
     }
     
@@ -113,25 +109,12 @@ const ReferencePage = () => {
             return;
         }
 
-        setActionStatus(null);
         const result = await cancelAppointmentReference(appointmentReferenceNumber);
 
         if (result.ok) {
             clearAppointmentReference();
             setRefNo('');
-            setActionStatus({
-                severity: result.alreadyCancelled ? "info" : "success",
-                text: result.alreadyCancelled
-                    ? "This appointment has already been cancelled."
-                    : "Your appointment has been cancelled.",
-            });
-            return;
         }
-
-        setActionStatus({
-            severity: "warning",
-            text: result.errorMessage || "We could not cancel that appointment right now.",
-        });
     }
 
     async function handleCheckInAppointment() {
@@ -139,30 +122,16 @@ const ReferencePage = () => {
             return;
         }
 
-        setActionStatus(null);
         const result = await checkInAppointmentReference(appointmentReferenceNumber);
 
-        if (result.alreadyCheckedIn) {
+        if (result.alreadyCheckedIn || result.checkedIn) {
             clearAppointmentReference();
             setRefNo('');
-            setActionStatus({
-                severity: "info",
-                text: "This appointment has already been checked in.",
-            });
-            return;
         }
 
         if (result.checkedIn) {
-            clearAppointmentReference();
-            setRefNo('');
             navigate("/checkinpage");
-            return;
         }
-
-        setActionStatus({
-            severity: "warning",
-            text: result.errorMessage || "We could not check in that appointment right now.",
-        });
     }
 
     useEffect(() => {
@@ -219,7 +188,7 @@ const ReferencePage = () => {
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center', height:'85vh' }}>
             {actionStatus && (
-                <Alert severity={actionStatus.severity} onClose={() => setActionStatus(null)}>
+                <Alert severity={actionStatus.severity} onClose={clearActionStatus}>
                     {actionStatus.text}
                 </Alert>
             )}
