@@ -22,29 +22,52 @@ import {
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
 import EditIcon from "@mui/icons-material/Edit";
-import { useState } from "react";
+import React, { useState } from "react";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../../amplify/data/resource";
+import ConfirmChangeModal from "./ConfirmChangeModal";
+
+const client = generateClient<Schema>({ authMode: "userPool" });
 
 interface CurrentQueueItemProps {
   caseItem: {
     id: string;
-    service: string;
+    caseId: string;
+    ticketNumber: string;
+    department: string;
     title: string;
     description: string;
     status: "Priority" | "Standard";
+    isFlagged: boolean;
     position: number;
+    notes: string | null;
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
+  handleMarkSeen: (ticketId: string) => void;
   showPosition: boolean;
 }
 const CurrentQueueItem = (props: CurrentQueueItemProps) => {
-  const { showPosition, caseItem, totalPositions, handleSelectPosition } =
-    props;
-  const [isFlagged, setIsFlagged] = useState(false);
-  const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(caseItem.status);
-  const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
+  const {
+    showPosition,
+    caseItem,
+    totalPositions,
+    handleSelectPosition,
+    handleMarkSeen,
+  } = props;
+  const [isFlagged, setIsFlagged] = useState(caseItem.isFlagged);
+  const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(
+    caseItem.status,
+  );
+  const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(
+    null,
+  );
+  const [prioritySaving, setPrioritySaving] = useState(false);
+  const [flagSaving, setFlagSaving] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(caseItem.notes ?? "");
+  const [confirmNotesOpen, setConfirmNotesOpen] = useState(false);
+  const [confirmSeenOpen, setConfirmSeenOpen] = useState(false);
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -53,19 +76,67 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     Priority: "error",
     Standard: "default",
   };
+
+  const handleTogglePriority = async () => {
+    const newStatus = localStatus === "Standard" ? "Priority" : "Standard";
+    setPriorityAnchor(null);
+    setPrioritySaving(true);
+    try {
+      await client.mutations.setCasePriority({
+        caseId: caseItem.caseId,
+        priority: newStatus === "Priority",
+      });
+      setLocalStatus(newStatus);
+    } catch (e) {
+      console.error("CurrentQueueItem: setCasePriority failed", e);
+    } finally {
+      setPrioritySaving(false);
+    }
+  };
+
+  const handleToggleFlag = async () => {
+    const newFlagged = !isFlagged;
+    setFlagSaving(true);
+    try {
+      await client.mutations.flagCaseSafeguarding({
+        caseId: caseItem.caseId,
+        flagged: newFlagged,
+      });
+      setIsFlagged(newFlagged);
+    } catch (e) {
+      console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
+    } finally {
+      setFlagSaving(false);
+    }
+  };
+
+  const handlePositionChange = (event: { target: { value: string } }) =>
+    handleSelectPosition(caseItem.id, Number(event.target.value));
+
+  const handleSaveNotes = async () => {
+    try {
+      await client.models.Ticket.update({ id: caseItem.id, notes });
+    } catch (error) {
+      console.error(`Failed to save note for case:${caseItem.caseId}`);
+    } finally {
+      setConfirmNotesOpen(false);
+      setNotesOpen(false);
+    }
+  };
+
   return (
     <Card key={caseItem.id} sx={{ borderRadius: 3 }}>
       <CardContent>
         <Stack direction="row" justifyContent="space-between">
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Stack direction="row" spacing={1} mb={1}>
+            <Stack direction="row" spacing={1} mb={1} alignItems="center">
               <Chip
                 label={localStatus}
                 color={statusColorMap[localStatus]}
                 size="small"
               />
               <Typography variant="caption" color="text.secondary">
-                #{caseItem.id}
+                #{caseItem.ticketNumber}
               </Typography>
             </Stack>
 
@@ -100,7 +171,10 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Tooltip title="Edit priority">
-                <IconButton size="small" onClick={(e) => setPriorityAnchor(e.currentTarget)}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => setPriorityAnchor(e.currentTarget)}
+                >
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -109,17 +183,31 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 open={Boolean(priorityAnchor)}
                 onClose={() => setPriorityAnchor(null)}
               >
-                <MenuItem onClick={() => {
-                  setLocalStatus(localStatus === "Standard" ? "Priority" : "Standard");
-                  setPriorityAnchor(null);
-                }}>
-                  {localStatus === "Standard" ? "Set to Priority" : "Set to Standard"}
+                <MenuItem
+                  disabled={prioritySaving}
+                  onClick={handleTogglePriority}
+                >
+                  {localStatus === "Standard"
+                    ? "Set to Priority"
+                    : "Set to Standard"}
                 </MenuItem>
               </Menu>
-              <Tooltip title="Flag this case">
-                <IconButton size="small" onClick={() => setIsFlagged(!isFlagged)}>
-                  <FlagIcon color={isFlagged ? "error" : "disabled"} />
-                </IconButton>
+              <Tooltip
+                title={
+                  isFlagged
+                    ? "Clear safeguarding flag"
+                    : "Flag for safeguarding"
+                }
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={flagSaving}
+                    onClick={handleToggleFlag}
+                  >
+                    <FlagIcon color={isFlagged ? "error" : "disabled"} />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
             <Stack spacing={1.5} alignItems="stretch">
@@ -131,13 +219,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                   <Select
                     labelId={`move-position-label-${caseItem.id}`}
                     label="Move to position"
-                    value={String(Math.min(caseItem.position, totalPositions))}
-                    onChange={(event) =>
-                      handleSelectPosition(
-                        caseItem.id,
-                        Number(event.target.value),
-                      )
-                    }
+                    value={String(caseItem.position)}
+                    onChange={handlePositionChange}
                   >
                     {positionOptions.map((position) => (
                       <MenuItem key={position} value={String(position)}>
@@ -151,6 +234,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
+                onClick={() => setConfirmSeenOpen(true)}
               >
                 Mark as Seen
               </Button>
@@ -188,11 +272,26 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setNotesOpen(false)}>
+          <Button variant="contained" onClick={() => setConfirmNotesOpen(true)}>
             Save
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmChangeModal
+        open={confirmNotesOpen}
+        handleClose={() => setConfirmNotesOpen(false)}
+        handleConfirm={handleSaveNotes}
+      />
+
+      <ConfirmChangeModal
+        open={confirmSeenOpen}
+        handleClose={() => setConfirmSeenOpen(true)}
+        handleConfirm={() => {
+          setConfirmSeenOpen(false);
+          handleMarkSeen(caseItem.id);
+        }}
+      />
     </Card>
   );
 };

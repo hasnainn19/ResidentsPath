@@ -185,6 +185,7 @@ const StaffDashboard = () => {
                 >
                   Longest Wait
                 </TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>Priority</TableCell>
                 <TableCell
                   onClick={() => handleSort("averageWait")}
                   sx={{
@@ -203,7 +204,6 @@ const StaffDashboard = () => {
                 >
                   Average Wait
                 </TableCell>
-                <TableCell sx={{ whiteSpace: "nowrap" }}>Priority</TableCell>
                 <TableCell
                   onClick={() => handleSort("steppedOutCount")}
                   sx={{
