@@ -160,6 +160,11 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             continue;
         }
 
+        // Check if they have opted-in for notifications on this ticket
+        if (!newImage.notificationsEnabled) {
+            continue;
+        }
+
         const caseData = await getCase(client, caseId);
         if (!caseData) {
             console.error(`notifyResident: Case with ID ${caseId} not found.`);
@@ -175,20 +180,22 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         // Retrieve contact details from user record
         const phoneNumber = user.phoneNumber ?? null;
         const email = user.email ?? null;
+        const preferredContactMethod = newImage.notificationPreferredContactMethod;
 
-        // They have no form of contact, skip
+        // They have no form of contact, skip (although if they have enabled notis then they should have at least one)
         if (!phoneNumber && !email) {
             console.log(`notifyResident: User with ID ${user.id} has no contact information, skipping notification for ticket ${ticketNumber}.`);
             continue;
         }
 
-        // If they have a phone number, we contact them via SMS using End User Messaging
-        if (phoneNumber) {
+        if (preferredContactMethod === 'SMS' && phoneNumber) {
             await sendSms(phoneNumber, ticketNumber, message);
         }
-        // If they don't have a phone number but have an email, we contact them via email using SES
-        else if (email) {
+        else if (preferredContactMethod === 'EMAIL' && email) {
             await sendEmail(email, ticketNumber, message);
+        }
+        else {
+            console.error(`notifyResident: No contact info for preferred method ${preferredContactMethod} on ticket ${ticketNumber}, skipping.`);
         }
     }
 };

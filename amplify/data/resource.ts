@@ -12,6 +12,7 @@ import { getDashboardStats } from "../functions/getDashboardStats/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 import { handleSteppedOut } from "../functions/handleSteppedOut/resource";
+import { toggleNotifications } from "../functions/toggleNotifications/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -147,6 +148,10 @@ const schema = a
         estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
         estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
         steppedOut: a.boolean().default(false),
+        
+        // Notification tracking
+        notificationsEnabled: a.boolean().default(false),
+        notificationPreferredContactMethod: a.enum(["SMS", "EMAIL"]),
 
         // Timestamps for queue tracking
         completedAt: a.datetime(),
@@ -258,6 +263,7 @@ const schema = a
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
           steppedOut: a.boolean().required(),
+          notificationsEnabled: a.boolean().required(),
         }),
       )
       .authorization((allow) => [
@@ -279,6 +285,23 @@ const schema = a
         allow.authenticated(),
       ])
       .handler(a.handler.function(handleSteppedOut)),
+
+    toggleNotifications: a
+      .mutation()
+      .arguments({
+          ticketId: a.id().required(),
+          caseId: a.id().required(),
+          enabled: a.boolean().required(),
+          contactMethod: a.enum(['SMS', 'EMAIL']),
+          contactValue: a.string(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [
+          allow.guest(),
+          allow.authenticated(),
+      ])
+      .handler(a.handler.function(toggleNotifications)),
+
 
     getDepartmentQueueStatus: a
       .query()
@@ -444,6 +467,7 @@ const schema = a
     allow.resource(getDashboardStats),
     allow.resource(checkTicketNumber),
     allow.resource(handleSteppedOut),
+    allow.resource(toggleNotifications),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 
