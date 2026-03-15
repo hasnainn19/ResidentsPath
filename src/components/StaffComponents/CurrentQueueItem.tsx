@@ -77,10 +77,6 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     Standard: "default",
   };
 
-  const handleOpenPriorityMenu = (e: React.MouseEvent<HTMLButtonElement>) =>
-    setPriorityAnchor(e.currentTarget);
-  const handleClosePriorityMenu = () => setPriorityAnchor(null);
-
   const handleTogglePriority = async () => {
     const newStatus = localStatus === "Standard" ? "Priority" : "Standard";
     setPriorityAnchor(null);
@@ -117,27 +113,15 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const handlePositionChange = (event: { target: { value: string } }) =>
     handleSelectPosition(caseItem.id, Number(event.target.value));
 
-  const handleOpenNotes = () => setNotesOpen(true);
-  const handleCloseNotes = () => setNotesOpen(false);
-  const handleOpenConfirmNotes = () => setConfirmNotesOpen(true);
-  const handleCloseConfirmNotes = () => setConfirmNotesOpen(false);
-
   const handleSaveNotes = async () => {
     try {
       await client.models.Ticket.update({ id: caseItem.id, notes });
     } catch (error) {
       console.error(`Failed to save note for case:${caseItem.caseId}`);
+    } finally {
+      setConfirmNotesOpen(false);
+      setNotesOpen(false);
     }
-    setConfirmNotesOpen(false);
-    setNotesOpen(false);
-  };
-
-  const handleOpenConfirmSeen = () => setConfirmSeenOpen(true);
-  const handleCloseConfirmSeen = () => setConfirmSeenOpen(false);
-
-  const handleConfirmSeen = async () => {
-    setConfirmSeenOpen(false);
-    handleMarkSeen(caseItem.id);
   };
 
   return (
@@ -187,14 +171,17 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           >
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Tooltip title="Edit priority">
-                <IconButton size="small" onClick={handleOpenPriorityMenu}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => setPriorityAnchor(e.currentTarget)}
+                >
                   <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
               <Menu
                 anchorEl={priorityAnchor}
                 open={Boolean(priorityAnchor)}
-                onClose={handleClosePriorityMenu}
+                onClose={() => setPriorityAnchor(null)}
               >
                 <MenuItem
                   disabled={prioritySaving}
@@ -247,7 +234,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
-                onClick={handleOpenConfirmSeen}
+                onClick={() => setConfirmSeenOpen(true)}
               >
                 Mark as Seen
               </Button>
@@ -255,7 +242,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                 variant="outlined"
                 size="small"
                 sx={{ whiteSpace: "nowrap", fontSize: "0.75rem", px: 1 }}
-                onClick={handleOpenNotes}
+                onClick={() => setNotesOpen(true)}
               >
                 View/Edit Notes
               </Button>
@@ -266,7 +253,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
 
       <Dialog
         open={notesOpen}
-        onClose={handleCloseNotes}
+        onClose={() => setNotesOpen(false)}
         fullWidth
         maxWidth="sm"
       >
@@ -284,8 +271,8 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseNotes}>Cancel</Button>
-          <Button variant="contained" onClick={handleOpenConfirmNotes}>
+          <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => setConfirmNotesOpen(true)}>
             Save
           </Button>
         </DialogActions>
@@ -293,14 +280,17 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
 
       <ConfirmChangeModal
         open={confirmNotesOpen}
-        handleClose={handleCloseConfirmNotes}
+        handleClose={() => setConfirmNotesOpen(false)}
         handleConfirm={handleSaveNotes}
       />
 
       <ConfirmChangeModal
         open={confirmSeenOpen}
-        handleClose={handleCloseConfirmSeen}
-        handleConfirm={handleConfirmSeen}
+        handleClose={() => setConfirmSeenOpen(true)}
+        handleConfirm={() => {
+          setConfirmSeenOpen(false);
+          handleMarkSeen(caseItem.id);
+        }}
       />
     </Card>
   );
