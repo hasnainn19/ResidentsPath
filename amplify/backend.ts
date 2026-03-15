@@ -131,7 +131,8 @@ const appointmentTable = backend.data.resources.tables["Appointment"];
  * Attach the Ticket stream to the Lambda.
  * The filter tells AWS to only invoke the Lambda for MODIFY events
  *
- * Further filters can be added that target the dynamoDB record's new and old images
+ * The 3 filters are mutually exclusive so the lambda doesn't fire multiple times for the same ticket update.
+ * Since FilterRule doesn't support greaterThan or lessThanOrEqualTo, we use between to create the necessary ranges.
  */
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
@@ -139,13 +140,34 @@ backend.notifyResident.resources.lambda.addEventSource(
     batchSize: 10,
     bisectBatchOnError: true,
     filters: [
+      // Position reaches 0 (being served)
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
         dynamodb: {
-          // Filter for when the record's data changes to something specific
+          NewImage: { position: { N: FilterRule.isEqual("0") } },
+          OldImage: { position: { N: FilterRule.notEquals("0") } },
+        },
+      }),
+      // Crosses into ≤5 min range from above 5 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
           NewImage: {
-            position: { N: FilterRule.isEqual("0") }, // Trigger when position changes to 0
+            estimatedWaitTimeLower: { N: FilterRule.between(0, 5) },
+            position: { N: FilterRule.notEquals("0") },
           },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(6, 999) } },
+        },
+      }),
+      // Crosses into 6–15 min range from above 15 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(6, 15) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(16, 999) } },
         },
       }),
     ]
