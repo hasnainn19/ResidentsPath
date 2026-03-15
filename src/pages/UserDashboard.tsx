@@ -60,8 +60,27 @@ export default function UserDashboard() {
 
     const handleStepOutConfirm = async (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => {
         setStepOutDialogOpen(false);
-        // TODO: call enableNotifications(ticketId, caseId, contactMethod, contactValue) once backend is ready
-        console.log('Step out contact:', contactMethod, contactValue);
+        if (!ticketId) return;
+
+        try {
+            const { errors: notifErrors } = await client.mutations.toggleNotifications({
+                ticketId,
+                caseId: caseId!,
+                enabled: true,
+                contactMethod,
+                contactValue,
+            });
+            if (notifErrors && notifErrors.length > 0) {
+                setErrors(notifErrors[0].message);
+                return;
+            }
+            setNotificationsEnabled(true);
+        }
+        catch (error) {
+            setErrors(`Failed to enable notifications: ${error}`);
+            return;
+        }
+
         await executeStepOut();
     };
 
@@ -70,8 +89,17 @@ export default function UserDashboard() {
         if (!ticketId) return;
 
         try {
-            // TODO: call enableNotifications(ticketId, caseId, contactMethod, contactValue) once backend is ready
-            console.log('Enable notifications contact:', contactMethod, contactValue);
+            const { errors: notifErrors } = await client.mutations.toggleNotifications({
+                ticketId,
+                caseId: caseId!,
+                enabled: true,
+                contactMethod,
+                contactValue,
+            });
+            if (notifErrors && notifErrors.length > 0) {
+                setErrors(notifErrors[0].message);
+                return;
+            }
             setNotificationsEnabled(true);
         }
         catch (error) {
@@ -83,7 +111,15 @@ export default function UserDashboard() {
         if (!ticketId) return;
 
         try {
-            // TODO: call disableNotifications(ticketId, caseId) once backend is ready
+            const { errors: notifErrors } = await client.mutations.toggleNotifications({
+                ticketId,
+                caseId: caseId!,
+                enabled: false,
+            });
+            if (notifErrors && notifErrors.length > 0) {
+                setErrors(notifErrors[0].message);
+                return;
+            }
             setNotificationsEnabled(false);
         }
         catch (error) {
@@ -144,6 +180,7 @@ export default function UserDashboard() {
             setWaitTimeLower(ticketInfo.estimatedWaitTimeLower);
             setWaitTimeUpper(ticketInfo.estimatedWaitTimeUpper);
             setStepOut(ticketInfo.steppedOut);
+            setNotificationsEnabled(ticketInfo.notificationsEnabled);
 
         } 
         catch (error) {
