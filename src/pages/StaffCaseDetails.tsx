@@ -28,6 +28,7 @@ import DetailRow from "../components/StaffComponents/DetailRow";
 import useCaseDetails from "../hooks/useCaseDetails";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
+import { UI_OPTIONS } from "../../shared/formSchema";
 
 const CASE_STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
 
@@ -80,6 +81,12 @@ const StaffCaseDetails = () => {
       setUpdatingStatus(false);
     }
   };
+  const {
+    ageRange: ageRangeLabels,
+    disabilityType: disabilityTypeLabels,
+    supportNeeds: supportNeedsLabels,
+    urgentReason: urgentReasonLabels,
+  } = UI_OPTIONS;
 
   if (loading) {
     return (
@@ -182,7 +189,12 @@ const StaffCaseDetails = () => {
               <DetailRow label="Full Name" value={c.name} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <DetailRow label="Age Range" value={c.ageRange} />
+              <DetailRow
+                label="Age Range"
+                value={
+                  ageRangeLabels.find((a) => a.value === c.ageRange)?.label
+                }
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <DetailRow label="Household Size" value={c.householdSize} />
@@ -216,7 +228,11 @@ const StaffCaseDetails = () => {
               <DetailRow
                 label="Disability / Sensory Need"
                 value={
-                  c.hasDisabilityOrSensory ? c.disabilityType : "None reported"
+                  c.hasDisabilityOrSensory
+                    ? disabilityTypeLabels.find(
+                        (d) => d.value === c.disabilityType,
+                      )?.label
+                    : "None reported"
                 }
               />
             </Grid>
@@ -243,7 +259,10 @@ const StaffCaseDetails = () => {
                       {c.supportNeeds.map((need) => (
                         <Chip
                           key={need}
-                          label={need.replace(/_/g, " ")}
+                          label={
+                            supportNeedsLabels.find((s) => s.value === need)
+                              ?.label
+                          }
                           size="small"
                           variant="outlined"
                         />
@@ -265,7 +284,13 @@ const StaffCaseDetails = () => {
         {c.urgent === "yes" && (
           <SectionCard title="Urgency">
             <Stack spacing={2}>
-              <DetailRow label="Urgent Reason" value={c.urgentReason} />
+              <DetailRow
+                label="Urgent Reason"
+                value={
+                  urgentReasonLabels.find((u) => u.value == c.urgentReason)
+                    ?.label
+                }
+              />
               {c.urgentReasonOtherText && (
                 <DetailRow
                   label="Additional Urgency Details"
@@ -283,7 +308,11 @@ const StaffCaseDetails = () => {
               <Box flex={1}>
                 <DetailRow label="Notes" value={c.notes ?? "No notes yet."} />
               </Box>
-              <IconButton size="small" onClick={openNotesModal} sx={{ mt: 0.5 }}>
+              <IconButton
+                size="small"
+                onClick={openNotesModal}
+                sx={{ mt: 0.5 }}
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
             </Stack>
