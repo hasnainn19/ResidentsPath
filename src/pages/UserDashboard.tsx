@@ -9,6 +9,7 @@ import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
 import ContactDetailsDialog from '../components/ContactDetailsDialog';
+import { useUser } from '../hooks/useUser';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -27,6 +28,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
+    const { user } = useUser();
     const [showStepOutAlert, setShowStepOutAlert]=useState(false);
     const [stepOut, setStepOut]=useState(false);
     const [errors, setErrors] = useState('');
@@ -193,6 +195,8 @@ export default function UserDashboard() {
                 open={stepOutDialogOpen}
                 onClose={() => setStepOutDialogOpen(false)}
                 onConfirm={handleStepOutConfirm}
+                prefillEmail={user?.email}
+                prefillPhone={user?.phoneNumber}
             />
         </>
     )

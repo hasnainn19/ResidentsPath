@@ -9,9 +9,11 @@ interface StepOutContactDialogProps {
     open: boolean;
     onClose: () => void;
     onConfirm: (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => void;
+    prefillEmail?: string | null;
+    prefillPhone?: string | null;
 }
 
-export default function ContactDetailsDialog({ open, onClose, onConfirm }: StepOutContactDialogProps) {
+export default function ContactDetailsDialog({ open, onClose, onConfirm, prefillEmail, prefillPhone }: StepOutContactDialogProps) {
     const [contactMethod, setContactMethod] = useState<'SMS' | 'EMAIL' | null>(null);
     const [contactValue, setContactValue] = useState('');
     const [contactTouched, setContactTouched] = useState(false);
@@ -45,15 +47,28 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm }: StepO
 
     function handleMethodChange(method: 'SMS' | 'EMAIL') {
         setContactMethod(method);
-        setContactValue('');
         setContactTouched(false);
+        if (method === 'SMS' && prefillPhone) {
+            setContactValue(prefillPhone);
+        } 
+        else if (method === 'EMAIL' && prefillEmail) {
+            setContactValue(prefillEmail);
+        } 
+        else {
+            setContactValue('');
+        }
     }
 
     function handleConfirm() {
         setContactTouched(true);
         if (!contactMethod || !contactValueValid) return;
-        const valueToSave = contactMethod === 'SMS' ? phoneNormalised! : contactValue.trim();
-        onConfirm(contactMethod, valueToSave);
+        
+        if (contactMethod === 'SMS') {
+            onConfirm(contactMethod, phoneNormalised!);
+        } 
+        else {
+            onConfirm(contactMethod, contactValue.trim());
+        }
     }
 
     return (
@@ -92,6 +107,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm }: StepO
                             helperText={contactInvalid ? 'Enter a valid phone number.' : 'e.g. 07912 345678 or +44...'}
                             fullWidth
                             autoComplete="tel"
+                            disabled={!!prefillPhone}
                             slotProps={{ htmlInput: { inputMode: 'tel' } }}
                         />
                     )}
@@ -106,6 +122,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm }: StepO
                             helperText={contactInvalid ? 'Enter a valid email address.' : ' '}
                             fullWidth
                             autoComplete="email"
+                            disabled={!!prefillEmail}
                             slotProps={{ htmlInput: { inputMode: 'email' } }}
                         />
                     )}
