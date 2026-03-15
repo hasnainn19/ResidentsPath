@@ -1,57 +1,55 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Chip, Grid, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SectionCard from "../components/StaffComponents/SectionCard";
 import DetailRow from "../components/StaffComponents/DetailRow";
-
-const dummyCase = {
-  departmentId: "HOMELESSNESS",
-  referenceNumber: "BOB-1234",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error ad blanditiis asperiores doloribus pariatur, fuga, omnis esse, labore placeat repellat sequi consectetur dolor corporis iusto aliquam ratione consequuntur sit incidunt iure mollitia eligendi magni. Dignissimos est voluptatibus vitae vel, autem ipsum sequi nisi fuga quidem nam veritatis facere, eius velit.",
-  status: "OPEN",
-  priority: true,
-  flag: false,
-  notes:
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quod enim quisquam veniam voluptates rem necessitatibus placeat aspernatur numquam iure architecto.",
-  enquiry:
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus molestiae inventore nisi eius atque unde obcaecati nobis adipisci minima consequuntur beatae maiores nostrum deserunt harum delectus quos, debitis quia in accusamus reprehenderit iure corrupti voluptatum?",
-  otherEnquiryText: "someOtherDetails",
-  childrenCount: "4",
-  householdSize: "7",
-  ageRange: "16-25",
-  hasDisabilityorSensory: false,
-  disabilityType: "blind",
-  domesticAbuse: false,
-  safeToContact: "yes",
-  urgent: "yes",
-  urgentReason: "HEALTH OR MOBIlITY",
-  urgentReasonOtherText: "Some other urgent text",
-  supportNotes:
-    "They need help with a lot of things — they only speak this language!",
-  supportNeeds: ["ACCESSIBILITY", "LANGUAGE", "SEATING"],
-  otherSupport: "I don't know",
-  additionalInfo: "Some additional info",
-  name: "Bob Test",
-  tickets: [{ id: "123", status: "WAITING" }],
-};
+import useCaseDetails from "../hooks/useCaseDetails";
 
 const StaffCaseDetails = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const c = dummyCase;
-
+  const { caseDetails: c, loading, error } = useCaseDetails(caseId);
   const statusColorMap: Record<
     string,
     "success" | "warning" | "error" | "default"
   > = {
     OPEN: "success",
-    CLOSED: "default",
-    PENDING: "warning",
+    IN_PROGRESS: "success",
+    RESOLVED: "default",
+    CLOSED: "warning",
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", pt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !c) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <IconButton onClick={() => navigate(-1)} size="small">
+          <ArrowBackIcon />
+        </IconButton>
+        <Typography color="error" mt={2}>
+          {error ?? "Case not found."}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 4, maxWidth: 1000, mx: "auto" }}>
@@ -76,7 +74,7 @@ const StaffCaseDetails = () => {
             {c.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            #{c.referenceNumber} &middot; {c.departmentId}
+            #{c.caseId} &middot; {c.departmentId}
           </Typography>
         </Box>
 
@@ -88,7 +86,7 @@ const StaffCaseDetails = () => {
         >
           <Chip
             label={c.status}
-            color={statusColorMap[c.status] ?? "default"}
+            color={statusColorMap[c.status ?? ""] ?? "default"}
             size="small"
           />
           {c.priority && (
@@ -157,7 +155,7 @@ const StaffCaseDetails = () => {
               <DetailRow
                 label="Disability / Sensory Need"
                 value={
-                  c.hasDisabilityorSensory ? c.disabilityType : "None reported"
+                  c.hasDisabilityOrSensory ? c.disabilityType : "None reported"
                 }
               />
             </Grid>
@@ -170,7 +168,7 @@ const StaffCaseDetails = () => {
             <Grid size={{ xs: 12, sm: 12 }}>
               <DetailRow label="Support Notes" value={c.supportNotes} />
             </Grid>
-            {c.supportNeeds && c.supportNeeds.length > 0 && (
+            {c.supportNeeds.length > 0 && (
               <Grid size={{ xs: 12, sm: 12 }}>
                 <DetailRow
                   label="Support Needs"
@@ -233,14 +231,16 @@ const StaffCaseDetails = () => {
             <Stack spacing={1}>
               {c.tickets.map((ticket) => (
                 <Stack
-                  key={ticket.id}
+                  key={ticket.ticketId}
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
                   sx={{ py: 0.5 }}
                 >
-                  <Typography variant="body2">Ticket #{ticket.id}</Typography>
-                  <Chip label={ticket.status} size="small" />
+                  <Typography variant="body2">
+                    Ticket #{ticket.ticketId}
+                  </Typography>
+                  <Chip label={ticket.ticketStatus} size="small" />
                 </Stack>
               ))}
             </Stack>
