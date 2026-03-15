@@ -541,11 +541,7 @@ const schema = a
           bookingReferenceNumber: a.string(),
         }),
       )
-      .authorization((allow) => [
-        allow.guest(),
-        allow.authenticated(),
-        allow.authenticated("identityPool"),
-      ])
+      .authorization((allow) => [allow.groups(["Staff", "HounslowHouseDevices"])])
       .handler(a.handler.function(cancelAppointmentByReference)),
 
     getAvailableAppointmentTimes: a

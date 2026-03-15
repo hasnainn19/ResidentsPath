@@ -10,6 +10,7 @@ import {
   type CountryCode,
 } from "libphonenumber-js";
 import { z } from "zod";
+import { CASE_REFERENCE_RE } from "./referenceNumbers";
 
 export const DEPARTMENTS = [
   { id: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP", label: "Council Tax or Housing Benefit Help" },
@@ -221,7 +222,7 @@ export function normaliseCaseReferenceNumber(value: unknown) {
 }
 
 export function isValidCaseReferenceNumber(value: string) {
-  return /^[A-Z]{3}-[A-Z0-9]{6}$/.test(value);
+  return CASE_REFERENCE_RE.test(value);
 }
 
 export function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {

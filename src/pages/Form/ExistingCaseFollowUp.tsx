@@ -253,7 +253,7 @@ export default function ExistingCaseFollowUp() {
                       setReferenceNumber(cleaned);
                     }
                   }}
-                  placeholder="e.g. ABC-123DEF"
+                  placeholder="e.g. ABC-234DEF"
                   fullWidth
                   slotProps={{
                     htmlInput: {
