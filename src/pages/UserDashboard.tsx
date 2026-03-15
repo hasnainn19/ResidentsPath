@@ -54,7 +54,7 @@ export default function UserDashboard() {
         // in the UI as the tickets are all updated.
         const interval = setInterval(() => {
             fetchTicketQueueInfo();
-        }, 30000); // refresh every 30 seconds
+        }, 60000); // refresh every 60 seconds
 
         return () => clearInterval(interval); // cleanup on unmount
     }, []);
