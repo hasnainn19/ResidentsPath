@@ -44,7 +44,7 @@ export default function UserDashboard() {
         if (!ticketId) return;
 
         try {
-            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: true });
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut: true });
             if (stepOutErrors && stepOutErrors.length > 0) {
                 setErrors(stepOutErrors[0].message);
                 return;
@@ -61,7 +61,7 @@ export default function UserDashboard() {
         if (!ticketId) return;
         
         try {
-            const { errors: returnedErrors } = await client.mutations.handleSteppedOut({ ticketId, steppedOut: false });
+            const { errors: returnedErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut: false });
             if (returnedErrors && returnedErrors.length > 0) {
                 setErrors(returnedErrors[0].message);
                 return;
@@ -126,7 +126,7 @@ export default function UserDashboard() {
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
                     {errors && (
-                        <Alert severity="error" color="error" onClose={() => {}}>
+                        <Alert severity="error" color="error" onClose={() => setErrors('')}>
                             {errors}
                         </Alert>
                     )}

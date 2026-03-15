@@ -270,6 +270,7 @@ const schema = a
       .mutation()
       .arguments({
         ticketId: a.id().required(),
+        caseId: a.id().required(),
         steppedOut: a.boolean().required(),
       })
       .returns(a.customType({ success: a.boolean().required() }))
