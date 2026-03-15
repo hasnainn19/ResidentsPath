@@ -75,7 +75,7 @@ const StaffNavbar = () => {
           />
           <StaffNavItem
             icon={<QueueIcon />}
-            label="Case Management"
+            label="Manage Tickets"
             url="/staff/queues"
           />
           <StaffNavItem
