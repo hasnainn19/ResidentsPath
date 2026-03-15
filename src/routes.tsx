@@ -10,6 +10,7 @@ import FormLayout from "./pages/Form/FormLayout";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
+import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
@@ -18,6 +19,7 @@ import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
 import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
+import CheckInConfirmation from "./pages/CheckInConfirmation";
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +41,18 @@ export const router = createBrowserRouter([
   {
     path: "/bookingpage",
     element: <RequireAuth><BookingPage /></RequireAuth>,
+  },  
+  {
+    path: "/checkinpage",
+    element: <CheckInConfirmation />,
+  },
+  {
+    path: "/receipts",
+    element: <SubmissionReceipt />,
+  },
+  {
+    path: "/receipts/:referenceNumber",
+    element: <SubmissionReceipt />,
   },
   {
     path: "/staff",

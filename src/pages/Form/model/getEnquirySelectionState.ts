@@ -15,10 +15,6 @@ import { getEnquiryOptions } from "./enquirySelectionLogic";
 export function getEnquirySelectionState(data: FormData) {
   const topLevel = data.topLevel;
 
-  const isGeneralServices = topLevel === "GeneralServices";
-  const generalServicesIsSection =
-    isGeneralServices && data.generalServicesChoice.startsWith("section:");
-
   const enquiryOptions = getEnquiryOptions(topLevel, data.generalServicesChoice);
   const selectedEnquiry = enquiryOptions.find((x) => x.value === data.enquiryId) || null;
 
@@ -40,8 +36,6 @@ export function getEnquirySelectionState(data: FormData) {
   const showAgeRange = hasChosenEnquiry && !data.dob && selectedEnquiry?.askAgeQs === true;
 
   return {
-    isGeneralServices,
-    generalServicesIsSection,
     enquiryOptions,
     selectedEnquiry,
     specificOptions,

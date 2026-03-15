@@ -7,52 +7,59 @@ import {
   Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
-type PriorityBreakdown = {
-  Standard: number;
-  Priority: number;
-};
+import { DEPARTMENTS } from "../../../shared/formSchema";
 
 interface QueueRowProps {
-  service: string;
-  waiting: number;
-  longestWaitTime: number | null;
-  priorityBreakdown: PriorityBreakdown;
-  steppedOut: number;
+  departmentName: string;
+  departmentId: string;
+  waitingCount: number;
+  longestWait: number;
+  averageWait: number;
+  priorityCaseCount: number;
+  standardCaseCount: number;
+  steppedOutCount: number;
   availableStaff: number;
 }
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
-  service,
-  waiting,
-  longestWaitTime,
-  priorityBreakdown,
-  steppedOut,
+  departmentName,
+  departmentId,
+  waitingCount,
+  longestWait,
+  averageWait,
+  priorityCaseCount,
+  standardCaseCount,
+  steppedOutCount,
   availableStaff,
 }: QueueRowProps) => {
   const navigate = useNavigate();
 
   const handleAdjustClick = () => {
-    const params = new URLSearchParams({ service });
+    const params = new URLSearchParams({ departmentName });
     navigate(`/staff/queues?${params.toString()}`);
   };
 
   return (
     <TableRow hover>
       <TableCell>
-        <Typography fontWeight={500}>{service}</Typography>
+        <Typography fontWeight={500}>
+          {
+            DEPARTMENTS.find((department) => department.id == departmentId)
+              ?.label
+          }
+        </Typography>
       </TableCell>
 
-      <TableCell>{waiting}</TableCell>
+      <TableCell>{waitingCount}</TableCell>
 
       <TableCell>
-        {longestWaitTime ? `${longestWaitTime} mins` : "--"}
+        {longestWait == null || longestWait < 0 ? "--" : `${longestWait} mins`}
       </TableCell>
 
       <TableCell>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Chip
-            label={`Priority: ${priorityBreakdown.Priority}`}
+            label={`Priority: ${priorityCaseCount}`}
             size="small"
             color="error"
             sx={{
@@ -61,18 +68,21 @@ const QueueRow = ({
             }}
           />
           <Chip
-            label={`Standard: ${priorityBreakdown.Standard}`}
+            label={`Standard: ${standardCaseCount}`}
             size="small"
-            color="warning"
             sx={{
               fontWeight: "bold",
               bgcolor: "warning.light",
+              color: "text",
             }}
           />
         </Box>
       </TableCell>
 
-      <TableCell>{steppedOut}</TableCell>
+      <TableCell>
+        {averageWait == null || averageWait < 0 ? "--" : `${averageWait} mins`}
+      </TableCell>
+      <TableCell>{steppedOutCount}</TableCell>
 
       <TableCell>{availableStaff}</TableCell>
 

@@ -9,7 +9,7 @@ export const auth = defineAuth({
 	loginWith: {
 		email: true,
 	},
-	groups: ['Staff', 'Residents'],
+	groups: ['Staff', 'Residents', 'HounslowHouseDevices'],
 	// Extra Cognito user attributes
 	userAttributes: {
 		givenName: {

@@ -1,0 +1,61 @@
+import { Box, Divider, Stack, Typography } from "@mui/material";
+import ReceiptDetailsCard from "./ReceiptDetailsCard";
+import ReceiptQrCard from "./ReceiptQrCard";
+import type { ReceiptDetailsCardProps } from "./ReceiptDetailsCard";
+
+type ReceiptBodyProps = ReceiptDetailsCardProps & {
+  qrCodeUrl: string | null;
+};
+
+export default function ReceiptBody({
+  receipt,
+  isAppointment,
+  appointmentDate,
+  submittedAt,
+  qrCodeUrl,
+  onCopyTicket,
+  onCheckQueueStatus,
+  onCopyAppointmentDetails,
+}: ReceiptBodyProps) {
+  return (
+    <Box>
+      <Stack spacing={0}>
+        <Stack direction={{ xs: "column", md: "row" }}>
+          <ReceiptDetailsCard
+            receipt={receipt}
+            isAppointment={isAppointment}
+            appointmentDate={appointmentDate}
+            submittedAt={submittedAt}
+            onCopyTicket={onCopyTicket}
+            onCheckQueueStatus={onCheckQueueStatus}
+            onCopyAppointmentDetails={onCopyAppointmentDetails}
+          />
+
+          <ReceiptQrCard isAppointment={isAppointment} qrCodeUrl={qrCodeUrl} />
+        </Stack>
+
+        <Divider sx={{ borderColor: "grey.300", borderBottomWidth: 2 }} />
+
+        <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+          <Stack spacing={1.5}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              What to keep
+            </Typography>
+            <Typography color="text.secondary">
+              {isAppointment
+                ? "Make sure you keep your appointment reference number and case reference number."
+                : `Make sure you keep your case reference number${
+                    receipt.ticketNumber ? " and ticket number." : "."
+                  }`}
+            </Typography>
+            <Typography color="text.secondary">
+              {isAppointment
+                ? "When you arrive, have your appointment reference number or QR code ready."
+                : "Use your ticket number or QR code on the reference page to check your position and wait time."}
+            </Typography>
+          </Stack>
+        </Box>
+      </Stack>
+    </Box>
+  );
+}

@@ -37,6 +37,7 @@ export default function UserDashboard() {
     const {  t: translate } = useTranslation();
 
 
+
     const handleStepOut = () => {
         setStepOut(true);
         setShowStepOutAlert(true);
@@ -74,7 +75,7 @@ export default function UserDashboard() {
                 return;
             }
             // calculate department wait times
-            const { data: calcResult, errors: calcErrors} = await client.queries.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
+            const { data: calcResult, errors: calcErrors} = await client.mutations.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
             
             if (calcErrors && calcErrors.length > 0) {
                 setErrors(calcErrors[0].message);
@@ -162,7 +163,7 @@ export default function UserDashboard() {
                                     </Item>
                                 </Grid>
                                 <Grid size={12}>
-                                    <Item sx={{ textAlign: 'left', backgroundColor:'warning.main'}}>
+                                    <Item sx={{ textAlign: 'left', backgroundColor:'warning.light'}}>
                                         <Stack direction='row' alignItems='flex-start'>
                                             <DangerousIcon sx={{color:'red', m:0.6}}/>
                                             <Typography variant='h6'>{translate("userdash-please")}

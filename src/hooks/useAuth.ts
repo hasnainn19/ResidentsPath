@@ -7,7 +7,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
  *
  * This hook centralizes all authentication logic, including:
  * - Checking if the user is authenticated
- * - Fetching the user's Cognito groups (e.g. "Staff", "Residents")
+ * - Fetching the user's Cognito groups (e.g. "Staff", "Residents", "HounslowHouseDevices")
  * - Fetching the user's profile attributes (email, given name, family name)
  * - Managing loading states during auth checks
  *
@@ -17,6 +17,19 @@ import { fetchAuthSession } from "aws-amplify/auth";
  * All values are derived from state so they all update together 
  * in the same render cycle, preventing stale intermediate states.
  */
+
+function getTokenGroups(value: unknown): string[] | null {
+    if (Array.isArray(value)) {
+        return value.filter((item): item is string => typeof item === "string");
+    }
+
+    if (typeof value === "string" && value.trim().length) {
+        return [value];
+    }
+
+    return null;
+}
+
 export function useAuth() {
     const { authStatus } = useAuthenticator((context) => [context.authStatus]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,9 +54,13 @@ export function useAuth() {
                     setIsLoading(true);
                     const session = await fetchAuthSession();
                     const idToken = session.tokens?.idToken?.payload;
+                    const accessToken = session.tokens?.accessToken?.payload;
+                    const groups =
+                        getTokenGroups(idToken?.["cognito:groups"]) ??
+                        getTokenGroups(accessToken?.["cognito:groups"]);
 
                     // Extract groups, profile attributes from the ID token
-                    setGroups(idToken?.["cognito:groups"] as string[] | undefined || null);
+                    setGroups(groups);
                     setEmail(idToken?.email as string | undefined || null);
                     setGivenName(idToken?.given_name as string | undefined || null);
                     setFamilyName(idToken?.family_name as string | undefined || null);
@@ -80,6 +97,7 @@ export function useAuth() {
         isAuthenticated,
         isStaff: Boolean(groups?.includes("Staff")),
         isResident: Boolean(groups?.includes("Residents")),
+        isHounslowHouseDevice: Boolean(groups?.includes("HounslowHouseDevices")),
 
         // Raw data
         groups,
