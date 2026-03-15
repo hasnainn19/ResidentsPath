@@ -9,7 +9,6 @@ import {
   AccordionSummary,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import GroupsIcon from "@mui/icons-material/Groups";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import WorkIcon from "@mui/icons-material/Work";
 import StaffNavItem from "./StaffNavItem";
@@ -75,13 +74,13 @@ const StaffNavbar = () => {
           />
           <StaffNavItem
             icon={<QueueIcon />}
-            label="Case Management"
+            label="Ticket Management"
             url="/staff/queues"
           />
           <StaffNavItem
             icon={<WorkIcon />}
             label="Case Management"
-            url="/staff"
+            url="/staff/cases"
           />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
