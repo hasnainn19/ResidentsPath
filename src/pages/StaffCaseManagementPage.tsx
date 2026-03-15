@@ -9,92 +9,94 @@ import {
   Chip,
   Stack,
   IconButton,
-  Button,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import SortIcon from "@mui/icons-material/Sort";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+import FlagIcon from "@mui/icons-material/Flag";
 import { useNavigate } from "react-router-dom";
+import {
+  DEPARTMENTS,
+  DepartmentLabelById,
+  type DepartmentId,
+} from "../../shared/formSchema";
+import useCases, { type CaseStatus } from "../hooks/useCases";
 
-type CaseStatus = "Priority" | "Standard";
-type CaseCategory =
-  | "Housing"
-  | "Financial Support"
-  | "Licensing"
-  | "Council Tax";
-
-interface CaseItem {
-  id: string;
-  title: string;
-  description: string;
-  category: CaseCategory;
-  status: CaseStatus;
-}
-
-const mockCases: CaseItem[] = [
-  {
-    id: "CS-2024-001",
-    category: "Housing",
-    status: "Priority",
-    title: "Tenancy Dispute: 14B High Street",
-    description:
-      "Tenant reports severe mold infestation in the primary bedroom and bathroom, alleging landlord negligence over a 6-month period.\n\nThe initial inspection by Environmental Health confirms Category 1 hazard. Landlord has been unresponsive to 3 separate notices.",
-  },
-  {
-    id: "CS-2024-002",
-    category: "Financial Support",
-    status: "Priority",
-    title: "Emergency Grant Application: Thompson Family",
-    description:
-      "Application for emergency crisis fund due to redundancy and unexpected medical bills.\n\nApplicant has zero savings and faces utility disconnection. Universal Credit pending.",
-  },
-  {
-    id: "CS-2024-003",
-    category: "Licensing",
-    status: "Standard",
-    title: "License Renewal: The Golden Lion Pub",
-    description:
-      "Standard renewal application for premises license. No noise complaints recorded in the last 12 months.\n\nPolice and Fire Service have no objections.",
-  },
-  {
-    id: "CS-2024-004",
-    category: "Council Tax",
-    status: "Standard",
-    title: "Council Tax Arrears: Account #882910",
-    description:
-      "Resident has accumulated arrears of £1,200 over the 2025/2026 tax year.\n\nCorrespondence returned 'Addressee Gone Away' for the last 3 months.",
-  },
+const STATUS_OPTIONS: CaseStatus[] = [
+  "OPEN",
+  "IN_PROGRESS",
+  "RESOLVED",
+  "CLOSED",
 ];
 
-const categoryColorMap: Record<
-  CaseCategory,
-  "warning" | "success" | "info" | "secondary"
-> = {
-  Housing: "warning",
-  "Financial Support": "success",
-  Licensing: "info",
-  "Council Tax": "secondary",
+const STATUS_LABEL: Record<CaseStatus, string> = {
+  OPEN: "Open",
+  IN_PROGRESS: "In Progress",
+  RESOLVED: "Resolved",
+  CLOSED: "Closed",
 };
 
-const statusColorMap: Record<CaseStatus, "error" | "default"> = {
-  Priority: "error",
-  Standard: "default",
+const STATUS_COLOR: Record<
+  CaseStatus,
+  "info" | "warning" | "success" | "default"
+> = {
+  OPEN: "info",
+  IN_PROGRESS: "warning",
+  RESOLVED: "success",
+  CLOSED: "default",
+};
+
+const DEPT_COLOR: Partial<
+  Record<
+    DepartmentId,
+    | "error"
+    | "warning"
+    | "info"
+    | "secondary"
+    | "success"
+    | "primary"
+    | "default"
+  >
+> = {
+  HOMELESSNESS: "error",
+  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "info",
+  ADULTS_DUTY: "secondary",
+  CHILDRENS_DUTY: "success",
+  COMMUNITY_HUB_ADVISOR: "primary",
+  GENERAL_CUSTOMER_SERVICES: "default",
 };
 
 // This page displays a searchable and filterable list of current cases for staff users, allowing them to review case details and statuses. Each case is presented in a card format with key information and a link to view more details.
 const StaffCaseManagementPage: React.FC = () => {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
+  const [departmentFilter, setDepartmentFilter] = useState<DepartmentId | "">(
+    "",
+  );
   const navigate = useNavigate();
 
+  const { cases, loading, error } = useCases({
+    status: statusFilter,
+    departmentId: departmentFilter,
+  });
+
   const filteredCases = useMemo(() => {
-    return mockCases.filter(
+    if (!search) return cases;
+    const q = search.toLowerCase();
+    return cases.filter(
       (c) =>
-        c.title.toLowerCase().includes(search.toLowerCase()) ||
-        c.description.toLowerCase().includes(search.toLowerCase()),
+        c.enquiry.toLowerCase().includes(q) ||
+        (c.description ?? "").toLowerCase().includes(q) ||
+        c.referenceNumber.toLowerCase().includes(q),
     );
-  }, [search]);
+  }, [cases, search]);
 
   return (
     <Box sx={{ p: 4, maxWidth: 1000, mx: "auto" }}>
@@ -102,83 +104,145 @@ const StaffCaseManagementPage: React.FC = () => {
         Case Management
       </Typography>
 
-      <Stack direction="row" spacing={2} mb={3}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <TextField
           fullWidth
           placeholder="Search cases..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
-        <Button variant="outlined" startIcon={<FilterListIcon />}>
-          Filter
-        </Button>
+        <FormControl sx={{ minWidth: 150 }}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            label="Status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as CaseStatus | "")}
+          >
+            <MenuItem value="">All</MenuItem>
+            {STATUS_OPTIONS.map((s) => (
+              <MenuItem key={s} value={s}>
+                {STATUS_LABEL[s]}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-        <Button variant="outlined" startIcon={<SortIcon />}>
-          Sort
-        </Button>
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Department</InputLabel>
+          <Select
+            label="Department"
+            value={departmentFilter}
+            onChange={(e) =>
+              setDepartmentFilter(e.target.value as DepartmentId | "")
+            }
+          >
+            <MenuItem value="">All</MenuItem>
+            {DEPARTMENTS.map((d) => (
+              <MenuItem key={d.id} value={d.id}>
+                {d.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Stack>
 
-      <Stack spacing={2}>
-        {filteredCases.map((caseItem) => (
-          <Card key={caseItem.id} sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Stack direction="row" justifyContent="space-between">
-                <Box>
-                  <Stack direction="row" spacing={1} mb={1}>
-                    <Chip
-                      label={caseItem.category}
-                      color={categoryColorMap[caseItem.category]}
-                      size="small"
-                    />
-                    <Chip
-                      label={caseItem.status}
-                      color={statusColorMap[caseItem.status]}
-                      size="small"
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      #{caseItem.id}
-                    </Typography>
-                  </Stack>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    {caseItem.title}
-                  </Typography>
+      {loading ? (
+        <Box display="flex" justifyContent="center" py={6}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Stack spacing={2}>
+          {filteredCases.length === 0 && (
+            <Typography color="text.secondary" textAlign="center" py={4}>
+              No cases found.
+            </Typography>
+          )}
 
-                  <Divider sx={{ mb: 1 }} />
+          {filteredCases.map((caseItem) => (
+            <Card key={caseItem.id} sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Stack direction="row" justifyContent="space-between">
+                  <Box flex={1} minWidth={0}>
+                    <Stack direction="row" spacing={1} mb={1} flexWrap="wrap">
+                      <Chip
+                        label={DepartmentLabelById[caseItem.departmentId]}
+                        color={DEPT_COLOR[caseItem.departmentId] ?? "default"}
+                        size="small"
+                      />
+                      {caseItem.status && (
+                        <Chip
+                          label={STATUS_LABEL[caseItem.status]}
+                          color={STATUS_COLOR[caseItem.status]}
+                          size="small"
+                        />
+                      )}
+                      {caseItem.priority && (
+                        <Chip
+                          icon={<PriorityHighIcon />}
+                          label="Priority"
+                          color="error"
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                      {caseItem.flag && (
+                        <Chip
+                          icon={<FlagIcon />}
+                          label="Flagged"
+                          color="warning"
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
 
-                  <Box
-                    sx={{
-                      maxHeight: 120,
-                      overflowY: "auto",
-                      pr: 1,
-                    }}
-                  >
                     <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ whiteSpace: "pre-line" }}
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      noWrap
                     >
-                      {caseItem.description}
+                      #{caseItem.referenceNumber}
                     </Typography>
-                  </Box>
-                </Box>
 
-                <IconButton onClick={() => navigate(`./${caseItem.id}`)}>
-                  <ChevronRightIcon />
-                </IconButton>
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
+                    <Divider sx={{ mb: 1 }} />
+
+                    <Box sx={{ maxHeight: 120, overflowY: "auto", pr: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ whiteSpace: "pre-line" }}
+                      >
+                        {caseItem.description ?? "No description provided."}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <IconButton onClick={() => navigate(`./${caseItem.id}`)}>
+                    <ChevronRightIcon />
+                  </IconButton>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+      )}
     </Box>
   );
 };
