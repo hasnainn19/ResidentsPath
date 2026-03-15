@@ -27,11 +27,20 @@ export function useUser() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (authLoading || !isAuthenticated) {
+        if (authLoading) {
+            // Auth is still resolving; keep loading state true and clear any stale user.
+            setUser(null);
+            setIsLoading(true);
+            return;
+        }
+        if (!isAuthenticated) {
+            // Auth has resolved and there is no authenticated user.
             setUser(null);
             setIsLoading(false);
             return;
         }
+        // Auth is resolved and user is authenticated; start (or restart) loading user data.
+        setIsLoading(true);
 
         const sub = client.models.User.observeQuery()
             .subscribe({
