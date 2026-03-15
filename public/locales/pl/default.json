@@ -57,5 +57,21 @@
     "Bpanel-ok":"OK",
     "Bpanel-select":"Wybierz datę:",
     "Bpanel-time":"Wybierz godzinę poniżej:",
-    "Bpanel-your":"Wybrany przez Ciebie czas wizyty to"
+    "Bpanel-your":"Wybrany przez Ciebie czas wizyty to",
+    "Bpanel-load":"Ładowanie dostępnych terminów...",
+    "Bpanel-no-avai":"Nie ma już wolnych terminów na ten dzień.",
+    "Bpanel-please":"Proszę wybrać inną datę.",
+    "Bpanel-unable":"Nie można załadować terminów spotkań.",
+    "CheckIn-ch":"Zameldowanie potwierdzone",
+    "CheckIn-you":"Zarejestrowałeś się pomyślnie na wizytę!",
+    "navbar-account":"Konto",
+    "navbar-login":"Login",
+    "navbar-logout":"Wyloguj",
+    "nav-council":"Strona internetowa Rady",
+    "nav-create":"Utwórz swoją sprawę",
+    "nav-form":"Formularz",
+    "nav-queue":"Kolejka",
+    "nav-resident":"Ścieżka Mieszkańców",
+    "nav-select":"Wybierz język",
+    "nav-show":"Pokaż informacje o kolejce"
 }

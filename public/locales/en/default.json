@@ -57,5 +57,21 @@
     "Bpanel-ok":"OK",
     "Bpanel-select":"Select the date:",
     "Bpanel-time":"Select a time below:",
-    "Bpanel-your":"Your selected appointment time is"
-}
+    "Bpanel-your":"Your selected appointment time is",
+    "Bpanel-load":"Loading available times...",
+    "Bpanel-no-avai":"No remaining appointment times available for this date.",
+    "Bpanel-please":"Please choose another date.",
+    "Bpanel-unable":"Unable to load appointment times.",
+    "CheckIn-ch":"Check in Confirmed",
+    "CheckIn-you":"You have successfully checked in for your appointment!",
+    "navbar-account":"Account",
+    "navbar-login":"Login",
+    "navbar-logout":"Logout",
+    "nav-council":"Council Website",
+    "nav-create":"Create your case",
+    "nav-form":"Form",
+    "nav-queue":"Queue",
+    "nav-resident":"ResidentsPath",
+    "nav-select":"Select language",
+    "nav-show":"Show queue information"
+    }

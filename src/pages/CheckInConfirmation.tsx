@@ -1,9 +1,11 @@
+import { Alert, AlertTitle, Container, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import Navbar from "../components/NavBar";
 import TextToSpeechButton from "../components/TextToSpeechButton";
-import { Alert, AlertTitle, Container, Box } from '@mui/material';
-
 
 const CheckInConfirmationPage = () => {
+  const {  t: translate } = useTranslation();
+
   return (
     <>
         <Navbar />
@@ -13,8 +15,7 @@ const CheckInConfirmationPage = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "80vh", // centers vertically
-            // textAlign: "center",
+            height: "80vh",
             }}
         >
             <Box>
@@ -26,9 +27,9 @@ const CheckInConfirmationPage = () => {
                         bgcolor: "secondary.light",     // light purple background
                         color: "primary.dark",        // darker purple text
                         borderRadius: 3,
-                        py: 4,                        // larger padding
+                        py: 4,                 
                         px: 6,
-                        fontSize: "1.5rem",           // large text
+                        fontSize: "1.5rem",         
                         width: "100%",
                         display: "flex",
                         flexDirection: "column",
@@ -38,8 +39,8 @@ const CheckInConfirmationPage = () => {
                         "& .MuiAlert-icon": {  color: "primary.main", fontSize: "2rem"  },
                     }}
                 >
-                    <AlertTitle>Check in Confirmed</AlertTitle>
-                        You have successfully checked in for your appointment!
+                    <AlertTitle>{translate("CheckIn-ch")}</AlertTitle>
+                        {translate("CheckIn-ch")}
                     <Box  sx={{ mt: 2 }}>
                         <TextToSpeechButton text='Check in Confirmed. You have successfully checked in for your appointment!'/>
                     </Box>

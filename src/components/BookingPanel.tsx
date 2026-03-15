@@ -291,20 +291,20 @@ export default function BookingPanel(props: Props) {
                 <List disablePadding>
                   {availabilityLoading ? (
                     <ListItem>
-                      <ListItemText primary="Loading available times..." />
+                      <ListItemText primary={translate("Bpanel-load")} />
                     </ListItem>
                   ) : availabilityError ? (
                     <ListItem>
                       <ListItemText
-                        primary="Unable to load appointment times."
+                        primary={translate("Bpanel-unable")}
                         secondary={availabilityError}
                       />
                     </ListItem>
                   ) : availableTimes.length === 0 ? (
                     <ListItem>
                       <ListItemText
-                        primary="No remaining appointment times available for this date."
-                        secondary="Please choose another date."
+                        primary={translate("Bpanel-no-avai")}
+                        secondary={translate("Bpanel-please")}
                       />
                     </ListItem>
                   ) : (
@@ -346,13 +346,13 @@ export default function BookingPanel(props: Props) {
               {isMobileLayout ? (
                 <CardActions>
                   <Stack direction="column" spacing={1.5} sx={{ width: "100%" }}>
-                    <Tooltip title="Clear appointment selection" placement="top">
+                    <Tooltip title={translate("Bpanel-clear")} placement="top">
                       <Button variant="outlined" onClick={handleClear} fullWidth>
-                        Clear
+                        {translate("Bpanel-cl")}
                       </Button>
                     </Tooltip>
 
-                    <Tooltip title="Confirm your appointment" placement="top">
+                    <Tooltip title={translate("Bpanel-confirm")} placement="top">
                       <Button
                         variant="contained"
                         disabled={!selectedTime || availabilityLoading}
@@ -360,7 +360,7 @@ export default function BookingPanel(props: Props) {
                         sx={{ backgroundColor: "secondary" }}
                         fullWidth
                       >
-                        Confirm
+                        {translate("Bpanel-conf")}
                       </Button>
                     </Tooltip>
 
@@ -381,16 +381,6 @@ export default function BookingPanel(props: Props) {
                   </Button>
                 </Tooltip>
 
-                  <Tooltip title="Confirm your appointment" placement="top">
-                    <Button
-                      variant="contained"
-                      disabled={!selectedTime || availabilityLoading}
-                      onClick={handleConfirm}
-                      sx={{ backgroundColor: "secondary" }}
-                    >
-                      {translate("Bpanel-confirm")}
-                    </Button>
-                  </Tooltip>
                 <Tooltip title={translate("Bpanel-confirm")} placement="top">
                   <Button
                     variant="contained"
@@ -437,7 +427,7 @@ export default function BookingPanel(props: Props) {
             variant="contained"
             fullWidth={isMobileLayout}
           >
-            OK
+            {translate("Bpanel-ok")}
           </Button>
         </DialogActions>
       </Dialog>
