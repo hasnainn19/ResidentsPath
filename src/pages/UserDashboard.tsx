@@ -241,12 +241,12 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
-                                                    variant={notificationsEnabled ? 'contained' : 'outlined'}
+                                                    variant='contained'
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={<NotificationsIcon />}
                                                     onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
                                                 >
-                                                    {notificationsEnabled ? 'Stop notifications' : 'Get queue notifications'}
+                                                    {notificationsEnabled ? 'Stop notifications' : 'Enable notifications'}
                                                 </Button>
                                             </Stack>
                                         </Stack>
