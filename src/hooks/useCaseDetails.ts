@@ -102,10 +102,14 @@ const useCaseDetails = (caseId: string | undefined) => {
       filter: { id: { eq: caseId } },
     }).subscribe({ next: fetchDetails });
 
-    const ticketUpdateSub = client.models.Ticket.onUpdate().subscribe({
+    const ticketUpdateSub = client.models.Ticket.onUpdate({
+      filter: { caseId: { eq: caseId } },
+    }).subscribe({
       next: fetchDetails,
     });
-    const ticketCreateSub = client.models.Ticket.onCreate().subscribe({
+    const ticketCreateSub = client.models.Ticket.onCreate({
+      filter: { caseId: { eq: caseId } },
+    }).subscribe({
       next: fetchDetails,
     });
 
