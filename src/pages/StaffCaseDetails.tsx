@@ -87,8 +87,8 @@ const StaffCaseDetails = () => {
       await client.models.Case.update({ id: caseId, name: caseNameValue });
       setCaseNameOpen(false);
     } catch (error) {
-      console.error("Failed to update case title", error);
-      window.alert("Unable to save title. Please try again.");
+      console.error("Failed to update case name", error);
+      window.alert("Unable to save case name. Please try again.");
     } finally {
       setSavingCaseName(false);
     }
