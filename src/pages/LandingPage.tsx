@@ -56,22 +56,22 @@ export default function LandingPage() {
 								</CardContent>
 							</Card>
 
-							{/* Option 2: Book an Appointment */}
+							{/* Option 2: Create a case with the form */}
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Book an Appointment
+										Create a case
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Schedule an appointment with a department.
+										Complete the form to create a case.
 									</Typography>
 									<Button
 										variant="outlined"
 										fullWidth
 										size="large"
-										onClick={() => navigate('/bookingpage')}
+										onClick={() => navigate('/form')}
 									>
-										Book Appointment
+										Form
 									</Button>
 								</CardContent>
 							</Card>
