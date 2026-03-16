@@ -36,21 +36,21 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     return cases.find((c) => c.id === caseId);
   };
 
-  const getWaitingCount = (departmentId: string) => {
-    return tickets.filter((t) => t.departmentId === departmentId).length;
+  const getWaitingCount = (departmentName: string) => {
+    return tickets.filter((t) => t.departmentName === departmentName).length;
   };
 
-  const getLongestWait = (departmentId: string) => {
+  const getLongestWait = (departmentName: string) => {
     const waiting = tickets
-      .filter((t) => t.departmentId === departmentId)
+      .filter((t) => t.departmentName === departmentName)
       .map((t) => t.estimatedWaitTimeUpper);
     if (waiting.length === 0) return 0;
     return Math.max(...waiting);
   };
 
-  const getAverageWait = (departmentId: string) => {
+  const getAverageWait = (departmentName: string) => {
     const waiting = tickets
-      .filter((t) => t.departmentId === departmentId)
+      .filter((t) => t.departmentName === departmentName)
       .map((t) =>
         Math.floor((t.estimatedWaitTimeLower + t.estimatedWaitTimeUpper) / 2),
       );
@@ -59,33 +59,32 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     return Math.floor(sum / waiting.length);
   };
 
-  const getPriorityCaseCount = (departmentId: string) => {
+  const getPriorityCaseCount = (departmentName: string) => {
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
-      return t.departmentId === departmentId && c?.priority === true;
+      return t.departmentName === departmentName && c?.priority === true;
     }).length;
   };
 
-  const getStandardCaseCount = (departmentId: string) => {
+  const getStandardCaseCount = (departmentName: string) => {
     return tickets.filter((t) => {
       const c = getCase(t.caseId);
-      return t.departmentId === departmentId && c?.priority !== true;
+      return t.departmentName === departmentName && c?.priority !== true;
     }).length;
   };
 
-  const getSteppedOutCount = (departmentId: string) => {
+  const getSteppedOutCount = (departmentName: string) => {
     return tickets.filter(
-      (t) => t.steppedOut === true && t.departmentId === departmentId,
+      (t) => t.steppedOut === true && t.departmentName === departmentName,
     ).length;
   };
 
-  const getAvailableStaff = (departmentId: string) => {
-    return staff.filter((s) => s.departmentId === departmentId).length;
+  const getAvailableStaff = (departmentName: string) => {
+    return staff.filter((s) => s.departmentName === departmentName).length;
   };
 
   const results = departments.map((d) => ({
-    departmentName: d.name ?? "Default",
-    departmentId: d.id,
+    departmentName: d.name ?? d.id,
     waitingCount: getWaitingCount(d.id),
     longestWait: getLongestWait(d.id),
     averageWait: getAverageWait(d.id),

@@ -158,7 +158,7 @@ const StaffCaseDetails = () => {
       >
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography variant="h4" fontWeight={600}>
-            {c?.caseName} #{c.referenceNumber} &middot; {c.departmentId}
+            {c?.caseName} #{c.referenceNumber} &middot; {c.departmentName}
           </Typography>
           <IconButton
             size="small"

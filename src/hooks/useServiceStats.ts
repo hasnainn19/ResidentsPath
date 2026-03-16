@@ -3,7 +3,6 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 
 interface ServiceStats {
-  departmentId: string;
   departmentName: string;
   waitingCount: number;
   longestWait: number;
@@ -27,7 +26,6 @@ const useServiceStats = () => {
           .filter((d) => d != null)
           .map((d) => ({
             departmentName: d.departmentName,
-            departmentId: d.departmentId,
             waitingCount: d.waitingCount,
             longestWait: d.longestWait,
             averageWait: d.averageWait,

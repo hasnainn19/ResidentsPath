@@ -1,11 +1,10 @@
 const DEFAULT_WAITING_TIMES: Record<string, number> = {
-  Council_Tax: 50,
-  Housing_Benefit: 50,
+  Council_Tax_Or_Housing_Benefit: 50,
   Homelessness: 100,
   Adults_Duty: 30,
   Childrens_Duty: 30,
   Community_Hub_Advisor: 30,
-  General_Customer_Service: 10,
+  General_Customer_Services: 10,
   Other: 30,
 };
 

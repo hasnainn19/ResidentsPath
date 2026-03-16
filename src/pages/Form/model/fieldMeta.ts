@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { getEnquirySelectionState } from "./getEnquirySelectionState";
 import type { FormData } from "./formFieldTypes";
 import {
-  DepartmentLabelById,
+  DepartmentLabelByName,
   FIELD_TEXT_CONSTRAINTS,
   UI_OPTIONS,
 } from "../../../../shared/formSchema";
@@ -177,7 +177,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     label: "Routed department",
     format: (fd) =>
       fd.routedDepartment
-        ? (DepartmentLabelById[fd.routedDepartment] ?? fd.routedDepartment)
+        ? (DepartmentLabelByName[fd.routedDepartment] ?? fd.routedDepartment)
         : null,
   },
 

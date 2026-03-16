@@ -100,7 +100,7 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
 
   // Only open and in-progress cases can be updated online
   if (
-    !caseRecord.departmentId ||
+    !caseRecord.departmentName ||
     (caseRecord.status !== "OPEN" && caseRecord.status !== "IN_PROGRESS")
   ) {
     return errorResult(
@@ -179,7 +179,7 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
         client,
         caseId: caseRecord.id,
         userId: caseRecord.userId,
-        departmentId: caseRecord.departmentId,
+        departmentName: caseRecord.departmentName,
         appointmentDateIso: validated.appointmentDateIso!,
         appointmentTime: validated.appointmentTime!,
         logPrefix: "submitCaseFollowUp",
@@ -199,7 +199,7 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
       const queueResult = await createQueueSubmission({
         client,
         caseId: caseRecord.id,
-        departmentId: caseRecord.departmentId,
+        departmentName: caseRecord.departmentName,
         logPrefix: "submitCaseFollowUp",
         visitState: createdVisitResources,
       });

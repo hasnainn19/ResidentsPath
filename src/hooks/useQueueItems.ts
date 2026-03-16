@@ -46,14 +46,14 @@ const useQueueItems = (departmentName: string) => {
     const init = async () => {
       await fetchItems();
 
-      // Resolve departmentId so ticket subscriptions only fire for this department
-      let filter: { departmentId: { eq: string } } | undefined;
+      // Resolve departmentName so ticket subscriptions only fire for this department
+      let filter: { departmentName: { eq: string } } | undefined;
       if (departmentName) {
         const { data: depts } = await client.models.Department.list({
           filter: { name: { eq: departmentName } },
         });
-        const departmentId = depts[0]?.id;
-        if (departmentId) filter = { departmentId: { eq: departmentId } };
+        const resolvedName = depts[0]?.id;
+        if (resolvedName) filter = { departmentName: { eq: resolvedName } };
       }
 
       createSub = client.models.Ticket.onCreate({ filter }).subscribe({ next: fetchItems });

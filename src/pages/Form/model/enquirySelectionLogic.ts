@@ -74,7 +74,7 @@ export function applyTopLevelChange(prev: FormData, nextTopLevel: string): FormD
   });
 
   if (nextTopLevel === "Other") {
-    return { ...next, routedDepartment: "GENERAL_CUSTOMER_SERVICES" };
+    return { ...next, routedDepartment: "General_Customer_Services" };
   }
 
   if (nextTopLevel !== "") {

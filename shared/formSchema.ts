@@ -13,28 +13,28 @@ import { z } from "zod";
 import { CASE_REFERENCE_RE } from "./referenceNumbers";
 
 export const DEPARTMENTS = [
-  { id: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP", label: "Council Tax or Housing Benefit Help" },
-  { id: "HOMELESSNESS", label: "Homelessness" },
-  { id: "ADULTS_DUTY", label: "Adults duty" },
-  { id: "CHILDRENS_DUTY", label: "Childrens duty" },
-  { id: "COMMUNITY_HUB_ADVISOR", label: "Community Hub Advisor" },
-  { id: "GENERAL_CUSTOMER_SERVICES", label: "General customer services" },
+  { name: "Council_Tax_Or_Housing_Benefit", label: "Council Tax or Housing Benefit" },
+  { name: "Homelessness", label: "Homelessness" },
+  { name: "Adults_Duty", label: "Adults duty" },
+  { name: "Childrens_Duty", label: "Childrens duty" },
+  { name: "Community_Hub_Advisor", label: "Community Hub Advisor" },
+  { name: "General_Customer_Services", label: "General customer services" },
 ] as const;
 
-export type DepartmentId = (typeof DEPARTMENTS)[number]["id"];
+export type DepartmentName = (typeof DEPARTMENTS)[number]["name"];
 export type DepartmentLabel = (typeof DEPARTMENTS)[number]["label"];
 
-export const DepartmentLabelById: Record<DepartmentId, string> = Object.fromEntries(
-  DEPARTMENTS.map((d) => [d.id, d.label]),
-) as Record<DepartmentId, string>;
+export const DepartmentLabelByName: Record<DepartmentName, string> = Object.fromEntries(
+  DEPARTMENTS.map((d) => [d.name, d.label]),
+) as Record<DepartmentName, string>;
 
-export const DepartmentIdByLabel: Record<DepartmentLabel, DepartmentId> = Object.fromEntries(
-  DEPARTMENTS.map((d) => [d.label, d.id]),
-) as Record<DepartmentLabel, DepartmentId>;
+export const DepartmentNameByLabel: Record<DepartmentLabel, DepartmentName> = Object.fromEntries(
+  DEPARTMENTS.map((d) => [d.label, d.name]),
+) as Record<DepartmentLabel, DepartmentName>;
 
 // UI options and validation logic for the form fields are defined here to be shared between the frontend and backend.
 export const UI_OPTIONS = {
-  departments: DEPARTMENTS.map((d) => ({ value: d.id, label: d.label })),
+  departments: DEPARTMENTS.map((d) => ({ value: d.name, label: d.label })),
 
   proceed: [
     { value: "BOOK_APPOINTMENT", label: "Book appointment" },
@@ -509,7 +509,7 @@ const otherFreeText = (maxLen: number) =>
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
   .object({
-    departmentId: DepartmentEnum,
+    departmentName: DepartmentEnum,
     enquiry: z
       .string()
       .transform((s) => s.trim())

@@ -43,8 +43,8 @@ function getSupportNeedsArray(data: FormData): SupportNeeds[] | undefined {
 export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const sel = getEnquirySelectionState(data);
 
-  const departmentId = data.routedDepartment || sel.selectedEnquiry?.department;
-  if (!departmentId) throw new Error("Unknown department");
+  const departmentName = data.routedDepartment || sel.selectedEnquiry?.department;
+  if (!departmentName) throw new Error("Unknown department");
 
   const enquiry = sel.isOther ? "OTHER" : data.enquiryId;
 
@@ -58,7 +58,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     sel.showDomesticAbuseQs && data.domesticAbuse ? optionalValue(data.safeToContact) : undefined;
 
   const payload: formInput = {
-    departmentId,
+    departmentName,
     enquiry,
     proceed,
 

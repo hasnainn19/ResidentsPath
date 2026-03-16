@@ -70,7 +70,7 @@ const schema = a
       .model({
         // Foreign keys
         userId: a.id().required(),
-        departmentId: a.id().required(),
+        departmentName: a.string().required(),
 
         // Case information
         name: a.string(),
@@ -110,7 +110,7 @@ const schema = a
 
         // Relationships
         user: a.belongsTo("User", "userId"),
-        department: a.belongsTo("Department", "departmentId"),
+        department: a.belongsTo("Department", "departmentName"),
         tickets: a.hasMany("Ticket", "caseId"),
         appointments: a.hasMany("Appointment", "caseId"),
         caseUpdates: a.hasMany("CaseUpdate", "caseId"),
@@ -138,21 +138,21 @@ const schema = a
       .model({
         // Department information
         name: a.enum([
+          "Council_Tax_Or_Housing_Benefit",
           "Homelessness",
-          "Housing_Benefit",
-          "Council_Tax",
           "Adults_Duty",
           "Childrens_Duty",
           "Community_Hub_Advisor",
-          "General_Customer_Service",
+          "General_Customer_Services",
         ]),
         estimatedWaitingTime: a.integer().required(),
 
         // Relationships
-        cases: a.hasMany("Case", "departmentId"),
-        staff: a.hasMany("Staff", "departmentId"),
-        tickets: a.hasMany("Ticket", "departmentId"),
+        cases: a.hasMany("Case", "departmentName"),
+        staff: a.hasMany("Staff", "departmentName"),
+        tickets: a.hasMany("Ticket", "departmentName"),
       })
+      .secondaryIndexes((index) => [index("name")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all departments
       ]),
@@ -162,7 +162,7 @@ const schema = a
       .model({
         // Foreign keys
         caseId: a.id().required(),
-        departmentId: a.id().required(),
+        departmentName: a.string().required(),
 
         // Display information
         ticketNumber: a.string().required(),
@@ -186,7 +186,7 @@ const schema = a
 
         // Relationships
         case: a.belongsTo("Case", "caseId"),
-        department: a.belongsTo("Department", "departmentId"),
+        department: a.belongsTo("Department", "departmentName"),
       })
       .secondaryIndexes((index) => [index("caseId"), index("ticketNumber")])
       .authorization((allow) => [
@@ -197,7 +197,7 @@ const schema = a
     Staff: a
       .model({
         // Foreign keys
-        departmentId: a.id().required(),
+        departmentName: a.string().required(),
 
         // Staff information
         cognitoUserId: a.string().required(), // Link to Cognito user for authentication
@@ -208,7 +208,7 @@ const schema = a
         isAvailable: a.boolean().default(false),
 
         // Relationships
-        department: a.belongsTo("Department", "departmentId"),
+        department: a.belongsTo("Department", "departmentName"),
       })
       .authorization((allow) => [
         allow.groups(["Staff"]), // Only staff can see staff information
@@ -289,7 +289,6 @@ const schema = a
       .handler(a.handler.function(getQueueItems)),
 
     ServiceStat: a.customType({
-      departmentId: a.string().required(),
       departmentName: a.string().required(),
       waitingCount: a.integer().required(),
       longestWait: a.integer().required(),
@@ -314,7 +313,7 @@ const schema = a
       .returns(
         a.customType({
           ticketId: a.id().required(),
-          departmentId: a.id().required(),
+          departmentName: a.string().required(),
           position: a.integer().required(),
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
@@ -352,7 +351,7 @@ const schema = a
     getDepartmentQueueStatus: a
       .query()
       .arguments({
-        departmentId: a.id().required(),
+        departmentName: a.string().required(),
       })
       .returns(
         a.customType({
@@ -378,7 +377,6 @@ const schema = a
           found: a.boolean().required(),
           errorMessage: a.string(),
           referenceNumber: a.string(),
-          departmentId: a.id(),
           departmentName: a.string(),
           status: a.string(),
           hasActiveWaitingTicket: a.boolean(),
@@ -435,7 +433,7 @@ const schema = a
       .mutation()
       .arguments({
         input: a.customType({
-          departmentId: a.id().required(),
+          departmentName: a.string().required(),
 
           firstName: a.string(),
           middleName: a.string(),
@@ -583,7 +581,7 @@ const schema = a
     getAvailableAppointmentTimes: a
       .query()
       .arguments({
-        departmentId: a.id().required(),
+        departmentName: a.string().required(),
         dateIso: a.string().required(),
       })
       .returns(
@@ -652,7 +650,7 @@ const schema = a
         a.customType({
           referenceNumber: a.string().required(),
           caseName: a.string(),
-          departmentId: a.string(),
+          departmentName: a.string(),
           description: a.string(),
           status: a.string(),
           priority: a.boolean(),
