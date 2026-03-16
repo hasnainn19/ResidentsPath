@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
-import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import { clearDraft, formatSavedTime, getSafeDraftPath, loadDraft } from "./model/draftStorage";
 import { initialFormData } from "./model/initialState";
@@ -38,9 +37,6 @@ export default function FormEntry() {
       showProgress={false}
       title={translate("formentry-coun")}
       subtitle={translate("formentry-start")}
-      languageValue={formData.language}
-      onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Stack spacing={{ xs: 3, sm: 4 }}>
         {draft ? (
