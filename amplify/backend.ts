@@ -26,6 +26,7 @@ import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/r
 import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
+import { handleSteppedOut } from "./functions/handleSteppedOut/resource";
 import {
   FilterCriteria,
   FilterRule,
@@ -51,6 +52,7 @@ const backend = defineBackend({
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
+  handleSteppedOut,
   adjustQueuePosition,
   getQueueItems,
   markTicketSeen,
@@ -144,7 +146,8 @@ const appointmentTable = backend.data.resources.tables["Appointment"];
  * Attach the Ticket stream to the Lambda.
  * The filter tells AWS to only invoke the Lambda for MODIFY events
  *
- * Further filters can be added that target the dynamoDB record's new and old images
+ * The filters are mutually exclusive so the lambda doesn't fire multiple times for the same ticket update.
+ * Since FilterRule doesn't support greaterThan or lessThanOrEqualTo, we use between to create the necessary ranges.
  */
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
@@ -152,13 +155,56 @@ backend.notifyResident.resources.lambda.addEventSource(
     batchSize: 10,
     bisectBatchOnError: true,
     filters: [
+      // Position reaches 0 (being served)
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
         dynamodb: {
-          // Filter for when the record's data changes to something specific
+          NewImage: { position: { N: FilterRule.isEqual("0") } },
+          OldImage: { position: { N: FilterRule.notEquals("0") } },
+        },
+      }),
+      // Crosses into ≤10 min range from above 10 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
           NewImage: {
-            position: { N: FilterRule.isEqual("0") }, // Trigger when position changes to 0
+            estimatedWaitTimeLower: { N: FilterRule.between(0, 10) },
+            position: { N: FilterRule.notEquals("0") },
           },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(11, 999) } },
+        },
+      }),
+      // Crosses into 11–20 min range from above 20 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(11, 20) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(21, 999) } },
+        },
+      }),
+      // Crosses into 21–30 min range from above 30 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(21, 30) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(31, 999) } },
+        },
+      }),
+      // Crosses into 31–60 min range from above 60 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(31, 60) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(61, 999) } },
         },
       }),
     ]
@@ -191,7 +237,7 @@ backend.notifyResident.addEnvironment(
   "SMS_ORIGINATION_IDENTITY",
   "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
 );
-backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
+backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@residentspath.uk");
 
 /**
  * Attach the Ticket stream to the onTicketCompleted Lambda.
