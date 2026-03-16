@@ -12,6 +12,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupsIcon from "@mui/icons-material/Groups";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import WorkIcon from "@mui/icons-material/Work";
+import PersonIcon from "@mui/icons-material/Person";
 import StaffNavItem from "./StaffNavItem";
 const drawerWidth = 240;
 
@@ -84,6 +85,7 @@ const StaffNavbar = () => {
             url="/staff"
           />
           <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
+          <StaffNavItem icon={<PersonIcon />} label="User Dashboard" url="/" />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
           <Accordion

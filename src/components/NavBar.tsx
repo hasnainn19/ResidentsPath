@@ -4,11 +4,12 @@ import { AccountCircle } from '@mui/icons-material';
 import { signOut } from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 
 export default function NavBar() {
 	const navigate = useNavigate();
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isStaff } = useAuth();
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
 	const menuDropdown = isAuthenticated
 		? ['Account', 'Logout']
@@ -74,7 +75,13 @@ export default function NavBar() {
 					}}
 				>
 					
-					<Tooltip title="Check your queue details or check in for an appointment">
+					{isStaff && (
+					<Tooltip title="Go to the staff dashboard">
+						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>Staff Dashboard</Button>
+					</Tooltip>
+				)}
+
+				<Tooltip title="Check your queue details or check in for an appointment">
 						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
 					</Tooltip>
 

@@ -11,7 +11,7 @@ interface RequireGuestProps {
  * Route guard that requires the user to be unauthenticated to access the wrapped component.
  *
  * If the user is authenticated as Staff, they will be redirected to /staff.
- * If the user is authenticated as a Resident, they will be redirected to /referencepage.
+ * If the user is authenticated as a Resident, they will be redirected to /form.
  * If the user is not authenticated, the wrapped component will be rendered.
  * 
  * Receives a "from" location in state if the user was redirected here from a protected route.
@@ -37,7 +37,7 @@ export default function RequireGuest({ children }: RequireGuestProps) {
         return <Navigate to={from ??
                 (isStaff 
                     ? '/staff' 
-                    : '/referencepage'
+                    : '/form'
                 )
         } replace />
     }
