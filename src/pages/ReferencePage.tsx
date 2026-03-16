@@ -1,6 +1,18 @@
 import { Html5Qrcode } from "html5-qrcode";
 import { useRef, useState, useEffect } from "react";
-import { Alert, Tooltip, Container, Grid, Box, TextField, Button,  Card, CardContent, CardActions, Typography} from '@mui/material';
+import {
+    Alert,
+    Tooltip,
+    Container,
+    Grid,
+    Box,
+    TextField,
+    Button,
+    Card,
+    CardContent,
+    CardActions,
+    Typography,
+} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
@@ -8,10 +20,11 @@ import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
+import AppointmentOptionsDialog from "../components/ReferencePageComponents/AppointmentOptionsDialog";
 import ScanButton from "../components/ReferencePageComponents/ScanButton"
 import { useNavigate } from 'react-router-dom';
 import { useCheckReferenceNumber } from "../hooks/useCheckReferenceNumber";
-
+import { useAppointmentReferenceActions } from "../hooks/useAppointmentReferenceActions";
 
 const ReferencePage = () => {
     const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -20,11 +33,32 @@ const ReferencePage = () => {
     const [ qrScanError, setQrScanError] = useState('');
     const startingRef = useRef(false);
     const navigate = useNavigate();
-    const { foundCaseId, refNoError, checkRefNo, isChecking } = useCheckReferenceNumber();
+    const {
+        foundCaseId,
+        appointmentReferenceNumber,
+        clearAppointmentReference,
+        refNoError,
+        checkRefNo,
+        isChecking,
+    } = useCheckReferenceNumber();
     const [ refPageError, setRefPageError] = useState('');
+    const {
+        actionStatus,
+        canCheckInAppointments,
+        clearActionStatus,
+        isCheckingIn,
+        isCancelling,
+        checkInAppointmentReference,
+        cancelAppointmentReference,
+    } = useAppointmentReferenceActions();
+    const checkRefNoRef = useRef(checkRefNo);
 
+    useEffect(() => {
+        checkRefNoRef.current = checkRefNo;
+    }, [checkRefNo]);
 
     const handleCheckStatus = async () => {
+        clearActionStatus();
         await checkRefNo(refNo);
     }
     
@@ -64,7 +98,41 @@ const ReferencePage = () => {
         if (foundCaseId) {
             navigate(`/userdashboard/${foundCaseId}`);
         }
-    }, [foundCaseId]);
+    }, [foundCaseId, navigate]);
+
+    function handleCloseAppointmentDialog() {
+        clearAppointmentReference();
+    }
+
+    async function handleCancelAppointment() {
+        if (!appointmentReferenceNumber) {
+            return;
+        }
+
+        const result = await cancelAppointmentReference(appointmentReferenceNumber);
+
+        if (result.ok) {
+            clearAppointmentReference();
+            setRefNo('');
+        }
+    }
+
+    async function handleCheckInAppointment() {
+        if (!appointmentReferenceNumber) {
+            return;
+        }
+
+        const result = await checkInAppointmentReference(appointmentReferenceNumber);
+
+        if (result.alreadyCheckedIn || result.checkedIn) {
+            clearAppointmentReference();
+            setRefNo('');
+        }
+
+        if (result.checkedIn) {
+            navigate("/checkinpage");
+        }
+    }
 
     useEffect(() => {
         if (!scanning || scannerRef.current) {
@@ -95,7 +163,7 @@ const ReferencePage = () => {
                         return;
                     }
 
-                    checkRefNo(value, type);
+                    checkRefNoRef.current(value, type);
                 },
                 () => {}
             )
@@ -115,11 +183,15 @@ const ReferencePage = () => {
          };
     }, [scanning]);
 
-
     return (
     <>
         <Navbar />
         <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center', height:'85vh' }}>
+            {actionStatus && (
+                <Alert severity={actionStatus.severity} onClose={clearActionStatus}>
+                    {actionStatus.text}
+                </Alert>
+            )}
             {refPageError && (
                 <Alert  severity="error" color="error" onClose={() => setRefPageError('')}>
                     {refPageError}
@@ -157,7 +229,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth value={refNo} id="outlined-search" label="Ticket/Appointment Number" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title="Check your status" placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                         Check Status
                                     </Button>
                                 </Tooltip>
@@ -209,6 +281,16 @@ const ReferencePage = () => {
                 </Grid>
             </Grid>
         </Container>
+
+        <AppointmentOptionsDialog
+            appointmentReferenceNumber={appointmentReferenceNumber}
+            canCheckInAppointments={canCheckInAppointments}
+            isCheckingIn={isCheckingIn}
+            isCancelling={isCancelling}
+            onClose={handleCloseAppointmentDialog}
+            onCancelAppointment={handleCancelAppointment}
+            onCheckInAppointment={handleCheckInAppointment}
+        />
     </>
     );
 };

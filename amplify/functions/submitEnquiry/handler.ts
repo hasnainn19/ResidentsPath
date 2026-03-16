@@ -20,6 +20,7 @@ import {
 import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   claimAppointmentSlot,
+  claimBookingReferenceNumber,
   claimCaseReferenceNumber,
   claimQueuePosition,
   claimTicketDigits,
@@ -27,6 +28,7 @@ import {
   getDate,
   getEnquiriesStateTableName,
   markAppointmentSlotBooked,
+  releaseBookingReferenceNumber,
   releaseAppointmentSlot,
   releaseCaseReferenceNumber,
   releaseQueuePosition,
@@ -39,6 +41,13 @@ import {
   tryCleanup,
 } from "../utils/runCleanup";
 import { DepartmentCodeById } from "../../../shared/departmentCodes";
+import {
+  BOOKING_REFERENCE_DIGITS,
+  BOOKING_REFERENCE_LETTERS,
+  BOOKING_REFERENCE_PREFIX,
+  CASE_REFERENCE_CHARS,
+  CASE_REFERENCE_LETTERS,
+} from "../../../shared/referenceNumbers";
 
 type DataClient = ReturnType<typeof generateClient<Schema>>;
 type UserCreateInput = Parameters<DataClient["models"]["User"]["create"]>[0];
@@ -50,6 +59,7 @@ type SubmitEnquiryErrorCode = "VALIDATION" | "CAPACITY" | "CONFLICT" | "SERVER";
 type SubmitEnquiryResult = {
   ok: boolean;
   referenceNumber?: string;
+  bookingReferenceNumber?: string;
   ticketNumber?: string;
   errorCode?: SubmitEnquiryErrorCode;
   errorMessage?: string;
@@ -70,6 +80,30 @@ function removeIrrelevantValues<T extends Record<string, unknown>>(obj: T): Part
   return out;
 }
 
+function getIdentityGroups(identity: unknown): string[] {
+  if (!identity || typeof identity !== "object") {
+    return [];
+  }
+
+  if ("groups" in identity && Array.isArray(identity.groups)) {
+    return identity.groups.filter((group): group is string => typeof group === "string");
+  }
+
+  if ("claims" in identity && identity.claims && typeof identity.claims === "object") {
+    const claimGroups = (identity.claims as Record<string, unknown>)["cognito:groups"];
+
+    if (Array.isArray(claimGroups)) {
+      return claimGroups.filter((group): group is string => typeof group === "string");
+    }
+
+    if (typeof claimGroups === "string" && claimGroups.trim()) {
+      return [claimGroups];
+    }
+  }
+
+  return [];
+}
+
 // Generate a random string of given length from the provided character set, using crypto for randomness
 function cryptoRandomFrom(set: string, length: number): string {
   const bytes = randomBytes(length);
@@ -80,15 +114,18 @@ function cryptoRandomFrom(set: string, length: number): string {
   return result;
 }
 
-// Generate a reference number in the format "ABC-123456" where ABC are random letters and 123456 are random alphanumeric characters
-export function generateReferenceNumber(): string {
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-  const prefix = cryptoRandomFrom(letters, 3);
-  const suffix = cryptoRandomFrom(chars, 6);
+export function generateCaseReferenceNumber(): string {
+  const prefix = cryptoRandomFrom(CASE_REFERENCE_LETTERS, 3);
+  const suffix = cryptoRandomFrom(CASE_REFERENCE_CHARS, 6);
 
   return `${prefix}-${suffix}`;
+}
+
+export function generateBookingReferenceNumber(): string {
+  const letters = cryptoRandomFrom(BOOKING_REFERENCE_LETTERS, 3);
+  const digits = cryptoRandomFrom(BOOKING_REFERENCE_DIGITS, 3);
+
+  return `${BOOKING_REFERENCE_PREFIX}-${letters}${digits}`;
 }
 
 const ddb = new DynamoDBClient({});
@@ -105,13 +142,13 @@ function getTicketCounterKey(queueId: string) {
 // This avoids race conditions and ensures uniqueness without needing to query the database for existing reference numbers
 async function allocateCaseReferenceNumber() {
   for (let attempt = 0; attempt < 10; attempt++) {
-    const referenceNumber = generateReferenceNumber();
+    const referenceNumber = generateCaseReferenceNumber();
 
     try {
       await claimCaseReferenceNumber(referenceNumber);
       return referenceNumber;
-    } catch (e: any) {
-      const name = typeof e?.name === "string" ? e.name : "";
+    } catch (e: unknown) {
+      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
       // If the error is a ConditionalCheckFailedException, it means the reference number is already claimed so continue the loop
       if (name === "ConditionalCheckFailedException") continue;
       throw e;
@@ -119,6 +156,23 @@ async function allocateCaseReferenceNumber() {
   }
 
   throw new Error("Failed to allocate a unique case reference");
+}
+
+async function allocateBookingReferenceNumber() {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const referenceNumber = generateBookingReferenceNumber();
+
+    try {
+      await claimBookingReferenceNumber(referenceNumber);
+      return referenceNumber;
+    } catch (e: unknown) {
+      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
+      if (name === "ConditionalCheckFailedException") continue;
+      throw e;
+    }
+  }
+
+  throw new Error("Failed to allocate a unique booking reference");
 }
 
 type DepartmentId = ReturnType<typeof formSchema.parse>["departmentId"];
@@ -194,8 +248,8 @@ async function allocateDeptTicketNumber(
         ticketDigits,
         ticketNumber: `${departmentCode}${ticketDigits}`,
       };
-    } catch (e: any) {
-      const name = typeof e?.name === "string" ? e.name : "";
+    } catch (e: unknown) {
+      const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
       // If the error is a ConditionalCheckFailedException, it means the ticket number is already claimed so continue the loop
       if (name === "ConditionalCheckFailedException") continue;
       throw e;
@@ -261,12 +315,17 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   const identity = event.identity;
   const sub =
     identity && typeof identity === "object" && "sub" in identity ? (identity.sub as string) : null;
+  const identityGroups = getIdentityGroups(identity);
+  const shouldCreateSeparateGuestUser =
+    identityGroups.includes("Staff") || identityGroups.includes("HounslowHouseDevices");
 
   let userId: string | null = null;
   let createdGuestUserId: string | null = null;
 
-  // If the user is logged in, try to find their account in the User model by their Cognito sub
-  if (sub) {
+  // Staff and Hounslow House device accounts can submit on behalf of residents, so keep
+  // those submissions separate from the signed-in account and always create a guest user.
+  // Residents can still reuse their linked account details when they are signed in.
+  if (sub && !shouldCreateSeparateGuestUser) {
     try {
       const { data: user, errors } = await client.models.User.get({ id: sub });
 
@@ -294,7 +353,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   // If no user found, create a new guest user with the provided details
   if (!userId) {
     const userCreateInput = removeIrrelevantValues({
-      id: sub ?? undefined,
+      id: shouldCreateSeparateGuestUser ? undefined : sub ?? undefined,
       isRegistered: false,
 
       firstName: validated.firstName,
@@ -341,6 +400,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
   let createdAppointmentId: string | null = null;
   let createdTicketId: string | null = null;
   let claimedReferenceNumber: string | null = null;
+  let claimedBookingReferenceNumber: string | null = null;
 
   let claimedQueueId: string | null = null;
   let claimedTicketDigits: string | null = null;
@@ -403,13 +463,15 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
         dateIso: validated.appointmentDateIso!,
         time: validated.appointmentTime!,
       } satisfies AppointmentSlotClaim;
+      const bookingReferenceNumber = await allocateBookingReferenceNumber();
+      claimedBookingReferenceNumber = bookingReferenceNumber;
 
       try {
         // Attempt to claim the appointment slot to ensure it is not double-booked
         await claimAppointmentSlot(appointmentSlot);
         claimedAppointmentSlot = appointmentSlot;
-      } catch (e: any) {
-        const name = typeof e?.name === "string" ? e.name : "";
+      } catch (e: unknown) {
+        const name = typeof e === "object" && e && "name" in e && typeof e.name === "string" ? e.name : "";
 
         if (name === "ConditionalCheckFailedException") {
           appointmentFailure = {
@@ -427,6 +489,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       const { data: apptData, errors: appointmentErrors } = await client.models.Appointment.create({
         caseId,
         userId: finalUserId,
+        bookingReferenceNumber,
         date: appointmentSlot.dateIso,
         time: appointmentSlot.time,
         status: "SCHEDULED",
@@ -441,7 +504,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       createdAppointmentId = apptData.id;
       // Appointment successfully created, now mark the slot as booked
       await markAppointmentSlotBooked(appointmentSlot);
-      return { ok: true, referenceNumber };
+      return {
+        ok: true,
+        referenceNumber,
+        bookingReferenceNumber,
+      };
     }
 
     const departmentCode = getDepartmentCode(validated.departmentId);
@@ -534,6 +601,13 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       const slot = claimedAppointmentSlot;
       await tryCleanup("submitEnquiry: cleanup AppointmentSlotClaims.delete failed", () =>
         releaseAppointmentSlot(slot),
+      );
+    }
+
+    if (claimedBookingReferenceNumber && appointmentDeleted) {
+      const bookingReferenceNumber = claimedBookingReferenceNumber;
+      await tryCleanup("submitEnquiry: cleanup BookingReferenceClaims.delete failed", () =>
+        releaseBookingReferenceNumber(bookingReferenceNumber),
       );
     }
 

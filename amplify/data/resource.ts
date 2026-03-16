@@ -9,10 +9,17 @@ import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/
 import { notifyResident } from "../functions/notifyResident/resource";
 import { getServiceStats } from "../functions/getServiceStats/resource";
 import { getDashboardStats } from "../functions/getDashboardStats/resource";
+import { adjustQueuePosition } from "../functions/adjustQueuePosition/resource";
+import { getQueueItems } from "../functions/getQueueItems/resource";
+import { markTicketSeen } from "../functions/markTicketSeen/resource";
+import { setCasePriority } from "../functions/setCasePriority/resource";
+import { flagCaseSafeguarding } from "../functions/flagCaseSafeguarding/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
 import { cleanupEnquiryState } from '../functions/cleanupEnquiryState/resource';
 import { handleSteppedOut } from "../functions/handleSteppedOut/resource";
 import { toggleNotifications } from "../functions/toggleNotifications/resource";
+import { checkInAppointmentByReference } from "../functions/checkInAppointmentByReference/resource";
+import { cancelAppointmentByReference } from "../functions/cancelAppointmentByReference/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -163,10 +170,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
         department: a.belongsTo("Department", "departmentId"),
       })
-      .secondaryIndexes((index) => [
-        index("caseId"),
-        index("ticketNumber"),
-      ])
+      .secondaryIndexes((index) => [index("caseId"), index("ticketNumber")])
       .authorization((allow) => [
         allow.groups(["Staff"]), // Staff can see all tickets
       ]),
@@ -198,25 +202,36 @@ const schema = a
         // Foreign keys
         userId: a.id().required(),
         caseId: a.id().required(),
+        bookingReferenceNumber: a.string().required(),
 
         // Appointment scheduling
         date: a.date().required(),
         time: a.time().required(),
 
         // Appointment status
-        status: a.enum(["SCHEDULED", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]),
+        status: a.enum([
+          "SCHEDULED",
+          "CONFIRMED",
+          "CANCELLED",
+          "COMPLETED",
+          "NO_SHOW",
+        ]),
+        checkedInAt: a.datetime(),
 
         // Additional information
         notes: a.string(),
 
-			// Relationships
-			user: a.belongsTo("User", "userId"),
-			case: a.belongsTo("Case", "caseId"),
-		})
-      .secondaryIndexes((index) => [index("caseId")])
-		.authorization((allow) => [
-			allow.groups(["Staff"]), // Only staff can access appointments directly
-		]),
+        // Relationships
+        user: a.belongsTo("User", "userId"),
+        case: a.belongsTo("Case", "caseId"),
+      })
+      .secondaryIndexes((index) => [
+        index("caseId"),
+        index("bookingReferenceNumber"),
+      ])
+      .authorization((allow) => [
+        allow.groups(["Staff"]), // Only staff can access appointments directly
+      ]),
 
     // Custom queries and mutations (lambdas defined in amplify/functions)
 
@@ -232,8 +247,31 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
+      
+    QueueItem: a.customType({
+      ticketId: a.id().required(),
+      caseId: a.id().required(),
+      ticketNumber: a.string().required(),
+      department: a.string().required(),
+      title: a.string().required(),
+      description: a.string().required(),
+      priority: a.boolean().required(),
+      flag: a.boolean().required(),
+      position: a.integer().required(),
+      notes: a.string(),
+    }),
 
+    getQueueItems: a
+      .query()
+      .arguments({
+        departmentName: a.string(),
+      })
+      .returns(a.ref("QueueItem").array())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getQueueItems)),
+      
     ServiceStat: a.customType({
+      departmentId: a.string().required(),
       departmentName: a.string().required(),
       waitingCount: a.integer().required(),
       longestWait: a.integer().required(),
@@ -269,7 +307,7 @@ const schema = a
       .authorization((allow) => [
         allow.guest(),
         allow.authenticated(),
-        ])
+      ])
       .handler(a.handler.function(getTicketInfo)),
 
     handleSteppedOut: a
@@ -302,22 +340,62 @@ const schema = a
       ])
       .handler(a.handler.function(toggleNotifications)),
 
-
     getDepartmentQueueStatus: a
       .query()
       .arguments({
-        departmentId: a.id().required()
+        departmentId: a.id().required(),
       })
-      .returns(a.customType({
-              queueCount: a.integer().required(),
-              updatedAtIso: a.string().required(),
-      }))
+      .returns(
+        a.customType({
+          queueCount: a.integer().required(),
+          updatedAtIso: a.string().required(),
+        }),
+      )
       .authorization((allow) => [
-              allow.guest(),
-              allow.authenticated(),
-              allow.authenticated("identityPool")
-          ])
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
       .handler(a.handler.function(getDepartmentQueueStatus)),
+
+    adjustQueuePosition: a
+      .mutation()
+      .arguments({
+        ticketId: a.string().required(),
+        newPosition: a.integer().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(adjustQueuePosition)),
+
+    markTicketSeen: a
+      .mutation()
+      .arguments({
+        ticketId: a.string().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(markTicketSeen)),
+
+    setCasePriority: a
+      .mutation()
+      .arguments({
+        caseId: a.string().required(),
+        priority: a.boolean().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(setCasePriority)),
+
+    flagCaseSafeguarding: a
+      .mutation()
+      .arguments({
+        caseId: a.string().required(),
+        flagged: a.boolean().required(),
+      })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(flagCaseSafeguarding)),
 
     submitEnquiry: a
       .mutation()
@@ -382,6 +460,7 @@ const schema = a
         a.customType({
           ok: a.boolean().required(),
           referenceNumber: a.string(),
+          bookingReferenceNumber: a.string(),
           ticketNumber: a.string(),
           errorCode: a.string(),
           errorMessage: a.string(),
@@ -393,6 +472,53 @@ const schema = a
         allow.authenticated("identityPool"),
       ]) // Allow both guests and authenticated users to submit enquiries
       .handler(a.handler.function(submitEnquiry)),
+
+    checkInAppointmentByReference: a
+      .mutation()
+      .arguments({
+        referenceNumber: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          ok: a.boolean().required(),
+          checkedIn: a.boolean(),
+          alreadyCheckedIn: a.boolean(),
+          errorCode: a.string(),
+          errorMessage: a.string(),
+          referenceNumber: a.string(),
+          bookingReferenceNumber: a.string(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.groups([
+          "Staff", 
+          "HounslowHouseDevices"
+        ]),
+      ])
+      .handler(a.handler.function(checkInAppointmentByReference)),
+
+    cancelAppointmentByReference: a
+      .mutation()
+      .arguments({
+        referenceNumber: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          ok: a.boolean().required(),
+          cancelled: a.boolean(),
+          alreadyCancelled: a.boolean(),
+          errorCode: a.string(),
+          errorMessage: a.string(),
+          referenceNumber: a.string(),
+          bookingReferenceNumber: a.string(),
+        }),
+      )
+      .authorization((allow) => [
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
+      ])
+      .handler(a.handler.function(cancelAppointmentByReference)),
 
     getAvailableAppointmentTimes: a
       .query()
@@ -423,6 +549,7 @@ const schema = a
           errorMessage: a.string(),
           createdAt: a.datetime(),
           referenceNumber: a.string(),
+          bookingReferenceNumber: a.string(),
           receiptType: a.string(),
           ticketNumber: a.string(),
           appointmentDateIso: a.string(),
@@ -438,23 +565,26 @@ const schema = a
       .handler(a.handler.function(getSubmissionReceipt)),
 
     checkTicketNumber: a
-        .query()
-        .arguments({
+      .query()
+      .arguments({
         ticketNumber: a.string().required(),
-        })
-        .returns(
+      })
+      .returns(
         a.customType({
-            caseId: a.string().required(),
+          caseId: a.string().required(),
         }),
-        )
-        .authorization((allow) => [
+      )
+      .authorization((allow) => [
         allow.guest(), 
-        allow.authenticated(),
-        ])    
-        .handler(a.handler.function(checkTicketNumber)),
+        allow.authenticated()
+      ])
+      .handler(a.handler.function(checkTicketNumber)),
+
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
+    allow.resource(checkInAppointmentByReference).to(["query", "mutate"]),
+    allow.resource(cancelAppointmentByReference).to(["query", "mutate"]),
     allow.resource(getDepartmentQueueStatus).to(["query"]),
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
@@ -465,6 +595,11 @@ const schema = a
     allow.resource(cleanupEnquiryState),
     allow.resource(getServiceStats),
     allow.resource(getDashboardStats),
+    allow.resource(adjustQueuePosition),
+    allow.resource(getQueueItems),
+    allow.resource(markTicketSeen),
+    allow.resource(setCasePriority),
+    allow.resource(flagCaseSafeguarding),
     allow.resource(checkTicketNumber),
     allow.resource(handleSteppedOut),
     allow.resource(toggleNotifications),

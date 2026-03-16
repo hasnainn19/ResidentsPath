@@ -24,12 +24,12 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
     filter: { isAvailable: { eq: true } },
   });
   const todayCaseIds = new Set(tickets.map((t) => t.caseId));
-  const { data: allCases } = await client.models.Case.list({
+  const { data: rawCases } = await client.models.Case.list({
     filter: {
       or: [{ status: { eq: "OPEN" } }, { status: { eq: "IN_PROGRESS" } }],
     },
   });
-  const cases = allCases.filter((c) => todayCaseIds.has(c.id));
+  const cases = rawCases.filter((c) => todayCaseIds.has(c.id));
   const { data: departments } = await client.models.Department.list();
 
   const getCase = (caseId: string) => {
@@ -84,7 +84,8 @@ export const handler: Schema["getServiceStats"]["functionHandler"] = async (
   };
 
   const results = departments.map((d) => ({
-    departmentName: d.name ?? "",
+    departmentName: d.name ?? "Default",
+    departmentId: d.id,
     waitingCount: getWaitingCount(d.id),
     longestWait: getLongestWait(d.id),
     averageWait: getAverageWait(d.id),

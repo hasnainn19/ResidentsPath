@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
@@ -11,6 +11,7 @@ import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
 import ContactDetailsDialog from '../components/ContactDetailsDialog';
 import { useUser } from '../hooks/useUser';
+import { useTicketQueueInfo } from '../hooks/useTicketQueueInfo';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -30,16 +31,19 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const { user } = useUser();
+    const client = generateClient<Schema>({ authMode: "userPool" });
+
+    const {
+        position, waitTimeLower, waitTimeUpper,
+        ticketId,
+        steppedOut, setSteppedOut,
+        notificationsEnabled, setNotificationsEnabled,
+        error: fetchError,
+    } = useTicketQueueInfo(caseId);
+
     const [showStepOutAlert, setShowStepOutAlert] = useState(false);
     const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
-    const [stepOut, setStepOut]=useState(false);
     const [errors, setErrors] = useState('');
-    const [ticketId, setTicketId] = useState<string | null>(null);
-    const [queuePosition, setQueuePosition] = useState(0);
-    const [waitTimeLower, setWaitTimeLower] = useState(0);
-    const [waitTimeUpper, setWaitTimeUpper] = useState(0);
-
-    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
     const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
 
@@ -51,7 +55,7 @@ export default function UserDashboard() {
                 setErrors(stepOutErrors[0].message);
                 return;
             }
-            setStepOut(true);
+            setSteppedOut(true);
             setShowStepOutAlert(true);
         }
         catch (error) {
@@ -139,7 +143,7 @@ export default function UserDashboard() {
                 setErrors(returnedErrors[0].message);
                 return;
             }
-            setStepOut(false);
+            setSteppedOut(false);
             setShowStepOutAlert(false);
         } 
         catch (error) {
@@ -147,49 +151,6 @@ export default function UserDashboard() {
         }
     };
 
-
-    useEffect(() => {
-        fetchTicketQueueInfo();
-
-        // Poll every 30 seconds for updates
-        // Could use subscriptions for real-time updates, but it may show a lot of flickering changes
-        // in the UI as the tickets are all updated.
-        const interval = setInterval(() => {
-            fetchTicketQueueInfo();
-        }, 30000); // refresh every 30 seconds
-
-        return () => clearInterval(interval); // cleanup on unmount
-    }, []);
-
-    const client = generateClient<Schema>({ authMode: "userPool" });
-
-    async function fetchTicketQueueInfo() {
-        try {
-            if (!caseId) {
-                return;
-            }
-            const { data: ticketInfo, errors: ticketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
-
-            if (ticketErrors && ticketErrors.length > 0) {
-                setErrors(ticketErrors[0].message);
-                return;
-            }
-            if (!ticketInfo) {
-                return;
-            }
-
-            setTicketId(ticketInfo.ticketId);
-            setQueuePosition(ticketInfo.position);
-            setWaitTimeLower(ticketInfo.estimatedWaitTimeLower);
-            setWaitTimeUpper(ticketInfo.estimatedWaitTimeUpper);
-            setStepOut(ticketInfo.steppedOut);
-            setNotificationsEnabled(ticketInfo.notificationsEnabled);
-
-        } 
-        catch (error) {
-            setErrors(`Failed to fetch tickets: ${error}`);
-        }
-    }
 
     return (
         <>
@@ -202,9 +163,9 @@ export default function UserDashboard() {
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
-                    {errors && (
+                    {(errors || fetchError) && (
                         <Alert severity="error" color="error" onClose={() => setErrors('')}>
-                            {errors}
+                            {errors || fetchError}
                         </Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
@@ -221,9 +182,9 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>There are </Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>{queuePosition}</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>{position}</Typography>
                                             <Typography variant='body1'>people ahead of you</Typography>
-                                            <TextToSpeechButton text={`There are ${queuePosition} people ahead of you`}/>
+                                            <TextToSpeechButton text={`There are ${position} people ahead of you`}/>
                                         </Item>
                                     </Grid>
                                     <Grid size={6}>
@@ -268,15 +229,15 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
-                                                    variant={stepOut ? 'outlined' : 'contained'}
+                                                    variant={steppedOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
-                                                    endIcon={stepOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
-                                                    onClick={stepOut
+                                                    endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
+                                                    onClick={steppedOut
                                                         ? handleReturned
                                                         : () => notificationsEnabled ? executeStepOut() : setStepOutDialogOpen(true)
                                                     }
                                                 >
-                                                    {stepOut ? "I've returned" : "I'm stepping out"}
+                                                    {steppedOut ? "I've returned" : "I'm stepping out"}
                                                 </Button>
                                             </Stack>
                                         </Stack>
