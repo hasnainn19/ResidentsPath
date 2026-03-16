@@ -421,6 +421,62 @@ export function isValidUkPostcode(value: string) {
   return re.test(compact);
 }
 
+type AppointmentValidationFields = {
+  proceed: z.infer<typeof ProceedEnum>;
+  appointmentDateIso?: string;
+  appointmentTime?: string;
+};
+
+function validateAppointment(
+  value: AppointmentValidationFields,
+  ctx: z.RefinementCtx,
+) {
+  if (value.proceed === "BOOK_APPOINTMENT") {
+    if (!value.appointmentDateIso) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentDateIso"],
+        message: "appointmentDateIso is required for appointment",
+      });
+    }
+    if (!value.appointmentTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: "appointmentTime is required for appointment",
+      });
+    }
+    if (
+      value.appointmentDateIso &&
+      value.appointmentTime &&
+      isValidIsoDate(value.appointmentDateIso) &&
+      isBookableAppointmentTime(value.appointmentTime) &&
+      !isFutureAppointmentDateTime(value.appointmentDateIso, value.appointmentTime)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
+      });
+    }
+  } else {
+    if (value.appointmentDateIso) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentDateIso"],
+        message: "appointmentDateIso must not be provided for queue",
+      });
+    }
+    if (value.appointmentTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: "appointmentTime must not be provided for queue",
+      });
+    }
+  }
+}
+
 function hasInvalidControlCharacters(value: string, allowNewlines = false) {
   for (const char of value) {
     const code = char.charCodeAt(0);
@@ -607,50 +663,7 @@ export const formSchema = z
   })
   .strict()
   .superRefine((v, ctx) => {
-    if (v.proceed === "BOOK_APPOINTMENT") {
-      if (!v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        });
-      }
-      if (!v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime is required for appointment",
-        });
-      }
-      if (
-        v.appointmentDateIso &&
-        v.appointmentTime &&
-        isValidIsoDate(v.appointmentDateIso) &&
-        isBookableAppointmentTime(v.appointmentTime) &&
-        !isFutureAppointmentDateTime(v.appointmentDateIso, v.appointmentTime)
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
-        });
-      }
-    } else {
-      if (v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso must not be provided for queue",
-        });
-      }
-      if (v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime must not be provided for queue",
-        });
-      }
-    }
+    validateAppointment(v, ctx);
 
     if (v.domesticAbuse === true) {
       if (!v.safeToContact) {
@@ -873,51 +886,6 @@ export const caseFollowUpSchema = z
     ),
   })
   .strict()
-  .superRefine((v, ctx) => {
-    if (v.proceed === "BOOK_APPOINTMENT") {
-      if (!v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        });
-      }
-      if (!v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime is required for appointment",
-        });
-      }
-      if (
-        v.appointmentDateIso &&
-        v.appointmentTime &&
-        isValidIsoDate(v.appointmentDateIso) &&
-        isBookableAppointmentTime(v.appointmentTime) &&
-        !isFutureAppointmentDateTime(v.appointmentDateIso, v.appointmentTime)
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
-        });
-      }
-    } else {
-      if (v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso must not be provided for queue",
-        });
-      }
-      if (v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime must not be provided for queue",
-        });
-      }
-    }
-  });
+  .superRefine(validateAppointment);
 
 export type caseFollowUpInput = z.infer<typeof caseFollowUpSchema>;

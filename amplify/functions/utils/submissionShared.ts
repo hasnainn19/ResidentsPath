@@ -241,7 +241,9 @@ export async function getCaseAppointmentCount(
     return null;
   }
 
-  const appointments = (appointmentLookup.data ?? []).filter(Boolean);
+  const appointments = (appointmentLookup.data ?? []).filter(
+    (appointment) => appointment?.status === "SCHEDULED",
+  );
 
   return appointments.length;
 }
