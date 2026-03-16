@@ -47,107 +47,81 @@ export default function UserDashboard() {
     const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
     const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
 
-    const executeStepOut = async () => {
-        if (!ticketId) return;
+    const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
+        if (!ticketId) return false;
         try {
-            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut: true });
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut });
             if (stepOutErrors && stepOutErrors.length > 0) {
                 setErrors(stepOutErrors[0].message);
-                return;
+                return false;
             }
-            setSteppedOut(true);
-            setShowStepOutAlert(true);
+            setSteppedOut(steppedOut);
+            return true;
         }
         catch (error) {
-            setErrors(`Failed to step out: ${error}`);
+            setErrors(`Failed to ${steppedOut ? 'step out' : 'update'}: ${error}`);
+            return false;
+        }
+    };
+
+    const executeToggleNotifications = async (
+        enabled: boolean,
+        contactMethod?: 'SMS' | 'EMAIL',
+        contactValue?: string,
+    ): Promise<boolean> => {
+        if (!ticketId) return false;
+
+        try {
+            const { errors: notifErrors } = await client.mutations.toggleNotifications({
+                ticketId,
+                caseId: caseId!,
+                enabled,
+                contactMethod,
+                contactValue,
+            });
+            if (notifErrors && notifErrors.length > 0) {
+                setErrors(notifErrors[0].message);
+                return false;
+            }
+            setNotificationsEnabled(enabled);
+            return true;
+        }
+        catch (error) {
+            setErrors(`Failed to ${enabled ? 'enable' : 'disable'} notifications: ${error}`);
+            return false;
         }
     };
 
     const handleStepOutConfirm = async (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => {
         setStepOutDialogOpen(false);
-        if (!ticketId) return;
-
-        try {
-            const { errors: notifErrors } = await client.mutations.toggleNotifications({
-                ticketId,
-                caseId: caseId!,
-                enabled: true,
-                contactMethod,
-                contactValue,
-            });
-            if (notifErrors && notifErrors.length > 0) {
-                setErrors(notifErrors[0].message);
-                return;
+        const success = await executeToggleNotifications(true, contactMethod, contactValue);
+        if (success) {
+            const stepOutSuccess = await executeHandleSteppedOut(true);
+            if (stepOutSuccess) {
+                setShowStepOutAlert(true);
             }
-            setNotificationsEnabled(true);
         }
-        catch (error) {
-            setErrors(`Failed to enable notifications: ${error}`);
-            return;
-        }
-
-        await executeStepOut();
     };
 
     const handleEnableNotificationsConfirm = async (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => {
         setEnableNotificationsDialogOpen(false);
-        if (!ticketId) return;
-
-        try {
-            const { errors: notifErrors } = await client.mutations.toggleNotifications({
-                ticketId,
-                caseId: caseId!,
-                enabled: true,
-                contactMethod,
-                contactValue,
-            });
-            if (notifErrors && notifErrors.length > 0) {
-                setErrors(notifErrors[0].message);
-                return;
-            }
-            setNotificationsEnabled(true);
+        const success = await executeToggleNotifications(true, contactMethod, contactValue);
+        if (success) {
             setShowNotificationsAlert(true);
-        }
-        catch (error) {
-            setErrors(`Failed to enable notifications: ${error}`);
         }
     };
 
     const handleDisableNotifications = async () => {
-        if (!ticketId) return;
-
-        try {
-            const { errors: notifErrors } = await client.mutations.toggleNotifications({
-                ticketId,
-                caseId: caseId!,
-                enabled: false,
-            });
-            if (notifErrors && notifErrors.length > 0) {
-                setErrors(notifErrors[0].message);
-                return;
-            }
-            setNotificationsEnabled(false);
+        const success = await executeToggleNotifications(false);
+        if (success) {
             setShowNotificationsAlert(false);
-        }
-        catch (error) {
-            setErrors(`Failed to disable notifications: ${error}`);
         }
     };
 
     const handleReturned = async () => {
-        if (!ticketId) return;
-        
-        try {
-            const { errors: returnedErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut: false });
-            if (returnedErrors && returnedErrors.length > 0) {
-                setErrors(returnedErrors[0].message);
-                return;
-            }
-            setSteppedOut(false);
+        const success = await executeHandleSteppedOut(false);
+        if (success) {
             setShowStepOutAlert(false);
-        } 
-        catch (error) {
-            setErrors(`Failed to update: ${error}`);
         }
     };
 
@@ -234,7 +208,14 @@ export default function UserDashboard() {
                                                     endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
                                                     onClick={steppedOut
                                                         ? handleReturned
-                                                        : () => notificationsEnabled ? executeStepOut() : setStepOutDialogOpen(true)
+                                                        : async () => {
+                                                            if (notificationsEnabled) {
+                                                                const success = await executeHandleSteppedOut(true);
+                                                                if (success) setShowStepOutAlert(true);
+                                                            } else {
+                                                                setStepOutDialogOpen(true);
+                                                            }
+                                                        }
                                                     }
                                                 >
                                                     {steppedOut ? "I've returned" : "I'm stepping out"}
