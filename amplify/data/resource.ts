@@ -15,9 +15,12 @@ import { markTicketSeen } from "../functions/markTicketSeen/resource";
 import { setCasePriority } from "../functions/setCasePriority/resource";
 import { flagCaseSafeguarding } from "../functions/flagCaseSafeguarding/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
+import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
+import { handleSteppedOut } from "../functions/handleSteppedOut/resource";
+import { toggleNotifications } from "../functions/toggleNotifications/resource";
 import { checkInAppointmentByReference } from "../functions/checkInAppointmentByReference/resource";
 import { cancelAppointmentByReference } from "../functions/cancelAppointmentByReference/resource";
-import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
+import { getCaseDetails } from "../functions/getCaseDetails/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -56,7 +59,8 @@ const schema = a
         appointments: a.hasMany("Appointment", "userId"),
       })
       .authorization((allow) => [
-        allow.groups(["Staff"]), // Only staff can access user data directly
+        allow.groups(["Staff"]),
+        allow.ownerDefinedIn("id").to(["read", "update"]),
       ]),
 
     // Case - represents an issue or matter that a resident needs help with
@@ -67,6 +71,7 @@ const schema = a
         departmentId: a.id().required(),
 
         // Case information
+        name: a.string(),
         referenceNumber: a.string().required(),
         description: a.string(),
         status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
@@ -151,6 +156,10 @@ const schema = a
         estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
         estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
         steppedOut: a.boolean().default(false),
+
+        // Notification tracking
+        notificationsEnabled: a.boolean().default(false),
+        notificationPreferredContactMethod: a.enum(["SMS", "EMAIL"]),
 
         // Timestamps for queue tracking
         completedAt: a.datetime(),
@@ -239,7 +248,7 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
-      
+
     QueueItem: a.customType({
       ticketId: a.id().required(),
       caseId: a.id().required(),
@@ -261,7 +270,7 @@ const schema = a
       .returns(a.ref("QueueItem").array())
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getQueueItems)),
-      
+
     ServiceStat: a.customType({
       departmentId: a.string().required(),
       departmentName: a.string().required(),
@@ -287,17 +296,41 @@ const schema = a
       })
       .returns(
         a.customType({
+          ticketId: a.id().required(),
           departmentId: a.id().required(),
           position: a.integer().required(),
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
+          steppedOut: a.boolean().required(),
+          notificationsEnabled: a.boolean().required(),
         }),
       )
-      .authorization((allow) => [
-        allow.guest(),
-        allow.authenticated(),
-      ])
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(getTicketInfo)),
+
+    handleSteppedOut: a
+      .mutation()
+      .arguments({
+        ticketId: a.id().required(),
+        caseId: a.id().required(),
+        steppedOut: a.boolean().required(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(handleSteppedOut)),
+
+    toggleNotifications: a
+      .mutation()
+      .arguments({
+        ticketId: a.id().required(),
+        caseId: a.id().required(),
+        enabled: a.boolean().required(),
+        contactMethod: a.enum(["SMS", "EMAIL"]),
+        contactValue: a.string(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(toggleNotifications)),
 
     getDepartmentQueueStatus: a
       .query()
@@ -448,10 +481,7 @@ const schema = a
         }),
       )
       .authorization((allow) => [
-        allow.groups([
-          "Staff", 
-          "HounslowHouseDevices"
-        ]),
+        allow.groups(["Staff", "HounslowHouseDevices"]),
       ])
       .handler(a.handler.function(checkInAppointmentByReference)),
 
@@ -532,12 +562,51 @@ const schema = a
           caseId: a.string().required(),
         }),
       )
-      .authorization((allow) => [
-        allow.guest(), 
-        allow.authenticated()
-      ])
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(checkTicketNumber)),
 
+    caseTicketDetails: a.customType({
+      ticketId: a.string().required(),
+      ticketStatus: a.string().required(),
+    }),
+    getCaseDetails: a
+      .query()
+      .arguments({
+        caseId: a.string().required(),
+      })
+      .returns(
+        a.customType({
+          referenceNumber: a.string().required(),
+          caseName: a.string(),
+          departmentId: a.string(),
+          description: a.string(),
+          status: a.string(),
+          priority: a.boolean(),
+          flag: a.boolean(),
+          notes: a.string(),
+          enquiry: a.string(),
+          otherEnquiryText: a.string(),
+          childrenCount: a.string(),
+          householdSize: a.string(),
+          ageRange: a.string(),
+          hasDisabilityOrSensory: a.boolean(),
+          disabilityType: a.string(),
+          domesticAbuse: a.boolean(),
+          safeToContact: a.string(),
+          safeContactNotes: a.string(),
+          urgent: a.string(),
+          urgentReason: a.string(),
+          urgentReasonOtherText: a.string(),
+          supportNotes: a.string(),
+          supportNeeds: a.string(),
+          otherSupport: a.string(),
+          additionalInfo: a.string(),
+          residentName: a.string(),
+          tickets: a.ref("caseTicketDetails").array(),
+        }),
+      )
+      .authorization((allow) => [allow.groups(["Staff"])])
+      .handler(a.handler.function(getCaseDetails)),
   })
   .authorization((allow) => [
     allow.resource(submitEnquiry).to(["query", "mutate"]),
@@ -559,6 +628,9 @@ const schema = a
     allow.resource(setCasePriority),
     allow.resource(flagCaseSafeguarding),
     allow.resource(checkTicketNumber),
+    allow.resource(getCaseDetails),
+    allow.resource(handleSteppedOut),
+    allow.resource(toggleNotifications),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 

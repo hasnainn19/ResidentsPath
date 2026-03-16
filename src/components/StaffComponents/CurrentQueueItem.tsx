@@ -194,13 +194,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                     : "Set to Standard"}
                 </MenuItem>
               </Menu>
-              <Tooltip
-                title={
-                  isFlagged
-                    ? "Clear safeguarding flag"
-                    : "Flag for safeguarding"
-                }
-              >
+              <Tooltip title={isFlagged ? "Clear case flag" : "Flag case"}>
                 <span>
                   <IconButton
                     size="small"

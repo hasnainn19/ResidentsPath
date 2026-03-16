@@ -18,6 +18,8 @@ import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
 import RequireRole from "./guards/RequireRole";
 import CheckInConfirmation from "./pages/CheckInConfirmation";
+import StaffCaseManagementPage from "./pages/StaffCaseManagementPage";
+import StaffCaseDetails from "./pages/StaffCaseDetails";
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +28,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <RequireGuest><AuthPage /></RequireGuest>,
+    element: (
+      <RequireGuest>
+        <AuthPage />
+      </RequireGuest>
+    ),
   },
   {
     path: "/start",
@@ -35,7 +41,7 @@ export const router = createBrowserRouter([
   {
     path: "/referencepage",
     element: <ReferencePage />,
-  },  
+  },
   {
     path: "/checkinpage",
     element: <CheckInConfirmation />,
@@ -50,7 +56,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/staff",
-    element: <RequireRole allowedGroups={["Staff"]}><StaffLayout /></RequireRole>,
+    element: (
+      <RequireRole allowedGroups={["Staff"]}>
+        <StaffLayout />
+      </RequireRole>
+    ),
     children: [
       {
         index: true,
@@ -60,11 +70,19 @@ export const router = createBrowserRouter([
         path: "queues",
         element: <StaffQueuePage />,
       },
+      {
+        path: "cases",
+        element: <StaffCaseManagementPage />,
+      },
+      {
+        path: "cases/:caseId",
+        element: <StaffCaseDetails />,
+      },
     ],
   },
   {
-      path: "/userdashboard/:caseId",
-      element: <UserDashboard /> 
+    path: "/userdashboard/:caseId",
+    element: <UserDashboard />,
   },
   {
     path: "/form",
