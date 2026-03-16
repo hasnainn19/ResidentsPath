@@ -1,3 +1,5 @@
+import { useId } from "react";
+import type { ReactNode } from "react";
 import {
   Alert,
   Box,
@@ -11,6 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+
+import { outlinedInfoAlertSx } from "./outlinedInfoAlertSx";
 
 type PrivacyNoticeDialogProps = {
   open: boolean;
@@ -29,7 +33,7 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
-function Section(props: { title: string; children: React.ReactNode }) {
+function Section(props: { title: string; children: ReactNode }) {
   return (
     <Box>
       <Typography variant="h6" fontWeight={800} sx={{ mb: 1 }}>
@@ -42,10 +46,21 @@ function Section(props: { title: string; children: React.ReactNode }) {
 
 export default function PrivacyNoticeDialog(props: PrivacyNoticeDialogProps) {
   const { open, onClose } = props;
+  const titleId = useId();
+  const descriptionId = useId();
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" scroll="paper">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      scroll="paper"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+    >
       <DialogTitle
+        id={titleId}
         sx={(theme) => ({
           fontWeight: 800,
           color: "common.white",
@@ -62,16 +77,7 @@ export default function PrivacyNoticeDialog(props: PrivacyNoticeDialogProps) {
           <Alert
             severity="info"
             variant="outlined"
-            sx={(theme) => ({
-              borderRadius: 2,
-              border: "2px solid",
-              borderColor: theme.palette.primary.main,
-              borderLeftWidth: 8,
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
-              "& .MuiAlert-icon": {
-                color: theme.palette.primary.dark,
-              },
-            })}
+            sx={outlinedInfoAlertSx}
           >
             Last updated: 16 March 2026
           </Alert>
@@ -81,7 +87,7 @@ export default function PrivacyNoticeDialog(props: PrivacyNoticeDialogProps) {
             and meeting its obligation under data protection law and other relevant legislation.
           </Typography>
 
-          <Typography variant="body2">
+          <Typography variant="body2" id={descriptionId}>
             This privacy notice applies to ResidentsPath and tells you what to expect us to do with
             your personal information when you use ResidentsPath to submit an enquiry. It should be
             read alongside the Council&apos;s{" "}

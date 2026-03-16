@@ -37,6 +37,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import { outlinedInfoAlertSx } from "../../components/FormPageComponents/outlinedInfoAlertSx";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -512,16 +513,7 @@ export default function PersonalDetails() {
                     <Alert
                       severity="info"
                       variant="outlined"
-                      sx={(theme) => ({
-                        borderRadius: 2,
-                        border: "2px solid",
-                        borderColor: theme.palette.primary.main,
-                        borderLeftWidth: 8,
-                        bgcolor: alpha(theme.palette.primary.main, 0.08),
-                        "& .MuiAlert-icon": {
-                          color: theme.palette.primary.dark,
-                        },
-                      })}
+                      sx={outlinedInfoAlertSx}
                     >
                       We only use your email address or phone number for this request and for the
                       updates you ask us to send.

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Alert, Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
+import { outlinedInfoAlertSx } from "./outlinedInfoAlertSx";
 import PrivacyNoticeDialog from "./PrivacyNoticeDialog";
 
 export default function FormPrivacyNotice() {
@@ -32,16 +33,7 @@ export default function FormPrivacyNotice() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={(theme) => ({
-              borderRadius: 2,
-              border: "2px solid",
-              borderColor: theme.palette.primary.main,
-              borderLeftWidth: 8,
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
-              "& .MuiAlert-icon": {
-                color: theme.palette.primary.dark,
-              },
-            })}
+            sx={outlinedInfoAlertSx}
           >
             The London Borough of Hounslow is committed to protecting and respecting your privacy
             and meeting its obligation under data protection law and other relevant legislation.
