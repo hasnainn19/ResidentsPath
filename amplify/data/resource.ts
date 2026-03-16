@@ -15,9 +15,11 @@ import { markTicketSeen } from "../functions/markTicketSeen/resource";
 import { setCasePriority } from "../functions/setCasePriority/resource";
 import { flagCaseSafeguarding } from "../functions/flagCaseSafeguarding/resource";
 import { checkTicketNumber } from "../functions/checkTicketNumber/resource";
+import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
+import { handleSteppedOut } from "../functions/handleSteppedOut/resource";
+import { toggleNotifications } from "../functions/toggleNotifications/resource";
 import { checkInAppointmentByReference } from "../functions/checkInAppointmentByReference/resource";
 import { cancelAppointmentByReference } from "../functions/cancelAppointmentByReference/resource";
-import { cleanupEnquiryState } from "../functions/cleanupEnquiryState/resource";
 import { getCaseDetails } from "../functions/getCaseDetails/resource";
 
 /**
@@ -57,7 +59,8 @@ const schema = a
         appointments: a.hasMany("Appointment", "userId"),
       })
       .authorization((allow) => [
-        allow.groups(["Staff"]), // Only staff can access user data directly
+        allow.groups(["Staff"]),
+        allow.ownerDefinedIn("id").to(["read", "update"]),
       ]),
 
     // Case - represents an issue or matter that a resident needs help with
@@ -154,6 +157,10 @@ const schema = a
         estimatedWaitTimeLower: a.integer().required(), // Lower bound in minutes
         estimatedWaitTimeUpper: a.integer().required(), // Upper bound in minutes
         steppedOut: a.boolean().default(false),
+
+        // Notification tracking
+        notificationsEnabled: a.boolean().default(false),
+        notificationPreferredContactMethod: a.enum(["SMS", "EMAIL"]),
 
         // Timestamps for queue tracking
         completedAt: a.datetime(),
@@ -290,14 +297,41 @@ const schema = a
       })
       .returns(
         a.customType({
+          ticketId: a.id().required(),
           departmentId: a.id().required(),
           position: a.integer().required(),
           estimatedWaitTimeLower: a.integer().required(),
           estimatedWaitTimeUpper: a.integer().required(),
+          steppedOut: a.boolean().required(),
+          notificationsEnabled: a.boolean().required(),
         }),
       )
       .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(getTicketInfo)),
+
+    handleSteppedOut: a
+      .mutation()
+      .arguments({
+        ticketId: a.id().required(),
+        caseId: a.id().required(),
+        steppedOut: a.boolean().required(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(handleSteppedOut)),
+
+    toggleNotifications: a
+      .mutation()
+      .arguments({
+        ticketId: a.id().required(),
+        caseId: a.id().required(),
+        enabled: a.boolean().required(),
+        contactMethod: a.enum(["SMS", "EMAIL"]),
+        contactValue: a.string(),
+      })
+      .returns(a.customType({ success: a.boolean().required() }))
+      .authorization((allow) => [allow.guest(), allow.authenticated()])
+      .handler(a.handler.function(toggleNotifications)),
 
     getDepartmentQueueStatus: a
       .query()
@@ -597,6 +631,8 @@ const schema = a
     allow.resource(flagCaseSafeguarding),
     allow.resource(checkTicketNumber),
     allow.resource(getCaseDetails),
+    allow.resource(handleSteppedOut),
+    allow.resource(toggleNotifications),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 
