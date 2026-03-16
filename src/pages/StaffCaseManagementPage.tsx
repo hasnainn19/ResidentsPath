@@ -233,7 +233,10 @@ const StaffCaseManagementPage: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <IconButton onClick={() => navigate(`./${caseItem.id}`)}>
+                  <IconButton
+                    onClick={() => navigate(`./${caseItem.id}`)}
+                    aria-label={`View details for case ${caseItem.referenceNumber}`}
+                  >
                     <ChevronRightIcon />
                   </IconButton>
                 </Stack>
