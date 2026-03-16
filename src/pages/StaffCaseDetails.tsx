@@ -67,6 +67,9 @@ const StaffCaseDetails = () => {
     try {
       await client.models.Case.update({ id: caseId, notes: notesValue });
       setNotesOpen(false);
+    } catch (error) {
+      console.error("Failed to update case notes", error);
+      window.alert("Unable to save notes. Please try again.");
     } finally {
       setSavingNotes(false);
     }
@@ -83,6 +86,9 @@ const StaffCaseDetails = () => {
     try {
       await client.models.Case.update({ id: caseId, title: titleValue });
       setTitleOpen(false);
+    } catch (error) {
+      console.error("Failed to update case title", error);
+      window.alert("Unable to save title. Please try again.");
     } finally {
       setSavingTitle(false);
     }
