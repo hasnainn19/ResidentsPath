@@ -124,10 +124,3 @@ export type QueueStatus = {
   queueCount: number;
   updatedAtIso: string;
 };
-
-export type OptionTileProps = {
-  title: string;
-  description: string;
-  selected: boolean;
-  onClick: () => void;
-};

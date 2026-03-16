@@ -9,23 +9,14 @@ import { Alert, Button, Stack, Typography } from "@mui/material";
 
 import FormStepLayout from "./FormStepLayout";
 import { LANGUAGE_OPTIONS } from "../../pages/Form/data/languages";
-import { clearDraft, loadDraft } from "../../pages/Form/model/draftStorage";
+import {
+  clearDraft,
+  formatSavedTime,
+  getSafeDraftPath,
+  loadDraft,
+} from "../../pages/Form/model/draftStorage";
 import { initialFormData } from "../../pages/Form/model/initialState";
 import { useFormWizard } from "../../context/FormWizardProvider";
-
-function formatSavedTime(ts: number) {
-  try {
-    return new Date(ts).toLocaleString("en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
 
 export default function ResumeFromSave() {
   const nav = useNavigate();
@@ -37,9 +28,7 @@ export default function ResumeFromSave() {
     return <Navigate to="/form/enquiry-selection" replace />;
   }
 
-  const lastPath = draft.lastPath;
-  const safeTarget =
-    lastPath && lastPath.startsWith("/form/") ? lastPath : "/form/enquiry-selection";
+  const safeTarget = getSafeDraftPath(draft.lastPath);
   const savedAt = formatSavedTime(draft.updatedAt);
 
   const handleContinue = () => {
@@ -49,7 +38,10 @@ export default function ResumeFromSave() {
 
   const handleStartNew = () => {
     clearDraft(localStorage);
-    setFormData(initialFormData);
+    setFormData({
+      ...initialFormData,
+      language: formData.language,
+    });
     nav("/form/enquiry-selection", { replace: true });
   };
 
@@ -65,7 +57,7 @@ export default function ResumeFromSave() {
       onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      <Stack spacing={3}>
+      <Stack spacing={{ xs: 3, sm: 4 }}>
         <Typography variant="body1">
           You can continue where you left off, or start a new form.
         </Typography>

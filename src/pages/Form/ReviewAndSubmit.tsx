@@ -57,7 +57,7 @@ export default function ReviewAndSubmit() {
       }
 
       if (!result.referenceNumber) {
-        setSubmitError("Submission succeeded but no case reference was returned.");
+        setSubmitError("Submission succeeded but no case reference number was returned.");
         return;
       }
 
@@ -71,6 +71,8 @@ export default function ReviewAndSubmit() {
             bookingReferenceNumber: result.bookingReferenceNumber || undefined,
             receiptType,
             ticketNumber: result.ticketNumber || undefined,
+            estimatedWaitTimeLower: result.estimatedWaitTimeLower ?? undefined,
+            estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
             appointmentTime: formData.appointmentTime || undefined,
             departmentName: DepartmentLabelById[payload.departmentId],

@@ -262,7 +262,7 @@ export default function ReceiptHeaderCard({
                 disabled={!caseReferenceNumber}
                 fullWidth
               >
-                {isAppointment ? "Copy case reference" : "Copy reference number"}
+                Copy case reference number
               </Button>
 
               <Button type="button" variant="contained" onClick={onPrint} fullWidth>

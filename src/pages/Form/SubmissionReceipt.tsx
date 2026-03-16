@@ -24,6 +24,8 @@ type Receipt = {
   bookingReferenceNumber?: string;
   receiptType: "QUEUE" | "APPOINTMENT";
   ticketNumber?: string;
+  estimatedWaitTimeLower?: number;
+  estimatedWaitTimeUpper?: number;
   appointmentDateIso?: string;
   appointmentTime?: string;
   departmentName?: string;
@@ -118,7 +120,7 @@ export default function SubmissionReceipt() {
 
       if (!referenceNumber) {
         setReceipt(null);
-        setErrorMessage("No case reference was provided.");
+        setErrorMessage("No case reference number was provided.");
         setLoading(false);
         return;
       }
@@ -172,7 +174,7 @@ export default function SubmissionReceipt() {
           if (!routeReceipt) {
             setReceipt(null);
             setErrorMessage(
-              data?.errorMessage || "We could not find a receipt for that case reference.",
+              data?.errorMessage || "We could not find a receipt for that case reference number.",
             );
           }
 
@@ -180,15 +182,24 @@ export default function SubmissionReceipt() {
           return;
         }
 
+        const fallbackReceipt =
+          routeReceipt?.receiptType === receiptType ? routeReceipt : null;
+
         setReceipt({
           createdAt: data.createdAt || undefined,
           referenceNumber: data.referenceNumber,
-          bookingReferenceNumber: data.bookingReferenceNumber || undefined,
+          bookingReferenceNumber:
+            data.bookingReferenceNumber || fallbackReceipt?.bookingReferenceNumber || undefined,
           receiptType,
-          ticketNumber: data.ticketNumber || undefined,
-          appointmentDateIso: data.appointmentDateIso || undefined,
-          appointmentTime: data.appointmentTime || undefined,
-          departmentName: data.departmentName || undefined,
+          ticketNumber: data.ticketNumber || fallbackReceipt?.ticketNumber || undefined,
+          estimatedWaitTimeLower:
+            data.estimatedWaitTimeLower ?? fallbackReceipt?.estimatedWaitTimeLower ?? undefined,
+          estimatedWaitTimeUpper:
+            data.estimatedWaitTimeUpper ?? fallbackReceipt?.estimatedWaitTimeUpper ?? undefined,
+          appointmentDateIso:
+            data.appointmentDateIso || fallbackReceipt?.appointmentDateIso || undefined,
+          appointmentTime: data.appointmentTime || fallbackReceipt?.appointmentTime || undefined,
+          departmentName: data.departmentName || fallbackReceipt?.departmentName || undefined,
         });
 
         setLoading(false);
@@ -320,7 +331,7 @@ export default function SubmissionReceipt() {
 
   let chipLabel = "Receipt";
   let heading = "Receipt details";
-  let introText = "Use your case reference to view this receipt again.";
+  let introText = "Use your case reference number to view this receipt again.";
 
   if (loading) {
     chipLabel = "Loading receipt";
