@@ -42,9 +42,28 @@ function validateTicketRecord(record: DynamoDBRecord) {
  * @returns the message to be sent to the resident if they should be notified or null otherwise
  */
 function shouldNotifyResident(newImage: Record<string, any>, oldImage: Record<string, any>, ticketNumber: string): string | null {
-    // Notify when the ticket transitions TO position 0 (i.e. now being served)
+    // Being served
     if (newImage.position === 0 && oldImage.position !== 0) {
         return `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
+    }
+
+    // Under 5 minutes
+    if (
+        newImage.estimatedWaitTimeLower <= 5 &&
+        oldImage.estimatedWaitTimeLower > 5 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 5 minutes or less.`;
+    }
+
+    // Under 15 minutes (only if not also crossing the 5 min threshold)
+    if (
+        newImage.estimatedWaitTimeLower <= 15 &&
+        oldImage.estimatedWaitTimeLower > 15 &&
+        newImage.estimatedWaitTimeLower > 5 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 15 minutes or less.`;
     }
 
     // Other notification conditions will go here
