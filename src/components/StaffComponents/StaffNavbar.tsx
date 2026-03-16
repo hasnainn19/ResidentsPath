@@ -2,6 +2,7 @@ import { Drawer, List, Toolbar, Typography, Box } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import WorkIcon from "@mui/icons-material/Work";
+import PersonIcon from "@mui/icons-material/Person";
 import StaffNavItem from "./StaffNavItem";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "aws-amplify/auth";
@@ -87,6 +88,8 @@ const StaffNavbar = () => {
             label="Case Management"
             url="/staff/cases"
           />
+          <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
+          <StaffNavItem icon={<PersonIcon />} label="User Dashboard" url="/" />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
           <Typography

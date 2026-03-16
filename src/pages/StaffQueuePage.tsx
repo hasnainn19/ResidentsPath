@@ -30,9 +30,8 @@ interface CaseItem {
   notes: string | null;
 }
 
-const client = generateClient<Schema>({ authMode: "userPool" });
-
 const StaffQueuePage = () => {
+  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
   const [searchParams] = useSearchParams();
   const selectedDepartmentName =
     searchParams.get("departmentName")?.trim() || "";
