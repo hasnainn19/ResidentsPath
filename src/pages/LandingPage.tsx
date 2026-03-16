@@ -18,8 +18,6 @@ export default function LandingPage() {
 	return (
 		<>
 			<NavBar />
-			{/* Show navbar if authenticated */}
-			{isAuthenticated && <NavBar />}
 
 			<Container maxWidth="md" sx={{ py: 8 }}>
 				{/* Header */}
