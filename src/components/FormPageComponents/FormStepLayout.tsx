@@ -4,7 +4,6 @@
  * Provides the shared header and structure across all steps, including:
  * - Title/subtitle area
  * - Step progress indicator when enabled
- * - Language selector
  * - TTS instructions action
  * - Back button when not on Step 1
  *
@@ -23,7 +22,6 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useTranslation } from 'react-i18next';
-import type { LanguageOption } from "../../pages/Form/model/formFieldTypes";
 import TextToSpeechButton from "../TextToSpeechButton";
 
 type Props = {
@@ -34,10 +32,6 @@ type Props = {
   showProgress?: boolean;
 
   onBack?: () => void;
-
-  languageValue: string;
-  onLanguageChange: (code: string) => void;
-  languageOptions: LanguageOption[];
 
   children: ReactNode;
 };
@@ -106,7 +100,7 @@ export default function FormStepLayout(props: Props) {
             <TextToSpeechButton text={listenText} />
           </Stack>
 
-          {/* Title + language */}
+          {/* Title */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
