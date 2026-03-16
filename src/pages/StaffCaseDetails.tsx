@@ -315,7 +315,7 @@ const StaffCaseDetails = () => {
               <DetailRow
                 label="Urgent Reason"
                 value={
-                  urgentReasonLabels.find((u) => u.value == c.urgentReason)
+                  urgentReasonLabels.find((u) => u.value === c.urgentReason)
                     ?.label
                 }
               />
