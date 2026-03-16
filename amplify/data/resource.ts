@@ -70,7 +70,7 @@ const schema = a
       .model({
         // Foreign keys
         userId: a.id().required(),
-        departmentName: a.string().required(),
+        departmentName: a.id().required(),
 
         // Case information
         name: a.string(),
@@ -161,7 +161,7 @@ const schema = a
       .model({
         // Foreign keys
         caseId: a.id().required(),
-        departmentName: a.string().required(),
+        departmentName: a.id().required(),
 
         // Display information
         ticketNumber: a.string().required(),
@@ -196,7 +196,7 @@ const schema = a
     Staff: a
       .model({
         // Foreign keys
-        departmentName: a.string().required(),
+        departmentName: a.id().required(),
 
         // Staff information
         cognitoUserId: a.string().required(), // Link to Cognito user for authentication
