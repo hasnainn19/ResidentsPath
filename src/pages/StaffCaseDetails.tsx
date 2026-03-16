@@ -138,7 +138,7 @@ const StaffCaseDetails = () => {
     <Box sx={{ p: 4, maxWidth: 1000, mx: "auto" }}>
       {/* Header */}
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-        <IconButton onClick={() => navigate(-1)} size="small">
+        <IconButton onClick={() => navigate(-1)} size="small" aria-label="Go back">
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="body2" color="text.secondary">
@@ -156,7 +156,12 @@ const StaffCaseDetails = () => {
           <Typography variant="h4" fontWeight={600}>
             {c?.title} #{c.referenceNumber} &middot; {c.departmentId}
           </Typography>
-          <IconButton size="small" onClick={openTitleModal} sx={{ mt: 0.25 }}>
+          <IconButton
+            size="small"
+            onClick={openTitleModal}
+            sx={{ mt: 0.25 }}
+            aria-label="Edit case title"
+          >
             <EditIcon fontSize="small" />
           </IconButton>
         </Stack>
