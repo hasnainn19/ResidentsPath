@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 import { getDataAuthMode } from '../utils/getDataAuthMode';
 
