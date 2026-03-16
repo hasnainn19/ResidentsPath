@@ -51,6 +51,7 @@ export type PronounsOption = "" | NonNullable<formInput["pronouns"]>;
 
 export type FormData = {
   language: string;
+  privacyNoticeAccepted: boolean;
 
   provideDetails: YesNo;
   firstName: string;
@@ -77,7 +78,6 @@ export type FormData = {
   enquiryId: string;
   specificDetailId: string;
   routedDepartment: "" | DepartmentId;
-  otherEnquiryText: string;
 
   hasChildren: boolean;
   childrenCount: Count;

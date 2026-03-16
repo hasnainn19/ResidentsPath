@@ -50,7 +50,6 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
     flag: selectedCase?.flag,
     notes: selectedCase?.notes,
     enquiry: selectedCase?.enquiry,
-    otherEnquiryText: selectedCase?.otherEnquiryText,
     childrenCount: selectedCase?.childrenCount,
     householdSize: selectedCase?.householdSize,
     ageRange: selectedCase?.ageRange,

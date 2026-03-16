@@ -83,7 +83,6 @@ const schema = a
 
         // What is being requested
         enquiry: a.string().required(),
-        otherEnquiryText: a.string(),
 
         // Prioritisation criteria
         childrenCount: a.string(),
@@ -456,7 +455,6 @@ const schema = a
           pronounsOtherText: a.string(),
 
           enquiry: a.string().required(),
-          otherEnquiryText: a.string(),
 
           childrenCount: a.string(),
 
@@ -659,7 +657,6 @@ const schema = a
           flag: a.boolean(),
           notes: a.string(),
           enquiry: a.string(),
-          otherEnquiryText: a.string(),
           childrenCount: a.string(),
           householdSize: a.string(),
           ageRange: a.string(),
