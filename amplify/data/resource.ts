@@ -3,7 +3,7 @@ import { submitEnquiry } from "../functions/submitEnquiry/resource";
 import { getSubmissionReceipt } from "../functions/getSubmissionReceipt/resource";
 import { getAvailableAppointmentTimes } from "../functions/getAvailableAppointmentTimes/resource";
 import { postConfirmation } from "../functions/postConfirmation/resource";
-import { calculateDepartmentQueue } from "../functions/calculateDepartmentQueue/resource";
+import { onTicketCompleted } from "../functions/onTicketCompleted/resource";
 import { getTicketInfo } from "../functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "../functions/getDepartmentQueueStatus/resource";
 import { notifyResident } from "../functions/notifyResident/resource";
@@ -227,6 +227,9 @@ const schema = a
       .authorization((allow) => [
         allow.groups(["Staff"]), // Only staff can access appointments directly
       ]),
+
+    // Custom queries and mutations (lambdas defined in amplify/functions)
+
     getDashboardStats: a
       .query()
       .returns(
@@ -239,6 +242,7 @@ const schema = a
       )
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getDashboardStats)),
+
     QueueItem: a.customType({
       ticketId: a.id().required(),
       caseId: a.id().required(),
@@ -251,6 +255,7 @@ const schema = a
       position: a.integer().required(),
       notes: a.string(),
     }),
+
     getQueueItems: a
       .query()
       .arguments({
@@ -259,6 +264,7 @@ const schema = a
       .returns(a.ref("QueueItem").array())
       .authorization((allow) => [allow.groups(["Staff"])])
       .handler(a.handler.function(getQueueItems)),
+
     ServiceStat: a.customType({
       departmentId: a.string().required(),
       departmentName: a.string().required(),
@@ -270,6 +276,7 @@ const schema = a
       steppedOutCount: a.integer().required(),
       availableStaff: a.integer().required(),
     }),
+
     getServiceStats: a
       .query()
       .returns(a.ref("ServiceStat").array())
@@ -283,25 +290,14 @@ const schema = a
       })
       .returns(
         a.customType({
-          departmentId: a.id(),
-          position: a.integer(),
-          estimatedWaitTimeLower: a.integer(),
-          estimatedWaitTimeUpper: a.integer(),
+          departmentId: a.id().required(),
+          position: a.integer().required(),
+          estimatedWaitTimeLower: a.integer().required(),
+          estimatedWaitTimeUpper: a.integer().required(),
         }),
       )
       .authorization((allow) => [allow.guest(), allow.authenticated()])
       .handler(a.handler.function(getTicketInfo)),
-
-    calculateDepartmentQueue: a
-      .mutation()
-      .arguments({
-        departmentId: a.string().required(),
-      })
-      .returns(a.boolean())
-      .authorization((allow) => [allow.guest(), allow.authenticated()])
-      .handler(a.handler.function(calculateDepartmentQueue)),
-
-    // Custom queries and mutations (lambdas defined in amplify/functions)
 
     getDepartmentQueueStatus: a
       .query()
@@ -588,7 +584,7 @@ const schema = a
     allow.resource(getAvailableAppointmentTimes).to(["query"]),
     allow.resource(getSubmissionReceipt).to(["query"]),
     allow.resource(postConfirmation),
-    allow.resource(calculateDepartmentQueue),
+    allow.resource(onTicketCompleted),
     allow.resource(getTicketInfo),
     allow.resource(notifyResident),
     allow.resource(cleanupEnquiryState),
