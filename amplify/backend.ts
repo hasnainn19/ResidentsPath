@@ -5,6 +5,8 @@ import { postConfirmation } from "./functions/postConfirmation/resource";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Aws } from "aws-cdk-lib";
 import { submitEnquiry } from "./functions/submitEnquiry/resource";
+import { submitCaseFollowUp } from "./functions/submitCaseFollowUp/resource";
+import { getCaseFollowUp } from "./functions/getCaseFollowUp/resource";
 import { getDashboardStats } from "./functions/getDashboardStats/resource";
 import { getServiceStats } from "./functions/getServiceStats/resource";
 import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
@@ -21,9 +23,10 @@ import {
 import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/resource";
-import { calculateDepartmentQueue } from "./functions/calculateDepartmentQueue/resource";
+import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
+import { handleSteppedOut } from "./functions/handleSteppedOut/resource";
 import {
   FilterCriteria,
   FilterRule,
@@ -39,14 +42,17 @@ const backend = defineBackend({
   data,
   postConfirmation,
   submitEnquiry,
+  submitCaseFollowUp,
+  getCaseFollowUp,
   getTicketInfo,
   getDepartmentQueueStatus,
-  calculateDepartmentQueue,
+  onTicketCompleted,
   notifyResident,
   cleanupEnquiryState,
   getAvailableAppointmentTimes,
   getDashboardStats,
   getServiceStats,
+  handleSteppedOut,
   adjustQueuePosition,
   getQueueItems,
   markTicketSeen,
@@ -89,6 +95,7 @@ const enquiriesStateTable = new Table(backend.stack, "EnquiriesStateTable", {
   timeToLiveAttribute: "expiresAt",
 });
 enquiriesStateTable.grantReadWriteData(backend.submitEnquiry.resources.lambda);
+enquiriesStateTable.grantReadWriteData(backend.submitCaseFollowUp.resources.lambda);
 enquiriesStateTable.grantReadData(
   backend.getAvailableAppointmentTimes.resources.lambda,
 );
@@ -102,12 +109,12 @@ backend.submitEnquiry.addEnvironment(
   enquiriesStateTable.tableName,
 );
 
-backend.getAvailableAppointmentTimes.addEnvironment(
+backend.submitCaseFollowUp.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
 );
 
-backend.getDepartmentQueueStatus.addEnvironment(
+backend.getAvailableAppointmentTimes.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
 );
@@ -139,7 +146,8 @@ const appointmentTable = backend.data.resources.tables["Appointment"];
  * Attach the Ticket stream to the Lambda.
  * The filter tells AWS to only invoke the Lambda for MODIFY events
  *
- * Further filters can be added that target the dynamoDB record's new and old images
+ * The filters are mutually exclusive so the lambda doesn't fire multiple times for the same ticket update.
+ * Since FilterRule doesn't support greaterThan or lessThanOrEqualTo, we use between to create the necessary ranges.
  */
 backend.notifyResident.resources.lambda.addEventSource(
   new DynamoEventSource(ticketTable, {
@@ -147,13 +155,56 @@ backend.notifyResident.resources.lambda.addEventSource(
     batchSize: 10,
     bisectBatchOnError: true,
     filters: [
+      // Position reaches 0 (being served)
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
         dynamodb: {
-          // Filter for when the record's data changes to something specific
+          NewImage: { position: { N: FilterRule.isEqual("0") } },
+          OldImage: { position: { N: FilterRule.notEquals("0") } },
+        },
+      }),
+      // Crosses into ≤10 min range from above 10 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
           NewImage: {
-            position: { N: FilterRule.isEqual("0") }, // Trigger when position changes to 0
+            estimatedWaitTimeLower: { N: FilterRule.between(0, 10) },
+            position: { N: FilterRule.notEquals("0") },
           },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(11, 999) } },
+        },
+      }),
+      // Crosses into 11–20 min range from above 20 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(11, 20) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(21, 999) } },
+        },
+      }),
+      // Crosses into 21–30 min range from above 30 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(21, 30) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(31, 999) } },
+        },
+      }),
+      // Crosses into 31–60 min range from above 60 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(31, 60) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(61, 999) } },
         },
       }),
     ]
@@ -186,7 +237,28 @@ backend.notifyResident.addEnvironment(
   "SMS_ORIGINATION_IDENTITY",
   "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
 );
-backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
+backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@residentspath.uk");
+
+/**
+ * Attach the Ticket stream to the onTicketCompleted Lambda.
+ * The filter tells AWS to only invoke the Lambda for MODIFY and INSERT events
+ */
+backend.onTicketCompleted.resources.lambda.addEventSource(
+  new DynamoEventSource(ticketTable, {
+    startingPosition: StartingPosition.LATEST,
+    batchSize: 10,
+    bisectBatchOnError: true,
+    filters: [
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+      }),
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("INSERT"), // new ticket creations
+      }),
+
+    ],
+  })
+);
 
 
 /**

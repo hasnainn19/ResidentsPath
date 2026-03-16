@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 
@@ -15,9 +15,8 @@ export interface QueueItem {
   notes: string | null;
 }
 
-const client = generateClient<Schema>({ authMode: "userPool" });
-
 const useQueueItems = (departmentName: string) => {
+  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

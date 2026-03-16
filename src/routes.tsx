@@ -5,21 +5,22 @@ import App from "./App";
 import StaffDashboard from "./pages/StaffDashboard";
 import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
-import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
+import FormEntry from "./pages/Form/FormEntry";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
 import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
-import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
-import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import ExistingCaseFollowUp from "./pages/Form/ExistingCaseFollowUp";
+import UserDashboard from "./pages/UserDashboard";
 import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
-import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
 import CheckInConfirmation from "./pages/CheckInConfirmation";
+import StaffCaseManagementPage from "./pages/StaffCaseManagementPage";
+import StaffCaseDetails from "./pages/StaffCaseDetails";
 
 export const router = createBrowserRouter([
   {
@@ -28,7 +29,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <RequireGuest><AuthPage /></RequireGuest>,
+    element: (
+      <RequireGuest>
+        <AuthPage />
+      </RequireGuest>
+    ),
   },
   {
     path: "/start",
@@ -38,10 +43,6 @@ export const router = createBrowserRouter([
     path: "/referencepage",
     element: <ReferencePage />,
   },
-  {
-    path: "/bookingpage",
-    element: <RequireAuth><BookingPage /></RequireAuth>,
-  },  
   {
     path: "/checkinpage",
     element: <CheckInConfirmation />,
@@ -56,7 +57,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/staff",
-    element: <RequireRole allowedGroups={["Staff"]}><StaffLayout /></RequireRole>,
+    element: (
+      <RequireRole allowedGroups={["Staff"]}>
+        <StaffLayout />
+      </RequireRole>
+    ),
     children: [
       {
         index: true,
@@ -66,17 +71,29 @@ export const router = createBrowserRouter([
         path: "queues",
         element: <StaffQueuePage />,
       },
+      {
+        path: "cases",
+        element: <StaffCaseManagementPage />,
+      },
+      {
+        path: "cases/:caseId",
+        element: <StaffCaseDetails />,
+      },
     ],
   },
   {
-      path: "/userdashboard/:caseId",
-      element: <UserDashboard /> 
+    path: "/userdashboard/:caseId",
+    element: <UserDashboard />,
   },
   {
     path: "/form",
     element: <FormLayout />,
     children: [
-      { index: true, element: <ResumeFromSave /> },
+      { index: true, element: <FormEntry /> },
+      {
+        path: "existing",
+        element: <ExistingCaseFollowUp />,
+      },
       {
         path: "personal-details",
         element: (

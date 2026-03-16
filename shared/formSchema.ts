@@ -10,6 +10,7 @@ import {
   type CountryCode,
 } from "libphonenumber-js";
 import { z } from "zod";
+import { CASE_REFERENCE_RE } from "./referenceNumbers";
 
 export const DEPARTMENTS = [
   { id: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP", label: "Council Tax or Housing Benefit Help" },
@@ -194,12 +195,14 @@ export const FIELD_TEXT_CONSTRAINTS = {
 
   otherEnquiryText: { maxLen: LIMIT.XLONG, allowNewlines: true },
   additionalInfo: { maxLen: LIMIT.XLONG, allowNewlines: true },
+  caseUpdate: { maxLen: LIMIT.XLONG, allowNewlines: true },
 } as const satisfies Record<string, TextFieldConstraint>;
 
 const HYGIENE = {
   ENQUIRY_ID_MAX: 100,
   PHONE_MAX_CHARS: 30,
   PHONE_COUNTRY_MAX: 50,
+  CASE_REFERENCE_MAX: 20,
 } as const;
 
 // Change empty strings to undefined, and trim whitespace.
@@ -208,6 +211,18 @@ function trimToUndef(value: unknown) {
   if (typeof value !== "string") return value;
   const t = value.trim();
   return t.length ? t : undefined;
+}
+
+export function normaliseCaseReferenceNumber(value: unknown) {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value !== "string") return value;
+
+  const trimmed = value.trim().toUpperCase();
+  return trimmed.length ? trimmed : undefined;
+}
+
+export function isValidCaseReferenceNumber(value: string) {
+  return CASE_REFERENCE_RE.test(value);
 }
 
 export function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
@@ -222,7 +237,7 @@ export function getSupportedPhoneCountry(value: string | undefined): CountryCode
 
 export function normalisePhoneToE164(value: string, phoneCountry?: string) {
   const trimmed = value.trim();
-  if (!trimmed.length){ 
+  if (!trimmed.length) {
     return undefined;
   }
 
@@ -235,7 +250,7 @@ export function normalisePhoneToE164(value: string, phoneCountry?: string) {
       ? parsePhoneNumberFromString(candidate, supportedCountry)
       : undefined;
 
-  if (!parsed || !parsed.isValid()){ 
+  if (!parsed || !parsed.isValid()) {
     return undefined;
   }
 
@@ -406,6 +421,82 @@ export function isValidUkPostcode(value: string) {
   return re.test(compact);
 }
 
+type AppointmentValidationFields = {
+  proceed: z.infer<typeof ProceedEnum>;
+  appointmentDateIso?: string;
+  appointmentTime?: string;
+};
+
+function validateAppointment(
+  value: AppointmentValidationFields,
+  ctx: z.RefinementCtx,
+) {
+  if (value.proceed === "BOOK_APPOINTMENT") {
+    if (!value.appointmentDateIso) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentDateIso"],
+        message: "appointmentDateIso is required for appointment",
+      });
+    }
+    if (!value.appointmentTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: "appointmentTime is required for appointment",
+      });
+    }
+    if (
+      value.appointmentDateIso &&
+      value.appointmentTime &&
+      isValidIsoDate(value.appointmentDateIso) &&
+      isBookableAppointmentTime(value.appointmentTime) &&
+      !isFutureAppointmentDateTime(value.appointmentDateIso, value.appointmentTime)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
+      });
+    }
+  } else {
+    if (value.appointmentDateIso) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentDateIso"],
+        message: "appointmentDateIso must not be provided for queue",
+      });
+    }
+    if (value.appointmentTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["appointmentTime"],
+        message: "appointmentTime must not be provided for queue",
+      });
+    }
+  }
+}
+
+function hasInvalidControlCharacters(value: string, allowNewlines = false) {
+  for (const char of value) {
+    const code = char.charCodeAt(0);
+
+    if (code === 0x7f) {
+      return true;
+    }
+
+    if (code < 0x20) {
+      if (allowNewlines && (code === 0x0a || code === 0x0d)) {
+        continue;
+      }
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Validation for "other" free text fields: required when "Other" option is selected
 const otherFreeText = (maxLen: number) =>
   z
@@ -413,10 +504,7 @@ const otherFreeText = (maxLen: number) =>
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine(
-      (s) => !/[\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]/.test(s),
-      "Contains invalid control characters",
-    );
+    .refine((s) => !hasInvalidControlCharacters(s, true), "Contains invalid control characters");
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
@@ -428,7 +516,7 @@ export const formSchema = z
       .refine((s) => s.length > 0, "Enquiry is required")
       .refine((s) => s.length <= HYGIENE.ENQUIRY_ID_MAX, "Enquiry is too long")
       .refine(
-        (s) => !/[\u0000-\u001F\u007F]/.test(s),
+        (s) => !hasInvalidControlCharacters(s),
         "Enquiry contains invalid control characters",
       ),
 
@@ -575,50 +663,7 @@ export const formSchema = z
   })
   .strict()
   .superRefine((v, ctx) => {
-    if (v.proceed === "BOOK_APPOINTMENT") {
-      if (!v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        });
-      }
-      if (!v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime is required for appointment",
-        });
-      }
-      if (
-        v.appointmentDateIso &&
-        v.appointmentTime &&
-        isValidIsoDate(v.appointmentDateIso) &&
-        isBookableAppointmentTime(v.appointmentTime) &&
-        !isFutureAppointmentDateTime(v.appointmentDateIso, v.appointmentTime)
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: APPOINTMENT_MUST_BE_FUTURE_MESSAGE,
-        });
-      }
-    } else {
-      if (v.appointmentDateIso) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso must not be provided for queue",
-        });
-      }
-      if (v.appointmentTime) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["appointmentTime"],
-          message: "appointmentTime must not be provided for queue",
-        });
-      }
-    }
+    validateAppointment(v, ctx);
 
     if (v.domesticAbuse === true) {
       if (!v.safeToContact) {
@@ -812,3 +857,35 @@ export const formSchema = z
   });
 
 export type formInput = z.infer<typeof formSchema>;
+
+export const caseFollowUpSchema = z
+  .object({
+    referenceNumber: z.preprocess(
+      normaliseCaseReferenceNumber,
+      z
+        .string()
+        .max(HYGIENE.CASE_REFERENCE_MAX)
+        .refine(isValidCaseReferenceNumber, "Case reference number format is invalid"),
+    ),
+    caseUpdate: z.preprocess(
+      trimToUndef,
+      z.string().max(FIELD_TEXT_CONSTRAINTS.caseUpdate.maxLen).optional(),
+    ),
+    proceed: ProceedEnum,
+    appointmentDateIso: z.preprocess(
+      normaliseAppointmentDateIso,
+      z.string().refine(isValidIsoDate, "appointmentDateIso must be YYYY-MM-DD").optional(),
+    ),
+    appointmentTime: z.preprocess(
+      trimToUndef,
+      z
+        .string()
+        .refine(isValidTimeHHmm, "appointmentTime must be HH:mm")
+        .refine(isBookableAppointmentTime, APPOINTMENT_SLOT_VALIDATION_MESSAGE)
+        .optional(),
+    ),
+  })
+  .strict()
+  .superRefine(validateAppointment);
+
+export type caseFollowUpInput = z.infer<typeof caseFollowUpSchema>;

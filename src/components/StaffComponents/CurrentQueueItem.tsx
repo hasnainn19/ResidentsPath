@@ -22,12 +22,10 @@ import {
 } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
 import EditIcon from "@mui/icons-material/Edit";
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import ConfirmChangeModal from "./ConfirmChangeModal";
-
-const client = generateClient<Schema>({ authMode: "userPool" });
 
 interface CurrentQueueItemProps {
   caseItem: {
@@ -55,6 +53,10 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     handleSelectPosition,
     handleMarkSeen,
   } = props;
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const [isFlagged, setIsFlagged] = useState(caseItem.isFlagged);
   const [localStatus, setLocalStatus] = useState<"Priority" | "Standard">(
     caseItem.status,
@@ -192,13 +194,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                     : "Set to Standard"}
                 </MenuItem>
               </Menu>
-              <Tooltip
-                title={
-                  isFlagged
-                    ? "Clear safeguarding flag"
-                    : "Flag for safeguarding"
-                }
-              >
+              <Tooltip title={isFlagged ? "Clear case flag" : "Flag case"}>
                 <span>
                   <IconButton
                     size="small"

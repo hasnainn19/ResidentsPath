@@ -16,12 +16,33 @@ export type FormDraftV1 = {
 
 const KEY = "residentspath.formDraft.v1";
 
+export function formatSavedTime(ts: number) {
+  try {
+    return new Date(ts).toLocaleString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
+export function getSafeDraftPath(lastPath: unknown) {
+  return typeof lastPath === "string" && lastPath.startsWith("/form/")
+    ? lastPath
+    : "/form/enquiry-selection";
+}
+
 function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;
 }
 
 function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
   const out: FormData = { ...initialFormData };
+  const outRecord = out as Record<keyof FormData, unknown>;
 
   for (const key of Object.keys(initialFormData) as Array<keyof FormData>) {
     const v = dataRaw[key as unknown as string];
@@ -30,17 +51,17 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
     const def = initialFormData[key];
 
     if (typeof def === "string") {
-      if (typeof v === "string") (out as any)[key] = v;
+      if (typeof v === "string") outRecord[key] = v;
       continue;
     }
 
     if (typeof def === "boolean") {
-      if (typeof v === "boolean") (out as any)[key] = v;
+      if (typeof v === "boolean") outRecord[key] = v;
       continue;
     }
 
     if (typeof def === "number") {
-      if (typeof v === "number" && Number.isFinite(v)) (out as any)[key] = v;
+      if (typeof v === "number" && Number.isFinite(v)) outRecord[key] = v;
       continue;
     }
   }
@@ -75,16 +96,14 @@ export function loadDraft(storage: Storage): FormDraftV1 | null {
 
     const parsed: unknown = JSON.parse(raw);
     if (!isObject(parsed)) return null;
-    if ((parsed as any).version !== 1) return null;
+    const parsedRecord = parsed as Record<string, unknown>;
+    if (parsedRecord.version !== 1) return null;
 
-    const lastPath =
-      typeof (parsed as any).lastPath === "string"
-        ? (parsed as any).lastPath
-        : "/form/enquiry-selection";
+    const lastPath = getSafeDraftPath(parsedRecord.lastPath);
     const updatedAt =
-      typeof (parsed as any).updatedAt === "number" ? (parsed as any).updatedAt : Date.now();
+      typeof parsedRecord.updatedAt === "number" ? parsedRecord.updatedAt : Date.now();
 
-    const dataRaw = (parsed as any).data;
+    const dataRaw = parsedRecord.data;
     if (!isObject(dataRaw)) return null;
 
     const data = sanitiseLoadedFormData(dataRaw);

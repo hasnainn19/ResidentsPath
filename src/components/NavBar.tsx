@@ -5,12 +5,13 @@ import { signOut } from 'aws-amplify/auth';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LanguageSupportButton from './LanguageSupportButton';
 
 
 export default function NavBar() {
 	const navigate = useNavigate();
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, isStaff } = useAuth();
 	const {  t: translate } = useTranslation();
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
 	const menuDropdown = isAuthenticated
@@ -76,8 +77,15 @@ export default function NavBar() {
 						},
 					}}
 				>
-					<Tooltip title={translate("nav-show")}>
-						<Button color="inherit" onClick={() => navigate('/userdashboard')}>{translate("nav-queue")}</Button>
+					
+					{isStaff && (
+					<Tooltip title="Go to the staff dashboard">
+						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>Staff Dashboard</Button>
+					</Tooltip>
+				)}
+
+				<Tooltip title="Check your queue details or check in for an appointment">
+						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
 					</Tooltip>
 
 					<Tooltip title={translate("nav-create")}>
