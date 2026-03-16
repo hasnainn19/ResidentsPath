@@ -68,7 +68,7 @@ I18n.putVocabularies({
   },
   pl: {
     "Email":"E-mail",
-    "Enter yourEemail":"Podaj swój adres e-mail",
+    "Enter your Email":"Podaj swój adres e-mail",
     "Password":"Hasło",
     "Enter your Password":"Wprowadź swoje hasło",
     "Confirm Password":"Potwierdź hasło",
