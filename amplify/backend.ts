@@ -232,7 +232,7 @@ backend.notifyResident.addEnvironment(
   "SMS_ORIGINATION_IDENTITY",
   "arn:aws:sms-voice:eu-west-2:812914649610:sender-id/HOUNSLOW/GB",
 );
-backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@domain.com");
+backend.notifyResident.addEnvironment("SENDER_EMAIL", "noreply@residentspath.uk");
 
 /**
  * Attach the Ticket stream to the onTicketCompleted Lambda.
