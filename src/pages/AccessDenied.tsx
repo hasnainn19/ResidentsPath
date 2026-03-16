@@ -34,9 +34,9 @@ export default function AccessDenied() {
         <Typography variant="body1" color="text.secondary">
           {translate("access-you")}
         </Typography>
-          {translate("access-go")}
-        <Button variant="contained" size="large" onClick={() => navigate(-1)}>
           
+        <Button variant="contained" size="large" onClick={() => navigate(-1)}>
+          {translate("access-go")}
         </Button>
       </Box>
     </Container>
