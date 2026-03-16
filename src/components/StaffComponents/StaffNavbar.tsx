@@ -97,10 +97,20 @@ const StaffNavbar = () => {
             {givenName?.concat(" ", familyName ? familyName : "")}
           </Typography>
           <Typography
+            component="button"
+            type="button"
             variant="body2"
             color="text.contrastText"
             onClick={handleLogout}
-            sx={{ mt: 1, fontStyle: "italic", cursor: "pointer" }}
+            sx={{
+              mt: 1,
+              fontStyle: "italic",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
+              textAlign: "left",
+            }}
           >
             Logout
           </Typography>
