@@ -125,6 +125,16 @@ export default function UserDashboard() {
         }
     };
 
+    const handleStepOut = async () => {
+        if (notificationsEnabled) {
+            const success = await executeHandleSteppedOut(true);
+            if (success) setShowStepOutAlert(true);
+        } 
+        else {
+            setStepOutDialogOpen(true);
+        }
+    };
+
 
     return (
         <>
@@ -206,17 +216,7 @@ export default function UserDashboard() {
                                                     variant={steppedOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
-                                                    onClick={steppedOut
-                                                        ? handleReturned
-                                                        : async () => {
-                                                            if (notificationsEnabled) {
-                                                                const success = await executeHandleSteppedOut(true);
-                                                                if (success) setShowStepOutAlert(true);
-                                                            } else {
-                                                                setStepOutDialogOpen(true);
-                                                            }
-                                                        }
-                                                    }
+                                                    onClick={steppedOut ? handleReturned : handleStepOut}
                                                 >
                                                     {steppedOut ? "I've returned" : "I'm stepping out"}
                                                 </Button>
