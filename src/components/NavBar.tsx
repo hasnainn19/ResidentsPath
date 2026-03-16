@@ -73,8 +73,9 @@ export default function NavBar() {
 						},
 					}}
 				>
-					<Tooltip title="Show queue information">
-						<Button color="inherit" onClick={() => navigate('/userdashboard')}>Queue</Button>
+					
+					<Tooltip title="Check your queue details or check in for an appointment">
+						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
 					</Tooltip>
 
 					<Tooltip title="Create your case">

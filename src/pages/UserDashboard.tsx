@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react';
-import type { Schema } from '../../../amplify/data/resource';
-import { generateClient } from "aws-amplify/api";
+import { useState } from 'react';
 import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 
-import TextToSpeechButton from '../../components/TextToSpeechButton';
-import NavBar from '../../components/NavBar';
+import TextToSpeechButton from '../components/TextToSpeechButton';
+import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
+import { useTicketQueueInfo } from '../hooks/useTicketQueueInfo';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -27,12 +26,9 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
-    const[showStepOutAlert, setShowStepOutAlert]=useState(false);
-    const[stepOut, setStepOut]=useState(false);
-    const[errors, setErrors] = useState('');
-    const [queuePosition, setQueuePosition] = useState(0); 
-    const [ waitTimeLower, setWaitTimeLower ] = useState(0);
-    const [ waitTimeUpper, setWaitTimeUpper ] = useState(0);
+    const { position, waitTimeLower, waitTimeUpper, error } = useTicketQueueInfo(caseId);
+    const [showStepOutAlert, setShowStepOutAlert] = useState(false);
+    const [stepOut, setStepOut] = useState(false);
 
 
 
@@ -46,63 +42,6 @@ export default function UserDashboard() {
         setShowStepOutAlert(false);
     };
 
-    useEffect(() => {
-        fetchTicketQueueInfo();
-    }, []);
-
-    const client = generateClient<Schema>({ authMode: "userPool" });
-
-    async function fetchTicketQueueInfo() {
-        try {
-            if (!caseId) {
-                return;
-            }
-            // get department id of ticket from case id
-            const { data: ticketInfo, errors: ticketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
-
-            if (ticketErrors && ticketErrors.length > 0) {
-                setErrors(ticketErrors[0].message);
-                return;
-            }
-            if (!ticketInfo) {
-                return;
-            }
-            const ticketDepartmentId = ticketInfo?.departmentId;
-
-            if (!ticketDepartmentId) {
-                return;
-            }
-            // calculate department wait times
-            const { data: calcResult, errors: calcErrors} = await client.mutations.calculateDepartmentQueue({ departmentId: ticketDepartmentId });
-            
-            if (calcErrors && calcErrors.length > 0) {
-                setErrors(calcErrors[0].message);
-                return;
-            }
-
-            if (!calcResult) {
-                return;
-            }
-            // fetch new ticket information to display
-            const { data: newTicketInfo, errors: newTicketErrors} = await client.queries.getTicketInfo({ caseId: caseId });
-
-            if (newTicketErrors && newTicketErrors.length > 0) {
-                setErrors(newTicketErrors[0].message);
-                return;
-            }
-
-            if (!newTicketInfo) {
-                return;
-            }
-
-            setQueuePosition(newTicketInfo?.position ?? 0);
-            setWaitTimeLower(newTicketInfo?.estimatedWaitTimeLower ?? 0);
-            setWaitTimeUpper(newTicketInfo?.estimatedWaitTimeUpper ?? 0);
-
-        } catch (err) {
-            setErrors(`Failed to fetch tickets: ${err}`);
-        }
-    }
 
     return (
         <>
@@ -112,9 +51,9 @@ export default function UserDashboard() {
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
-                    {errors && (
-                        <Alert severity="error" color="error" onClose={() => {}}>
-                            {errors}
+                    {error && (
+                        <Alert severity="error" color="error">
+                            {error}
                         </Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
@@ -131,9 +70,9 @@ export default function UserDashboard() {
                                     <Grid size={6}>
                                         <Item>
                                             <Typography variant='body1'>There are </Typography>
-                                            <Typography variant='h5' sx={{color:'primary.main'}}>{queuePosition}</Typography>
+                                            <Typography variant='h5' sx={{color:'primary.main'}}>{position}</Typography>
                                             <Typography variant='body1'>people ahead of you</Typography>
-                                            <TextToSpeechButton text={`There are ${queuePosition} people ahead of you`}/>
+                                            <TextToSpeechButton text={`There are ${position} people ahead of you`}/>
                                         </Item>
                                     </Grid>
                                     <Grid size={6}>

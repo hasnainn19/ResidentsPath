@@ -5,7 +5,6 @@ import App from "./App";
 import StaffDashboard from "./pages/StaffDashboard";
 import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
-import BookingPage from "./pages/BookingPage";
 import FormLayout from "./pages/Form/FormLayout";
 import FormEntry from "./pages/Form/FormEntry";
 import PersonalDetails from "./pages/Form/PersonalDetails";
@@ -15,10 +14,9 @@ import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
 import ExistingCaseFollowUp from "./pages/Form/ExistingCaseFollowUp";
-import UserDashboard from "./pages/UserDashboard/UserDashboard";
+import UserDashboard from "./pages/UserDashboard";
 import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
-import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
 import CheckInConfirmation from "./pages/CheckInConfirmation";
 
@@ -38,10 +36,6 @@ export const router = createBrowserRouter([
   {
     path: "/referencepage",
     element: <ReferencePage />,
-  },
-  {
-    path: "/bookingpage",
-    element: <RequireAuth><BookingPage /></RequireAuth>,
   },  
   {
     path: "/checkinpage",
