@@ -10,6 +10,7 @@ import type { FormData } from "./formFieldTypes";
 
 export const initialFormData: FormData = {
   language: "en",
+  privacyNoticeAccepted: false,
 
   provideDetails: "yes",
   firstName: "",
@@ -36,7 +37,6 @@ export const initialFormData: FormData = {
   enquiryId: "",
   specificDetailId: "",
   routedDepartment: "",
-  otherEnquiryText: "",
 
   hasChildren: false,
   childrenCount: "",

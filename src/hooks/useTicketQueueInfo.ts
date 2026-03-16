@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
+import { getDataAuthMode } from '../utils/getDataAuthMode';
 
 /**
  * Fetches and polls queue information for a given case's active ticket.
@@ -25,13 +26,17 @@ export function useTicketQueueInfo(caseId: string | undefined) {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
-    const client = useMemo(() => generateClient<Schema>({ authMode: 'userPool' }), []);
+    const client = useMemo(() => generateClient<Schema>(), []);
 
     async function fetch() {
         if (!caseId) return;
 
         try {
-            const { data: ticketInfo, errors: ticketErrors } = await client.queries.getTicketInfo({ caseId });
+            const authMode = await getDataAuthMode();
+            const { data: ticketInfo, errors: ticketErrors } = await client.queries.getTicketInfo(
+                { caseId },
+                { authMode },
+            );
 
             if (ticketErrors && ticketErrors.length > 0) {
                 setError(ticketErrors[0].message);

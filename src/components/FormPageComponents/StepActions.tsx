@@ -4,7 +4,7 @@
  * Renders:
  * - The main advance button (Continue/Submit), which can be disabled.
  * - An optional Previous button.
- * - A "Save and continue later" button.
+ * - An optional "Save and continue later" button.
  *
  * The step decides when the advance button should be enabled, based on its rules.
  */

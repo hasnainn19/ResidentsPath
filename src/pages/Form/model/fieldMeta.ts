@@ -69,6 +69,7 @@ function optionLabel(opts: OptionList, value: unknown) {
 
 export const FIELD_META: Record<FieldKey, FieldMeta> = {
   language: { label: "Language" },
+  privacyNoticeAccepted: { label: "Privacy notice accepted", omitWhen: () => true },
 
   provideDetails: { label: "Provide personal details?" },
 
@@ -159,13 +160,11 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
 
   enquiryId: {
     label: "Choose an enquiry",
-    dependsOn: (fd) => fd.topLevel !== "Other",
     format: (_fd, ctx) => ctx.selectedEnquiry?.label || "",
   },
 
   specificDetailId: {
     label: "More detail",
-    dependsOn: (fd) => fd.topLevel !== "Other",
     format: (fd, ctx) => {
       return (
         ctx.selectedEnquiry?.specifics?.find((d) => d.value === fd.specificDetailId)?.label || ""
@@ -179,13 +178,6 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
       fd.routedDepartment
         ? (DepartmentLabelByName[fd.routedDepartment] ?? fd.routedDepartment)
         : null,
-  },
-
-  otherEnquiryText: {
-    label: "Describe your enquiry",
-    dependsOn: (fd) => fd.topLevel === "Other",
-    maxLen: FIELD_TEXT_CONSTRAINTS.otherEnquiryText.maxLen,
-    allowNewlines: FIELD_TEXT_CONSTRAINTS.otherEnquiryText.allowNewlines,
   },
 
   hasChildren: {
