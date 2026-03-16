@@ -28,7 +28,7 @@ export default function ReceiptQrCard({ isAppointment, qrCodeUrl }: ReceiptQrCar
       <Typography color="text.secondary" sx={{ mb: 2.5 }}>
         {isAppointment
           ? "Scan this at a kiosk or reception when you arrive for a quick check-in."
-          : "Keep this with your case reference and ticket details for a quick check-in."}
+          : "Keep this with your case reference number and ticket details for a quick check-in."}
       </Typography>
 
       {qrCodeUrl ? (

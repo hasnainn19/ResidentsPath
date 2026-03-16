@@ -1,18 +1,8 @@
 import { getAmplifyClient } from "./amplifyClient";
 import type { Schema } from "../../data/resource";
+import { getDefaultEstimatedWaitingTime, getEstimatedWaitTimeBounds } from "./queueWaitTimes";
 
 const client = await getAmplifyClient();
-
-const DEFAULT_WAITING_TIMES: Record<string, number> = {
-  "Council_Tax": 50,
-  "Housing_Benefit": 50,
-  "Homelessness": 100,
-  "Adults_Duty": 30,
-  "Childrens_Duty": 30,
-  "Community_Hub_Advisor": 30,
-  "General_Customer_Service": 10,
-  "Other": 30,
-};
 
 /**
  * Returns the median value from a sorted array of numbers.
@@ -114,9 +104,7 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
 
       const position = i; 
 
-      const lower = Math.round(estWaitingTime * position);
-
-      const upper = lower + 20;
+      const { lower, upper } = getEstimatedWaitTimeBounds(position, estWaitingTime);
 
       await client.models.Ticket.update({
           id: ticket.id,
@@ -173,7 +161,8 @@ export async function recalculateDepartmentQueue(departmentId:string) {
     if (completedTickets.length >= 5) {
         estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentId);
     } else {
-        estWaitingTime = department?.estimatedWaitingTime ?? DEFAULT_WAITING_TIMES[department?.name ?? "Other"] ?? 30;
+        estWaitingTime =
+          department?.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department?.name);
     }
     
     await updateTickets(waitingTickets, estWaitingTime);

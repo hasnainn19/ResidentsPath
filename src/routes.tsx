@@ -6,13 +6,14 @@ import StaffDashboard from "./pages/StaffDashboard";
 import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
 import FormLayout from "./pages/Form/FormLayout";
+import FormEntry from "./pages/Form/FormEntry";
 import PersonalDetails from "./pages/Form/PersonalDetails";
 import EnquirySelection from "./pages/Form/EnquirySelection";
 import ReviewAndSubmit from "./pages/Form/ReviewAndSubmit";
 import SubmissionReceipt from "./pages/Form/SubmissionReceipt";
 import Actions from "./pages/Form/Actions";
 import RequireFormSteps from "./components/FormPageComponents/RequireFormSteps";
-import ResumeFromSave from "./components/FormPageComponents/ResumeFromSave";
+import ExistingCaseFollowUp from "./pages/Form/ExistingCaseFollowUp";
 import UserDashboard from "./pages/UserDashboard";
 import StaffQueuePage from "./pages/StaffQueuePage";
 import RequireGuest from "./guards/RequireGuest";
@@ -88,7 +89,11 @@ export const router = createBrowserRouter([
     path: "/form",
     element: <FormLayout />,
     children: [
-      { index: true, element: <ResumeFromSave /> },
+      { index: true, element: <FormEntry /> },
+      {
+        path: "existing",
+        element: <ExistingCaseFollowUp />,
+      },
       {
         path: "personal-details",
         element: (

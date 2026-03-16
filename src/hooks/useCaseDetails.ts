@@ -17,7 +17,6 @@ interface CaseDetails {
   flag: boolean | null;
   notes: string | null;
   enquiry: string | null;
-  otherEnquiryText: string | null;
   childrenCount: string | null;
   householdSize: string | null;
   ageRange: string | null;
@@ -67,7 +66,6 @@ const useCaseDetails = (caseId: string | undefined) => {
             flag: d.flag ?? null,
             notes: d.notes ?? null,
             enquiry: d.enquiry ?? null,
-            otherEnquiryText: d.otherEnquiryText ?? null,
             childrenCount: d.childrenCount ?? null,
             householdSize: d.householdSize ?? null,
             ageRange: d.ageRange ?? null,

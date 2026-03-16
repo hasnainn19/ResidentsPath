@@ -40,6 +40,7 @@ import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import FormPrivacyNotice from "../../components/FormPageComponents/FormPrivacyNotice";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
+import LongTextSection from "../../components/FormPageComponents/LongTextSection";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 
@@ -183,7 +184,6 @@ export default function EnquirySelection() {
     py: { xs: 0.25, sm: 0 },
   } as const;
 
-  
   return (
     <FormStepLayout
       step={1}
@@ -214,57 +214,57 @@ export default function EnquirySelection() {
             }}
           >
             <Stack spacing={{ xs: 3, sm: 4 }}>
-            {/* Service */}
-            <WithTTS
-              copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
-              required
-              titleVariant="subtitle1"
-            >
-              <FormControl fullWidth required>
-                <InputLabel id="top-label">Select an area...</InputLabel>
-                <Select
-                  labelId="top-label"
-                  label="Select an area..."
-                  value={formData.topLevel}
-                  onChange={(e) => handleTopLevelChange(String(e.target.value))}
-                >
-                  <MenuItem value="">Select an area...</MenuItem>
-                  {TOP_LEVEL.map((t) => (
-                    <MenuItem key={t.value} value={t.value}>
-                      {t.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </WithTTS>
-
-            {showEnquiryDropdown && (
+              {/* Service */}
               <WithTTS
-                copy={{
-                  label: FIELD_META.enquiryId.label,
-                  tts: "Choose an enquiry. This tells us what you need help with.",
-                }}
+                copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
                 required
-                sx={insetSectionSx}
+                titleVariant="subtitle1"
               >
                 <FormControl fullWidth required>
-                  <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                  <InputLabel id="top-label">Select an area...</InputLabel>
                   <Select
-                    labelId="enquiry-label"
-                    label="Select an enquiry..."
-                    value={formData.enquiryId}
-                    onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                    labelId="top-label"
+                    label="Select an area..."
+                    value={formData.topLevel}
+                    onChange={(e) => handleTopLevelChange(String(e.target.value))}
                   >
-                    <MenuItem value="">Select an enquiry...</MenuItem>
-                    {enquiryOptions.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
+                    <MenuItem value="">Select an area...</MenuItem>
+                    {TOP_LEVEL.map((t) => (
+                      <MenuItem key={t.value} value={t.value}>
+                        {t.label}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </WithTTS>
-            )}
+
+              {showEnquiryDropdown && (
+                <WithTTS
+                  copy={{
+                    label: FIELD_META.enquiryId.label,
+                    tts: "Choose an enquiry. This tells us what you need help with.",
+                  }}
+                  required
+                  sx={insetSectionSx}
+                >
+                  <FormControl fullWidth required>
+                    <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                    <Select
+                      labelId="enquiry-label"
+                      label="Select an enquiry..."
+                      value={formData.enquiryId}
+                      onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                    >
+                      <MenuItem value="">Select an enquiry...</MenuItem>
+                      {enquiryOptions.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </WithTTS>
+              )}
 
             {
               // Show the "more detail" dropdown when relevant
@@ -638,47 +638,43 @@ export default function EnquirySelection() {
                   </FormControl>
 
                   {formData.urgentReason === "OTHER" && (
-                  <Stack spacing={1} sx={{ mt: 2 }}>
-                    <Typography component="label" htmlFor="urgent-reason-other" fontWeight={700}>
-                      Briefly describe why you need support sooner today
-                    </Typography>
+                    <Stack spacing={1} sx={{ mt: 2 }}>
+                      <Typography component="label" htmlFor="urgent-reason-other" fontWeight={700}>
+                        Briefly describe why you need support sooner today
+                      </Typography>
 
-                    <TextField
-                      id="urgent-reason-other"
-                      fullWidth
-                      required
-                      multiline
-                      minRows={3}
-                      placeholder="Tell us why this is urgent"
-                      value={formData.urgentReasonOtherText}
-                      onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
-                      slotProps={{
-                        htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen },
-                      }}
-                      helperText={countChars("urgentReasonOtherText", formData.urgentReasonOtherText)}
-                    />
-                  </Stack>
-                )}
+                      <TextField
+                        id="urgent-reason-other"
+                        fullWidth
+                        required
+                        multiline
+                        minRows={3}
+                        placeholder="Tell us why this is urgent"
+                        value={formData.urgentReasonOtherText}
+                        onChange={(e) => setField("urgentReasonOtherText", e.target.value)}
+                        slotProps={{
+                          htmlInput: { maxLength: FIELD_META.urgentReasonOtherText.maxLen },
+                        }}
+                        helperText={countChars(
+                          "urgentReasonOtherText",
+                          formData.urgentReasonOtherText,
+                        )}
+                      />
+                    </Stack>
+                  )}
                 </Box>
               )}
             </WithTTS>
 
             {/* Additional info */}
-            <WithTTS
+            <LongTextSection
               copy={{ label: labelOptional("additionalInfo"), tts: additionalInfoTts }}
               titleVariant="subtitle1"
-            >
-              <TextField
-                fullWidth
-                multiline
-                minRows={4}
-                placeholder="Add any details that might help us support you..."
-                value={formData.additionalInfo}
-                onChange={(e) => setField("additionalInfo", e.target.value)}
-                helperText={countChars("additionalInfo", formData.additionalInfo)}
-                slotProps={{ htmlInput: { maxLength: FIELD_META.additionalInfo.maxLen } }}
-              />
-            </WithTTS>
+              value={formData.additionalInfo}
+              onChange={(value) => setField("additionalInfo", value)}
+              maxLength={FIELD_META.additionalInfo.maxLen ?? 0}
+              placeholder="Add any details that might help us support you..."
+            />
 
             {/* Proceed */}
             <Box sx={{ pt: 2 }}>
@@ -796,11 +792,11 @@ export default function EnquirySelection() {
             </WithTTS>
 
             {/* Navigation Buttons */}
-            <StepActions
-              onSave={handleSave}
-              advanceLabel="Continue"
-              advanceDisabled={!canGoNext}
-            />
+              <StepActions
+                onSave={handleSave}
+                advanceLabel="Continue"
+                advanceDisabled={!canGoNext}
+              />
             </Stack>
           </Box>
         </Paper>

@@ -249,12 +249,6 @@ const StaffCaseDetails = () => {
         <SectionCard title="Enquiry">
           <Stack spacing={2}>
             <DetailRow label="Details" value={c.enquiry} />
-            {c.otherEnquiryText && (
-              <DetailRow
-                label="Other Enquiry Details"
-                value={c.otherEnquiryText}
-              />
-            )}
           </Stack>
         </SectionCard>
 
