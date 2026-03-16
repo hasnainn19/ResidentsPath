@@ -18,16 +18,13 @@ export function getEnquirySelectionState(data: FormData) {
   const enquiryOptions = getEnquiryOptions(topLevel);
   const selectedEnquiry = enquiryOptions.find((x) => x.value === data.enquiryId) || null;
 
-  const isOther = topLevel === "Other";
   const hasChosenEnquiry = data.enquiryId !== "";
 
   const specificOptions = selectedEnquiry?.specifics ?? [];
   const showSpecificDropdown = specificOptions.length > 0;
 
   const hasSatisfiedSpecific = !showSpecificDropdown || data.specificDetailId !== "";
-  const hasEnoughToProceed = isOther
-    ? data.otherEnquiryText.trim() !== ""
-    : hasChosenEnquiry && hasSatisfiedSpecific;
+  const hasEnoughToProceed = hasChosenEnquiry && hasSatisfiedSpecific;
 
   const showChildrenQs = topLevel === "ChildrensDuty" || selectedEnquiry?.askChildrenQs === true;
   const showDisabilityQs = selectedEnquiry?.askVulnerabilityQs === true;
@@ -40,7 +37,6 @@ export function getEnquirySelectionState(data: FormData) {
     selectedEnquiry,
     specificOptions,
     showSpecificDropdown,
-    isOther,
     hasChosenEnquiry,
     hasSatisfiedSpecific,
     hasEnoughToProceed,

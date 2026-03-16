@@ -45,7 +45,6 @@ export function resetFormInfo(prev: FormData): FormData {
     enquiryId: "",
     specificDetailId: "",
     routedDepartment: "",
-    otherEnquiryText: "",
 
     householdSize: "",
 
@@ -72,10 +71,6 @@ export function applyTopLevelChange(prev: FormData, nextTopLevel: string): FormD
     topLevel: nextTopLevel,
     generalServicesChoice: "",
   });
-
-  if (nextTopLevel === "Other") {
-    return { ...next, routedDepartment: "GENERAL_CUSTOMER_SERVICES" };
-  }
 
   if (nextTopLevel !== "") {
     const options = ENQUIRIES_BY_TOPLEVEL[nextTopLevel] || [];

@@ -92,7 +92,6 @@ export default function EnquirySelection() {
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   const {
-    isOther,
     enquiryOptions,
     specificOptions,
     showSpecificDropdown,
@@ -110,7 +109,7 @@ export default function EnquirySelection() {
   // Whether the continue button should be enabled, based on whether required fields are filled in
   const canGoNext = computeCanGoNext(formData, hasEnoughToProceed, needsUrgentReason);
 
-  const showEnquiryDropdown = formData.topLevel !== "" && !isOther && enquiryOptions.length > 1;
+  const showEnquiryDropdown = formData.topLevel !== "" && enquiryOptions.length > 1;
 
   function handleTopLevelChange(nextTopLevel: string) {
     setFormData((prev) => applyTopLevelChange(prev, nextTopLevel));
@@ -139,11 +138,6 @@ export default function EnquirySelection() {
     parts.push("What do you need help with? Select an area.");
 
     if (!formData.topLevel) return parts.join(" ");
-
-    if (isOther) {
-      parts.push("Then describe your enquiry.");
-      return parts.join(" ");
-    }
 
     if (showEnquiryDropdown) {
       parts.push("Then choose an enquiry.");
@@ -269,34 +263,6 @@ export default function EnquirySelection() {
                     ))}
                   </Select>
                 </FormControl>
-              </WithTTS>
-            )}
-
-            {isOther && formData.topLevel !== "" && (
-              <WithTTS
-                copy={{
-                  label: FIELD_META.otherEnquiryText.label,
-                  tts: "Describe your enquiry. Briefly tell us what you need help with.",
-                }}
-                required
-                sx={insetSectionSx}
-              >
-                <TextField
-                  fullWidth
-                  required
-                  multiline
-                  minRows={3}
-                  label={FIELD_META.otherEnquiryText.label}
-                  placeholder="Tell us what you need help with"
-                  value={formData.otherEnquiryText}
-                  onChange={(e) => setField("otherEnquiryText", e.target.value)}
-                  helperText={countChars(
-                    "otherEnquiryText",
-                    formData.otherEnquiryText,
-                    "Avoid sharing bank details or passwords.",
-                  )}
-                  slotProps={{ htmlInput: { maxLength: FIELD_META.otherEnquiryText.maxLen } }}
-                />
               </WithTTS>
             )}
 

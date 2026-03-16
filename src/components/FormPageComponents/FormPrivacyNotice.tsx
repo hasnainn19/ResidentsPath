@@ -24,8 +24,8 @@ export default function FormPrivacyNotice() {
               Privacy notice
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              This notice explains how your personal information is collected, used, shared and kept
-              by the Council when you use ResidentsPath.
+              This notice explains how your personal information is collected, used, shared and
+              kept by the Council when you use ResidentsPath.
             </Typography>
           </Box>
 
@@ -62,15 +62,15 @@ export default function FormPrivacyNotice() {
             </Box>
             <Box component="li">
               <Typography variant="body2">
-                If you use Save and continue later, a draft may be stored locally in this browser on
-                this device until you return to the form, start a new form, or clear your browser
-                storage.
+                If you use Save and continue later, a draft may be stored locally in this browser
+                on this device until you return to the form, start a new form, or clear your
+                browser storage.
               </Typography>
             </Box>
             <Box component="li">
               <Typography variant="body2">
-                Do not use Save and continue later on a public or shared device unless you are happy
-                for someone else using that device to be able to access your draft.
+                Do not use Save and continue later on a public or shared device unless you are
+                happy for someone else using that device to be able to access your draft.
               </Typography>
             </Box>
           </Box>

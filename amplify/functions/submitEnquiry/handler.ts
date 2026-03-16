@@ -422,7 +422,6 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       status: "OPEN",
 
       enquiry: validated.enquiry,
-      otherEnquiryText: validated.otherEnquiryText,
       childrenCount: validated.childrenCount,
       householdSize: validated.householdSize,
       ageRange: validated.ageRange,

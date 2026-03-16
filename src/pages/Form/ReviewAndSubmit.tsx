@@ -22,7 +22,7 @@ import {
   FormHelperText,
 } from "@mui/material";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
-import FormPrivacyNotice from "../../components/FormPageComponents/FormPrivacyNotice";
+import PrivacyNoticeDialog from "../../components/FormPageComponents/PrivacyNoticeDialog";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -42,6 +42,7 @@ export default function ReviewAndSubmit() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [privacyNoticeOpen, setPrivacyNoticeOpen] = useState(false);
 
   const client = useMemo(() => generateClient<Schema>(), []);
 
@@ -129,7 +130,7 @@ export default function ReviewAndSubmit() {
     },
     {
       title: "Your request",
-      keys: ["enquiryId", "specificDetailId", "otherEnquiryText", "proceed", "additionalInfo"],
+      keys: ["enquiryId", "specificDetailId", "proceed", "additionalInfo"],
       editTo: "/form/enquiry-selection",
     },
     {
@@ -320,8 +321,6 @@ export default function ReviewAndSubmit() {
 
         <Box sx={{ mt: 4, mb: 3 }}>
           <Stack spacing={2}>
-            <FormPrivacyNotice />
-
             <FormControl>
               <FormControlLabel
                 control={
@@ -335,13 +334,22 @@ export default function ReviewAndSubmit() {
                     }
                   />
                 }
-                label="I confirm that I have read the privacy notice for this form."
+                label="I acknowledge the privacy notice for this form."
               />
               <FormHelperText sx={{ ml: 0 }}>
-                This confirms you have read the notice before submitting. The Council is not
-                relying on your consent to process your information.
+                You can open the full privacy notice before you submit. The Council is not relying
+                on your consent to process your information.
               </FormHelperText>
             </FormControl>
+
+            <Button
+              type="button"
+              variant="text"
+              onClick={() => setPrivacyNoticeOpen(true)}
+              sx={{ alignSelf: "flex-start", px: 0, fontWeight: 700 }}
+            >
+              Read the full privacy notice
+            </Button>
           </Stack>
         </Box>
 
@@ -354,6 +362,11 @@ export default function ReviewAndSubmit() {
           advanceDisabled={submitting || !formData.privacyNoticeAccepted}
           showPrevious
           onPrevious={() => nav("/form/actions")}
+        />
+
+        <PrivacyNoticeDialog
+          open={privacyNoticeOpen}
+          onClose={() => setPrivacyNoticeOpen(false)}
         />
       </Paper>
     </FormStepLayout>

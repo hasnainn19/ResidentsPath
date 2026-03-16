@@ -191,8 +191,6 @@ export const FIELD_TEXT_CONSTRAINTS = {
 
   supportNotes: { maxLen: LIMIT.LONG, allowNewlines: true },
   otherSupport: { maxLen: LIMIT.LONG },
-
-  otherEnquiryText: { maxLen: LIMIT.XLONG, allowNewlines: true },
   additionalInfo: { maxLen: LIMIT.XLONG, allowNewlines: true },
 } as const satisfies Record<string, TextFieldConstraint>;
 
@@ -563,11 +561,6 @@ export const formSchema = z
       trimToUndef,
       z.string().max(FIELD_TEXT_CONSTRAINTS.otherSupport.maxLen).optional(),
     ),
-
-    otherEnquiryText: z.preprocess(
-      trimToUndef,
-      z.string().max(FIELD_TEXT_CONSTRAINTS.otherEnquiryText.maxLen).optional(),
-    ),
     additionalInfo: z.preprocess(
       trimToUndef,
       z.string().max(FIELD_TEXT_CONSTRAINTS.additionalInfo.maxLen).optional(),
@@ -784,23 +777,6 @@ export const formSchema = z
       });
     }
 
-    if (v.enquiry === "OTHER") {
-      if (!v.otherEnquiryText) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["otherEnquiryText"],
-          message: "Details are required when Other is selected",
-        });
-      }
-    } else {
-      if (v.otherEnquiryText) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["otherEnquiryText"],
-          message: "otherEnquiryText must only be provided when enquiry is OTHER",
-        });
-      }
-    }
   })
   .transform((v) => {
     const normalisedPhone = v.phone ? normalisePhoneToE164(v.phone, v.phoneCountry) : undefined;

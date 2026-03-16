@@ -46,8 +46,6 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const departmentId = data.routedDepartment || sel.selectedEnquiry?.department;
   if (!departmentId) throw new Error("Unknown department");
 
-  const enquiry = sel.isOther ? "OTHER" : data.enquiryId;
-
   const proceed = getProceedBackend(data.proceed);
 
   const contactMethod = optionalValue(data.contactMethod);
@@ -59,7 +57,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
 
   const payload: formInput = {
     departmentId,
-    enquiry,
+    enquiry: data.enquiryId,
     proceed,
 
     dob: data.provideDetails === "yes" ? trimOrUndef(data.dob) : undefined,
@@ -105,8 +103,6 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     urgentReason: optionalValue(data.urgentReason),
     urgentReasonOtherText:
       data.urgentReason === "OTHER" ? trimOrUndef(data.urgentReasonOtherText) : undefined,
-
-    otherEnquiryText: sel.isOther ? trimOrUndef(data.otherEnquiryText) : undefined,
 
     additionalInfo: trimOrUndef(data.additionalInfo),
 
