@@ -270,7 +270,7 @@ const ReferencePage = () => {
                                 <Box sx={{  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10, visibility: scanning ? 'visible' : 'hidden', pointerEvents: scanning ? 'auto' : 'none', overflow: 'hidden', borderRadius: 1, }}>
                                     <div id="qr-reader" role="region" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
                                     {scanning && (
-                                        <Tooltip title="Cancel QR Scan" placement="top">
+                                        <Tooltip title={translate("reference-cancelqr")} placement="top">
                                             <Button variant='contained' size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: '3%', right: '2%', zIndex: 20 }} >
                                                 {translate("reference-cancel")}
                                             </Button>

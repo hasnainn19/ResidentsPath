@@ -25,6 +25,7 @@
     "reference-ref":"Reference number retrieved:",
     "reference-tap":"Tap to open scanner",
     "reference-tick":"Ticket/Appointment Number",
+    "reference-cancelqr":"Cancel QR Scan",
     "access-acc":"Access Denied",
     "access-go":"Go Back",
     "access-you":"You don't have permission to access this page.",
