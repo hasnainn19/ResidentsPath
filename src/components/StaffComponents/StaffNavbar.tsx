@@ -88,7 +88,6 @@ const StaffNavbar = () => {
             label="Case Management"
             url="/staff/cases"
           />
-          <StaffNavItem icon={<WorkIcon />} label="My cases" url="/staff" />
           <StaffNavItem icon={<PersonIcon />} label="User Dashboard" url="/" />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
