@@ -47,26 +47,41 @@ function shouldNotifyResident(newImage: Record<string, any>, oldImage: Record<st
         return `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
     }
 
-    // Under 5 minutes
+    // Under 10 minutes
     if (
-        newImage.estimatedWaitTimeLower <= 5 &&
-        oldImage.estimatedWaitTimeLower > 5 &&
+        newImage.estimatedWaitTimeLower <= 10 &&
+        oldImage.estimatedWaitTimeLower > 10 &&
         newImage.position !== 0
     ) {
-        return `Your ticket number ${ticketNumber} will be served in approximately 5 minutes or less.`;
+        return `Your ticket number ${ticketNumber} will be served in approximately 10 minutes or less.`;
     }
 
-    // Under 15 minutes (only if not also crossing the 5 min threshold)
+    // Under 20 minutes
     if (
-        newImage.estimatedWaitTimeLower <= 15 &&
-        oldImage.estimatedWaitTimeLower > 15 &&
-        newImage.estimatedWaitTimeLower > 5 &&
+        newImage.estimatedWaitTimeLower <= 20 &&
+        oldImage.estimatedWaitTimeLower > 20 &&
         newImage.position !== 0
     ) {
-        return `Your ticket number ${ticketNumber} will be served in approximately 15 minutes or less.`;
+        return `Your ticket number ${ticketNumber} will be served in approximately 20 minutes or less.`;
     }
 
-    // Other notification conditions will go here
+    // Under 30 minutes
+    if (
+        newImage.estimatedWaitTimeLower <= 30 &&
+        oldImage.estimatedWaitTimeLower > 30 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 30 minutes or less.`;
+    }
+
+    // Under 60 minutes
+    if (
+        newImage.estimatedWaitTimeLower <= 60 &&
+        oldImage.estimatedWaitTimeLower > 60 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 60 minutes or less.`;
+    }
 
     return null;
 }

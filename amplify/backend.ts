@@ -141,7 +141,7 @@ const appointmentTable = backend.data.resources.tables["Appointment"];
  * Attach the Ticket stream to the Lambda.
  * The filter tells AWS to only invoke the Lambda for MODIFY events
  *
- * The 3 filters are mutually exclusive so the lambda doesn't fire multiple times for the same ticket update.
+ * The filters are mutually exclusive so the lambda doesn't fire multiple times for the same ticket update.
  * Since FilterRule doesn't support greaterThan or lessThanOrEqualTo, we use between to create the necessary ranges.
  */
 backend.notifyResident.resources.lambda.addEventSource(
@@ -158,26 +158,48 @@ backend.notifyResident.resources.lambda.addEventSource(
           OldImage: { position: { N: FilterRule.notEquals("0") } },
         },
       }),
-      // Crosses into ≤5 min range from above 5 (and not being served)
+      // Crosses into ≤10 min range from above 10 (and not being served)
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
         dynamodb: {
           NewImage: {
-            estimatedWaitTimeLower: { N: FilterRule.between(0, 5) },
+            estimatedWaitTimeLower: { N: FilterRule.between(0, 10) },
             position: { N: FilterRule.notEquals("0") },
           },
-          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(6, 999) } },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(11, 999) } },
         },
       }),
-      // Crosses into 6–15 min range from above 15 (and not being served)
+      // Crosses into 11–20 min range from above 20 (and not being served)
       FilterCriteria.filter({
         eventName: FilterRule.isEqual("MODIFY"),
         dynamodb: {
           NewImage: {
-            estimatedWaitTimeLower: { N: FilterRule.between(6, 15) },
+            estimatedWaitTimeLower: { N: FilterRule.between(11, 20) },
             position: { N: FilterRule.notEquals("0") },
           },
-          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(16, 999) } },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(21, 999) } },
+        },
+      }),
+      // Crosses into 21–30 min range from above 30 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(21, 30) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(31, 999) } },
+        },
+      }),
+      // Crosses into 31–60 min range from above 60 (and not being served)
+      FilterCriteria.filter({
+        eventName: FilterRule.isEqual("MODIFY"),
+        dynamodb: {
+          NewImage: {
+            estimatedWaitTimeLower: { N: FilterRule.between(31, 60) },
+            position: { N: FilterRule.notEquals("0") },
+          },
+          OldImage: { estimatedWaitTimeLower: { N: FilterRule.between(61, 999) } },
         },
       }),
     ]
