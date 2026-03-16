@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import {Grid, styled, Paper, Typography, Box, Button, Stack, Alert} from '@mui/material';
+import type { Schema } from '../../amplify/data/resource';
+import { generateClient } from "aws-amplify/api";
+import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
-
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
 import { useParams } from 'react-router-dom';
+import ContactDetailsDialog from '../components/ContactDetailsDialog';
+import { useUser } from '../hooks/useUser';
 import { useTicketQueueInfo } from '../hooks/useTicketQueueInfo';
 
 
@@ -26,20 +30,109 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
-    const { position, waitTimeLower, waitTimeUpper, error } = useTicketQueueInfo(caseId);
+    const { user } = useUser();
+    const client = generateClient<Schema>({ authMode: "userPool" });
+
+    const {
+        position, waitTimeLower, waitTimeUpper,
+        ticketId,
+        steppedOut, setSteppedOut,
+        notificationsEnabled, setNotificationsEnabled,
+        error: fetchError,
+    } = useTicketQueueInfo(caseId);
+
     const [showStepOutAlert, setShowStepOutAlert] = useState(false);
-    const [stepOut, setStepOut] = useState(false);
+    const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
+    const [errors, setErrors] = useState('');
+    const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
+    const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
 
-
-
-    const handleStepOut = () => {
-        setStepOut(true);
-        setShowStepOutAlert(true);
+    const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
+        if (!ticketId) return false;
+        try {
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut });
+            if (stepOutErrors && stepOutErrors.length > 0) {
+                setErrors(stepOutErrors[0].message);
+                return false;
+            }
+            setSteppedOut(steppedOut);
+            return true;
+        }
+        catch (error) {
+            setErrors(`Failed to ${steppedOut ? 'step out' : 'update'}: ${error}`);
+            return false;
+        }
     };
 
-    const handleReturned = () => {
-        setStepOut(false);
-        setShowStepOutAlert(false);
+    const executeToggleNotifications = async (
+        enabled: boolean,
+        contactMethod?: 'SMS' | 'EMAIL',
+        contactValue?: string,
+    ): Promise<boolean> => {
+        if (!ticketId) return false;
+
+        try {
+            const { errors: notifErrors } = await client.mutations.toggleNotifications({
+                ticketId,
+                caseId: caseId!,
+                enabled,
+                contactMethod,
+                contactValue,
+            });
+            if (notifErrors && notifErrors.length > 0) {
+                setErrors(notifErrors[0].message);
+                return false;
+            }
+            setNotificationsEnabled(enabled);
+            return true;
+        }
+        catch (error) {
+            setErrors(`Failed to ${enabled ? 'enable' : 'disable'} notifications: ${error}`);
+            return false;
+        }
+    };
+
+    const handleStepOutConfirm = async (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => {
+        setStepOutDialogOpen(false);
+        const success = await executeToggleNotifications(true, contactMethod, contactValue);
+        if (success) {
+            const stepOutSuccess = await executeHandleSteppedOut(true);
+            if (stepOutSuccess) {
+                setShowStepOutAlert(true);
+            }
+        }
+    };
+
+    const handleEnableNotificationsConfirm = async (contactMethod: 'SMS' | 'EMAIL', contactValue: string) => {
+        setEnableNotificationsDialogOpen(false);
+        const success = await executeToggleNotifications(true, contactMethod, contactValue);
+        if (success) {
+            setShowNotificationsAlert(true);
+        }
+    };
+
+    const handleDisableNotifications = async () => {
+        const success = await executeToggleNotifications(false);
+        if (success) {
+            setShowNotificationsAlert(false);
+        }
+    };
+
+    const handleReturned = async () => {
+        const success = await executeHandleSteppedOut(false);
+        if (success) {
+            setShowStepOutAlert(false);
+        }
+    };
+
+    const handleStepOut = async () => {
+        if (notificationsEnabled) {
+            const success = await executeHandleSteppedOut(true);
+            if (success) setShowStepOutAlert(true);
+        } 
+        else {
+            setStepOutDialogOpen(true);
+        }
     };
 
 
@@ -48,12 +141,15 @@ export default function UserDashboard() {
             <NavBar />
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
+                    {showNotificationsAlert && (
+                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>Notifications enabled. We'll send you updates as your turn approaches.</Alert>
+                    )}
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
                     )}
-                    {error && (
-                        <Alert severity="error" color="error">
-                            {error}
+                    {(errors || fetchError) && (
+                        <Alert severity="error" color="error" onClose={() => setErrors('')}>
+                            {errors || fetchError}
                         </Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
@@ -86,15 +182,44 @@ export default function UserDashboard() {
                                     </Grid>
                                 </Stack>
                                 <Grid size={12}>
+                                    <Item sx={{ textAlign: 'left', backgroundColor: '#e8f5e9' }}>
+                                        <Stack spacing={1}>
+                                            <Typography variant='h6'>
+                                                Would you like to receive notification updates about your status in the queue?
+                                                <TextToSpeechButton text='Would you like to receive notification updates about your status in the queue? We can send you an SMS or email as your turn approaches.' />
+                                            </Typography>
+                                            <Typography variant='body1'>We can send you an SMS or email as your turn approaches.</Typography>
+                                            <Stack direction='row' spacing={2}>
+                                                <Button
+                                                    className='dashboardBtn'
+                                                    variant={notificationsEnabled ? 'outlined' : 'contained'}
+                                                    sx={{ borderColor: 'primary.main' }}
+                                                    endIcon={<NotificationsIcon />}
+                                                    onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
+                                                >
+                                                    {notificationsEnabled ? 'Stop notifications' : 'Enable notifications'}
+                                                </Button>
+                                            </Stack>
+                                        </Stack>
+                                    </Item>
+                                </Grid>
+                                <Grid size={12}>
                                     <Item sx={{ textAlign: 'left', backgroundColor:'#e0eeff'}}>
                                         <Stack spacing={1}>
                                             <Typography variant='h6'>Need to step out?
-                                                <TextToSpeechButton text='If you need to leave the building, click the button on the left. We can send you updates as your turn approaches. Upon returning click the button on the right to stop receiving updates.'/>
+                                                <TextToSpeechButton text='If you need to leave the building, click the button below. We can send you updates as your turn approaches. Upon returning, click the button again.'/>
                                             </Typography>
                                             <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
                                             <Stack direction='row' spacing={2}>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<DirectionsWalkIcon />} onClick={handleStepOut} disabled={stepOut}>I'm stepping out</Button>
-                                                <Button className='dashboardBtn' variant='contained' sx={{borderColor:'primary.main'}} endIcon={<CommentsDisabledIcon />} onClick={handleReturned} disabled={!stepOut} >I've returned - stop updates</Button>
+                                                <Button
+                                                    className='dashboardBtn'
+                                                    variant={steppedOut ? 'outlined' : 'contained'}
+                                                    sx={{ borderColor: 'primary.main' }}
+                                                    endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
+                                                    onClick={steppedOut ? handleReturned : handleStepOut}
+                                                >
+                                                    {steppedOut ? "I've returned" : "I'm stepping out"}
+                                                </Button>
                                             </Stack>
                                         </Stack>
                                     </Item>
@@ -116,6 +241,27 @@ export default function UserDashboard() {
                     </Paper>
                 </Box>
             </Box>
+
+            <ContactDetailsDialog
+                title="How would you like to receive updates?"
+                description="We'll notify you as your turn approaches so you can return in time."
+                confirmLabel="Step out"
+                open={stepOutDialogOpen}
+                onClose={() => setStepOutDialogOpen(false)}
+                onConfirm={handleStepOutConfirm}
+                prefillEmail={user?.email}
+                prefillPhone={user?.phoneNumber}
+            />
+            <ContactDetailsDialog
+                title="Get queue notifications"
+                description="We'll notify you when your turn is approaching."
+                confirmLabel="Enable notifications"
+                open={enableNotificationsDialogOpen}
+                onClose={() => setEnableNotificationsDialogOpen(false)}
+                onConfirm={handleEnableNotificationsConfirm}
+                prefillEmail={user?.email}
+                prefillPhone={user?.phoneNumber}
+            />
         </>
     )
 }
