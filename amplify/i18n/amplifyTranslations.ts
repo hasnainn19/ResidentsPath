@@ -5,6 +5,7 @@ I18n.putVocabularies({
   en: {
     "Email":"Email",
     "Enter your Email":"Enter your Email",
+    "Enter your email":"Enter your email",
     "Password":"Password",
     "Enter your Password":"Enter your Password",
     "Confirm Password":"Confirm Password",
@@ -16,11 +17,19 @@ I18n.putVocabularies({
     "Create Account":"Create Account",
     "Sign In":"Sign In",
     "Sign in":"Sign in",
-    "Forgot your password?":"Forgot your password?"
+    "Forgot your password?":"Forgot your password?",
+    "Reset Password": "Reset Password",
+    "Send code":"Send code",
+    "Back to Sign In":"Back to Sign In",
+    "Code":"Code",
+    "New Password":"New Password",
+    "Submit":"Submit",
+    "Resend Code":"Resend Code"
   },
   cy: {
     "Email":"E-bost",
     "Enter your Email":"Rhowch eich e-bost",
+    "Enter your email":"Rhowch eich e-bost",
     "Password":"Cyfrinair",
     "Enter your Password":"Rhowch eich cyfrinair",
     "Confirm Password":"Cadarnhau Cyfrinair",
@@ -32,11 +41,19 @@ I18n.putVocabularies({
     "Create Account":"Creu Cyfrif",
     "Sign In":"Mewngofnodi",
     "Sign in":"Mewngofnodi",
-    "Forgot your password?":"Wedi anghofio eich cyfrinair?"
+    "Forgot your password?":"Wedi anghofio eich cyfrinair?",
+    "Reset Password": "Ailosod Cyfrinair",
+    "Send code":"Anfon Cod",
+    "Back to Sign In":"Yn ôl i Mewngofnodi",
+    "Code":"Cod",
+    "New Password":"Cyfrinair Newydd",
+    "Submit":"Cyflwyno",
+    "Resend Code":"Ail-anfon y Cod"
   },
   fa: {
     "Email":"ایمیل",
     "Enter your Email":"ایمیل خود را وارد کنید",
+    "Enter your email":"ایمیل خود را وارد کنید",
     "Password":"رمز عبور",
     "Enter your Password":"رمز عبور خود را وارد کنید",
     "Confirm Password":"تأیید رمز عبور",
@@ -48,11 +65,19 @@ I18n.putVocabularies({
     "Create Account":"ایجاد حساب کاربری",
     "Sign In":"ورود",
     "Sign in":"ورود",
-    "Forgot your password?":"رمز عبور خود را فراموش کرده‌اید؟"
+    "Forgot your password?":"رمز عبور خود را فراموش کرده‌اید؟",
+    "Reset Password": "ازنشانی رمز عبور",
+    "Send code":"ارسال کد",
+    "Back to Sign In":"بازگشت به ورود",
+    "Code":"کد",
+    "New Password":"رمز عبور جدید",
+    "Submit":"ارسال",
+    "Resend Code":"ارسال مجدد کد"
   },
   pa: {
     "Email":"ਈਮੇਲ",
     "Enter your Email":"ਆਪਣਾ ਈਮੇਲ ਦਰਜ ਕਰੋ",
+    "Enter your email":"ਆਪਣਾ ਈਮੇਲ ਦਰਜ ਕਰੋ",
     "Password":"ਪਾਸਵਰਡ",
     "Enter your Password":"ਆਪਣਾ ਪਾਸਵਰਡ ਦਰਜ ਕਰੋ",
     "Confirm Password":"ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
@@ -64,11 +89,19 @@ I18n.putVocabularies({
     "Create Account":"ਖਾਤਾ ਬਣਾਉ",
     "Sign In":"ਸਾਈਨ - ਇਨ",
     "Sign in":"ਸਾਈਨ - ਇਨ",
-    "Forgot your password?":"ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?"
+    "Forgot your password?":"ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
+    "Reset Password": "ਪਾਸਵਰਡ ਰੀਸੈਟ ਕਰੋ",
+    "Send code":"ਕੋਡ ਭੇਜੋ",
+    "Back to Sign In":"ਸਾਈਨ ਇਨ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+    "Code":"ਕੋਡ",
+    "New Password":"ਨਵਾਂ ਪਾਸਵਰਡ",
+    "Submit":"ਜਮ੍ਹਾਂ ਕਰੋ",
+    "Resend Code":"ਕੋਡ ਦੁਬਾਰਾ ਭੇਜੋ"
   },
   pl: {
     "Email":"E-mail",
     "Enter your Email":"Podaj swój adres e-mail",
+    "Enter your email":"Podaj swój adres e-mail",
     "Password":"Hasło",
     "Enter your Password":"Wprowadź swoje hasło",
     "Confirm Password":"Potwierdź hasło",
@@ -80,7 +113,14 @@ I18n.putVocabularies({
     "Create Account":"Utwórz konto",
     "Sign In":"Zalogować się",
     "Sign in":"Zalogować się",
-    "Forgot your password?":"Zapomniałeś hasła?"
+    "Forgot your password?":"Zapomniałeś hasła?",
+    "Reset Password": "Zresetuj hasło",
+    "Send code":"Wyślij kod",
+    "Back to Sign In":"Powrót do logowania",
+    "Code":"Kod",
+    "New Password":"Nowe hasło",
+    "Submit":"Składać",
+    "Resend Code":"Wyślij ponownie kod"
   }
 });
 
