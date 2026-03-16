@@ -416,7 +416,9 @@ const StaffCaseDetails = () => {
               rows={6}
               fullWidth
               value={notesValue}
-              onChange={(e) => setNotesValue(e.target.value)}
+              onChange={(e) => setNotesValue(e.target.value.slice(0, 5000))}
+              slotProps={{ htmlInput: { maxLength: 5000 } }}
+              helperText={`${notesValue.length}/5000`}
               sx={{ mt: 1 }}
             />
           </DialogContent>
