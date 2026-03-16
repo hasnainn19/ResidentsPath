@@ -42,9 +42,9 @@ const StaffCaseDetails = () => {
   const [notesOpen, setNotesOpen] = useState(false);
   const [notesValue, setNotesValue] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
-  const [titleOpen, setTitleOpen] = useState(false);
-  const [titleValue, setTitleValue] = useState("");
-  const [savingTitle, setSavingTitle] = useState(false);
+  const [caseNameOpen, setCaseNameOpen] = useState(false);
+  const [caseNameValue, setCaseNameValue] = useState("");
+  const [savingCaseName, setSavingCaseName] = useState(false);
 
   const statusColorMap: Record<
     string,
@@ -75,22 +75,22 @@ const StaffCaseDetails = () => {
     }
   };
 
-  const openTitleModal = () => {
-    setTitleValue(c?.caseName ?? "");
-    setTitleOpen(true);
+  const openCaseNameModal = () => {
+    setCaseNameValue(c?.caseName ?? "");
+    setCaseNameOpen(true);
   };
 
-  const handleSaveTitle = async () => {
+  const handleSaveCaseName = async () => {
     if (!caseId) return;
-    setSavingTitle(true);
+    setSavingCaseName(true);
     try {
-      await client.models.Case.update({ id: caseId, name: titleValue });
-      setTitleOpen(false);
+      await client.models.Case.update({ id: caseId, name: caseNameValue });
+      setCaseNameOpen(false);
     } catch (error) {
       console.error("Failed to update case title", error);
       window.alert("Unable to save title. Please try again.");
     } finally {
-      setSavingTitle(false);
+      setSavingCaseName(false);
     }
   };
 
@@ -162,7 +162,7 @@ const StaffCaseDetails = () => {
           </Typography>
           <IconButton
             size="small"
-            onClick={openTitleModal}
+            onClick={openCaseNameModal}
             sx={{ mt: 0.25 }}
             aria-label="Edit case title"
           >
@@ -222,10 +222,10 @@ const StaffCaseDetails = () => {
         {/* Resident Details */}
         <SectionCard title="Resident Details">
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 6 }} sx={{ minWidth: 0 }}>
               <DetailRow label="Full Name" value={c.residentName} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 6 }} sx={{ minWidth: 0 }}>
               <DetailRow
                 label="Age Range"
                 value={
@@ -239,8 +239,16 @@ const StaffCaseDetails = () => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <DetailRow label="Number of Children" value={c.childrenCount} />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <DetailRow label="Safe to Contact" value={c.safeToContact} />
+            <Grid size={{ xs: 12, sm: 12 }}>
+              <Stack spacing={2}>
+                <DetailRow label="Safe to Contact" value={c.safeToContact} />
+                {c.safeContactNotes && (
+                  <DetailRow
+                    label="Safe to Contact Notes"
+                    value={c.safeContactNotes}
+                  />
+                )}
+              </Stack>
             </Grid>
           </Grid>
         </SectionCard>
@@ -360,8 +368,8 @@ const StaffCaseDetails = () => {
         </SectionCard>
 
         <Dialog
-          open={titleOpen}
-          onClose={() => setTitleOpen(false)}
+          open={caseNameOpen}
+          onClose={() => setCaseNameOpen(false)}
           fullWidth
           maxWidth="sm"
         >
@@ -370,21 +378,26 @@ const StaffCaseDetails = () => {
             <TextField
               autoFocus
               fullWidth
-              value={titleValue}
-              onChange={(e) => setTitleValue(e.target.value)}
+              value={caseNameValue}
+              onChange={(e) => setCaseNameValue(e.target.value.slice(0, 50))}
+              slotProps={{ htmlInput: { maxLength: 50 } }}
+              helperText={`${caseNameValue.length}/50`}
               sx={{ mt: 1 }}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setTitleOpen(false)} disabled={savingTitle}>
+            <Button
+              onClick={() => setCaseNameOpen(false)}
+              disabled={savingCaseName}
+            >
               Cancel
             </Button>
             <Button
               variant="contained"
-              onClick={handleSaveTitle}
-              disabled={savingTitle}
+              onClick={handleSaveCaseName}
+              disabled={savingCaseName}
             >
-              {savingTitle ? "Saving…" : "Save"}
+              {savingCaseName ? "Saving…" : "Save"}
             </Button>
           </DialogActions>
         </Dialog>

@@ -52,7 +52,7 @@ const StaffCaseManagementPage: React.FC = () => {
         c.enquiry.toLowerCase().includes(q) ||
         (c.description ?? "").toLowerCase().includes(q) ||
         c.referenceNumber.toLowerCase().includes(q) ||
-        (c.title ?? "").toLowerCase().includes(q),
+        (c.caseName ?? "").toLowerCase().includes(q),
     );
   }, [cases, search]);
 
