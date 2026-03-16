@@ -60,10 +60,10 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Create a case
+										Submit an Enquiry
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Complete the form to create a case.
+										Fill in our online form and we'll bring you to the right service
 									</Typography>
 									<Button
 										variant="outlined"
@@ -71,7 +71,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/form')}
 									>
-										Form
+										Start Your Enquiry
 									</Button>
 								</CardContent>
 							</Card>
