@@ -2,11 +2,13 @@
  * Builds the payload to submit an enquiry, removing any fields that are empty or not relevant for the backend
  */
 
+import dayjs from "dayjs";
 import type { FormData } from "./formFieldTypes";
 import { getEnquirySelectionState } from "./getEnquirySelectionState";
 import { normalisePhoneToE164, type formInput } from "../../../../shared/formSchema";
 
 type SupportNeeds = NonNullable<NonNullable<formInput["supportNeeds"]>[number]>;
+type AgeRangeValue = NonNullable<formInput["ageRange"]>;
 
 // Trims a string and returns undefined if it's empty after trimming
 function trimOrUndef(s: string): string | undefined {
@@ -39,6 +41,31 @@ function getSupportNeedsArray(data: FormData): SupportNeeds[] | undefined {
   return needs.length ? needs : undefined;
 }
 
+function getAgeRangeFromDob(dob: string): AgeRangeValue | undefined {
+  const birthDate = dayjs(dob);
+
+  if (!birthDate.isValid()) return undefined;
+
+  const today = dayjs();
+  let age = today.year() - birthDate.year();
+
+  if (
+    today.month() < birthDate.month() ||
+    (today.month() === birthDate.month() && today.date() < birthDate.date())
+  ) {
+    age -= 1;
+  }
+
+  if (age < 0) return undefined;
+  if (age < 18) return "UNDER_18";
+  if (age <= 24) return "AGE_18_24";
+  if (age <= 34) return "AGE_25_34";
+  if (age <= 44) return "AGE_35_44";
+  if (age <= 54) return "AGE_45_54";
+  if (age <= 64) return "AGE_55_64";
+  return "AGE_65_PLUS";
+}
+
 // Build the payload, removing any fields that are empty or not relevant for the backend
 export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const sel = getEnquirySelectionState(data);
@@ -51,6 +78,10 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const contactMethod = optionalValue(data.contactMethod);
   const phoneCountry = trimOrUndef(data.phoneCountry);
   const phone = trimOrUndef(data.phone);
+  const dob = data.provideDetails === "yes" ? trimOrUndef(data.dob) : undefined;
+  const ageRange =
+    optionalValue(data.ageRange) ??
+    (sel.selectedEnquiry?.askAgeQs === true && dob ? getAgeRangeFromDob(dob) : undefined);
 
   const safeToContact =
     sel.showDomesticAbuseQs && data.domesticAbuse ? optionalValue(data.safeToContact) : undefined;
@@ -60,7 +91,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
     enquiry: data.enquiryId,
     proceed,
 
-    dob: data.provideDetails === "yes" ? trimOrUndef(data.dob) : undefined,
+    dob,
 
     appointmentDateIso:
       proceed === "BOOK_APPOINTMENT" ? trimOrUndef(data.appointmentDateIso) : undefined,
@@ -97,7 +128,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
       sel.showDomesticAbuseQs && data.domesticAbuse && safeToContact === "no"
         ? trimOrUndef(data.safeContactNotes)
         : undefined,
-    ageRange: sel.showAgeRange ? optionalValue(data.ageRange) : undefined,
+    ageRange,
 
     urgent: optionalValue(data.urgent),
     urgentReason: optionalValue(data.urgentReason),
