@@ -46,15 +46,8 @@ const useQueueItems = (departmentName: string) => {
     const init = async () => {
       await fetchItems();
 
-      // Resolve departmentName so ticket subscriptions only fire for this department
-      let filter: { departmentName: { eq: string } } | undefined;
-      if (departmentName) {
-        const { data: depts } = await client.models.Department.list({
-          filter: { name: { eq: departmentName } },
-        });
-        const resolvedName = depts[0]?.id;
-        if (resolvedName) filter = { departmentName: { eq: resolvedName } };
-      }
+      // Scope ticket subscriptions to this department
+      const filter = departmentName ? { departmentName: { eq: departmentName } } : undefined;
 
       createSub = client.models.Ticket.onCreate({ filter }).subscribe({ next: fetchItems });
       updateSub = client.models.Ticket.onUpdate({ filter }).subscribe({ next: fetchItems });
