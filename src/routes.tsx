@@ -43,14 +43,6 @@ export const router = createBrowserRouter([
     element: <ReferencePage />,
   },
   {
-    path: "/bookingpage",
-    element: (
-      <RequireAuth>
-        <BookingPage />
-      </RequireAuth>
-    ),
-  },
-  {
     path: "/checkinpage",
     element: <CheckInConfirmation />,
   },
