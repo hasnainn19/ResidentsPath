@@ -138,7 +138,11 @@ const StaffCaseDetails = () => {
     <Box sx={{ p: 4, maxWidth: 1000, mx: "auto" }}>
       {/* Header */}
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-        <IconButton onClick={() => navigate(-1)} size="small" aria-label="Go back">
+        <IconButton
+          onClick={() => navigate(-1)}
+          size="small"
+          aria-label="Go back"
+        >
           <ArrowBackIcon />
         </IconButton>
         <Typography variant="body2" color="text.secondary">
@@ -183,7 +187,7 @@ const StaffCaseDetails = () => {
           {c.flag && (
             <Chip
               icon={<ShieldIcon />}
-              label="Safeguarding"
+              label="Flagged"
               color="warning"
               size="small"
             />

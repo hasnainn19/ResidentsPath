@@ -204,7 +204,7 @@ const StaffCaseManagementPage: React.FC = () => {
                       {caseItem.flag && (
                         <Chip
                           icon={<FlagIcon />}
-                          label="Safeguarding"
+                          label="Flagged"
                           color="warning"
                           size="small"
                         />
