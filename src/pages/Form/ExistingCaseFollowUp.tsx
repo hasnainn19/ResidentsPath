@@ -10,8 +10,6 @@ import LongTextSection from "../../components/FormPageComponents/LongTextSection
 import OptionTile from "../../components/FormPageComponents/OptionTile";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import BookingPanel from "../../components/BookingPanel";
-import { LANGUAGE_OPTIONS } from "./data/languages";
-import { useFormWizard } from "../../context/FormWizardProvider";
 import { FIELD_META } from "./model/fieldMeta";
 import type { Proceed } from "./model/formFieldTypes";
 import {
@@ -33,7 +31,6 @@ type CaseLookup = {
 export default function ExistingCaseFollowUp() {
   const nav = useNavigate();
   const client = useMemo(() => generateClient<Schema>(), []);
-  const { formData, setFormData } = useFormWizard();
 
   const [referenceNumber, setReferenceNumber] = useState("");
   const [lookupResult, setLookupResult] = useState<CaseLookup | null>(null);
@@ -210,9 +207,6 @@ export default function ExistingCaseFollowUp() {
       showProgress={false}
       title="Council service request"
       subtitle="Use your case reference number to add an update, then join the queue or book an appointment."
-      languageValue={formData.language}
-      onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Paper
         variant="outlined"

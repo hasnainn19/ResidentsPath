@@ -15,7 +15,6 @@ import { generateClient } from "aws-amplify/data";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import StepActions from "../../components/FormPageComponents/StepActions";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
-import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import BookingPanel from "../../components/BookingPanel";
 import { getEnquirySelectionState } from "./model/getEnquirySelectionState";
@@ -158,9 +157,6 @@ export default function Actions() {
       title="Council service request"
       subtitle="Next steps"
       onBack={() => nav("/form/personal-details")}
-      languageValue={formData.language}
-      onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Paper
         variant="outlined"

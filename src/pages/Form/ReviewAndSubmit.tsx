@@ -24,7 +24,6 @@ import {
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import PrivacyNoticeDialog from "../../components/FormPageComponents/PrivacyNoticeDialog";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
-import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import type { FormData } from "./model/formFieldTypes";
 import StepActions from "../../components/FormPageComponents/StepActions";
@@ -242,9 +241,6 @@ export default function ReviewAndSubmit() {
       title="Council service request"
       subtitle="Please review and submit"
       onBack={() => nav("/form/actions")}
-      languageValue={formData.language}
-      onLanguageChange={(code) => setFormData((p) => ({ ...p, language: code }))}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Paper variant="outlined" sx={{ p: { xs: 0, sm: 4 }, borderRadius: { xs: 0, sm: 2 }, borderWidth: { xs: 0, sm: 1 }, bgcolor: { xs: "transparent", sm: "background.paper" } }}>
         <Typography fontWeight={800} sx={{ mb: 2 }}>

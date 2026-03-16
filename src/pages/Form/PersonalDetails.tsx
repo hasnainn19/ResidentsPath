@@ -40,7 +40,6 @@ import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import { outlinedInfoAlertSx } from "../../components/FormPageComponents/outlinedInfoAlertSx";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
-import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
 import type { ContactMethod, YesNo, FormData, PronounsOption } from "./model/formFieldTypes";
 import {
@@ -230,9 +229,6 @@ export default function PersonalDetails() {
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
       onBack={() => nav("/form/enquiry-selection")}
-      languageValue={formData.language}
-      onLanguageChange={(code) => setField("language", code as FormData["language"])}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Box
         component="form"
