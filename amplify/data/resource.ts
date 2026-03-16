@@ -68,7 +68,7 @@ const schema = a
         departmentId: a.id().required(),
 
         // Case information
-        title: a.string(),
+        name: a.string(),
         referenceNumber: a.string().required(),
         description: a.string(),
         status: a.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]),
@@ -549,7 +549,7 @@ const schema = a
       .returns(
         a.customType({
           referenceNumber: a.string().required(),
-          title: a.string(),
+          caseName: a.string(),
           departmentId: a.string(),
           description: a.string(),
           status: a.string(),
@@ -573,7 +573,7 @@ const schema = a
           supportNeeds: a.string(),
           otherSupport: a.string(),
           additionalInfo: a.string(),
-          name: a.string(),
+          residentName: a.string(),
           tickets: a.ref("caseTicketDetails").array(),
         }),
       )

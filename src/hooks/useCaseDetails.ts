@@ -8,7 +8,7 @@ interface CaseTicket {
 }
 
 interface CaseDetails {
-  title: string | null;
+  caseName: string | null;
   referenceNumber: string;
   departmentId: string | null;
   description: string | null;
@@ -33,7 +33,7 @@ interface CaseDetails {
   supportNeeds: string[];
   otherSupport: string | null;
   additionalInfo: string | null;
-  name: string | null;
+  residentName: string | null;
   tickets: CaseTicket[];
 }
 
@@ -58,7 +58,7 @@ const useCaseDetails = (caseId: string | undefined) => {
             return;
           }
           setCaseDetails({
-            title: d.title,
+            caseName: d.caseName,
             referenceNumber: d.referenceNumber,
             departmentId: d.departmentId ?? null,
             description: d.description ?? null,
@@ -83,7 +83,7 @@ const useCaseDetails = (caseId: string | undefined) => {
             supportNeeds: d.supportNeeds ? JSON.parse(d.supportNeeds) : [],
             otherSupport: d.otherSupport ?? null,
             additionalInfo: d.additionalInfo ?? null,
-            name: d.name ?? null,
+            residentName: d.residentName ?? null,
             tickets: (d.tickets ?? []).map((t: any) => ({
               ticketId: t.ticketId,
               ticketStatus: t.ticketStatus,

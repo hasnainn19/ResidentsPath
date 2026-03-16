@@ -32,17 +32,16 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
   if (!user) {
     console.error("No user found");
   }
-  const tickets =
-    (selectedTickets ?? []).map((t) => ({
-      ticketId: t.id ?? null,
-      ticketStatus: (t.status as string) ?? null,
-    }));
+  const tickets = (selectedTickets ?? []).map((t) => ({
+    ticketId: t.id ?? null,
+    ticketStatus: (t.status as string) ?? null,
+  }));
 
   // The Amplify-generated RefType for nested custom types is not assignable
   // from plain objects, so we cast to satisfy the function handler signature.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return {
-    title: selectedCase?.title,
+    caseName: selectedCase?.name,
     referenceNumber: selectedCase.referenceNumber,
     departmentId: selectedCase?.departmentId,
     description: selectedCase?.description,
@@ -67,7 +66,7 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
     supportNeeds: selectedCase?.supportNeedsJson,
     otherSupport: selectedCase?.otherSupport,
     additionalInfo: selectedCase?.additionalInfo,
-    name: user?.firstName?.concat(" ", user?.lastName ?? ""),
+    residentName: user?.firstName?.concat(" ", user?.lastName ?? ""),
     tickets: tickets as any,
   };
 };

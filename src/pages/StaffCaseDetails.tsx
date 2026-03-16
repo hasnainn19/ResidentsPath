@@ -76,7 +76,7 @@ const StaffCaseDetails = () => {
   };
 
   const openTitleModal = () => {
-    setTitleValue(c?.title ?? "");
+    setTitleValue(c?.caseName ?? "");
     setTitleOpen(true);
   };
 
@@ -84,7 +84,7 @@ const StaffCaseDetails = () => {
     if (!caseId) return;
     setSavingTitle(true);
     try {
-      await client.models.Case.update({ id: caseId, title: titleValue });
+      await client.models.Case.update({ id: caseId, name: titleValue });
       setTitleOpen(false);
     } catch (error) {
       console.error("Failed to update case title", error);
@@ -154,7 +154,7 @@ const StaffCaseDetails = () => {
       >
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography variant="h4" fontWeight={600}>
-            {c?.title} #{c.referenceNumber} &middot; {c.departmentId}
+            {c?.caseName} #{c.referenceNumber} &middot; {c.departmentId}
           </Typography>
           <IconButton
             size="small"
@@ -219,7 +219,7 @@ const StaffCaseDetails = () => {
         <SectionCard title="Resident Details">
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <DetailRow label="Full Name" value={c.name} />
+              <DetailRow label="Full Name" value={c.residentName} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <DetailRow
