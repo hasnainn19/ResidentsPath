@@ -3,6 +3,8 @@ import { Container, Box, Typography, Button, Stack, Card, CardContent } from '@m
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NavBar from '../components/NavBar';
+import TextToSpeechButton from "../components/TextToSpeechButton";
+
 
 export default function LandingPage() {
 	const navigate = useNavigate();
@@ -30,6 +32,7 @@ export default function LandingPage() {
 					<Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
 						Hounslow Council Queue Management System
 					</Typography>
+                    <TextToSpeechButton text='Welcome to ResidentsPath, the Hounslow Council Queue Management System'/>
 				</Box>
 
 				{/* Cards vary based on authentication status */}
@@ -42,6 +45,7 @@ export default function LandingPage() {
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
 										Queue Information and Appointment Check-in
 									</Typography>
+                                    <TextToSpeechButton text='Click the button below to check in to your appointment or view your current queue status.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 										Check in to your appointment or view your current queue status.
 									</Typography>
@@ -62,6 +66,7 @@ export default function LandingPage() {
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
 										Submit an Enquiry
 									</Typography>
+                                    <TextToSpeechButton text='Click the button below to submit an enquiry.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 										Fill in our online form and we'll bring you to the right service
 									</Typography>
@@ -84,6 +89,7 @@ export default function LandingPage() {
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
 										Continue as Visitor
 									</Typography>
+                                    <TextToSpeechButton text='Click the button below to continue as a visitor and submit an enquiry.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 										No account needed. Get help immediately by submitting an enquiry.
 									</Typography>
@@ -104,6 +110,7 @@ export default function LandingPage() {
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
 										Sign In or Create Account
 									</Typography>
+                                    <TextToSpeechButton text='Click the button below to sign in or create a new account.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 										Access your account to book appointments and track your past visits.
 									</Typography>
