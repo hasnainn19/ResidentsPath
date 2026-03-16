@@ -164,7 +164,7 @@ const StaffCaseDetails = () => {
             size="small"
             onClick={openCaseNameModal}
             sx={{ mt: 0.25 }}
-            aria-label="Edit case title"
+            aria-label="Edit case name"
           >
             <EditIcon fontSize="small" />
           </IconButton>
