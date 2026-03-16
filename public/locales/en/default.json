@@ -73,5 +73,13 @@
     "nav-queue":"Queue",
     "nav-resident":"ResidentsPath",
     "nav-select":"Select language",
-    "nav-show":"Show queue information"
+    "nav-show":"Show queue information",
+    "appOptions-app":"Appointment options",
+    "appOptions-cancel":"Cancel appointment",
+    "appOptions-ch":"Check-in is only available at Hounslow House.",
+    "appOptions-what":"What would you like to do with appointment",
+    "formlayout-comp":"complete",
+    "formlayout-of":"of",
+    "formlayout-prev":"Previous",
+    "formlayout-step":"Step"
     }

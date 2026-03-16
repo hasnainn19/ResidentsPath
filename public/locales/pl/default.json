@@ -73,5 +73,13 @@
     "nav-queue":"Kolejka",
     "nav-resident":"Ścieżka Mieszkańców",
     "nav-select":"Wybierz język",
-    "nav-show":"Pokaż informacje o kolejce"
+    "nav-show":"Pokaż informacje o kolejce",
+    "appOptions-app":"Opcje umawiania wizyt",
+    "appOptions-cancel":"Anuluj wizytę",
+    "appOptions-ch":"Zameldowanie jest możliwe wyłącznie w Hounslow House.",
+    "appOptions-what":"Co chciałbyś zrobić z tym spotkaniem?",
+    "formlayout-comp":"kompletny",
+    "formlayout-of":"z",
+    "formlayout-prev":"Poprzedni",
+    "formlayout-step":"Krok"
 }

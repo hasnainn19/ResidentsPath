@@ -73,5 +73,13 @@
     "nav-queue":"صف",
     "nav-resident":"رزیدنتس پث",
     "nav-select":"انتخاب زبان",
-    "nav-show":"نمایش اطلاعات صف انتظار"
+    "nav-show":"نمایش اطلاعات صف انتظار",
+    "appOptions-app":"گزینه‌های قرار ملاقات",
+    "appOptions-cancel":"لغو قرار ملاقات",
+    "appOptions-ch":"ورود فقط در هتل هانسلو هاوس امکان‌پذیر است.",
+    "appOptions-what":"با قرار ملاقات چه کاری می‌خواهید انجام دهید؟",
+    "formlayout-comp":"کامل",
+    "formlayout-of":"از",
+    "formlayout-prev":"قبلی",
+    "formlayout-step":"قدم"
 }

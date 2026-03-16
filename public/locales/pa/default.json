@@ -73,5 +73,13 @@
     "nav-queue":"ਕਤਾਰ",
     "nav-resident":"ਨਿਵਾਸੀ ਮਾਰਗ",
     "nav-select":"ਭਾਸ਼ਾ ਚੁਣੋ",
-    "nav-show":"ਕਤਾਰ ਜਾਣਕਾਰੀ ਦਿਖਾਓ"
+    "nav-show":"ਕਤਾਰ ਜਾਣਕਾਰੀ ਦਿਖਾਓ",
+    "appOptions-app":"ਅਪਾਇੰਟਮੈਂਟ ਵਿਕਲਪ",
+    "appOptions-cancel":"ਅਪਾਇੰਟਮੈਂਟ ਰੱਦ ਕਰੋ",
+    "appOptions-ch":"ਚੈੱਕ-ਇਨ ਸਿਰਫ਼ ਹਾਊਂਸਲੋ ਹਾਊਸ ਵਿਖੇ ਹੀ ਉਪਲਬਧ ਹੈ।",
+    "appOptions-what":"ਤੁਸੀਂ ਮੁਲਾਕਾਤ ਨਾਲ ਕੀ ਕਰਨਾ ਚਾਹੋਗੇ?",
+    "formlayout-comp":"ਪੂਰਾ",
+    "formlayout-of":"ਦੇ",
+    "formlayout-prev":"ਪਿਛਲਾ",
+    "formlayout-step":"ਕਦਮ"
 }

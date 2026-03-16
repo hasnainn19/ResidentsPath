@@ -73,5 +73,13 @@
     "nav-queue":"Ciw",
     "nav-resident":"Llwybr y Preswylwyr",
     "nav-select":"Dewiswch iaith",
-    "nav-show":"Dangos gwybodaeth ciw"
+    "nav-show":"Dangos gwybodaeth ciw",
+    "appOptions-app":"Dewisiadau apwyntiad",
+    "appOptions-cancel":"Canslo apwyntiad",
+    "appOptions-ch":"Dim ond yn Hounslow House y mae modd cofrestru.",
+    "appOptions-what":"Beth hoffech chi ei wneud gyda'r apwyntiad?",
+    "formlayout-comp":"cwblhau",
+    "formlayout-of":"o",
+    "formlayout-prev":"Blaenorol",
+    "formlayout-step":"Cam"
 }
