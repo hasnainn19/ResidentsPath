@@ -169,7 +169,6 @@ export default function FormStepLayout(props: Props) {
             </Stack>
             <LinearProgress variant="determinate" value={percent} />
           </Paper>
-
           {/* Step content */}
           {props.children}
         </Paper>

@@ -10,6 +10,7 @@ import type { FormData } from "./formFieldTypes";
 
 export const initialFormData: FormData = {
   language: "en",
+  privacyNoticeAccepted: false,
 
   provideDetails: "yes",
   firstName: "",

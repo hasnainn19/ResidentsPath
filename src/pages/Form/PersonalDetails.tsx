@@ -509,6 +509,24 @@ export default function PersonalDetails() {
                 {/* Contact details */}
                 <WithTTS copy={COPY.contactDetails} titleVariant="subtitle1">
                   <Stack spacing={{ xs: 1.5, sm: 2 }}>
+                    <Alert
+                      severity="info"
+                      variant="outlined"
+                      sx={(theme) => ({
+                        borderRadius: 2,
+                        border: "2px solid",
+                        borderColor: theme.palette.primary.main,
+                        borderLeftWidth: 8,
+                        bgcolor: alpha(theme.palette.primary.main, 0.08),
+                        "& .MuiAlert-icon": {
+                          color: theme.palette.primary.dark,
+                        },
+                      })}
+                    >
+                      We only use your email address or phone number for this request and for the
+                      updates you ask us to send.
+                    </Alert>
+
                     <TextField
                       label={labelOptional("email")}
                       type="email"

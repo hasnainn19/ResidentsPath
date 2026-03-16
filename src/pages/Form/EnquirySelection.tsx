@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  Alert,
   Box,
   Button,
   Collapse,
@@ -36,6 +37,7 @@ import {
 } from "@mui/material";
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import FormPrivacyNotice from "../../components/FormPageComponents/FormPrivacyNotice";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -198,23 +200,26 @@ export default function EnquirySelection() {
       onLanguageChange={(code) => setField("language", code)}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      {/* Main form card */}
-      <Paper
-        variant="outlined"
-        sx={{
-          p: { xs: 2.5, sm: 4 },
-          borderRadius: { xs: 1.5, sm: 2 },
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!canGoNext) return;
-            nav("/form/personal-details");
+      <Stack spacing={3}>
+        <FormPrivacyNotice />
+
+        {/* Main form card */}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: { xs: 1.5, sm: 2 },
           }}
         >
-          <Stack spacing={{ xs: 3, sm: 4 }}>
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!canGoNext) return;
+              nav("/form/personal-details");
+            }}
+          >
+            <Stack spacing={{ xs: 3, sm: 4 }}>
             {/* Service */}
             <WithTTS
               copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
@@ -513,6 +518,11 @@ export default function EnquirySelection() {
                             {formData.domesticAbuse && (
                               <Box sx={{ mt: 1.5 }}>
                                 <Stack spacing={2}>
+                                  <Alert severity="warning" variant="outlined">
+                                    Only share details here if it is safe to do so. Use the safe
+                                    contact option below if contacting you could put you at risk.
+                                  </Alert>
+
                                   <FormControl fullWidth>
                                     <InputLabel id="safe-contact-label">
                                       {FIELD_META.safeToContact.label}
@@ -825,9 +835,10 @@ export default function EnquirySelection() {
               advanceLabel="Continue"
               advanceDisabled={!canGoNext}
             />
-          </Stack>
-        </Box>
-      </Paper>
+            </Stack>
+          </Box>
+        </Paper>
+      </Stack>
     </FormStepLayout>
   );
 }

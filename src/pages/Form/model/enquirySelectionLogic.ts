@@ -16,7 +16,7 @@ import { ENQUIRIES_BY_TOPLEVEL } from "../data/enquiries";
 // - Whether the current selection is complete enough to move forward.
 // - Which follow up sections should appear (children, disability/sensory, household size,
 //   domestic abuse).
-export function getEnquiryOptions(topLevel: string, _choice: string): EnquiryItem[] {
+export function getEnquiryOptions(topLevel: string): EnquiryItem[] {
   if (!topLevel) return [];
   return ENQUIRIES_BY_TOPLEVEL[topLevel] || [];
 }

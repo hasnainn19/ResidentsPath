@@ -8,8 +8,21 @@
 
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Paper, Typography, Button, Stack, Divider, Box, Alert } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Button,
+  Stack,
+  Divider,
+  Box,
+  Alert,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+} from "@mui/material";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import FormPrivacyNotice from "../../components/FormPageComponents/FormPrivacyNotice";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -305,13 +318,40 @@ export default function ReviewAndSubmit() {
           );
         })}
 
+        <Box sx={{ mt: 4, mb: 3 }}>
+          <Stack spacing={2}>
+            <FormPrivacyNotice />
+
+            <FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.privacyNoticeAccepted}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        privacyNoticeAccepted: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="I confirm that I have read the privacy notice for this form."
+              />
+              <FormHelperText sx={{ ml: 0 }}>
+                This confirms you have read the notice before submitting. The Council is not
+                relying on your consent to process your information.
+              </FormHelperText>
+            </FormControl>
+          </Stack>
+        </Box>
+
         {/* Navigation Buttons */}
         <StepActions
           onSave={handleSave}
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           advanceType="button"
-          advanceDisabled={submitting}
+          advanceDisabled={submitting || !formData.privacyNoticeAccepted}
           showPrevious
           onPrevious={() => nav("/form/actions")}
         />

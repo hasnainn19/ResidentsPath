@@ -15,7 +15,7 @@ import { getEnquiryOptions } from "./enquirySelectionLogic";
 export function getEnquirySelectionState(data: FormData) {
   const topLevel = data.topLevel;
 
-  const enquiryOptions = getEnquiryOptions(topLevel, data.generalServicesChoice);
+  const enquiryOptions = getEnquiryOptions(topLevel);
   const selectedEnquiry = enquiryOptions.find((x) => x.value === data.enquiryId) || null;
 
   const isOther = topLevel === "Other";
