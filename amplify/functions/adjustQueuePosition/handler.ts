@@ -1,5 +1,6 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { recalculateDepartmentQueue } from "../utils/recalculateDepartmentQueue";
 
 /**
  * Lambda function to move a waiting ticket to a new queue position.
@@ -86,8 +87,13 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
     console.error(`Failed to adjust positions for ${departmentId}`);
   }
 
-  // Recalculate wait times using calculateDepartmentQueue
-  await client.mutations.calculateDepartmentQueue({ departmentId });
+  // Recalculate wait times
+  try {
+    await recalculateDepartmentQueue(departmentId);
+  } 
+  catch (error) {
+    console.error(`recalculateDepartmentQueue: failed for department ${departmentId}`, error);
+  }
 
   return true;
 };

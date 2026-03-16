@@ -1,5 +1,6 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { recalculateDepartmentQueue } from "../utils/recalculateDepartmentQueue";
 
 /**
  * Lambda function to mark a ticket as seen (completed).
@@ -83,10 +84,13 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
     );
   }
 
-  // Recalculate wait times using the shared calculateDepartmentQueue logic
-  await client.mutations.calculateDepartmentQueue({
-    departmentId: ticket.departmentId,
-  });
+  // Recalculate wait times
+  try {
+    await recalculateDepartmentQueue(ticket.departmentId);
+  } 
+  catch (error) {
+    console.error(`recalculateDepartmentQueue: failed for department ${ticket.departmentId}`, error);
+  }
 
   return true;
 };

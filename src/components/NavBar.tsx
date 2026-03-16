@@ -73,6 +73,7 @@ export default function NavBar() {
 						},
 					}}
 				>
+					
 					<Tooltip title="Check your queue details or check in for an appointment">
 						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
 					</Tooltip>
