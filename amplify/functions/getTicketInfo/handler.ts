@@ -14,10 +14,13 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  * @throws Error if the caseId is missing, the case is not found, the case has no departmentId,
  *         or there is no waiting ticket for today
  * @returns Object containing:
+ *   - ticketId: ID of the current waiting ticket for the case
  *   - departmentId: ID of the department handling the case
  *   - position: the current ticket's position in the queue
  *   - estimatedWaitTimeLower: lower bound of the estimated wait time in minutes
  *   - estimatedWaitTimeUpper: upper bound of the estimated wait time in minutes
+ *   - steppedOut: boolean indicating if the ticket holder has stepped out
+ *   - notificationsEnabled: boolean indicating if notifications are enabled for this ticket
  */
 
 const client = await getAmplifyClient();
@@ -85,9 +88,12 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
     }
 
     return {
+        ticketId: currentTicket.id,
         departmentId: departmentId,
         position: currentTicket.position,
         estimatedWaitTimeLower: currentTicket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: currentTicket.estimatedWaitTimeUpper,
+        steppedOut: currentTicket.steppedOut ?? false,
+        notificationsEnabled: currentTicket.notificationsEnabled ?? false,
     };
 };

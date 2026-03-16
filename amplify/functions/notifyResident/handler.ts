@@ -47,26 +47,41 @@ function shouldNotifyResident(newImage: Record<string, any>, oldImage: Record<st
         return `Your ticket number ${ticketNumber} is now being served. Please proceed to the counter.`;
     }
 
-    // Under 5 minutes
+    // Under 10 minutes
     if (
-        newImage.estimatedWaitTimeLower <= 5 &&
-        oldImage.estimatedWaitTimeLower > 5 &&
+        newImage.estimatedWaitTimeLower <= 10 &&
+        oldImage.estimatedWaitTimeLower > 10 &&
         newImage.position !== 0
     ) {
-        return `Your ticket number ${ticketNumber} will be served in approximately 5 minutes or less.`;
+        return `Your ticket number ${ticketNumber} will be served in approximately 10 minutes or less.`;
     }
 
-    // Under 15 minutes (only if not also crossing the 5 min threshold)
+    // Under 20 minutes
     if (
-        newImage.estimatedWaitTimeLower <= 15 &&
-        oldImage.estimatedWaitTimeLower > 15 &&
-        newImage.estimatedWaitTimeLower > 5 &&
+        newImage.estimatedWaitTimeLower <= 20 &&
+        oldImage.estimatedWaitTimeLower > 20 &&
         newImage.position !== 0
     ) {
-        return `Your ticket number ${ticketNumber} will be served in approximately 15 minutes or less.`;
+        return `Your ticket number ${ticketNumber} will be served in approximately 20 minutes or less.`;
     }
 
-    // Other notification conditions will go here
+    // Under 30 minutes
+    if (
+        newImage.estimatedWaitTimeLower <= 30 &&
+        oldImage.estimatedWaitTimeLower > 30 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 30 minutes or less.`;
+    }
+
+    // Under 60 minutes
+    if (
+        newImage.estimatedWaitTimeLower <= 60 &&
+        oldImage.estimatedWaitTimeLower > 60 &&
+        newImage.position !== 0
+    ) {
+        return `Your ticket number ${ticketNumber} will be served in approximately 60 minutes or less.`;
+    }
 
     return null;
 }
@@ -155,6 +170,11 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         const { newImage, oldImage, caseId, ticketNumber } = validated;
 
+        // Check if they have opted-in for notifications on this ticket
+        if (!newImage.notificationsEnabled) {
+            continue;
+        }
+
         const message = shouldNotifyResident(newImage, oldImage, ticketNumber);
         if (!message) {
             continue;
@@ -175,20 +195,22 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         // Retrieve contact details from user record
         const phoneNumber = user.phoneNumber ?? null;
         const email = user.email ?? null;
+        const preferredContactMethod = newImage.notificationPreferredContactMethod;
 
-        // They have no form of contact, skip
+        // They have no form of contact, skip (although if they have enabled notis then they should have at least one)
         if (!phoneNumber && !email) {
             console.log(`notifyResident: User with ID ${user.id} has no contact information, skipping notification for ticket ${ticketNumber}.`);
             continue;
         }
 
-        // If they have a phone number, we contact them via SMS using End User Messaging
-        if (phoneNumber) {
+        if (preferredContactMethod === 'SMS' && phoneNumber) {
             await sendSms(phoneNumber, ticketNumber, message);
         }
-        // If they don't have a phone number but have an email, we contact them via email using SES
-        else if (email) {
+        else if (preferredContactMethod === 'EMAIL' && email) {
             await sendEmail(email, ticketNumber, message);
+        }
+        else {
+            console.error(`notifyResident: No contact info for preferred method ${preferredContactMethod} on ticket ${ticketNumber}, skipping.`);
         }
     }
 };
