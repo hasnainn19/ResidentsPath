@@ -79,13 +79,13 @@ export default function NavBar() {
 				>
 					
 					{isStaff && (
-					<Tooltip title="Go to the staff dashboard">
-						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>Staff Dashboard</Button>
+					<Tooltip title={translate("navbar-goto")}>
+						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>{translate("landing-staff")}</Button>
 					</Tooltip>
 				)}
 
-				<Tooltip title="Check your queue details or check in for an appointment">
-						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
+				<Tooltip title={translate("reference-check")}>
+						<Button color="inherit" onClick={() => navigate('/referencepage')}>{translate("landing-check")}</Button>
 					</Tooltip>
 
 					<Tooltip title={translate("nav-create")}>

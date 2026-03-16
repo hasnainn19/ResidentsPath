@@ -1,5 +1,6 @@
 import { Alert, Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -10,6 +11,7 @@ import { initialFormData } from "./model/initialState";
 export default function FormEntry() {
   const nav = useNavigate();
   const { formData, setFormData } = useFormWizard();
+  const {  t: translate } = useTranslation();
   const draft = loadDraft(localStorage);
   const savedAt = draft ? formatSavedTime(draft.updatedAt) : "";
 
@@ -34,8 +36,8 @@ export default function FormEntry() {
       step={1}
       totalSteps={1}
       showProgress={false}
-      title="Council service request"
-      subtitle="Start a new enquiry or continue an existing case."
+      title={translate("formentry-coun")}
+      subtitle={translate("formentry-start")}
       languageValue={formData.language}
       onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
       languageOptions={LANGUAGE_OPTIONS}
@@ -69,18 +71,18 @@ export default function FormEntry() {
           >
             <Stack spacing={2} sx={{ width: "100%", height: "100%" }}>
               <Typography variant="h6" fontWeight={800}>
-                Start a new enquiry
+                {translate("formentry-startnew")}
               </Typography>
               <Typography color="text.secondary" sx={{ minHeight: { md: 64 } }}>
-                Complete the form to tell us what you need help with today.
+                {translate("formentry-complete")}
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: "auto" }}>
                 <Button variant="contained" onClick={handleStartNew}>
-                  Start a new enquiry
+                  {translate("formentry-startnew")}
                 </Button>
                 {draft ? (
                   <Button variant="outlined" onClick={handleContinueSaved}>
-                    Continue saved form
+                    {translate("formentry-continue")}
                   </Button>
                 ) : null}
               </Stack>
@@ -98,11 +100,10 @@ export default function FormEntry() {
           >
             <Stack spacing={2} sx={{ width: "100%", height: "100%" }}>
               <Typography variant="h6" fontWeight={800}>
-                Continue an existing case
+                {translate("formentry-existing")}
               </Typography>
               <Typography color="text.secondary" sx={{ minHeight: { md: 64 } }}>
-                Use your case reference number to add an update, then join the queue or book an
-                appointment.
+                {translate("formentry-use")}
               </Typography>
               <Box sx={{ mt: "auto" }}>
                 <Button
@@ -110,7 +111,8 @@ export default function FormEntry() {
                   onClick={() => nav("/form/existing")}
                   sx={{ width: { xs: "100%", sm: "fit-content" } }}
                 >
-                  Continue an existing case
+                  
+                  {translate("formentry-existing")}
                 </Button>
               </Box>
             </Stack>

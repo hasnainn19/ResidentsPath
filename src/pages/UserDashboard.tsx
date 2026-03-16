@@ -144,7 +144,7 @@ export default function UserDashboard() {
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {showNotificationsAlert && (
-                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>Notifications enabled. We'll send you updates as your turn approaches.</Alert>
+                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>{translate("userdash-notifications")}</Alert>
                     )}
                     {showStepOutAlert && (
                         <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>{translate("userdash-stepout")}</Alert>
@@ -187,10 +187,10 @@ export default function UserDashboard() {
                                     <Item sx={{ textAlign: 'left', backgroundColor: '#e8f5e9' }}>
                                         <Stack spacing={1}>
                                             <Typography variant='h6'>
-                                                Would you like to receive notification updates about your status in the queue?
+                                                {translate("userdash-would")}
                                                 <TextToSpeechButton text='Would you like to receive notification updates about your status in the queue? We can send you an SMS or email as your turn approaches.' />
                                             </Typography>
-                                            <Typography variant='body1'>We can send you an SMS or email as your turn approaches.</Typography>
+                                            <Typography variant='body1'>{translate("userdash-wesend")}</Typography>
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
@@ -199,7 +199,7 @@ export default function UserDashboard() {
                                                     endIcon={<NotificationsIcon />}
                                                     onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
                                                 >
-                                                    {notificationsEnabled ? 'Stop notifications' : 'Enable notifications'}
+                                                    {notificationsEnabled ? translate("userdash-stopnotf") : translate("userdash-enablenotf")}
                                                 </Button>
                                             </Stack>
                                         </Stack>
@@ -245,8 +245,8 @@ export default function UserDashboard() {
             </Box>
 
             <ContactDetailsDialog
-                title="How would you like to receive updates?"
-                description="We'll notify you as your turn approaches so you can return in time."
+                title={translate("userdash-wouldyou")}
+                description={translate("userdash-wewill")}
                 confirmLabel="Step out"
                 open={stepOutDialogOpen}
                 onClose={() => setStepOutDialogOpen(false)}
@@ -255,8 +255,8 @@ export default function UserDashboard() {
                 prefillPhone={user?.phoneNumber}
             />
             <ContactDetailsDialog
-                title="Get queue notifications"
-                description="We'll notify you when your turn is approaching."
+                title={translate("userdash-getqueue")}
+                description={translate("userdash-notify")}
                 confirmLabel="Enable notifications"
                 open={enableNotificationsDialogOpen}
                 onClose={() => setEnableNotificationsDialogOpen(false)}
