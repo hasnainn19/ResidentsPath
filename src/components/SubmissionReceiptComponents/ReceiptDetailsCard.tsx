@@ -5,6 +5,8 @@ type ReceiptSummary = {
   bookingReferenceNumber?: string;
   appointmentTime?: string;
   departmentName?: string;
+  estimatedWaitTimeLower?: number;
+  estimatedWaitTimeUpper?: number;
 };
 
 export type ReceiptDetailsCardProps = {
@@ -26,6 +28,13 @@ export default function ReceiptDetailsCard({
   onCheckQueueStatus,
   onCopyAppointmentDetails,
 }: ReceiptDetailsCardProps) {
+  const hasEstimatedWaitTime =
+    !isAppointment &&
+    typeof receipt.estimatedWaitTimeLower === "number" &&
+    typeof receipt.estimatedWaitTimeUpper === "number" &&
+    receipt.estimatedWaitTimeLower >= 0 &&
+    receipt.estimatedWaitTimeUpper >= 0;
+
   return (
     <Box sx={{ flex: 1, minWidth: 0, p: { xs: 2.5, sm: 3 } }}>
       <Stack spacing={{ xs: 2.5, md: 3 }}>
@@ -121,6 +130,24 @@ export default function ReceiptDetailsCard({
 
         {/* Department name and submission info */}
         <Stack spacing={1.5}>
+          {hasEstimatedWaitTime ? (
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                Estimated wait time
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: "1.2rem", sm: "1.3rem" },
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {receipt.estimatedWaitTimeLower} to {receipt.estimatedWaitTimeUpper} minutes
+              </Typography>
+            </Box>
+          ) : null}
+
           {receipt.departmentName ? (
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>

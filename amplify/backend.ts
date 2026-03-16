@@ -117,11 +117,6 @@ backend.getAvailableAppointmentTimes.addEnvironment(
   enquiriesStateTable.tableName,
 );
 
-backend.getDepartmentQueueStatus.addEnvironment(
-  "ENQUIRIES_STATE_TABLE",
-  enquiriesStateTable.tableName,
-);
-
 backend.cleanupEnquiryState.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,

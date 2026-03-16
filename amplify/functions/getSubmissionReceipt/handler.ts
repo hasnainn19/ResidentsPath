@@ -107,6 +107,8 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
       : undefined,
     receiptType: useAppointment ? "APPOINTMENT" : "QUEUE",
     ticketNumber: useAppointment ? undefined : (ticket?.ticketNumber ?? undefined),
+    estimatedWaitTimeLower: useAppointment ? undefined : (ticket?.estimatedWaitTimeLower ?? undefined),
+    estimatedWaitTimeUpper: useAppointment ? undefined : (ticket?.estimatedWaitTimeUpper ?? undefined),
     appointmentDateIso: useAppointment ? (appointment?.date ?? undefined) : undefined,
     appointmentTime: useAppointment ? (appointment?.time ?? undefined) : undefined,
     departmentName: caseRecord.departmentId

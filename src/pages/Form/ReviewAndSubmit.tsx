@@ -71,6 +71,8 @@ export default function ReviewAndSubmit() {
             bookingReferenceNumber: result.bookingReferenceNumber || undefined,
             receiptType,
             ticketNumber: result.ticketNumber || undefined,
+            estimatedWaitTimeLower: result.estimatedWaitTimeLower ?? undefined,
+            estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
             appointmentTime: formData.appointmentTime || undefined,
             departmentName: DepartmentLabelById[payload.departmentId],

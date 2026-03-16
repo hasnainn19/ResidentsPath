@@ -39,6 +39,8 @@ type SubmitCaseFollowUpResult = {
   referenceNumber?: string;
   bookingReferenceNumber?: string;
   ticketNumber?: string;
+  estimatedWaitTimeLower?: number;
+  estimatedWaitTimeUpper?: number;
   errorCode?: SubmitCaseFollowUpErrorCode;
   errorMessage?: string;
 };
@@ -167,6 +169,8 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
   let appointmentFailure: SubmitCaseFollowUpResult | null = null;
   let bookingReferenceNumber: string | undefined;
   let ticketNumber: string | undefined;
+  let estimatedWaitTimeLower: number | undefined;
+  let estimatedWaitTimeUpper: number | undefined;
 
   try {
     // If the user chose to book an appointment, create an appointment linked to the case
@@ -206,6 +210,8 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
       }
 
       ticketNumber = queueResult.ticketNumber;
+      estimatedWaitTimeLower = queueResult.estimatedWaitTimeLower;
+      estimatedWaitTimeUpper = queueResult.estimatedWaitTimeUpper;
     }
 
     if (validated.caseUpdate) {
@@ -222,6 +228,8 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
       referenceNumber: caseRecord.referenceNumber ?? validated.referenceNumber,
       bookingReferenceNumber,
       ticketNumber,
+      estimatedWaitTimeLower,
+      estimatedWaitTimeUpper,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

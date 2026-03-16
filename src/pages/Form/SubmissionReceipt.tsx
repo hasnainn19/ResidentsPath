@@ -24,6 +24,8 @@ type Receipt = {
   bookingReferenceNumber?: string;
   receiptType: "QUEUE" | "APPOINTMENT";
   ticketNumber?: string;
+  estimatedWaitTimeLower?: number;
+  estimatedWaitTimeUpper?: number;
   appointmentDateIso?: string;
   appointmentTime?: string;
   departmentName?: string;
@@ -190,6 +192,10 @@ export default function SubmissionReceipt() {
             data.bookingReferenceNumber || fallbackReceipt?.bookingReferenceNumber || undefined,
           receiptType,
           ticketNumber: data.ticketNumber || fallbackReceipt?.ticketNumber || undefined,
+          estimatedWaitTimeLower:
+            data.estimatedWaitTimeLower ?? fallbackReceipt?.estimatedWaitTimeLower ?? undefined,
+          estimatedWaitTimeUpper:
+            data.estimatedWaitTimeUpper ?? fallbackReceipt?.estimatedWaitTimeUpper ?? undefined,
           appointmentDateIso:
             data.appointmentDateIso || fallbackReceipt?.appointmentDateIso || undefined,
           appointmentTime: data.appointmentTime || fallbackReceipt?.appointmentTime || undefined,

@@ -25,6 +25,7 @@ import {
   markAppointmentSlotBooked,
   type AppointmentSlotClaim,
 } from "./enquiriesStateTable";
+import { getDefaultEstimatedWaitingTime, getEstimatedWaitTimeBounds } from "./queueWaitTimes";
 import { logModelErrors, runCleanup, tryCleanup } from "./runCleanup";
 
 const ddb = new DynamoDBClient({});
@@ -309,6 +310,8 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
   | {
       ok: true;
       ticketNumber: string;
+      estimatedWaitTimeLower: number;
+      estimatedWaitTimeUpper: number;
     }
   | {
       ok: false;
@@ -327,6 +330,24 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
 
   input.visitState.claimedQueuePositionKey = `${getDate()}#${input.departmentId}`;
   const nextQueuePosition = await claimQueuePosition(input.visitState.claimedQueuePositionKey);
+  let estimatedWaitingTime = getDefaultEstimatedWaitingTime();
+
+  try {
+    const { data: department, errors: departmentErrors } = await input.client.models.Department.get({
+      id: input.departmentId,
+    });
+
+    if (departmentErrors?.length) {
+      logModelErrors(`${input.logPrefix}: Department.get failed`, departmentErrors);
+    }
+
+    estimatedWaitingTime =
+      department?.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department?.name);
+  } catch (error) {
+    console.error(`${input.logPrefix}: Department.get failed`, error);
+  }
+
+  const waitTimes = getEstimatedWaitTimeBounds(nextQueuePosition, estimatedWaitingTime);
 
   // If not booking an appointment, create a ticket for the case.
   const { data, errors } = await input.client.models.Ticket.create({
@@ -335,8 +356,8 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
     ticketNumber: alloc.ticketNumber,
     status: "WAITING",
     position: nextQueuePosition,
-    estimatedWaitTimeLower: -1,
-    estimatedWaitTimeUpper: -1,
+    estimatedWaitTimeLower: waitTimes.lower,
+    estimatedWaitTimeUpper: waitTimes.upper,
   });
 
   if (errors?.length || !data?.id) {
@@ -349,6 +370,8 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
   return {
     ok: true,
     ticketNumber: alloc.ticketNumber,
+    estimatedWaitTimeLower: waitTimes.lower,
+    estimatedWaitTimeUpper: waitTimes.upper,
   };
 }
 

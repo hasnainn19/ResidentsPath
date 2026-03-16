@@ -187,6 +187,8 @@ export default function ExistingCaseFollowUp() {
             bookingReferenceNumber: result.bookingReferenceNumber || undefined,
             receiptType: proceed === "BOOK_APPOINTMENT" ? "APPOINTMENT" : "QUEUE",
             ticketNumber: result.ticketNumber || undefined,
+            estimatedWaitTimeLower: result.estimatedWaitTimeLower ?? undefined,
+            estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: proceed === "BOOK_APPOINTMENT" ? appointmentDateIso : undefined,
             appointmentTime: proceed === "BOOK_APPOINTMENT" ? appointmentTime : undefined,
             departmentName: lookupResult.departmentName,

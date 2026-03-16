@@ -38,6 +38,8 @@ type SubmitEnquiryResult = {
   referenceNumber?: string;
   bookingReferenceNumber?: string;
   ticketNumber?: string;
+  estimatedWaitTimeLower?: number;
+  estimatedWaitTimeUpper?: number;
   errorCode?: SubmitEnquiryErrorCode;
   errorMessage?: string;
 };
@@ -334,7 +336,13 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
       throw new Error("Ticket allocation failed");
     }
 
-    return { ok: true, referenceNumber, ticketNumber: queueResult.ticketNumber };
+    return {
+      ok: true,
+      referenceNumber,
+      ticketNumber: queueResult.ticketNumber,
+      estimatedWaitTimeLower: queueResult.estimatedWaitTimeLower,
+      estimatedWaitTimeUpper: queueResult.estimatedWaitTimeUpper,
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("submitEnquiry: failed", {
