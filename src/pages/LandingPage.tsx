@@ -28,9 +28,6 @@ export default function LandingPage() {
 							: `${translate("landing-welcome")}`
 						}
 					</Typography>
-					<Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-						{translate("landing-welcome-back")}
-					</Typography>
 				</Box>
 
 				{/* Cards vary based on authentication status */}
