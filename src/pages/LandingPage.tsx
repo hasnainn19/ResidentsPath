@@ -85,13 +85,13 @@ export default function LandingPage() {
 										Continue as Visitor
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										No account needed. Get help immediately and check queue status.
+										No account needed. Get help immediately by submitting an enquiry.
 									</Typography>
 									<Button
 										variant="contained"
 										fullWidth
 										size="large"
-										onClick={() => navigate('/referencepage')}
+										onClick={() => navigate('/form')}
 									>
 										Continue as Visitor
 									</Button>
