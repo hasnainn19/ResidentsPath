@@ -35,7 +35,6 @@
     "i18next-http-backend": "^3.0.2",
     "libphonenumber-js": "^1.12.37",
     "qrcode": "^1.5.4",
-    "node": "^20.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.8",
