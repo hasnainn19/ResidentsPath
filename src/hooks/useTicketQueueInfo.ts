@@ -12,12 +12,16 @@ import type { Schema } from '../../amplify/data/resource';
  *
  * @param caseId - The case ID to fetch ticket queue info for. If undefined,
  *                 no fetch is performed.
- * @returns position, waitTimeLower, waitTimeUpper, error, and isLoading
+ * @returns position, waitTimeLower, waitTimeUpper, ticketId, steppedOut, setSteppedOut,
+ *          notificationsEnabled, setNotificationsEnabled, error, and isLoading
  */
 export function useTicketQueueInfo(caseId: string | undefined) {
     const [position, setPosition] = useState(0);
     const [waitTimeLower, setWaitTimeLower] = useState(0);
     const [waitTimeUpper, setWaitTimeUpper] = useState(0);
+    const [ticketId, setTicketId] = useState<string | null>(null);
+    const [steppedOut, setSteppedOut] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
@@ -35,9 +39,12 @@ export function useTicketQueueInfo(caseId: string | undefined) {
             }
             if (!ticketInfo) return;
 
+            setTicketId(ticketInfo.ticketId);
             setPosition(ticketInfo.position);
             setWaitTimeLower(ticketInfo.estimatedWaitTimeLower);
             setWaitTimeUpper(ticketInfo.estimatedWaitTimeUpper);
+            setSteppedOut(ticketInfo.steppedOut);
+            setNotificationsEnabled(ticketInfo.notificationsEnabled);
         }
         catch (err) {
             setError(`Failed to fetch tickets: ${err}`);
@@ -53,5 +60,5 @@ export function useTicketQueueInfo(caseId: string | undefined) {
         return () => clearInterval(interval);
     }, [caseId]);
 
-    return { position, waitTimeLower, waitTimeUpper, error, isLoading };
+    return { position, waitTimeLower, waitTimeUpper, ticketId, steppedOut, setSteppedOut, notificationsEnabled, setNotificationsEnabled, error, isLoading };
 }
