@@ -33,10 +33,10 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
     console.error("No user found");
   }
   const tickets =
-    selectedTickets.map((t) => ({
+    (selectedTickets ?? []).map((t) => ({
       ticketId: t.id ?? null,
       ticketStatus: (t.status as string) ?? null,
-    })) ?? [];
+    }));
 
   // The Amplify-generated RefType for nested custom types is not assignable
   // from plain objects, so we cast to satisfy the function handler signature.
