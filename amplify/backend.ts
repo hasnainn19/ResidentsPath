@@ -114,6 +114,11 @@ backend.submitCaseFollowUp.addEnvironment(
   enquiriesStateTable.tableName,
 );
 
+backend.getDepartmentQueueStatus.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
 backend.getAvailableAppointmentTimes.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,

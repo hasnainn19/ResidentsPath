@@ -37,6 +37,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { getCountries, getCountryCallingCode, type CountryCode } from "libphonenumber-js";
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import { outlinedInfoAlertSx } from "../../components/FormPageComponents/outlinedInfoAlertSx";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import TextToSpeechButton from "../../components/TextToSpeechButton";
 import { LANGUAGE_OPTIONS } from "./data/languages";
@@ -509,6 +510,15 @@ export default function PersonalDetails() {
                 {/* Contact details */}
                 <WithTTS copy={COPY.contactDetails} titleVariant="subtitle1">
                   <Stack spacing={{ xs: 1.5, sm: 2 }}>
+                    <Alert
+                      severity="info"
+                      variant="outlined"
+                      sx={outlinedInfoAlertSx}
+                    >
+                      We only use your email address or phone number for this request and for the
+                      updates you ask us to send.
+                    </Alert>
+
                     <TextField
                       label={labelOptional("email")}
                       type="email"

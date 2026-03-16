@@ -19,7 +19,6 @@ export const TOP_LEVEL: { value: string; label: string }[] = [
   { value: "ChildrensDuty", label: "Childrens Duty" },
   { value: "CommunityHub", label: "Community Hub Advisor" },
   { value: "GeneralServices", label: "General Customer Services" },
-  { value: "Other", label: "Other" },
 ];
 
 // The actual enquiries, grouped by top-level area.

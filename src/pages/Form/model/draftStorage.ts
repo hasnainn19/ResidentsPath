@@ -68,21 +68,35 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
 
   out.phoneCountry = getSupportedPhoneCountry(out.phoneCountry) ?? "GB";
 
-  if (out.topLevel && out.topLevel !== "Other") {
-    const options = ENQUIRIES_BY_TOPLEVEL[out.topLevel] || [];
-    if (options.length === 1) {
-      const only = options[0];
-      out.enquiryId = only.value;
-      out.routedDepartment = only.department ?? "";
-    } else if (out.enquiryId) {
-      const match = options.find((x) => x.value === out.enquiryId);
-      if (match?.department) {
-        out.routedDepartment = match.department;
-      } else {
-        out.enquiryId = "";
-        out.specificDetailId = "";
-        out.routedDepartment = "";
-      }
+  if (!out.topLevel) {
+    return out;
+  }
+
+  const options = ENQUIRIES_BY_TOPLEVEL[out.topLevel];
+  if (!options) {
+    out.topLevel = "";
+    out.generalServicesChoice = "";
+    out.enquiryId = "";
+    out.specificDetailId = "";
+    out.routedDepartment = "";
+    return out;
+  }
+
+  if (options.length === 1) {
+    const only = options[0];
+    out.enquiryId = only.value;
+    out.routedDepartment = only.department ?? "";
+    return out;
+  }
+
+  if (out.enquiryId) {
+    const match = options.find((x) => x.value === out.enquiryId);
+    if (match?.department) {
+      out.routedDepartment = match.department;
+    } else {
+      out.enquiryId = "";
+      out.specificDetailId = "";
+      out.routedDepartment = "";
     }
   }
 
