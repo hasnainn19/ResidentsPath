@@ -35,8 +35,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import MicIcon from "@mui/icons-material/Mic";
-
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
@@ -87,9 +85,6 @@ export default function EnquirySelection() {
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
-
-  // TODO: Replace with Speech-to-Text
-  const handleVoiceInput = () => alert("Voice input started (mock)");
 
   // Logic for which follow-up questions to show.
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
@@ -180,7 +175,7 @@ export default function EnquirySelection() {
     "How would you like to proceed? Select join the digital queue or book an appointment.";
 
   const additionalInfoTts =
-    "Anything else you want to tell us. This is optional. Add any details that might help. You can also use voice input.";
+    "Anything else you want to tell us. This is optional. Add any details that might help.";
 
   const supportTts =
     "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options, and add support notes.";
@@ -707,23 +702,6 @@ export default function EnquirySelection() {
                 helperText={countChars("additionalInfo", formData.additionalInfo)}
                 slotProps={{ htmlInput: { maxLength: FIELD_META.additionalInfo.maxLen } }}
               />
-
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                sx={{ mt: 1.5, flexWrap: "wrap", rowGap: 0.5 }}
-              >
-                <MicIcon fontSize="small" />
-                <Button
-                  type="button"
-                  size="small"
-                  onClick={handleVoiceInput}
-                  sx={{ textTransform: "none" }}
-                >
-                  Voice input
-                </Button>
-              </Stack>
             </WithTTS>
 
             {/* Proceed */}
