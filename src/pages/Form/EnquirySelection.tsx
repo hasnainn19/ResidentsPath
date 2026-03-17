@@ -512,7 +512,8 @@ export default function EnquirySelection() {
                                     <TextField
                                       fullWidth
                                       multiline
-                                      label={labelOptional("safeContactNotes")}
+                                      required
+                                      label={FIELD_META.safeContactNotes.label}
                                       placeholder="Safe time or method, or do not contact"
                                       value={formData.safeContactNotes}
                                       onChange={(e) => setField("safeContactNotes", e.target.value)}
