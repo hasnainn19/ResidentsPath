@@ -28,6 +28,7 @@ export function computeCanGoNext(
 ) {
   if (!hasEnoughToProceed) return false;
   if (data.proceed === "") return false;
+  if (data.domesticAbuse && data.safeToContact === "no" && !(data.safeContactNotes || "").trim()) return false;
   if (needsUrgentReason) {
     const r = data.urgentReason;
     if (r === "") return false;
