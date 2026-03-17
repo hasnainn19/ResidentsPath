@@ -2,7 +2,15 @@ import type { ScheduledHandler } from "aws-lambda";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { createQueueSubmission } from "../utils/submissionShared";
 
-const SEED_CASES: { caseId: string; departmentName: string }[] = [
+type SeedDepartmentName =
+  | "Homelessness"
+  | "Adults_Duty"
+  | "General_Customer_Services"
+  | "Council_Tax_Or_Housing_Benefit"
+  | "Childrens_Duty"
+  | "Community_Hub_Advisor";
+
+const SEED_CASES: { caseId: string; departmentName: SeedDepartmentName }[] = [
   { caseId: "4a349e14-540f-4eb9-96d3-6672dc28d679", departmentName: "Homelessness" },
   { caseId: "ab630af3-00a7-43bb-bedf-53e87335a71a", departmentName: "Adults_Duty" },
   { caseId: "558a38f3-2c7f-4c8b-8540-c541495cced1", departmentName: "General_Customer_Services" },
