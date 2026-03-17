@@ -27,6 +27,7 @@
     "@mui/styled-engine-sc": "^7.3.8",
     "@mui/x-data-grid": "^8.0.0",
     "@mui/x-date-pickers": "^8.27.0",
+    "node": "^25.6.0",
     "aws-amplify": "^6.16.2",
     "dayjs": "^1.11.19",
     "html5-qrcode": "^2.3.8",
