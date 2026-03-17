@@ -40,7 +40,7 @@ const CheckInConfirmationPage = () => {
                     }}
                 >
                     <AlertTitle>{translate("CheckIn-ch")}</AlertTitle>
-                        {translate("CheckIn-ch")}
+                        {translate("CheckIn-you")}
                     <Box  sx={{ mt: 2 }}>
                         <TextToSpeechButton text='Check in Confirmed. You have successfully checked in for your appointment!'/>
                     </Box>

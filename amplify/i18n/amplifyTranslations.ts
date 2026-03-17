@@ -9,6 +9,7 @@ I18n.putVocabularies({
     "Password":"Password",
     "Enter your Password":"Enter your Password",
     "Confirm Password":"Confirm Password",
+    "Confirm":"Confirm",
     "Please confirm your Password":"Please confirm your Password",
     "First Name":"First Name",
     "Enter your first name":"Enter your first name",
@@ -22,9 +23,13 @@ I18n.putVocabularies({
     "Send code":"Send code",
     "Back to Sign In":"Back to Sign In",
     "Code":"Code",
+    "Enter your code":"Enter your code",
     "New Password":"New Password",
     "Submit":"Submit",
-    "Resend Code":"Resend Code"
+    "Resend Code":"Resend Code",
+    "We Emailed You":"We Emailed You",
+    "Confirmation Code":"Confirmation Code",
+    "Your code is on the way. To log in, enter the code we emailed to":"Your code is on the way. To log in, enter the code we emailed to"
   },
   cy: {
     "Email":"E-bost",
@@ -33,6 +38,7 @@ I18n.putVocabularies({
     "Password":"Cyfrinair",
     "Enter your Password":"Rhowch eich cyfrinair",
     "Confirm Password":"Cadarnhau Cyfrinair",
+    "Confirm":"Cadarnhau",
     "Please confirm your Password":"Cadarnhewch eich cyfrinair",
     "First Name":"Enw Cyntaf",
     "Enter your first name":"Rhowch eich enw cyntaf",
@@ -46,9 +52,13 @@ I18n.putVocabularies({
     "Send code":"Anfon Cod",
     "Back to Sign In":"Yn ôl i Mewngofnodi",
     "Code":"Cod",
+    "Enter your code":"Rhowch eich Cod",
     "New Password":"Cyfrinair Newydd",
     "Submit":"Cyflwyno",
-    "Resend Code":"Ail-anfon y Cod"
+    "Resend Code":"Ail-anfon y Cod",
+    "We Emailed You":"Fe wnaethon ni anfon e-bost atoch chi",
+    "Confirmation Code":"Cod Cadarnhau",
+    "Your code is on the way. To log in, enter the code we emailed to":"Mae eich cod ar y ffordd. I fewngofnodi, nodwch y cod a anfonwyd atoch drwy e-bost."
   },
   fa: {
     "Email":"ایمیل",
@@ -57,6 +67,7 @@ I18n.putVocabularies({
     "Password":"رمز عبور",
     "Enter your Password":"رمز عبور خود را وارد کنید",
     "Confirm Password":"تأیید رمز عبور",
+    "Confirm":"تأیید",
     "Please confirm your Password":"لطفا رمز عبور خود را تایید کنید",
     "First Name":"نام",
     "Enter your first name":"نام خود را وارد کنید",
@@ -70,9 +81,13 @@ I18n.putVocabularies({
     "Send code":"ارسال کد",
     "Back to Sign In":"بازگشت به ورود",
     "Code":"کد",
+    "Enter your code":"کد خود را وارد کنید",
     "New Password":"رمز عبور جدید",
     "Submit":"ارسال",
-    "Resend Code":"ارسال مجدد کد"
+    "Resend Code":"ارسال مجدد کد",
+    "We Emailed You":"ما به شما ایمیل زدیم",
+    "Confirmation Code":"کد تایید",
+    "Your code is on the way. To log in, enter the code we emailed to":"کد شما در راه است. برای ورود، کدی را که به آن ایمیل کرده‌ایم وارد کنید."
   },
   pa: {
     "Email":"ਈਮੇਲ",
@@ -81,6 +96,7 @@ I18n.putVocabularies({
     "Password":"ਪਾਸਵਰਡ",
     "Enter your Password":"ਆਪਣਾ ਪਾਸਵਰਡ ਦਰਜ ਕਰੋ",
     "Confirm Password":"ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
+    "Confirm":"ਪੁਸ਼ਟੀ ਕਰੋ", 
     "Please confirm your Password":"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।",
     "First Name":"ਪਹਿਲਾ ਨਾਂ",
     "Enter your first name":"ਆਪਣਾ ਪਹਿਲਾ ਨਾਮ ਦਰਜ ਕਰੋ",
@@ -94,9 +110,13 @@ I18n.putVocabularies({
     "Send code":"ਕੋਡ ਭੇਜੋ",
     "Back to Sign In":"ਸਾਈਨ ਇਨ 'ਤੇ ਵਾਪਸ ਜਾਓ",
     "Code":"ਕੋਡ",
+    "Enter your code":"ਆਪਣਾ ਕੋਡ ਦਰਜ ਕਰੋ",
     "New Password":"ਨਵਾਂ ਪਾਸਵਰਡ",
     "Submit":"ਜਮ੍ਹਾਂ ਕਰੋ",
-    "Resend Code":"ਕੋਡ ਦੁਬਾਰਾ ਭੇਜੋ"
+    "Resend Code":"ਕੋਡ ਦੁਬਾਰਾ ਭੇਜੋ",
+    "We Emailed You":"ਅਸੀਂ ਤੁਹਾਨੂੰ ਈਮੇਲ ਕੀਤਾ ਹੈ",
+    "Confirmation Code":"ਅਨੁਕੂਲੀਕਰਨ ਕੋਡ",
+    "Your code is on the way. To log in, enter the code we emailed to":"ਤੁਹਾਡਾ ਕੋਡ ਜਲਦੀ ਹੀ ਆ ਜਾਵੇਗਾ। ਲੌਗਇਨ ਕਰਨ ਲਈ, ਉਹ ਕੋਡ ਦਰਜ ਕਰੋ ਜਿਸਨੂੰ ਅਸੀਂ ਈਮੇਲ ਕੀਤਾ ਹੈ।"
   },
   pl: {
     "Email":"E-mail",
@@ -105,6 +125,7 @@ I18n.putVocabularies({
     "Password":"Hasło",
     "Enter your Password":"Wprowadź swoje hasło",
     "Confirm Password":"Potwierdź hasło",
+    "Confirm":"Potwierdź",
     "Please confirm your Password":"Proszę potwierdzić hasło",
     "First Name":"Imię",
     "Enter your first name":"Wpisz swoje imię",
@@ -118,9 +139,13 @@ I18n.putVocabularies({
     "Send code":"Wyślij kod",
     "Back to Sign In":"Powrót do logowania",
     "Code":"Kod",
+    "Enter your code":"Podaj swój kod",
     "New Password":"Nowe hasło",
     "Submit":"Składać",
-    "Resend Code":"Wyślij ponownie kod"
+    "Resend Code":"Wyślij ponownie kod",
+    "We Emailed You":"Wysłaliśmy Ci e-mail",
+    "Confirmation Code":"Kod potwierdzający",
+    "Your code is on the way. To log in, enter the code we emailed to":"Twój kod jest już w drodze. Aby się zalogować, wpisz kod, który wysłaliśmy na adres e-mail"
   }
 });
 
