@@ -262,7 +262,9 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
             minRows={6}
             placeholder="Add notes here..."
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(e) => setNotes(e.target.value.slice(0, 5000))}
+            slotProps={{ htmlInput: { maxLength: 5000 } }}
+            helperText={`${notes.length}/5000`}
             sx={{ mt: 1 }}
           />
         </DialogContent>

@@ -10,7 +10,7 @@ const VALID_DEPARTMENT_NAMES = new Set(DEPARTMENTS.map((d) => d.name));
 
 export interface CaseSummary {
   id: string;
-  title: string;
+  caseName: string;
   referenceNumber: string;
   departmentName: DepartmentName;
   status: CaseStatus | null;
@@ -51,7 +51,7 @@ const useCases = (filters: CasesFilters = {}) => {
             (result.data ?? []).map((c: any) => ({
               id: c.id,
               referenceNumber: c.referenceNumber,
-              title: c.title,
+              caseName: c.name,
               departmentName: (VALID_DEPARTMENT_NAMES.has(c.departmentName)
                 ? c.departmentName
                 : "General_Customer_Services") as DepartmentName,

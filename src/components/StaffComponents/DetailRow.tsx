@@ -7,7 +7,7 @@ interface Props {
 }
 
 const DetailRow = ({ label, value }: Props) => (
-  <Box>
+  <Box sx={{ minWidth: 0 }}>
     <Typography
       variant="caption"
       color="text.secondary"
@@ -17,7 +17,7 @@ const DetailRow = ({ label, value }: Props) => (
     >
       {label}
     </Typography>
-    <Typography variant="body2" mt={0.25}>
+    <Typography variant="body2" mt={0.25} sx={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
       {value}
     </Typography>
   </Box>
