@@ -18,14 +18,13 @@ import {
   FIELD_TEXT_CONSTRAINTS,
   isValidCaseReferenceNumber,
   normaliseCaseReferenceNumber,
-  type DepartmentId,
+  type DepartmentName,
 } from "../../../shared/formSchema";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 type CaseLookup = {
   referenceNumber: string;
-  departmentId: DepartmentId;
-  departmentName?: string;
+  departmentName: DepartmentName;
   hasActiveWaitingTicket: boolean;
   hasReachedAppointmentLimit: boolean;
 };
@@ -97,7 +96,7 @@ export default function ExistingCaseFollowUp() {
 
       const data = response.data;
 
-      if (!data?.found || !data.referenceNumber || !data.departmentId) {
+      if (!data?.found || !data.referenceNumber || !data.departmentName) {
         setLookupError(
           data?.errorMessage || "We could not find a case with that reference number.",
         );
@@ -106,8 +105,7 @@ export default function ExistingCaseFollowUp() {
 
       setLookupResult({
         referenceNumber: data.referenceNumber,
-        departmentId: data.departmentId as DepartmentId,
-        departmentName: data.departmentName || undefined,
+        departmentName: data.departmentName as DepartmentName,
         hasActiveWaitingTicket: !!data.hasActiveWaitingTicket,
         hasReachedAppointmentLimit: !!data.hasReachedAppointmentLimit,
       });
@@ -419,7 +417,7 @@ export default function ExistingCaseFollowUp() {
                     titleVariant="h6"
                   >
                     <BookingPanel
-                      departmentId={lookupResult.departmentId}
+                      departmentName={lookupResult.departmentName}
                       onConfirm={(dateIso, time) => {
                         setAppointmentDateIso(dateIso);
                         setAppointmentTime(time);

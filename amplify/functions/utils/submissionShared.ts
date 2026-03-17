@@ -3,7 +3,7 @@ import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { generateClient } from "aws-amplify/data";
 
 import type { Schema } from "../../data/resource";
-import { DepartmentCodeById } from "../../../shared/departmentCodes";
+import { DepartmentCodeByName } from "../../../shared/departmentCodes";
 import {
   BOOKING_REFERENCE_DIGITS,
   BOOKING_REFERENCE_LETTERS,
@@ -60,7 +60,7 @@ type CreateAppointmentSubmissionInput = {
   client: AmplifyClient;
   caseId: string;
   userId: string;
-  departmentId: string;
+  departmentName: string;
   appointmentDateIso: string;
   appointmentTime: string;
   logPrefix: string;
@@ -70,7 +70,7 @@ type CreateAppointmentSubmissionInput = {
 type CreateQueueSubmissionInput = {
   client: AmplifyClient;
   caseId: string;
-  departmentId: string;
+  departmentName: string;
   logPrefix: string;
   visitState: CreatedVisitResourcesState;
 };
@@ -170,11 +170,11 @@ async function getNextTicketIndex(queueId: string): Promise<number> {
 // Atomically allocate a unique 3 digit ticket number for the current service day and department
 // TicketNumber is in the form "X000" where X represents the first (or first two) letter(s) of the department and 000 is a zero-padded number from 000 to 999
 export async function allocateDeptTicketNumber(
-  departmentId: string,
+  departmentName: string,
 ): Promise<AllocateDeptTicketNumberResult> {
-  const departmentCode = DepartmentCodeById[departmentId as keyof typeof DepartmentCodeById];
+  const departmentCode = DepartmentCodeByName[departmentName as keyof typeof DepartmentCodeByName];
   if (!departmentCode) {
-    throw new Error(`No department code configured for ${departmentId}`);
+    throw new Error(`No department code configured for ${departmentName}`);
   }
 
   const serviceDay = getDate();
@@ -260,7 +260,7 @@ export async function createAppointmentSubmission(input: CreateAppointmentSubmis
     }
 > {
   const appointmentSlot: AppointmentSlotClaim = {
-    departmentId: input.departmentId,
+    departmentName: input.departmentName,
     dateIso: input.appointmentDateIso,
     time: input.appointmentTime,
   };
@@ -321,7 +321,7 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
       errorMessage: string;
     }
 > {
-  const alloc = await allocateDeptTicketNumber(input.departmentId);
+  const alloc = await allocateDeptTicketNumber(input.departmentName);
 
   if (!alloc.ok) {
     return alloc;
@@ -330,13 +330,13 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
   input.visitState.claimedQueueId = alloc.queueId;
   input.visitState.claimedTicketDigits = alloc.ticketDigits;
 
-  input.visitState.claimedQueuePositionKey = `${getDate()}#${input.departmentId}`;
+  input.visitState.claimedQueuePositionKey = `${getDate()}#${input.departmentName}`;
   const nextQueuePosition = await claimQueuePosition(input.visitState.claimedQueuePositionKey);
   let estimatedWaitingTime = getDefaultEstimatedWaitingTime();
 
   try {
     const { data: department, errors: departmentErrors } = await input.client.models.Department.get({
-      id: input.departmentId,
+      id: input.departmentName,
     });
 
     if (departmentErrors?.length) {
@@ -354,7 +354,7 @@ export async function createQueueSubmission(input: CreateQueueSubmissionInput): 
   // If not booking an appointment, create a ticket for the case.
   const { data, errors } = await input.client.models.Ticket.create({
     caseId: input.caseId,
-    departmentId: input.departmentId,
+    departmentName: input.departmentName,
     ticketNumber: alloc.ticketNumber,
     status: "WAITING",
     position: nextQueuePosition,

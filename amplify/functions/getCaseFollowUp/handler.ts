@@ -1,6 +1,6 @@
 import type { Schema } from "../../data/resource";
 import {
-  DepartmentLabelById,
+  DepartmentLabelByName,
   isValidCaseReferenceNumber,
   normaliseCaseReferenceNumber,
 } from "../../../shared/formSchema";
@@ -55,7 +55,7 @@ export const handler: Schema["getCaseFollowUp"]["functionHandler"] = async (even
 
   // Only open and in-progress cases can be updated online
   if (
-    !caseRecord.departmentId ||
+    !caseRecord.departmentName ||
     (caseRecord.status !== "OPEN" && caseRecord.status !== "IN_PROGRESS")
   ) {
     return createFoundErrorResponse(
@@ -94,9 +94,7 @@ export const handler: Schema["getCaseFollowUp"]["functionHandler"] = async (even
   return {
     found: true,
     referenceNumber: caseRecord.referenceNumber ?? referenceNumber,
-    departmentId: caseRecord.departmentId,
-    departmentName:
-      DepartmentLabelById[caseRecord.departmentId as keyof typeof DepartmentLabelById] ?? undefined,
+    departmentName: caseRecord.departmentName ?? undefined,
     status: caseRecord.status ?? undefined,
     hasActiveWaitingTicket: waitingTicketLookup.hasActiveWaitingTicket,
     hasReachedAppointmentLimit,

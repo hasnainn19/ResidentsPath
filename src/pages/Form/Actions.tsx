@@ -82,7 +82,7 @@ export default function Actions() {
   const showQueue = formData.proceed === "JOIN_DIGITAL_QUEUE";
   const showBooking = formData.proceed === "BOOK_APPOINTMENT";
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
-  const selectedDepartmentId =
+  const selectedDepartmentName =
     formData.routedDepartment || enquirySelectionState.selectedEnquiry?.department;
   const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
   const [queueStatusLoading, setQueueStatusLoading] = useState(false);
@@ -93,7 +93,7 @@ export default function Actions() {
     let cancelled = false;
 
     async function loadQueueStatus() {
-      if (!showQueue || !selectedDepartmentId) {
+      if (!showQueue || !selectedDepartmentName) {
         setQueueStatus(null);
         setQueueStatusError(null);
         setQueueStatusLoading(false);
@@ -106,7 +106,7 @@ export default function Actions() {
       try {
         const authMode = await getDataAuthMode();
         const response = await client.queries.getDepartmentQueueStatus(
-          { departmentId: selectedDepartmentId },
+          { departmentName: selectedDepartmentName },
           { authMode },
         );
 
@@ -145,7 +145,7 @@ export default function Actions() {
     return () => {
       cancelled = true;
     };
-  }, [client, selectedDepartmentId, showQueue]);
+  }, [client, selectedDepartmentName, showQueue]);
 
   const bookingIncomplete =
     showBooking &&
@@ -190,7 +190,7 @@ export default function Actions() {
               titleVariant="h6"
             >
               <Stack spacing={2}>
-                {!selectedDepartmentId ? (
+                {!selectedDepartmentName ? (
                   <Alert severity="info" variant="outlined">
                     Select a service to see the current queue size.
                   </Alert>
@@ -280,7 +280,7 @@ export default function Actions() {
               titleVariant="h6"
             >
               <BookingPanel
-                departmentId={selectedDepartmentId || undefined}
+                departmentName={selectedDepartmentName || undefined}
                 onConfirm={(dateIso, time) => {
                   setFormData((p) => ({
                     ...p,

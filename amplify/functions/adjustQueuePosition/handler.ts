@@ -37,7 +37,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
     throw new Error(`Ticket ${ticketId} is not in WAITING status`);
   }
 
-  const departmentId = ticket.departmentId;
+  const departmentName = ticket.departmentName;
 
   // Fetch today's tickets for the department
   const startOfDay = new Date();
@@ -48,7 +48,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
 
   const { data: allTickets } = await client.models.Ticket.list({
     filter: {
-      departmentId: { eq: departmentId },
+      departmentName: { eq: departmentName },
       createdAt: {
         ge: startOfDay.toISOString(),
         le: endOfDay.toISOString(),
@@ -64,7 +64,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
 
   if (orderedTickets.length === 0) {
     throw new Error(
-      `No waiting tickets found for department ${departmentId} today`,
+      `No waiting tickets found for department ${departmentName} today`,
     );
   }
 
@@ -84,15 +84,15 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
       ),
     );
   } catch (error) {
-    console.error(`Failed to adjust positions for ${departmentId}`);
+    console.error(`Failed to adjust positions for ${departmentName}`);
   }
 
   // Recalculate wait times
   try {
-    await recalculateDepartmentQueue(departmentId);
+    await recalculateDepartmentQueue(departmentName);
   } 
   catch (error) {
-    console.error(`recalculateDepartmentQueue: failed for department ${departmentId}`, error);
+    console.error(`recalculateDepartmentQueue: failed for department ${departmentName}`, error);
   }
 
   return true;

@@ -21,11 +21,11 @@ function median(values: number[]) {
 /**
  * Fetches all tickets for a given department created today.
  *
- * @param departmentId - The ID of the department to fetch tickets for
+ * @param departmentName - The ID of the department to fetch tickets for
  * @throws Error if no tickets are found for today
  * @returns An array of tickets for the specified department created today
  */
-async function getTodayTickets(departmentId:string){
+async function getTodayTickets(departmentName:string){
   const startOfDay = new Date();
   startOfDay.setHours(0,0,0,0);
 
@@ -34,7 +34,7 @@ async function getTodayTickets(departmentId:string){
 
   const { data: tickets } = await client.models.Ticket.list({
       filter: {
-          departmentId: { eq: departmentId },
+          departmentName: { eq: departmentName },
           createdAt: {
               ge: startOfDay.toISOString(),
               le: endOfDay.toISOString()
@@ -43,7 +43,7 @@ async function getTodayTickets(departmentId:string){
   });
 
   if (!tickets || tickets.length === 0) {
-    throw new Error(`No tickets found for department ${departmentId} for today`);
+    throw new Error(`No tickets found for department ${departmentName} for today`);
   }
 
   return tickets;
@@ -54,10 +54,10 @@ async function getTodayTickets(departmentId:string){
  * updates the department's estimatedWaitingTime in DynamoDB with the result.
  *
  * @param completedTickets - The most recent completed tickets to calculate the median from
- * @param departmentId - The ID of the department to update
+ * @param departmentName - The ID of the department to update
  * @returns The calculated median time in minutes, or 0 if it could not be determined
  */
-async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["type"][], departmentId:string)
+async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["type"][], departmentName:string)
 {
   let estWaitingTime=0;
   const durations: number[] = [];
@@ -81,7 +81,7 @@ async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["ty
       estWaitingTime = medianTime;
 
       await client.models.Department.update({
-          id: departmentId,
+          id: departmentName,
           estimatedWaitingTime: Math.round(estWaitingTime),
       });
   }
@@ -125,13 +125,13 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
  * tickets. If fewer than 5 completed tickets exist today, falls back to the
  * department's stored estimatedWaitingTime or hardcoded defaults.
  *
- * @param departmentId - The ID of the department whose queue should be recalculated
+ * @param departmentName - The ID of the department whose queue should be recalculated
  * @throws Error if no tickets exist for today or the department cannot be found
  * @returns true when all ticket updates have been successfully written to DynamoDB
  */
-export async function recalculateDepartmentQueue(departmentId:string) {
+export async function recalculateDepartmentQueue(departmentName:string) {
   
-    let tickets = await getTodayTickets(departmentId);
+    let tickets = await getTodayTickets(departmentName);
 
     // Sort based on position in the queue 
     tickets.sort((a, b) => a.position - b.position)
@@ -151,15 +151,15 @@ export async function recalculateDepartmentQueue(departmentId:string) {
       .slice(0,5);
     
     // Get department 
-    const { data: department } = await client.models.Department.get({ id: departmentId });
+    const { data: department } = await client.models.Department.get({ id: departmentName });
 
     if (!department) {
-      throw new Error(`Department ${departmentId} not found`);
+      throw new Error(`Department ${departmentName} not found`);
     }
 
     let estWaitingTime = 0;
     if (completedTickets.length >= 5) {
-        estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentId);
+        estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentName);
     } else {
         estWaitingTime =
           department?.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department?.name);

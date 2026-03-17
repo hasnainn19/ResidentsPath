@@ -7,15 +7,15 @@ import { getAmplifyClient } from "../utils/amplifyClient";
  *
  * This is a public-facing query that retrieves the current ticket for
  * a given case if it is in the "WAITING" status and was created today.
- * It returns the departmentId and the ticket's queue details, including
+ * It returns the departmentName and the ticket's queue details, including
  * position and estimated wait time bounds.
  *
  * @param event.arguments.caseId - The ID of the case to look up
- * @throws Error if the caseId is missing, the case is not found, the case has no departmentId,
+ * @throws Error if the caseId is missing, the case is not found, the case has no departmentName,
  *         or there is no waiting ticket for today
  * @returns Object containing:
  *   - ticketId: ID of the current waiting ticket for the case
- *   - departmentId: ID of the department handling the case
+ *   - departmentName: ID of the department handling the case
  *   - position: the current ticket's position in the queue
  *   - estimatedWaitTimeLower: lower bound of the estimated wait time in minutes
  *   - estimatedWaitTimeUpper: upper bound of the estimated wait time in minutes
@@ -41,11 +41,11 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
         throw new Error(`Case ${caseId} not found`);
     }
 
-    // Get the departmentId
-    const departmentId = caseData.departmentId;
+    // Get the departmentName
+    const departmentName = caseData.departmentName;
 
-    if (!departmentId) {
-        throw new Error(`Case ${caseId} has no departmentId`);
+    if (!departmentName) {
+        throw new Error(`Case ${caseId} has no departmentName`);
     }
 
     // Get tickets for this case
@@ -89,7 +89,7 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
 
     return {
         ticketId: currentTicket.id,
-        departmentId: departmentId,
+        departmentName: departmentName,
         position: currentTicket.position,
         estimatedWaitTimeLower: currentTicket.estimatedWaitTimeLower,
         estimatedWaitTimeUpper: currentTicket.estimatedWaitTimeUpper,

@@ -8,7 +8,7 @@
  * and any review/validation logic that depends on it.
  */
 
-import type { DepartmentId, formInput } from "../../../../shared/formSchema";
+import type { DepartmentName, formInput } from "../../../../shared/formSchema";
 
 // Enums used in form stored in formSchema to reduce duplication
 export type Urgency = NonNullable<formInput["urgent"]>;
@@ -31,7 +31,7 @@ export type SpecificOption = { value: string; label: string };
 export type EnquiryItem = {
   value: string;
   label: string;
-  department: DepartmentId;
+  department: DepartmentName;
   specifics?: SpecificOption[];
 
   askChildrenQs?: boolean;
@@ -77,7 +77,7 @@ export type FormData = {
 
   enquiryId: string;
   specificDetailId: string;
-  routedDepartment: "" | DepartmentId;
+  routedDepartment: "" | DepartmentName;
 
   hasChildren: boolean;
   childrenCount: Count;

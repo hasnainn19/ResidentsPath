@@ -60,6 +60,7 @@ const backend = defineBackend({
   flagCaseSafeguarding,
 });
 
+
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups
  *
@@ -146,6 +147,13 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamS
 const ticketTable = backend.data.resources.tables["Ticket"];
 const caseTable = backend.data.resources.tables["Case"];
 const appointmentTable = backend.data.resources.tables["Appointment"];
+const departmentTable = backend.data.resources.tables["Department"];
+
+backend.addOutput({
+  custom: {
+    departmentTableName: departmentTable.tableName,
+  },
+});
 
 /**
  * Attach the Ticket stream to the Lambda.

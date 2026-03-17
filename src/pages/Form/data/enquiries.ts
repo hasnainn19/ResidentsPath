@@ -27,7 +27,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "council_tax",
       label: "Council Tax",
-      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
+      department: "Council_Tax_Or_Housing_Benefit",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -40,7 +40,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "housing_benefit",
       label: "Housing Benefit",
-      department: "COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP",
+      department: "Council_Tax_Or_Housing_Benefit",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -50,7 +50,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "homelessness",
       label: "Homelessness",
-      department: "HOMELESSNESS",
+      department: "Homelessness",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -60,7 +60,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "collecting_keys",
       label: "Collecting keys",
-      department: "HOMELESSNESS",
+      department: "Homelessness",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -70,7 +70,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "repair_query",
       label: "Repair query",
-      department: "HOMELESSNESS",
+      department: "Homelessness",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -80,7 +80,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "tenancy_query",
       label: "Tenancy query",
-      department: "HOMELESSNESS",
+      department: "Homelessness",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -93,7 +93,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "assessment",
       label: "Assessment",
-      department: "ADULTS_DUTY",
+      department: "Adults_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -103,7 +103,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "urgent_support_needs",
       label: "Urgent support needs",
-      department: "ADULTS_DUTY",
+      department: "Adults_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -113,7 +113,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "safeguarding_concerns",
       label: "Safeguarding concerns",
-      department: "ADULTS_DUTY",
+      department: "Adults_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -123,7 +123,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "carer_query",
       label: "Carer query",
-      department: "ADULTS_DUTY",
+      department: "Adults_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -136,7 +136,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "child_safety_concerns",
       label: "Child safety concerns",
-      department: "CHILDRENS_DUTY",
+      department: "Childrens_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -146,7 +146,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "conflict",
       label: "Conflict",
-      department: "CHILDRENS_DUTY",
+      department: "Childrens_Duty",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -159,7 +159,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "employment",
       label: "Employment",
-      department: "COMMUNITY_HUB_ADVISOR",
+      department: "Community_Hub_Advisor",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -169,7 +169,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "volunteering",
       label: "Volunteering",
-      department: "COMMUNITY_HUB_ADVISOR",
+      department: "Community_Hub_Advisor",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -179,7 +179,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "financial_support",
       label: "Financial support",
-      department: "COMMUNITY_HUB_ADVISOR",
+      department: "Community_Hub_Advisor",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -192,7 +192,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "fly-tipping",
       label: "Fly-tipping",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -202,7 +202,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "bin_collection",
       label: "Bin collection",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -212,7 +212,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "registrations",
       label: "Registrations",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -222,7 +222,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "parking",
       label: "Parking",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -232,7 +232,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "blue_badge",
       label: "Blue Badge",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,
@@ -242,7 +242,7 @@ export const ENQUIRIES_BY_TOPLEVEL: Record<string, EnquiryItem[]> = {
     {
       value: "freedom_pass",
       label: "Freedom Pass",
-      department: "GENERAL_CUSTOMER_SERVICES",
+      department: "General_Customer_Services",
       askVulnerabilityQs: true,
       askHouseholdSize: true,
       askDomesticAbuseQs: true,

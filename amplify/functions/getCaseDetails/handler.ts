@@ -43,7 +43,7 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
   return {
     caseName: selectedCase?.name,
     referenceNumber: selectedCase.referenceNumber,
-    departmentId: selectedCase?.departmentId,
+    departmentName: selectedCase?.departmentName,
     description: selectedCase?.description,
     status: selectedCase?.status as string,
     priority: selectedCase?.priority,

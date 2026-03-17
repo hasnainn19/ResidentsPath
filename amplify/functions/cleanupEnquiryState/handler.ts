@@ -13,11 +13,11 @@ import {
 } from "./helpers";
 
 async function releaseAppointmentSlotForDetails(
-  departmentId: string,
+  departmentName: string,
   dateIso: string,
   time: string,
 ) {
-  await releaseAppointmentSlot({ departmentId, dateIso, time });
+  await releaseAppointmentSlot({ departmentName, dateIso, time });
 }
 
 async function releaseAppointmentSlotForAppointmentRecord(
@@ -39,12 +39,12 @@ async function releaseAppointmentSlotForAppointmentRecord(
   const { data: caseData, errors } = await client.models.Case.get({ id: caseId });
   logModelErrors("cleanupEnquiryState: Case.get failed", errors);
 
-  if (!caseData?.departmentId) {
+  if (!caseData?.departmentName) {
     return;
   }
 
   await tryCleanup("cleanupEnquiryState: AppointmentSlotClaims.delete failed", () =>
-    releaseAppointmentSlotForDetails(caseData.departmentId, date, time),
+    releaseAppointmentSlotForDetails(caseData.departmentName, date, time),
   );
 }
 
@@ -52,7 +52,7 @@ async function releaseAppointmentSlotForAppointmentRecord(
 async function deleteRelatedAppointments(
   client: AmplifyClient,
   caseId: string,
-  departmentId: string | null,
+  departmentName: string | null,
 ) {
   const appointments = await listAllPages(
     (nextToken) =>
@@ -80,12 +80,12 @@ async function deleteRelatedAppointments(
     }
 
     // If appointment was successfully deleted, release the claimed slot
-    if (departmentId && appointment.date && appointment.time) {
+    if (departmentName && appointment.date && appointment.time) {
       const date = appointment.date;
       const time = appointment.time;
 
       await tryCleanup("cleanupEnquiryState: AppointmentSlotClaims.delete failed", () =>
-        releaseAppointmentSlotForDetails(departmentId, date, time),
+        releaseAppointmentSlotForDetails(departmentName, date, time),
       );
     }
   }
@@ -143,7 +143,7 @@ async function handleCaseRecord(record: DynamoDBRecord, client: AmplifyClient) {
     await deleteRelatedAppointments(
       client,
       oldImage.id,
-      typeof oldImage.departmentId === "string" ? oldImage.departmentId : null,
+      typeof oldImage.departmentName === "string" ? oldImage.departmentName : null,
     );
     await deleteRelatedTickets(client, oldImage.id);
   }

@@ -4,13 +4,13 @@ import { getDate, getQueuePositionCount } from "../utils/enquiriesStateTable";
 
 // Handler for getDepartmentQueueStatus query to return the number of waiting tickets for a department
 export const handler: Schema["getDepartmentQueueStatus"]["functionHandler"] = async (event) => {
-  const { departmentId } = event.arguments;
+  const { departmentName } = event.arguments;
 
-  if (!DepartmentEnum.safeParse(departmentId).success) {
-    throw new Error("A valid departmentId is required");
+  if (!DepartmentEnum.safeParse(departmentName).success) {
+    throw new Error("A valid departmentName is required");
   }
 
-  const serviceDayQueueKey = `${getDate()}#${departmentId}`;
+  const serviceDayQueueKey = `${getDate()}#${departmentName}`;
   const queueCount = await getQueuePositionCount(serviceDayQueueKey);
 
   return {

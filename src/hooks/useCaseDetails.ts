@@ -10,7 +10,7 @@ interface CaseTicket {
 interface CaseDetails {
   caseName: string | null;
   referenceNumber: string;
-  departmentId: string | null;
+  departmentName: string | null;
   description: string | null;
   status: string | null;
   priority: boolean | null;
@@ -59,7 +59,7 @@ const useCaseDetails = (caseId: string | undefined) => {
           setCaseDetails({
             caseName: d.caseName,
             referenceNumber: d.referenceNumber,
-            departmentId: d.departmentId ?? null,
+            departmentName: d.departmentName ?? null,
             description: d.description ?? null,
             status: d.status ?? null,
             priority: d.priority ?? null,

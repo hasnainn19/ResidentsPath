@@ -100,10 +100,10 @@ function getTicketClaimInfo(ticket: StreamItem) {
 }
 
 function getQueuePositionClaimInfo(ticket: StreamItem) {
-  const departmentId = typeof ticket.departmentId === "string" ? ticket.departmentId : null;
+  const departmentName = typeof ticket.departmentName === "string" ? ticket.departmentName : null;
   const createdAt = ticket.createdAt as string;
 
-  if (!departmentId) {
+  if (!departmentName) {
     return null;
   }
 
@@ -114,7 +114,7 @@ function getQueuePositionClaimInfo(ticket: StreamItem) {
   }
 
   return {
-    queuePositionKey: `${getDate(new Date(createdAtMs))}#${departmentId}`,
+    queuePositionKey: `${getDate(new Date(createdAtMs))}#${departmentName}`,
   };
 }
 

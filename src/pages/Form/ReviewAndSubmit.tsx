@@ -34,7 +34,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
-import { DepartmentLabelById } from "../../../shared/formSchema";
+import { DepartmentLabelByName } from "../../../shared/formSchema";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -89,7 +89,7 @@ export default function ReviewAndSubmit() {
             estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
             appointmentTime: formData.appointmentTime || undefined,
-            departmentName: DepartmentLabelById[payload.departmentId],
+            departmentName: DepartmentLabelByName[payload.departmentName],
           },
         },
       });

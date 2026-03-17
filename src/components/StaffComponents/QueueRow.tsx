@@ -11,7 +11,6 @@ import { DEPARTMENTS } from "../../../shared/formSchema";
 
 interface QueueRowProps {
   departmentName: string;
-  departmentId: string;
   waitingCount: number;
   longestWait: number;
   averageWait: number;
@@ -23,7 +22,6 @@ interface QueueRowProps {
 // This component represents a single row in the service queue table on the staff dashboard, displaying key metrics and actions for each service.
 const QueueRow = ({
   departmentName,
-  departmentId,
   waitingCount,
   longestWait,
   averageWait,
@@ -43,10 +41,7 @@ const QueueRow = ({
     <TableRow hover>
       <TableCell>
         <Typography fontWeight={500}>
-          {
-            DEPARTMENTS.find((department) => department.id == departmentId)
-              ?.label
-          }
+          {DEPARTMENTS.find((department) => department.name === departmentName)?.label ?? departmentName}
         </Typography>
       </TableCell>
 

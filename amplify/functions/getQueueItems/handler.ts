@@ -36,7 +36,7 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
       ge: startOfDay.toISOString(),
       le: endOfDay.toISOString(),
     },
-    ...(selectedDept ? { departmentId: { eq: selectedDept.id } } : {}),
+    ...(selectedDept ? { departmentName: { eq: selectedDept.id } } : {}),
   };
 
   const { data: tickets } = await client.models.Ticket.list({
@@ -59,13 +59,13 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
 
   const items = tickets.map((ticket) => {
     const caseRecord = caseMap.get(ticket.caseId);
-    const dept = deptMap.get(ticket.departmentId);
+    const dept = deptMap.get(ticket.departmentName);
 
     return {
       ticketId: ticket.id,
       caseId: ticket.caseId,
       ticketNumber: ticket.ticketNumber,
-      department: dept?.name ?? ticket.departmentId,
+      department: dept?.name ?? ticket.departmentName,
       title: caseRecord?.referenceNumber ?? ticket.ticketNumber,
       description: [caseRecord?.enquiry, caseRecord?.description]
         .filter(Boolean)
