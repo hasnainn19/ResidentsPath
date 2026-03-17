@@ -29,7 +29,8 @@ I18n.putVocabularies({
     "Resend Code":"Resend Code",
     "We Emailed You":"We Emailed You",
     "Confirmation Code":"Confirmation Code",
-    "Your code is on the way. To log in, enter the code we emailed to":"Your code is on the way. To log in, enter the code we emailed to"
+    "Your code is on the way. To log in, enter the code we emailed to":"Your code is on the way. To log in, enter the code we emailed to",
+    "It may take a minute to arrive":"It may take a minute to arrive"
   },
   cy: {
     "Email":"E-bost",
@@ -58,6 +59,7 @@ I18n.putVocabularies({
     "Resend Code":"Ail-anfon y Cod",
     "We Emailed You":"Fe wnaethon ni anfon e-bost atoch chi",
     "Confirmation Code":"Cod Cadarnhau",
+    "It may take a minute to arrive":" Efallai y bydd yn cymryd munud i gyrraedd",
     "Your code is on the way. To log in, enter the code we emailed to":"Mae eich cod ar y ffordd. I fewngofnodi, nodwch y cod a anfonwyd atoch drwy e-bost."
   },
   fa: {
@@ -87,7 +89,8 @@ I18n.putVocabularies({
     "Resend Code":"ارسال مجدد کد",
     "We Emailed You":"ما به شما ایمیل زدیم",
     "Confirmation Code":"کد تایید",
-    "Your code is on the way. To log in, enter the code we emailed to":"کد شما در راه است. برای ورود، کدی را که به آن ایمیل کرده‌ایم وارد کنید."
+    "It may take a minute to arrive":" ممکن است یک دقیقه طول بکشد تا برسد.",
+    "Your code is on the way. To log in, enter the code we emailed to":"کد شما در راه است. برای ورود، کدی را که به آن ایمیل کرده‌ایم وارد کنید"
   },
   pa: {
     "Email":"ਈਮੇਲ",
@@ -116,6 +119,7 @@ I18n.putVocabularies({
     "Resend Code":"ਕੋਡ ਦੁਬਾਰਾ ਭੇਜੋ",
     "We Emailed You":"ਅਸੀਂ ਤੁਹਾਨੂੰ ਈਮੇਲ ਕੀਤਾ ਹੈ",
     "Confirmation Code":"ਅਨੁਕੂਲੀਕਰਨ ਕੋਡ",
+    "It may take a minute to arrive":"ਇਸਨੂੰ ਪਹੁੰਚਣ ਵਿੱਚ ਇੱਕ ਮਿੰਟ ਲੱਗ ਸਕਦਾ ਹੈ।",
     "Your code is on the way. To log in, enter the code we emailed to":"ਤੁਹਾਡਾ ਕੋਡ ਜਲਦੀ ਹੀ ਆ ਜਾਵੇਗਾ। ਲੌਗਇਨ ਕਰਨ ਲਈ, ਉਹ ਕੋਡ ਦਰਜ ਕਰੋ ਜਿਸਨੂੰ ਅਸੀਂ ਈਮੇਲ ਕੀਤਾ ਹੈ।"
   },
   pl: {
@@ -145,6 +149,7 @@ I18n.putVocabularies({
     "Resend Code":"Wyślij ponownie kod",
     "We Emailed You":"Wysłaliśmy Ci e-mail",
     "Confirmation Code":"Kod potwierdzający",
+    "It may take a minute to arrive":" Dotarcie przesyłki może potrwać chwilę",
     "Your code is on the way. To log in, enter the code we emailed to":"Twój kod jest już w drodze. Aby się zalogować, wpisz kod, który wysłaliśmy na adres e-mail"
   }
 });
