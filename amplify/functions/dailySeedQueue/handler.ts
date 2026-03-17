@@ -82,19 +82,24 @@ export const handler: ScheduledHandler = async () => {
      * Queue recalculation is handled automatically since the Ticket table DynamoDB stream fires on INSERT,
      * which triggers onTicketCompleted, which calls recalculateDepartmentQueue for the affected department
      */
-    const result = await createQueueSubmission({
-      client,
-      caseId,
-      departmentName,
-      logPrefix,
-      visitState,
-    });
+    try {
+      const result = await createQueueSubmission({
+        client,
+        caseId,
+        departmentName,
+        logPrefix,
+        visitState,
+      });
 
-    if (!result.ok) {
-      console.error(`${logPrefix}: Failed to create ticket — ${result.errorMessage}`);
+      if (!result.ok) {
+        console.error(`${logPrefix}: Failed to create ticket — ${result.errorMessage}`);
+      }
+      else {
+        console.log(`${logPrefix}: Created ticket ${result.ticketNumber} for case ${caseId}`);
+      }
     }
-    else {
-      console.log(`${logPrefix}: Created ticket ${result.ticketNumber} for case ${caseId}`);
+    catch (error) {
+      console.error(`${logPrefix}: Unexpected error while creating ticket for case ${caseId}`, error);
     }
   }
 };
