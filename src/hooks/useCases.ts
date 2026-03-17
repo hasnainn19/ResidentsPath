@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
-import { DEPARTMENTS, type DepartmentId } from "../../shared/formSchema";
+import { DEPARTMENTS, type DepartmentName } from "../../shared/formSchema";
 
 export type CaseStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
-export type { DepartmentId };
+export type { DepartmentName };
 
-const VALID_DEPARTMENT_IDS = new Set(DEPARTMENTS.map((d) => d.id));
+const VALID_DEPARTMENT_NAMES = new Set(DEPARTMENTS.map((d) => d.name));
 
 export interface CaseSummary {
   id: string;
   caseName: string;
   referenceNumber: string;
-  departmentId: DepartmentId;
+  departmentName: DepartmentName;
   status: CaseStatus | null;
   priority: boolean | null;
   flag: boolean | null;
@@ -23,7 +23,7 @@ export interface CaseSummary {
 
 export interface CasesFilters {
   status?: CaseStatus | "";
-  departmentId?: DepartmentId | "";
+  departmentName?: DepartmentName | "";
 }
 
 const useCases = (filters: CasesFilters = {}) => {
@@ -40,8 +40,8 @@ const useCases = (filters: CasesFilters = {}) => {
 
       const filter: Record<string, any> = {};
       if (filters.status) filter.status = { eq: filters.status };
-      if (filters.departmentId)
-        filter.departmentId = { eq: filters.departmentId };
+      if (filters.departmentName)
+        filter.departmentName = { eq: filters.departmentName };
 
       client.models.Case.list(
         Object.keys(filter).length > 0 ? { filter } : undefined,
@@ -52,9 +52,9 @@ const useCases = (filters: CasesFilters = {}) => {
               id: c.id,
               referenceNumber: c.referenceNumber,
               caseName: c.name,
-              departmentId: (VALID_DEPARTMENT_IDS.has(c.departmentId)
-                ? c.departmentId
-                : "GENERAL_CUSTOMER_SERVICES") as DepartmentId,
+              departmentName: (VALID_DEPARTMENT_NAMES.has(c.departmentName)
+                ? c.departmentName
+                : "General_Customer_Services") as DepartmentName,
               status: c.status ?? null,
               priority: c.priority ?? null,
               flag: c.flag ?? null,
@@ -83,7 +83,7 @@ const useCases = (filters: CasesFilters = {}) => {
       createSub.unsubscribe();
       updateSub.unsubscribe();
     };
-  }, [filters.status, filters.departmentId]);
+  }, [filters.status, filters.departmentName]);
 
   return { cases, loading, error };
 };

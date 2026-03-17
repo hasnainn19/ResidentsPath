@@ -1,8 +1,8 @@
-export const DepartmentCodeById = {
-  HOMELESSNESS: "H",
-  ADULTS_DUTY: "A",
-  COMMUNITY_HUB_ADVISOR: "CH",
-  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "CT",
-  GENERAL_CUSTOMER_SERVICES: "G",
-  CHILDRENS_DUTY: "C",
+export const DepartmentCodeByName = {
+  Homelessness: "H",
+  Adults_Duty: "A",
+  Community_Hub_Advisor: "CH",
+  Council_Tax_Or_Housing_Benefit: "CT",
+  General_Customer_Services: "G",
+  Childrens_Duty: "C",
 } as const;

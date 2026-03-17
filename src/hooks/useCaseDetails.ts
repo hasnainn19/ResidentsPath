@@ -10,14 +10,13 @@ interface CaseTicket {
 interface CaseDetails {
   caseName: string | null;
   referenceNumber: string;
-  departmentId: string | null;
+  departmentName: string | null;
   description: string | null;
   status: string | null;
   priority: boolean | null;
   flag: boolean | null;
   notes: string | null;
   enquiry: string | null;
-  otherEnquiryText: string | null;
   childrenCount: string | null;
   householdSize: string | null;
   ageRange: string | null;
@@ -60,14 +59,13 @@ const useCaseDetails = (caseId: string | undefined) => {
           setCaseDetails({
             caseName: d.caseName,
             referenceNumber: d.referenceNumber,
-            departmentId: d.departmentId ?? null,
+            departmentName: d.departmentName ?? null,
             description: d.description ?? null,
             status: d.status ?? null,
             priority: d.priority ?? null,
             flag: d.flag ?? null,
             notes: d.notes ?? null,
             enquiry: d.enquiry ?? null,
-            otherEnquiryText: d.otherEnquiryText ?? null,
             childrenCount: d.childrenCount ?? null,
             householdSize: d.householdSize ?? null,
             ageRange: d.ageRange ?? null,

@@ -8,8 +8,21 @@
 
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Paper, Typography, Button, Stack, Divider, Box, Alert } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Button,
+  Stack,
+  Divider,
+  Box,
+  Alert,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+} from "@mui/material";
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import PrivacyNoticeDialog from "../../components/FormPageComponents/PrivacyNoticeDialog";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import { LANGUAGE_OPTIONS } from "./data/languages";
 import { useFormWizard } from "../../context/FormWizardProvider";
@@ -21,7 +34,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 import { buildSubmitEnquiryPayload } from "./model/buildSubmitEnquiryPayload";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
-import { DepartmentLabelById } from "../../../shared/formSchema";
+import { DepartmentLabelByName } from "../../../shared/formSchema";
 
 export default function ReviewAndSubmit() {
   const nav = useNavigate();
@@ -29,6 +42,7 @@ export default function ReviewAndSubmit() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [privacyNoticeOpen, setPrivacyNoticeOpen] = useState(false);
 
   const client = useMemo(() => generateClient<Schema>(), []);
 
@@ -75,7 +89,7 @@ export default function ReviewAndSubmit() {
             estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: formData.appointmentDateIso || undefined,
             appointmentTime: formData.appointmentTime || undefined,
-            departmentName: DepartmentLabelById[payload.departmentId],
+            departmentName: DepartmentLabelByName[payload.departmentName],
           },
         },
       });
@@ -118,7 +132,7 @@ export default function ReviewAndSubmit() {
     },
     {
       title: "Your request",
-      keys: ["enquiryId", "specificDetailId", "otherEnquiryText", "proceed", "additionalInfo"],
+      keys: ["enquiryId", "specificDetailId", "proceed", "additionalInfo"],
       editTo: "/form/enquiry-selection",
     },
     {
@@ -307,15 +321,54 @@ export default function ReviewAndSubmit() {
           );
         })}
 
+        <Box sx={{ mt: 4, mb: 3 }}>
+          <Stack spacing={2}>
+            <FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.privacyNoticeAccepted}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        privacyNoticeAccepted: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                label="I acknowledge the privacy notice for this form."
+              />
+              <FormHelperText sx={{ ml: 0 }}>
+                You can open the full privacy notice before you submit. The Council is not relying
+                on your consent to process your information.
+              </FormHelperText>
+            </FormControl>
+
+            <Button
+              type="button"
+              variant="text"
+              onClick={() => setPrivacyNoticeOpen(true)}
+              sx={{ alignSelf: "flex-start", px: 0, fontWeight: 700 }}
+            >
+              Read the full privacy notice
+            </Button>
+          </Stack>
+        </Box>
+
         {/* Navigation Buttons */}
         <StepActions
           onSave={handleSave}
           advanceLabel="Submit request"
           onAdvanceClick={submitToBackend}
           advanceType="button"
-          advanceDisabled={submitting}
+          advanceDisabled={submitting || !formData.privacyNoticeAccepted}
           showPrevious
           onPrevious={() => nav("/form/actions")}
+        />
+
+        <PrivacyNoticeDialog
+          open={privacyNoticeOpen}
+          onClose={() => setPrivacyNoticeOpen(false)}
         />
       </Paper>
     </FormStepLayout>

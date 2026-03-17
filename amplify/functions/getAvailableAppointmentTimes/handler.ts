@@ -25,13 +25,13 @@ function getEnquiriesStateTableName() {
 }
 
 // Helper function to construct the partition key for appointment slots (useful if name changes in the future)
-function getAppointmentSlotPartitionKey(departmentId: string, dateIso: string) {
-  return `APPOINTMENT_SLOT#${departmentId}#${dateIso}`;
+function getAppointmentSlotPartitionKey(departmentName: string, dateIso: string) {
+  return `APPOINTMENT_SLOT#${departmentName}#${dateIso}`;
 }
 
-async function queryClaimedAppointmentTimes(departmentId: string, dateIso: string) {
+async function queryClaimedAppointmentTimes(departmentName: string, dateIso: string) {
   const tableName = getEnquiriesStateTableName();
-  const pk = getAppointmentSlotPartitionKey(departmentId, dateIso);
+  const pk = getAppointmentSlotPartitionKey(departmentName, dateIso);
 
   const result = await ddb.send(
     new QueryCommand({
@@ -53,8 +53,8 @@ async function queryClaimedAppointmentTimes(departmentId: string, dateIso: strin
   const times = new Set<string>();
 
 // List all claimed appointment times for a given department and date by querying the enquiries state table
-async function listClaimedAppointmentTimes(departmentId: string, dateIso: string) {
-  const claimedTimes = await queryClaimedAppointmentTimes(departmentId, dateIso);
+async function listClaimedAppointmentTimes(departmentName: string, dateIso: string) {
+  const claimedTimes = await queryClaimedAppointmentTimes(departmentName, dateIso);
   const times = new Set<string>();
   const nowSeconds = Math.floor(Date.now() / 1000);
 
@@ -84,10 +84,10 @@ async function listClaimedAppointmentTimes(departmentId: string, dateIso: string
 }
 
 export const handler: Schema["getAvailableAppointmentTimes"]["functionHandler"] = async (event) => {
-  const { departmentId, dateIso } = event.arguments;
+  const { departmentName, dateIso } = event.arguments;
 
-  // Validate the departmentId and dateIso parameters before proceeding
-  if (!DepartmentEnum.safeParse(departmentId).success || !isValidIsoDate(dateIso)) {
+  // Validate the departmentName and dateIso parameters before proceeding
+  if (!DepartmentEnum.safeParse(departmentName).success || !isValidIsoDate(dateIso)) {
     return {
       availableTimes: [],
     };
@@ -100,7 +100,7 @@ export const handler: Schema["getAvailableAppointmentTimes"]["functionHandler"] 
     };
   }
 
-  const claimedTimes = await listClaimedAppointmentTimes(departmentId, dateIso);
+  const claimedTimes = await listClaimedAppointmentTimes(departmentName, dateIso);
 
   return {
     availableTimes: futureTimes.filter((time) => !claimedTimes.has(time)),

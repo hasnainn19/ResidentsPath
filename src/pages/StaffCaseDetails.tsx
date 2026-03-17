@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -32,11 +32,13 @@ import { UI_OPTIONS } from "../../shared/formSchema";
 
 const CASE_STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
 
-const client = generateClient<Schema>({ authMode: "userPool" });
-
 const StaffCaseDetails = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const { caseDetails: c, loading, error } = useCaseDetails(caseId);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
@@ -158,7 +160,7 @@ const StaffCaseDetails = () => {
       >
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography variant="h4" fontWeight={600}>
-            {c?.caseName} #{c.referenceNumber} &middot; {c.departmentId}
+            {c?.caseName} #{c.referenceNumber} &middot; {c.departmentName}
           </Typography>
           <IconButton
             size="small"
@@ -257,12 +259,6 @@ const StaffCaseDetails = () => {
         <SectionCard title="Enquiry">
           <Stack spacing={2}>
             <DetailRow label="Details" value={c.enquiry} />
-            {c.otherEnquiryText && (
-              <DetailRow
-                label="Other Enquiry Details"
-                value={c.otherEnquiryText}
-              />
-            )}
           </Stack>
         </SectionCard>
 

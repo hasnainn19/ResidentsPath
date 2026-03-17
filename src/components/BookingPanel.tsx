@@ -35,21 +35,21 @@ import {
   getCurrentAppointmentDateTime,
   isBookableAppointmentTime,
 } from "../../shared/formSchema";
-import type { DepartmentId } from "../../shared/formSchema";
+import type { DepartmentName } from "../../shared/formSchema";
 
 type Props = {
-  departmentId?: DepartmentId;
+  departmentName?: DepartmentName;
   onConfirm?: (dateIso: string, time: string) => void;
 };
 
 async function fetchAvailableAppointmentTimes(
-  departmentId: DepartmentId,
+  departmentName: DepartmentName,
   dateIso: string,
   authMode: Awaited<ReturnType<typeof getDataAuthMode>>,
 ) {
   const client = generateClient<Schema>();
   const response = await client.queries.getAvailableAppointmentTimes(
-    { departmentId, dateIso },
+    { departmentName, dateIso },
     { authMode },
   );
 
@@ -78,7 +78,7 @@ export default function BookingPanel(props: Props) {
     let cancelled = false;
 
     async function loadAvailability() {
-      if (!props.departmentId || !selectedDateIso) {
+      if (!props.departmentName || !selectedDateIso) {
         setAvailableTimes([]);
         setAvailabilityError(null);
         setAvailabilityLoading(false);
@@ -91,7 +91,7 @@ export default function BookingPanel(props: Props) {
       try {
         const authMode = await getDataAuthMode();
         const response = await fetchAvailableAppointmentTimes(
-          props.departmentId,
+          props.departmentName,
           selectedDateIso,
           authMode,
         );
@@ -135,7 +135,7 @@ export default function BookingPanel(props: Props) {
     return () => {
       cancelled = true;
     };
-  }, [props.departmentId, selectedDateIso]);
+  }, [props.departmentName, selectedDateIso]);
 
   useEffect(() => {
     if (selectedTime && !availableTimes.includes(selectedTime)) {

@@ -38,13 +38,13 @@ function shouldRecalculate(record: DynamoDBRecord, newImage?: Record<string, any
   
 /**
  * Trigger recalculations of department queues when tickets are completed or created.
- * For each relevant change, we add the departmentId to a Set to ensure we only 
+ * For each relevant change, we add the departmentName to a Set to ensure we only
  * recalculate once per department, then call recalculateDepartmentQueue for each affected department.
  * 
  * @param event 
  */
 export const handler: DynamoDBStreamHandler = async (event) => {
-  const departmentIds = new Set<string>();
+  const departmentNames = new Set<string>();
 
   for (const record of event.Records) {
 
@@ -55,21 +55,21 @@ export const handler: DynamoDBStreamHandler = async (event) => {
       continue;
     }
 
-    const departmentId = newImage!.departmentId;
-    if (!departmentId) {
-      console.error("onTicketCompleted: departmentId is missing in record", record);
+    const departmentName = newImage!.departmentName;
+    if (!departmentName) {
+      console.error("onTicketCompleted: departmentName is missing in record", record);
       continue;
     }
 
-    departmentIds.add(departmentId);
+    departmentNames.add(departmentName);
   }
 
-  for (const departmentId of departmentIds) {
+  for (const departmentName of departmentNames) {
     try {
-      await recalculateDepartmentQueue(departmentId);
-    } 
+      await recalculateDepartmentQueue(departmentName);
+    }
     catch (error) {
-      console.error(`recalculateDepartmentQueue: failed for department ${departmentId}`, error);
+      console.error(`recalculateDepartmentQueue: failed for department ${departmentName}`, error);
     }
   }
 };

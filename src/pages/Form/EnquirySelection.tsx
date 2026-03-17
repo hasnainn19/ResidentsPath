@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  Alert,
   Box,
   Button,
   Collapse,
@@ -36,6 +37,7 @@ import {
 } from "@mui/material";
 
 import FormStepLayout from "../../components/FormPageComponents/FormStepLayout";
+import FormPrivacyNotice from "../../components/FormPageComponents/FormPrivacyNotice";
 import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import LongTextSection from "../../components/FormPageComponents/LongTextSection";
@@ -87,14 +89,10 @@ export default function EnquirySelection() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
-  // TODO: Replace with Speech-to-Text
-  const handleVoiceInput = () => alert("Voice input started (mock)");
-
   // Logic for which follow-up questions to show.
   const enquirySelectionState = useMemo(() => getEnquirySelectionState(formData), [formData]);
 
   const {
-    isOther,
     enquiryOptions,
     specificOptions,
     showSpecificDropdown,
@@ -112,7 +110,7 @@ export default function EnquirySelection() {
   // Whether the continue button should be enabled, based on whether required fields are filled in
   const canGoNext = computeCanGoNext(formData, hasEnoughToProceed, needsUrgentReason);
 
-  const showEnquiryDropdown = formData.topLevel !== "" && !isOther && enquiryOptions.length > 1;
+  const showEnquiryDropdown = formData.topLevel !== "" && enquiryOptions.length > 1;
 
   function handleTopLevelChange(nextTopLevel: string) {
     setFormData((prev) => applyTopLevelChange(prev, nextTopLevel));
@@ -141,11 +139,6 @@ export default function EnquirySelection() {
     parts.push("What do you need help with? Select an area.");
 
     if (!formData.topLevel) return parts.join(" ");
-
-    if (isOther) {
-      parts.push("Then describe your enquiry.");
-      return parts.join(" ");
-    }
 
     if (showEnquiryDropdown) {
       parts.push("Then choose an enquiry.");
@@ -179,7 +172,7 @@ export default function EnquirySelection() {
     "How would you like to proceed? Select join the digital queue or book an appointment.";
 
   const additionalInfoTts =
-    "Anything else you want to tell us. This is optional. Add any details that might help. You can also use voice input.";
+    "Anything else you want to tell us. This is optional. Add any details that might help.";
 
   const supportTts =
     "Support needs are optional. Select any support you need today, such as accessibility support or language support. You can also show more support options, and add support notes.";
@@ -201,102 +194,77 @@ export default function EnquirySelection() {
       onLanguageChange={(code) => setField("language", code)}
       languageOptions={LANGUAGE_OPTIONS}
     >
-      {/* Main form card */}
-      <Paper
-        variant="outlined"
-        sx={{
-          p: { xs: 2.5, sm: 4 },
-          borderRadius: { xs: 1.5, sm: 2 },
-        }}
-      >
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!canGoNext) return;
-            nav("/form/personal-details");
+      <Stack spacing={3}>
+        <FormPrivacyNotice />
+
+        {/* Main form card */}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: { xs: 2.5, sm: 4 },
+            borderRadius: { xs: 1.5, sm: 2 },
           }}
         >
-          <Stack spacing={{ xs: 3, sm: 4 }}>
-            {/* Service */}
-            <WithTTS
-              copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
-              required
-              titleVariant="subtitle1"
-            >
-              <FormControl fullWidth required>
-                <InputLabel id="top-label">Select an area...</InputLabel>
-                <Select
-                  labelId="top-label"
-                  label="Select an area..."
-                  value={formData.topLevel}
-                  onChange={(e) => handleTopLevelChange(String(e.target.value))}
-                >
-                  <MenuItem value="">Select an area...</MenuItem>
-                  {TOP_LEVEL.map((t) => (
-                    <MenuItem key={t.value} value={t.value}>
-                      {t.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </WithTTS>
-
-            {showEnquiryDropdown && (
+          <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!canGoNext) return;
+              nav("/form/personal-details");
+            }}
+          >
+            <Stack spacing={{ xs: 3, sm: 4 }}>
+              {/* Service */}
               <WithTTS
-                copy={{
-                  label: FIELD_META.enquiryId.label,
-                  tts: "Choose an enquiry. This tells us what you need help with.",
-                }}
+                copy={{ label: "What do you need help with?", tts: buildServiceTts() }}
                 required
-                sx={insetSectionSx}
+                titleVariant="subtitle1"
               >
                 <FormControl fullWidth required>
-                  <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                  <InputLabel id="top-label">Select an area...</InputLabel>
                   <Select
-                    labelId="enquiry-label"
-                    label="Select an enquiry..."
-                    value={formData.enquiryId}
-                    onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                    labelId="top-label"
+                    label="Select an area..."
+                    value={formData.topLevel}
+                    onChange={(e) => handleTopLevelChange(String(e.target.value))}
                   >
-                    <MenuItem value="">Select an enquiry...</MenuItem>
-                    {enquiryOptions.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
+                    <MenuItem value="">Select an area...</MenuItem>
+                    {TOP_LEVEL.map((t) => (
+                      <MenuItem key={t.value} value={t.value}>
+                        {t.label}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </WithTTS>
-            )}
 
-            {isOther && formData.topLevel !== "" && (
-              <WithTTS
-                copy={{
-                  label: FIELD_META.otherEnquiryText.label,
-                  tts: "Describe your enquiry. Briefly tell us what you need help with.",
-                }}
-                required
-                sx={insetSectionSx}
-              >
-                <TextField
-                  fullWidth
+              {showEnquiryDropdown && (
+                <WithTTS
+                  copy={{
+                    label: FIELD_META.enquiryId.label,
+                    tts: "Choose an enquiry. This tells us what you need help with.",
+                  }}
                   required
-                  multiline
-                  minRows={3}
-                  label={FIELD_META.otherEnquiryText.label}
-                  placeholder="Tell us what you need help with"
-                  value={formData.otherEnquiryText}
-                  onChange={(e) => setField("otherEnquiryText", e.target.value)}
-                  helperText={countChars(
-                    "otherEnquiryText",
-                    formData.otherEnquiryText,
-                    "Avoid sharing bank details or passwords.",
-                  )}
-                  slotProps={{ htmlInput: { maxLength: FIELD_META.otherEnquiryText.maxLen } }}
-                />
-              </WithTTS>
-            )}
+                  sx={insetSectionSx}
+                >
+                  <FormControl fullWidth required>
+                    <InputLabel id="enquiry-label">Select an enquiry...</InputLabel>
+                    <Select
+                      labelId="enquiry-label"
+                      label="Select an enquiry..."
+                      value={formData.enquiryId}
+                      onChange={(e) => handleEnquiryChange(String(e.target.value))}
+                    >
+                      <MenuItem value="">Select an enquiry...</MenuItem>
+                      {enquiryOptions.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </WithTTS>
+              )}
 
             {
               // Show the "more detail" dropdown when relevant
@@ -516,6 +484,11 @@ export default function EnquirySelection() {
                             {formData.domesticAbuse && (
                               <Box sx={{ mt: 1.5 }}>
                                 <Stack spacing={2}>
+                                  <Alert severity="warning" variant="outlined">
+                                    Only share details here if it is safe to do so. Use the safe
+                                    contact option below if contacting you could put you at risk.
+                                  </Alert>
+
                                   <FormControl fullWidth>
                                     <InputLabel id="safe-contact-label">
                                       {FIELD_META.safeToContact.label}
@@ -701,8 +674,6 @@ export default function EnquirySelection() {
               onChange={(value) => setField("additionalInfo", value)}
               maxLength={FIELD_META.additionalInfo.maxLen ?? 0}
               placeholder="Add any details that might help us support you..."
-              showVoiceInput
-              onVoiceInput={handleVoiceInput}
             />
 
             {/* Proceed */}
@@ -821,10 +792,15 @@ export default function EnquirySelection() {
             </WithTTS>
 
             {/* Navigation Buttons */}
-            <StepActions onSave={handleSave} advanceLabel="Continue" advanceDisabled={!canGoNext} />
-          </Stack>
-        </Box>
-      </Paper>
+              <StepActions
+                onSave={handleSave}
+                advanceLabel="Continue"
+                advanceDisabled={!canGoNext}
+              />
+            </Stack>
+          </Box>
+        </Paper>
+      </Stack>
     </FormStepLayout>
   );
 }

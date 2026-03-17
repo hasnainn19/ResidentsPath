@@ -11,9 +11,9 @@ import {
 import type {
   CaseStatus,
   CaseSummary,
-  DepartmentId,
+  DepartmentName,
 } from "../../hooks/useCases";
-import { DepartmentLabelById } from "../../../shared/formSchema";
+import { DepartmentLabelByName } from "../../../shared/formSchema";
 import { useNavigate } from "react-router-dom";
 import { STATUS_LABEL } from "../../pages/StaffCaseManagementPage";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -32,7 +32,7 @@ const STATUS_COLOR: Record<
 
 const DEPT_COLOR: Partial<
   Record<
-    DepartmentId,
+    DepartmentName,
     | "error"
     | "warning"
     | "info"
@@ -42,12 +42,12 @@ const DEPT_COLOR: Partial<
     | "default"
   >
 > = {
-  HOMELESSNESS: "error",
-  COUNCIL_TAX_OR_HOUSING_BENEFIT_HELP: "info",
-  ADULTS_DUTY: "secondary",
-  CHILDRENS_DUTY: "success",
-  COMMUNITY_HUB_ADVISOR: "primary",
-  GENERAL_CUSTOMER_SERVICES: "default",
+  Homelessness: "error",
+  Council_Tax_Or_Housing_Benefit: "info",
+  Adults_Duty: "secondary",
+  Childrens_Duty: "success",
+  Community_Hub_Advisor: "primary",
+  General_Customer_Services: "default",
 };
 
 const CaseItemCard = ({ caseItem }: { caseItem: CaseSummary }) => {
@@ -59,8 +59,8 @@ const CaseItemCard = ({ caseItem }: { caseItem: CaseSummary }) => {
           <Box flex={1} minWidth={0}>
             <Stack direction="row" spacing={1} mb={1} flexWrap="wrap">
               <Chip
-                label={DepartmentLabelById[caseItem.departmentId]}
-                color={DEPT_COLOR[caseItem.departmentId] ?? "default"}
+                label={DepartmentLabelByName[caseItem.departmentName]}
+                color={DEPT_COLOR[caseItem.departmentName] ?? "default"}
                 size="small"
               />
               {caseItem.status && (

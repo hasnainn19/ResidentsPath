@@ -251,12 +251,11 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
 
     const caseCreateInput = removeIrrelevantValues({
       userId: finalUserId,
-      departmentId: validated.departmentId,
+      departmentName: validated.departmentName,
       referenceNumber,
       status: "OPEN",
 
       enquiry: validated.enquiry,
-      otherEnquiryText: validated.otherEnquiryText,
       childrenCount: validated.childrenCount,
       householdSize: validated.householdSize,
       ageRange: validated.ageRange,
@@ -296,7 +295,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
         client,
         caseId,
         userId: finalUserId,
-        departmentId: validated.departmentId,
+        departmentName: validated.departmentName,
         appointmentDateIso: validated.appointmentDateIso!,
         appointmentTime: validated.appointmentTime!,
         logPrefix: "submitEnquiry",
@@ -322,7 +321,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     const queueResult = await createQueueSubmission({
       client,
       caseId,
-      departmentId: validated.departmentId,
+      departmentName: validated.departmentName,
       logPrefix: "submitEnquiry",
       visitState: createdVisitResources,
     });

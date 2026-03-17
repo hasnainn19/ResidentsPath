@@ -9,7 +9,7 @@ import {
 const ddb = new DynamoDBClient({});
 
 export type AppointmentSlotClaim = {
-  departmentId: string;
+  departmentName: string;
   dateIso: string;
   time: string;
 };
@@ -38,9 +38,9 @@ function getTicketClaimKey(queueId: string, ticketNumber: string) {
   };
 }
 
-function getAppointmentSlotClaimKey(departmentId: string, dateIso: string, time: string) {
+function getAppointmentSlotClaimKey(departmentName: string, dateIso: string, time: string) {
   return {
-    pk: `APPOINTMENT_SLOT#${departmentId}#${dateIso}`,
+    pk: `APPOINTMENT_SLOT#${departmentName}#${dateIso}`,
     sk: `TIME#${time}`,
   };
 }
@@ -142,7 +142,7 @@ function getBookedAppointmentSlotExpiresAt(dateIso: string) {
 // availability will stop treating this slot as blocked after the pending expiry passes.
 export async function claimAppointmentSlot(slot: AppointmentSlotClaim) {
   const tableName = getEnquiriesStateTableName();
-  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+  const key = getAppointmentSlotClaimKey(slot.departmentName, slot.dateIso, slot.time);
 
   await ddb.send(
     new PutItemCommand({
@@ -163,7 +163,7 @@ export async function claimAppointmentSlot(slot: AppointmentSlotClaim) {
 // Mark an appointment slot as booked after the appointment has been successfully created
 export async function markAppointmentSlotBooked(slot: AppointmentSlotClaim) {
   const tableName = getEnquiriesStateTableName();
-  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+  const key = getAppointmentSlotClaimKey(slot.departmentName, slot.dateIso, slot.time);
 
   await ddb.send(
     new UpdateItemCommand({
@@ -189,7 +189,7 @@ export async function releaseAppointmentSlot(slot: AppointmentSlotClaim) {
   const tableName = process.env.ENQUIRIES_STATE_TABLE;
   if (!tableName) return;
 
-  const key = getAppointmentSlotClaimKey(slot.departmentId, slot.dateIso, slot.time);
+  const key = getAppointmentSlotClaimKey(slot.departmentName, slot.dateIso, slot.time);
 
   await ddb.send(
     new DeleteItemCommand({

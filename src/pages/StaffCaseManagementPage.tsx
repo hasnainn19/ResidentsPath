@@ -13,7 +13,7 @@ import {
   Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { DEPARTMENTS, type DepartmentId } from "../../shared/formSchema";
+import { DEPARTMENTS, type DepartmentName } from "../../shared/formSchema";
 import useCases, { type CaseStatus, type CaseSummary } from "../hooks/useCases";
 import CaseItemCard from "../components/StaffComponents/CaseItemCard";
 
@@ -35,13 +35,13 @@ export const STATUS_LABEL: Record<CaseStatus, string> = {
 const StaffCaseManagementPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
-  const [departmentFilter, setDepartmentFilter] = useState<DepartmentId | "">(
+  const [departmentFilter, setDepartmentFilter] = useState<DepartmentName | "">(
     "",
   );
 
   const { cases, loading, error } = useCases({
     status: statusFilter,
-    departmentId: departmentFilter,
+    departmentName: departmentFilter,
   });
 
   const filteredCases = useMemo(() => {
@@ -101,12 +101,12 @@ const StaffCaseManagementPage: React.FC = () => {
             label="Department"
             value={departmentFilter}
             onChange={(e) =>
-              setDepartmentFilter(e.target.value as DepartmentId | "")
+              setDepartmentFilter(e.target.value as DepartmentName | "")
             }
           >
             <MenuItem value="">All</MenuItem>
             {DEPARTMENTS.map((d) => (
-              <MenuItem key={d.id} value={d.id}>
+              <MenuItem key={d.name} value={d.name}>
                 {d.label}
               </MenuItem>
             ))}

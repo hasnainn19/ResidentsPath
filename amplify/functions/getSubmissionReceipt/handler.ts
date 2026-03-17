@@ -1,6 +1,6 @@
 import type { Schema } from "../../data/resource";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import { DepartmentLabelById } from "../../../shared/formSchema";
+import { DepartmentLabelByName } from "../../../shared/formSchema";
 import {
   createFoundErrorResponse,
   getCaseAccessErrorMessage,
@@ -111,9 +111,9 @@ export const handler: Schema["getSubmissionReceipt"]["functionHandler"] = async 
     estimatedWaitTimeUpper: useAppointment ? undefined : (ticket?.estimatedWaitTimeUpper ?? undefined),
     appointmentDateIso: useAppointment ? (appointment?.date ?? undefined) : undefined,
     appointmentTime: useAppointment ? (appointment?.time ?? undefined) : undefined,
-    departmentName: caseRecord.departmentId
-      ? (DepartmentLabelById[caseRecord.departmentId as keyof typeof DepartmentLabelById] ??
-        undefined)
+    departmentName: caseRecord.departmentName
+      ? (DepartmentLabelByName[caseRecord.departmentName as keyof typeof DepartmentLabelByName] ??
+        caseRecord.departmentName)
       : undefined,
   };
 };

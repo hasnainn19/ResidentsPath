@@ -53,7 +53,7 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
 
   const { data: allTickets } = await client.models.Ticket.list({
     filter: {
-      departmentId: { eq: ticket.departmentId },
+      departmentName: { eq: ticket.departmentName },
       status: { eq: "WAITING" },
       createdAt: {
         ge: startOfDay.toISOString(),
@@ -80,16 +80,16 @@ export const handler: Schema["markTicketSeen"]["functionHandler"] = async (
     );
   } catch (error) {
     console.error(
-      `Failed to reposition tickets for department ${ticket.departmentId}`,
+      `Failed to reposition tickets for department ${ticket.departmentName}`,
     );
   }
 
   // Recalculate wait times
   try {
-    await recalculateDepartmentQueue(ticket.departmentId);
+    await recalculateDepartmentQueue(ticket.departmentName);
   } 
   catch (error) {
-    console.error(`recalculateDepartmentQueue: failed for department ${ticket.departmentId}`, error);
+    console.error(`recalculateDepartmentQueue: failed for department ${ticket.departmentName}`, error);
   }
 
   return true;

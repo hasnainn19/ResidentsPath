@@ -27,12 +27,16 @@ import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
 import { notifyResident } from "./functions/notifyResident/resource";
 import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
 import { handleSteppedOut } from "./functions/handleSteppedOut/resource";
+import { dailySeedQueue } from "./functions/dailySeedQueue/resource";
 import {
   FilterCriteria,
   FilterRule,
   StartingPosition,
 } from "aws-cdk-lib/aws-lambda";
 import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { Schedule } from "aws-cdk-lib/aws-events";
+import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
+import { Rule } from "aws-cdk-lib/aws-events";
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -58,7 +62,9 @@ const backend = defineBackend({
   markTicketSeen,
   setCasePriority,
   flagCaseSafeguarding,
+  dailySeedQueue,
 });
+
 
 /**
  * Grant permissions to the postConfirmation Lambda to add users to Cognito groups
@@ -114,6 +120,11 @@ backend.submitCaseFollowUp.addEnvironment(
   enquiriesStateTable.tableName,
 );
 
+backend.getDepartmentQueueStatus.addEnvironment(
+  "ENQUIRIES_STATE_TABLE",
+  enquiriesStateTable.tableName,
+);
+
 backend.getAvailableAppointmentTimes.addEnvironment(
   "ENQUIRIES_STATE_TABLE",
   enquiriesStateTable.tableName,
@@ -141,6 +152,13 @@ backend.data.resources.cfnResources.amplifyDynamoDbTables["Appointment"].streamS
 const ticketTable = backend.data.resources.tables["Ticket"];
 const caseTable = backend.data.resources.tables["Case"];
 const appointmentTable = backend.data.resources.tables["Appointment"];
+const departmentTable = backend.data.resources.tables["Department"];
+
+backend.addOutput({
+  custom: {
+    departmentTableName: departmentTable.tableName,
+  },
+});
 
 /**
  * Attach the Ticket stream to the Lambda.
@@ -318,3 +336,18 @@ backend.cleanupEnquiryState.resources.lambda.addEventSource(
 backend.cleanupEnquiryState.addEnvironment("TICKET_TABLE_NAME", ticketTable.tableName);
 backend.cleanupEnquiryState.addEnvironment("CASE_TABLE_NAME", caseTable.tableName);
 backend.cleanupEnquiryState.addEnvironment("APPOINTMENT_TABLE_NAME", appointmentTable.tableName);
+
+/**
+ * Grant dailySeedQueue access to the EnquiriesStateTable for ticket number generation,
+ * and schedule it to run every day at midnight UTC via EventBridge.
+ */
+enquiriesStateTable.grantReadWriteData(backend.dailySeedQueue.resources.lambda);
+backend.dailySeedQueue.addEnvironment("ENQUIRIES_STATE_TABLE", enquiriesStateTable.tableName);
+
+// only run on the production deployment
+if (process.env.AWS_BRANCH === "main") {
+  new Rule(backend.stack, "DailySeedQueueRule", {
+    schedule: Schedule.cron({ minute: "0", hour: "0" }),
+    targets: [new LambdaFunction(backend.dailySeedQueue.resources.lambda)],
+  });
+}
