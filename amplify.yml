@@ -18,4 +18,3 @@ frontend:
     cache:
         paths:
             - .npm/**/*
-            - node_modules/**/*
