@@ -2,18 +2,21 @@ import React from 'react';
 import { AppBar, Box, Toolbar, Typography, Button, Menu, MenuItem, Tooltip, Stack, IconButton } from '@mui/material';
 import { AccountCircle } from '@mui/icons-material';
 import { signOut } from 'aws-amplify/auth';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import LanguageSupportButton from './LanguageSupportButton';
 
 
 export default function NavBar() {
 	const navigate = useNavigate();
 	const { isAuthenticated, isStaff } = useAuth();
+	const {  t: translate } = useTranslation();
 	const [anchorElUser, setAnchorElUser] = React.useState(null);
 	const menuDropdown = isAuthenticated
-		? ['Account', 'Logout']
-		: ['Log in'];
+		? [translate("navbar-logout")]
+		: [translate("navbar-login")];
 
 	const handleOpenUserMenu = (event: any) => {
 		setAnchorElUser(event.currentTarget);
@@ -26,11 +29,11 @@ export default function NavBar() {
 	const handleMenuItemClick = async (dropdown: string) => {
 		handleCloseUserMenu();
 
-		if (dropdown === 'Logout') {
+		if (dropdown === translate("navbar-logout")) {
 			await handleLogout();
 		}
 
-		if (dropdown === 'Log in') {
+		if (dropdown === translate("navbar-login")) {
 			navigate('/auth');
 		}
 	};
@@ -61,7 +64,7 @@ export default function NavBar() {
 						'&:hover': { transform: 'translateY(-2px)' },
 					}}
 				>
-					ResidentsPath
+					{translate("nav-resident")}
 				</Typography>
 
 				<Stack
@@ -76,17 +79,17 @@ export default function NavBar() {
 				>
 					
 					{isStaff && (
-					<Tooltip title="Go to the staff dashboard">
-						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>Staff Dashboard</Button>
+					<Tooltip title={translate("navbar-goto")}>
+						<Button color="inherit" onClick={() => navigate('/staff')} startIcon={<AdminPanelSettingsIcon />}>{translate("landing-staff")}</Button>
 					</Tooltip>
 				)}
 
-				<Tooltip title="Check your queue details or check in for an appointment">
-						<Button color="inherit" onClick={() => navigate('/referencepage')}>Check In</Button>
+				<Tooltip title={translate("reference-check")}>
+						<Button color="inherit" onClick={() => navigate('/referencepage')}>{translate("landing-check")}</Button>
 					</Tooltip>
 
-					<Tooltip title="Create your case">
-						<Button color="inherit" onClick={() => navigate("/form")}>Form</Button>
+					<Tooltip title={translate("nav-create")}>
+						<Button color="inherit" onClick={() => navigate("/form")}>{translate("nav-form")}</Button>
 					</Tooltip>
 					
 					<Button
@@ -96,7 +99,7 @@ export default function NavBar() {
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						Council Website
+						{translate("nav-council")}
 					</Button>
 
 					<Box>
@@ -143,6 +146,10 @@ export default function NavBar() {
 							))}
 						</Menu>
 					</Box>
+
+					<Tooltip title={translate("nav-select")}>
+						<LanguageSupportButton />
+					</Tooltip>
 				</Stack>
 			</Toolbar>
 		</AppBar>

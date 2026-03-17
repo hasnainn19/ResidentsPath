@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
@@ -30,6 +31,7 @@ export default function AppointmentOptionsDialog({
   onCancelAppointment,
   onCheckInAppointment,
 }: AppointmentOptionsDialogProps) {
+  const {  t: translate } = useTranslation();
   const appointmentDialogTtsText = appointmentReferenceNumber
     ? [
         `Appointment options for reference ${appointmentReferenceNumber}.`,
@@ -51,7 +53,7 @@ export default function AppointmentOptionsDialog({
         paper: {
           sx: {
             borderRadius: 3,
-            width: "min(92vw, 760px)",
+            width: "min(92vw, 760px)", 
             minHeight: 360,
           },
         },
@@ -59,7 +61,7 @@ export default function AppointmentOptionsDialog({
     >
       <DialogTitle sx={{ px: 4, pt: 4, pb: 1, pr: 8, fontSize: "2.2rem", fontWeight: 700 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, pr: 6, flexWrap: "wrap" }}>
-          <Box component="span">Appointment options</Box>
+          <Box component="span">{translate("appOptions-app")}</Box>
           <TextToSpeechButton text={appointmentDialogTtsText} />
         </Box>
         <IconButton
@@ -73,11 +75,11 @@ export default function AppointmentOptionsDialog({
       </DialogTitle>
       <DialogContent sx={{ px: 4, pb: 2 }}>
         <DialogContentText sx={{ fontSize: "1.2rem", lineHeight: 1.5 }}>
-          What would you like to do with appointment {appointmentReferenceNumber}?
+          {translate("appOptions-what")} {appointmentReferenceNumber}?
         </DialogContentText>
         {!canCheckInAppointments && (
           <DialogContentText sx={{ mt: 2, fontSize: "1.1rem", lineHeight: 1.5 }}>
-            Check-in is only available at Hounslow House.
+            {translate("appOptions-ch")}
           </DialogContentText>
         )}
       </DialogContent>
@@ -108,7 +110,7 @@ export default function AppointmentOptionsDialog({
             variant="contained"
             sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
           >
-            Cancel appointment
+            {translate("appOptions-cancel")}
           </Button>
           {canCheckInAppointments && (
             <Button
@@ -118,7 +120,7 @@ export default function AppointmentOptionsDialog({
               size="large"
               sx={{ minHeight: 60, px: 3, fontSize: "1.05rem", width: "100%" }}
             >
-              Check in
+              {translate("landing-check")}
             </Button>
           )}
         </Box>

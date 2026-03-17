@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography, Button, Stack, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NavBar from '../components/NavBar';
@@ -9,6 +10,7 @@ import TextToSpeechButton from "../components/TextToSpeechButton";
 export default function LandingPage() {
 	const navigate = useNavigate();
 	const { isAuthenticated, isLoading, givenName } = useAuth();
+  	const {  t: translate } = useTranslation();
 
 	// Show loading spinner while checking authentication status
 	if (isLoading) {
@@ -17,20 +19,20 @@ export default function LandingPage() {
 
 	return (
 		<>
-			{/* Show navbar if authenticated */}
-			{isAuthenticated && <NavBar />}
+			<NavBar />
 
 			<Container maxWidth="md" sx={{ py: 8 }}>
 				{/* Header */}
 				<Box sx={{ textAlign: 'center', mb: 6 }}>
 					<Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
 						{isAuthenticated
-							? (givenName ? `Welcome back, ${givenName}` : 'Welcome back')
-							: 'Welcome to ResidentsPath'
+							? (givenName ? `${translate("landing-welcome-back")}, ${givenName}` : `${translate("landing-welcome-back")}`)
+							: `${translate("landing-welcome")}`
 						}
 					</Typography>
+					
 					<Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
-						Hounslow Council Queue Management System
+						{translate("landing-council")}
 					</Typography>
                     <TextToSpeechButton text='Welcome to ResidentsPath, the Hounslow Council Queue Management System'/>
 				</Box>
@@ -43,11 +45,11 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Queue Information and Appointment Check-in
+										{translate("landing-queue-info")}
 									</Typography>
                                     <TextToSpeechButton text='Click the button below to check in to your appointment or view your current queue status.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Check in to your appointment or view your current queue status.
+										{translate("landing-check-in-to")}
 									</Typography>
 									<Button
 										variant="contained"
@@ -55,7 +57,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/referencepage')}
 									>
-										Check In
+										{translate("landing-check")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -87,11 +89,11 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Continue as Visitor
+										{translate("landing-continue-as")}
 									</Typography>
                                     <TextToSpeechButton text='Click the button below to continue as a visitor and submit an enquiry.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										No account needed. Get help immediately by submitting an enquiry.
+										{translate("landing-no-account")}
 									</Typography>
 									<Button
 										variant="contained"
@@ -99,7 +101,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/form')}
 									>
-										Continue as Visitor
+										{translate("landing-continue-as")}
 									</Button>
 								</CardContent>
 							</Card>
@@ -108,11 +110,11 @@ export default function LandingPage() {
 							<Card sx={{ width: '100%', maxWidth: 500 }}>
 								<CardContent sx={{ p: 4 }}>
 									<Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-										Sign In or Create Account
+										{translate("landing-sign-in")}
 									</Typography>
                                     <TextToSpeechButton text='Click the button below to sign in or create a new account.'/>
 									<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-										Access your account to book appointments and track your past visits.
+										{translate("landing-access")}
 									</Typography>
 									<Button
 										variant="outlined"
@@ -120,7 +122,7 @@ export default function LandingPage() {
 										size="large"
 										onClick={() => navigate('/auth')}
 									>
-										Sign In / Register
+										{translate("landing-register")}
 									</Button>
 								</CardContent>
 							</Card>

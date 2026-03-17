@@ -1,6 +1,7 @@
 import { Box, Typography, Button, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BlockIcon from "@mui/icons-material/Block";
+import { useTranslation } from 'react-i18next';
 
 /**
  * Access Denied page shown when a user tries to access a route they don't have permission for.
@@ -8,6 +9,7 @@ import BlockIcon from "@mui/icons-material/Block";
  */
 export default function AccessDenied() {
   const navigate = useNavigate();
+  const {  t: translate } = useTranslation();
 
   return (
     <Container maxWidth="sm">
@@ -26,15 +28,15 @@ export default function AccessDenied() {
         <BlockIcon sx={{ fontSize: 80, color: "error.main" }} />
 
         <Typography variant="h3" fontWeight="bold">
-          Access Denied
+          {translate("access-acc")}
         </Typography>
 
         <Typography variant="body1" color="text.secondary">
-          You don't have permission to access this page.
+          {translate("access-you")}
         </Typography>
-
+          
         <Button variant="contained" size="large" onClick={() => navigate(-1)}>
-          Go Back
+          {translate("access-go")}
         </Button>
       </Box>
     </Container>

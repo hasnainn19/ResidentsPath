@@ -9,6 +9,8 @@ import { Authenticator, ThemeProvider as AmplifyThemeProvider } from '@aws-ampli
 import { amplifyComponentsTheme } from './Constants/AmplifyTheme'
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "./i18n";
+import '../amplify/i18n/amplifyTranslations'; 
 
 import { Amplify } from 'aws-amplify'
 import outputs from '../amplify_outputs.json'

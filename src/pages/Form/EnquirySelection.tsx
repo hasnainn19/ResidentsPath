@@ -42,7 +42,6 @@ import WithTTS from "../../components/FormPageComponents/WithTTS";
 import LeftCheckRow from "../../components/FormPageComponents/LeftCheckRow";
 import LongTextSection from "../../components/FormPageComponents/LongTextSection";
 import { useFormWizard } from "../../context/FormWizardProvider";
-import { LANGUAGE_OPTIONS } from "./data/languages";
 
 import { TOP_LEVEL } from "./data/enquiries";
 
@@ -190,9 +189,6 @@ export default function EnquirySelection() {
       totalSteps={4}
       title="Council service request"
       subtitle="Please complete this form to help us support you today"
-      languageValue={formData.language}
-      onLanguageChange={(code) => setField("language", code)}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Stack spacing={3}>
         <FormPrivacyNotice />
