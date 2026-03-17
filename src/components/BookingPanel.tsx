@@ -28,6 +28,7 @@ import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import HistoryToggleOffOutlinedIcon from "@mui/icons-material/HistoryToggleOffOutlined";
+import { useTranslation } from 'react-i18next';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 import type { Schema } from "../../amplify/data/resource";
 import { getDataAuthMode } from "../utils/getDataAuthMode";
@@ -70,6 +71,7 @@ export default function BookingPanel(props: Props) {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const {  t: translate } = useTranslation();
 
   const prettyDate = selectedDate ? selectedDate.format("D MMMM YYYY") : "";
   const selectedDateIso = selectedDate ? selectedDate.format("YYYY-MM-DD") : "";
@@ -195,7 +197,7 @@ export default function BookingPanel(props: Props) {
                   color="text.primary"
                   sx={{ ml: 3, fontWeight: 700 }}
                 >
-                  Select the date:
+                  {translate("Bpanel-select")}
                   <TextToSpeechButton text="Select the date" />
                 </Typography>
               </Box>
@@ -271,7 +273,7 @@ export default function BookingPanel(props: Props) {
                   color="text.primary"
                   sx={{ fontWeight: 700 }}
                 >
-                  Select a time below:
+                  {translate("Bpanel-time")}
                   <TextToSpeechButton text="Select a time below" />
                 </Typography>
               </Box>
@@ -289,20 +291,20 @@ export default function BookingPanel(props: Props) {
                 <List disablePadding>
                   {availabilityLoading ? (
                     <ListItem>
-                      <ListItemText primary="Loading available times..." />
+                      <ListItemText primary={translate("Bpanel-load")} />
                     </ListItem>
                   ) : availabilityError ? (
                     <ListItem>
                       <ListItemText
-                        primary="Unable to load appointment times."
+                        primary={translate("Bpanel-unable")}
                         secondary={availabilityError}
                       />
                     </ListItem>
                   ) : availableTimes.length === 0 ? (
                     <ListItem>
                       <ListItemText
-                        primary="No remaining appointment times available for this date."
-                        secondary="Please choose another date."
+                        primary={translate("Bpanel-no-avai")}
+                        secondary={translate("Bpanel-please")}
                       />
                     </ListItem>
                   ) : (
@@ -337,22 +339,20 @@ export default function BookingPanel(props: Props) {
 
               <TextToSpeechButton
                 text={
-                  selectedTime
-                    ? `Your selected appointment time is ${selectedTime}.`
-                    : "No appointment time selected."
+                  selectedTime ? `${translate("Bpanel-your")} ${selectedTime}.` : translate("Bpanel-no")
                 }
               />
 
               {isMobileLayout ? (
                 <CardActions>
                   <Stack direction="column" spacing={1.5} sx={{ width: "100%" }}>
-                    <Tooltip title="Clear appointment selection" placement="top">
+                    <Tooltip title={translate("Bpanel-clear")} placement="top">
                       <Button variant="outlined" onClick={handleClear} fullWidth>
-                        Clear
+                        {translate("Bpanel-cl")}
                       </Button>
                     </Tooltip>
 
-                    <Tooltip title="Confirm your appointment" placement="top">
+                    <Tooltip title={translate("Bpanel-confirm")} placement="top">
                       <Button
                         variant="contained"
                         disabled={!selectedTime || availabilityLoading}
@@ -360,7 +360,7 @@ export default function BookingPanel(props: Props) {
                         sx={{ backgroundColor: "secondary" }}
                         fullWidth
                       >
-                        Confirm
+                        {translate("Bpanel-conf")}
                       </Button>
                     </Tooltip>
 
@@ -374,23 +374,23 @@ export default function BookingPanel(props: Props) {
                   </Stack>
                 </CardActions>
               ) : (
-                <CardActions>
-                  <Tooltip title="Clear appointment selection" placement="top">
-                    <Button variant="outlined" onClick={handleClear}>
-                      Clear
-                    </Button>
-                  </Tooltip>
+              <CardActions>
+                <Tooltip title={translate("Bpanel-clear")} placement="top">
+                  <Button variant="outlined" onClick={handleClear}>
+                    {translate("Bpanel-cl")}
+                  </Button>
+                </Tooltip>
 
-                  <Tooltip title="Confirm your appointment" placement="top">
-                    <Button
-                      variant="contained"
-                      disabled={!selectedTime || availabilityLoading}
-                      onClick={handleConfirm}
-                      sx={{ backgroundColor: "secondary" }}
-                    >
-                      Confirm
-                    </Button>
-                  </Tooltip>
+                <Tooltip title={translate("Bpanel-confirm")} placement="top">
+                  <Button
+                    variant="contained"
+                    disabled={!selectedTime}
+                    onClick={handleConfirm}
+                    sx={{ bgColor: "secondary" }}
+                  >
+                    {translate("Bpanel-conf")}
+                  </Button>
+                </Tooltip>
 
                   <TextToSpeechButton
                     text={
@@ -413,11 +413,11 @@ export default function BookingPanel(props: Props) {
         fullWidth={isMobileLayout}
         maxWidth={isMobileLayout ? "xs" : false}
       >
-        <DialogTitle id="appointment-confirmed-title">Appointment selection saved</DialogTitle>
+        <DialogTitle id="appointment-confirmed-title">{translate("Bpanel-app")}</DialogTitle>
 
         <DialogContent dividers>
           <Typography variant="body1">
-            {prettyDate} at {selectedTime}
+            {prettyDate} {translate("Bpanel-at")} {selectedTime}
           </Typography>
         </DialogContent>
 
@@ -427,7 +427,7 @@ export default function BookingPanel(props: Props) {
             variant="contained"
             fullWidth={isMobileLayout}
           >
-            OK
+            {translate("Bpanel-ok")}
           </Button>
         </DialogActions>
       </Dialog>

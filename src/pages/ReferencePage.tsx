@@ -18,6 +18,7 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/NavBar';
 import TextToSpeechButton from "../components/TextToSpeechButton";
 import AppointmentOptionsDialog from "../components/ReferencePageComponents/AppointmentOptionsDialog";
@@ -31,6 +32,7 @@ const ReferencePage = () => {
     const [ scanning, setScanning ] = useState(false);
     const [ refNo, setRefNo ] = useState('');
     const [ qrScanError, setQrScanError] = useState('');
+    const {  t: translate } = useTranslation();
     const startingRef = useRef(false);
     const navigate = useNavigate();
     const {
@@ -203,10 +205,10 @@ const ReferencePage = () => {
                 </Alert>
             )}
             <Typography variant="h3" component="h1"  gutterBottom sx={{ fontWeight: 700 , mb: 6 }}>
-                Use one of the following methods
+                {translate("reference-use")}
             </Typography>
             <Typography variant="h4" component="h2"  gutterBottom sx={{ fontWeight: 700 , mb: 4 }}>
-                Check your queue details OR Check in for an appointment
+                {translate("reference-check")}
                 <TextToSpeechButton text='Use one of the following methods to either check your queue details or check in for an appointment'/>
             </Typography>
             <Grid container spacing={3} sx={{ justifyContent: "center", height: '80%' }}>
@@ -217,20 +219,20 @@ const ReferencePage = () => {
                                 <SearchRoundedIcon />
                             </Avatar>
                             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700}}>
-                                Manual Entry
+                                {translate("reference-manual")}
                             </Typography>
                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
-                                Enter your ticket number OR appointment reference number here:
+                                {translate("reference-enter")}
                             </Typography>
                             <TextToSpeechButton text='For manual entry, enter your ticket number to see your queue details or enter your appointment reference number to check in for an appointment.'/>
                         </CardContent>
 
                         <CardActions sx={{ px: 4, pb: 4}}>
                             <Box sx={{ mt: 'auto', width: '100%' }}>
-                                <TextField fullWidth value={refNo} id="outlined-search" label="Ticket/Appointment Number" sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
-                                <Tooltip title="Check your status" placement="top">
+                                <TextField fullWidth value={refNo} id="outlined-search" label={translate("reference-tick")} sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
+                                <Tooltip title={translate("reference-check-status")} placement="top">
                                     <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
-                                        Check Status
+                                         {translate("reference-check-status")}
                                     </Button>
                                 </Tooltip>
                             </Box>
@@ -245,10 +247,10 @@ const ReferencePage = () => {
                             <QrCode2OutlinedIcon />
                             </Avatar>
                             <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-                                Scan QR Code
+                                {translate("reference-scan")}
                             </Typography>
-                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700 }}>
-                                Click to use the camera to scan your QR code:
+                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700, mb: 2 }}>
+                                 {translate("reference-click")}
                             </Typography>
                             <TextToSpeechButton text='For QR code entry, click the button below to use the camera to scan your QR code.'/>
                         </CardContent>
@@ -260,7 +262,7 @@ const ReferencePage = () => {
                                     <>
                                         <QrCodeScannerRoundedIcon fontSize="large"   />
                                         <Box component="span" sx={{ mt: 2, fontWeight: 600, fontSize:"large" }}>
-                                            Tap to open scanner 
+                                             {translate("reference-tap")}
                                         </Box>
                                     </>
                                     )}
@@ -268,13 +270,19 @@ const ReferencePage = () => {
                                 <Box sx={{  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10, visibility: scanning ? 'visible' : 'hidden', pointerEvents: scanning ? 'auto' : 'none', overflow: 'hidden', borderRadius: 1, }}>
                                     <div id="qr-reader" role="region" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
                                     {scanning && (
-                                        <Tooltip title="Cancel QR Scan" placement="top">
+                                        <Tooltip title={translate("reference-cancelqr")} placement="top">
                                             <Button variant='contained' size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: '3%', right: '2%', zIndex: 20 }} >
-                                                Cancel
+                                                {translate("reference-cancel")}
                                             </Button>
                                         </Tooltip>
                                     )}
                                 </Box>
+                                {/* Placeholder showing qr code extracts text */}
+                                {refNo && (
+                                    <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
+                                        {translate("reference-ref")}: {refNo}
+                                    </Typography>
+                                )}
                             </Box>
                         </CardActions>
                     </Card>

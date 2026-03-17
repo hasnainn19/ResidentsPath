@@ -8,7 +8,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 
 import FormStepLayout from "./FormStepLayout";
-import { LANGUAGE_OPTIONS } from "../../pages/Form/data/languages";
 import {
   clearDraft,
   formatSavedTime,
@@ -53,9 +52,6 @@ export default function ResumeFromSave() {
       subtitle={
         savedAt ? `We found a saved form from ${savedAt}.` : "We found a saved form on this device."
       }
-      languageValue={formData.language}
-      onLanguageChange={(code) => setFormData((prev) => ({ ...prev, language: code }))}
-      languageOptions={LANGUAGE_OPTIONS}
     >
       <Stack spacing={{ xs: 3, sm: 4 }}>
         <Typography variant="body1">

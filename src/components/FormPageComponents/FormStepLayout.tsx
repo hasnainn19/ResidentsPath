@@ -4,7 +4,6 @@
  * Provides the shared header and structure across all steps, including:
  * - Title/subtitle area
  * - Step progress indicator when enabled
- * - Language selector
  * - TTS instructions action
  * - Back button when not on Step 1
  *
@@ -20,13 +19,9 @@ import {
   Paper,
   Stack,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import type { LanguageOption } from "../../pages/Form/model/formFieldTypes";
+import { useTranslation } from 'react-i18next';
 import TextToSpeechButton from "../TextToSpeechButton";
 
 type Props = {
@@ -38,16 +33,13 @@ type Props = {
 
   onBack?: () => void;
 
-  languageValue: string;
-  onLanguageChange: (code: string) => void;
-  languageOptions: LanguageOption[];
-
   children: ReactNode;
 };
 
 export default function FormStepLayout(props: Props) {
   const showProgress = props.showProgress ?? true;
   const percent = Math.round((props.step / props.totalSteps) * 100);
+  const {  t: translate } = useTranslation();
 
   // Scroll to top when step changes so that user always starts at the top of the form
   useEffect(() => {
@@ -58,7 +50,7 @@ export default function FormStepLayout(props: Props) {
   const listenText = [
     props.title,
     props.subtitle,
-    showProgress ? `Step ${props.step} of ${props.totalSteps}.` : null,
+    showProgress ? `${translate("formlayout-step")} ${props.step} ${translate("formlayout-of")} ${props.totalSteps}.` : null,
   ]
     .filter(Boolean)
     .join(". ");
@@ -99,7 +91,7 @@ export default function FormStepLayout(props: Props) {
                 sx={{ textTransform: "none" }}
               >
                 <ArrowBackIcon sx={{ mr: 1 }} />
-                Previous
+                {translate("formlayout-prev")}
               </Button>
             ) : (
               <Box sx={{ width: { xs: 0, sm: 80 } }} />
@@ -108,7 +100,7 @@ export default function FormStepLayout(props: Props) {
             <TextToSpeechButton text={listenText} />
           </Stack>
 
-          {/* Title + language */}
+          {/* Title */}
           <Stack
             direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
@@ -126,25 +118,6 @@ export default function FormStepLayout(props: Props) {
                 </Typography>
               )}
             </Box>
-
-            <FormControl
-              size="small"
-              sx={{ minWidth: { xs: 0, sm: 220 }, width: { xs: "100%", sm: "auto" } }}
-            >
-              <InputLabel id="lang-label">Language</InputLabel>
-              <Select
-                labelId="lang-label"
-                label="Language"
-                value={props.languageValue}
-                onChange={(e) => props.onLanguageChange(String(e.target.value))}
-              >
-                {props.languageOptions.map((opt) => (
-                  <MenuItem key={opt.code} value={opt.code}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           </Stack>
 
           {showProgress ? (
@@ -153,10 +126,10 @@ export default function FormStepLayout(props: Props) {
               <Box sx={{ display: { xs: "block", sm: "none" }, mb: 2 }}>
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
                   <Typography variant="body2" fontWeight={700}>
-                    Step {props.step} of {props.totalSteps}
+                     {translate("formlayout-step")} {props.step} {translate("formlayout-of")} {props.totalSteps}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {percent}% complete
+                    {percent}%  {translate("formlayout-comp")}
                   </Typography>
                 </Stack>
                 <LinearProgress variant="determinate" value={percent} />
@@ -168,10 +141,10 @@ export default function FormStepLayout(props: Props) {
               >
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
                   <Typography variant="body2" fontWeight={700}>
-                    Step {props.step} of {props.totalSteps}
+                   {translate("formlayout-step")} {props.step} {translate("formlayout-of")} {props.totalSteps}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {percent}% complete
+                    {percent}% {translate("formlayout-comp")}
                   </Typography>
                 </Stack>
                 <LinearProgress variant="determinate" value={percent} />

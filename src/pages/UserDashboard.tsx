@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
@@ -32,6 +33,7 @@ export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const { user } = useUser();
     const client = generateClient<Schema>({ authMode: "userPool" });
+    const {  t: translate } = useTranslation();
 
     const {
         position, waitTimeLower, waitTimeUpper,
@@ -142,10 +144,10 @@ export default function UserDashboard() {
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {showNotificationsAlert && (
-                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>Notifications enabled. We'll send you updates as your turn approaches.</Alert>
+                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>{translate("userdash-notifications")}</Alert>
                     )}
                     {showStepOutAlert && (
-                        <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>You've stepped out. We've notified staff and you'll receive updates about your estimated waiting time.</Alert>
+                        <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>{translate("userdash-stepout")}</Alert>
                     )}
                     {(errors || fetchError) && (
                         <Alert severity="error" color="error" onClose={() => setErrors('')}>
@@ -157,7 +159,7 @@ export default function UserDashboard() {
                             <Stack spacing={4} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <Item sx={{backgroundColor:'success.main'}}>
-                                        <Typography variant='h4'>You are in the queue!
+                                        <Typography variant='h4'>{translate("userdash-you")}
                                             <TextToSpeechButton text='You are currently in the queue!'/>
                                         </Typography>
                                     </Item>
@@ -165,17 +167,17 @@ export default function UserDashboard() {
                                 <Stack direction='row' spacing={2}>
                                     <Grid size={6}>
                                         <Item>
-                                            <Typography variant='body1'>There are </Typography>
+                                            <Typography variant='body1'>{translate("userdash-there")}</Typography>
                                             <Typography variant='h5' sx={{color:'primary.main'}}>{position}</Typography>
-                                            <Typography variant='body1'>people ahead of you</Typography>
+                                            <Typography variant='body1'>{translate("userdash-people")}</Typography>
                                             <TextToSpeechButton text={`There are ${position} people ahead of you`}/>
                                         </Item>
                                     </Grid>
                                     <Grid size={6}>
                                         <Item>
-                                            <Typography variant='body1'>Estimated waiting time is:</Typography>
+                                            <Typography variant='body1'>{translate("userdash-est")}</Typography>
                                             <Typography variant='h5' sx={{color:'primary.main'}}>
-                                                {waitTimeLower} to {waitTimeUpper} minutes
+                                                {waitTimeLower} {translate("userdash-to")} {waitTimeUpper} {translate("userdash-min")}
                                             </Typography>
                                             <TextToSpeechButton text={`Estimated wait time is ${waitTimeLower} to ${waitTimeUpper} minutes`} />
                                         </Item>
@@ -185,10 +187,10 @@ export default function UserDashboard() {
                                     <Item sx={{ textAlign: 'left', backgroundColor: '#e8f5e9' }}>
                                         <Stack spacing={1}>
                                             <Typography variant='h6'>
-                                                Would you like to receive notification updates about your status in the queue?
+                                                {translate("userdash-would")}
                                                 <TextToSpeechButton text='Would you like to receive notification updates about your status in the queue? We can send you an SMS or email as your turn approaches.' />
                                             </Typography>
-                                            <Typography variant='body1'>We can send you an SMS or email as your turn approaches.</Typography>
+                                            <Typography variant='body1'>{translate("userdash-wesend")}</Typography>
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
@@ -197,7 +199,7 @@ export default function UserDashboard() {
                                                     endIcon={<NotificationsIcon />}
                                                     onClick={() => notificationsEnabled ? handleDisableNotifications() : setEnableNotificationsDialogOpen(true)}
                                                 >
-                                                    {notificationsEnabled ? 'Stop notifications' : 'Enable notifications'}
+                                                    {notificationsEnabled ? translate("userdash-stopnotf") : translate("userdash-enablenotf")}
                                                 </Button>
                                             </Stack>
                                         </Stack>
@@ -206,10 +208,10 @@ export default function UserDashboard() {
                                 <Grid size={12}>
                                     <Item sx={{ textAlign: 'left', backgroundColor:'#e0eeff'}}>
                                         <Stack spacing={1}>
-                                            <Typography variant='h6'>Need to step out?
+                                            <Typography variant='h6'>{translate("userdash-need")}
                                                 <TextToSpeechButton text='If you need to leave the building, click the button below. We can send you updates as your turn approaches. Upon returning, click the button again.'/>
                                             </Typography>
-                                            <Typography variant='body1'>If you need to leave the building, we can send you updates as your turn approaches.</Typography>
+                                            <Typography variant='body1'>{translate("userdash-if")}</Typography>
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     className='dashboardBtn'
@@ -218,7 +220,7 @@ export default function UserDashboard() {
                                                     endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}
                                                     onClick={steppedOut ? handleReturned : handleStepOut}
                                                 >
-                                                    {steppedOut ? "I've returned" : "I'm stepping out"}
+                                                    {steppedOut ? translate("userdash-ret") : translate("userdash-im")}
                                                 </Button>
                                             </Stack>
                                         </Stack>
@@ -228,12 +230,12 @@ export default function UserDashboard() {
                                     <Item sx={{ textAlign: 'left', backgroundColor:'warning.light'}}>
                                         <Stack direction='row' alignItems='flex-start'>
                                             <DangerousIcon sx={{color:'red', m:0.6}}/>
-                                            <Typography variant='h6'>Please note
+                                            <Typography variant='h6'>{translate("userdash-please")}
                                                 <TextToSpeechButton text='Please note, wait times are estimated and may vary. Urgent cases may be prioritised and seen before you. We appreciate your patience and understanding.' />
                                             </Typography>
                                         </Stack>
-                                        <Typography variant='body1'>Wait times are estimated and may vary. Urgent cases may be prioritised and seen before you.</Typography>
-                                        <Typography variant='subtitle2' color={'error.main'} fontWeight={500}>We appreciate your patience and understanding.</Typography>
+                                        <Typography variant='body1'>{translate("userdash-wait")}</Typography>
+                                        <Typography variant='subtitle2' color={'error.main'} fontWeight={500}>{translate("userdash-we")}</Typography>
                                     </Item>
                                 </Grid>
                             </Stack>
@@ -243,8 +245,8 @@ export default function UserDashboard() {
             </Box>
 
             <ContactDetailsDialog
-                title="How would you like to receive updates?"
-                description="We'll notify you as your turn approaches so you can return in time."
+                title={translate("userdash-wouldyou")}
+                description={translate("userdash-wewill")}
                 confirmLabel="Step out"
                 open={stepOutDialogOpen}
                 onClose={() => setStepOutDialogOpen(false)}
@@ -253,8 +255,8 @@ export default function UserDashboard() {
                 prefillPhone={user?.phoneNumber}
             />
             <ContactDetailsDialog
-                title="Get queue notifications"
-                description="We'll notify you when your turn is approaching."
+                title={translate("userdash-getqueue")}
+                description={translate("userdash-notify")}
                 confirmLabel="Enable notifications"
                 open={enableNotificationsDialogOpen}
                 onClose={() => setEnableNotificationsDialogOpen(false)}

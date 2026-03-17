@@ -89,7 +89,7 @@ const CaseItemCard = ({ caseItem }: { caseItem: CaseSummary }) => {
             </Stack>
 
             <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
-              {caseItem.title} #{caseItem.referenceNumber}
+              {caseItem?.caseName} #{caseItem.referenceNumber}
             </Typography>
 
             <Divider sx={{ mb: 1 }} />
