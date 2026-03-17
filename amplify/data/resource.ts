@@ -23,6 +23,7 @@ import { checkInAppointmentByReference } from "../functions/checkInAppointmentBy
 import { cancelAppointmentByReference } from "../functions/cancelAppointmentByReference/resource";
 import { submitCaseFollowUp } from "../functions/submitCaseFollowUp/resource";
 import { getCaseDetails } from "../functions/getCaseDetails/resource";
+import { dailySeedQueue } from "../functions/dailySeedQueue/resource";
 
 /**
  * id, createdAt, and updatedAt fields are automatically added to all models
@@ -702,6 +703,7 @@ const schema = a
     allow.resource(getCaseDetails),
     allow.resource(handleSteppedOut),
     allow.resource(toggleNotifications),
+    allow.resource(dailySeedQueue).to(["query", "mutate"]),
   ]);
 export type Schema = ClientSchema<typeof schema>;
 
