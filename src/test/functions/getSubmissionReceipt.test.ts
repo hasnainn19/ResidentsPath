@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const { mockLoadAccessibleCase, mockListTickets, mockListAppointments } = vi.hoisted(() => ({
   mockLoadAccessibleCase: vi.fn(),
@@ -46,8 +46,14 @@ function makeEvent(referenceNumber: string, identity: unknown = null) {
 
 describe("getSubmissionReceipt handler", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    mockListTickets.mockResolvedValue({ data: [], errors: undefined });
+    mockListAppointments.mockResolvedValue({ data: [], errors: undefined });
     vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.mocked(console.error).mockRestore?.();
   });
 
   // -- Case access --
