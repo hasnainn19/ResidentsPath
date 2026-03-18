@@ -7,10 +7,9 @@ const client = await getAmplifyClient();
 /**
  * Returns the median value from a sorted array of numbers.
  * Used to calculate the median time from completed tickets.
+ * Always called with exactly 5 durations (guaranteed by the completedTickets.length >= 5 check).
  */
 function median(values: number[]) {
-  if (values.length === 0) return 0;
-
   values.sort((a, b) => a - b);
 
   const mid = Math.floor(values.length / 2);
@@ -52,22 +51,21 @@ async function getTodayTickets(departmentName:string){
 /**
  * Calculates the median time from the provided completed tickets and
  * updates the department's estimatedWaitingTime in DynamoDB with the result.
+ * Only called when completedTickets.length >= 5, so durations always has at least 5 values.
  *
  * @param completedTickets - The most recent completed tickets to calculate the median from
  * @param departmentName - The ID of the department to update
- * @returns The calculated median time in minutes, or 0 if it could not be determined
+ * @returns The calculated median time in minutes, or 0 if all durations are zero
  */
 async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["type"][], departmentName:string)
 {
-  let estWaitingTime=0;
+  let estWaitingTime = 0;
   const durations: number[] = [];
 
   for (const ticket of completedTickets) {
 
-      if (!ticket.createdAt || !ticket.completedAt) continue;
-
       const start = new Date(ticket.createdAt).getTime();
-      const end = new Date(ticket.completedAt).getTime();
+      const end = new Date(ticket.completedAt!).getTime();
 
       const minutes = (end - start) / 60000;
 
@@ -85,7 +83,8 @@ async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["ty
           estimatedWaitingTime: Math.round(estWaitingTime),
       });
   }
-    return estWaitingTime;
+
+  return estWaitingTime;
 }
 
 /**
@@ -145,8 +144,8 @@ export async function recalculateDepartmentQueue(departmentName:string) {
     const completedTickets = tickets
       .filter(t => t.status === "COMPLETED" && t.completedAt)
       .sort((a,b) =>
-        new Date(b.completedAt ?? 0).getTime() -
-        new Date(a.completedAt ?? 0).getTime()
+        new Date(b.completedAt!).getTime() -
+        new Date(a.completedAt!).getTime()
       )
       .slice(0,5);
     
@@ -160,9 +159,10 @@ export async function recalculateDepartmentQueue(departmentName:string) {
     let estWaitingTime = 0;
     if (completedTickets.length >= 5) {
         estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentName);
-    } else {
+    } 
+    else {
         estWaitingTime =
-          department?.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department?.name);
+          department.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department.name);
     }
     
     await updateTickets(waitingTickets, estWaitingTime);
