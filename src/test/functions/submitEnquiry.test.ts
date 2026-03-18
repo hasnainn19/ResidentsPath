@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const {
   mockUserGet,
@@ -144,6 +144,11 @@ describe("submitEnquiry handler", () => {
     });
   });
 
+  afterEach(() => {
+    vi.mocked(console.error).mockRestore?.();
+    vi.mocked(console.warn).mockRestore?.();
+  });
+
   // -- Validation --
 
   it("rejects invalid input with VALIDATION error", async () => {
@@ -263,7 +268,7 @@ describe("submitEnquiry handler", () => {
     expect(mockClaimCaseReferenceNumber).toHaveBeenCalledTimes(10);
   });
 
-  it("throws non-conditional-check errors during reference allocation", async () => {
+  it("returns SERVER error for non-conditional-check errors during reference allocation", async () => {
     mockClaimCaseReferenceNumber.mockRejectedValue(new Error("DynamoDB timeout"));
 
     const result = await handler(makeEvent(validInput));
