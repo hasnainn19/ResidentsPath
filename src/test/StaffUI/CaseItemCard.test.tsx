@@ -7,7 +7,10 @@ import type { CaseSummary } from "../../hooks/useCases";
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
@@ -54,7 +57,9 @@ describe("CaseItemCard", () => {
 
   it("renders the description", () => {
     renderCard();
-    expect(screen.getByText("Needs urgent housing support")).toBeInTheDocument();
+    expect(
+      screen.getByText("Needs urgent housing support"),
+    ).toBeInTheDocument();
   });
 
   it("renders 'No description provided.' when description is null", () => {
@@ -99,7 +104,18 @@ describe("CaseItemCard", () => {
 
   it("renders the department label for Council_Tax_Or_Housing_Benefit", () => {
     renderCard({ departmentName: "Council_Tax_Or_Housing_Benefit" });
-    expect(screen.getByText("Council Tax or Housing Benefit")).toBeInTheDocument();
+    expect(
+      screen.getByText("Council Tax or Housing Benefit"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the department chip with default color for an unknown department name", () => {
+    const { container } = renderCard({
+      departmentName: "Unknown Department" as any,
+    });
+    expect(
+      container.querySelector(".MuiChip-colorDefault"),
+    ).toBeInTheDocument();
   });
 
   it("navigates to the case detail route on chevron button click", () => {
