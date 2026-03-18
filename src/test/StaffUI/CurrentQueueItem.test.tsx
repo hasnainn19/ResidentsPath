@@ -323,12 +323,9 @@ describe("CurrentQueueItem", () => {
     expect(screen.getByText("Confirm Change")).toBeInTheDocument();
   });
 
-  describe("error logging", () => {
-    it("logs an error when setCasePriority fails", async () => {
+  describe("error alerts", () => {
+    it("shows an alert when setCasePriority fails", async () => {
       mockSetCasePriority.mockRejectedValueOnce(new Error("network error"));
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
 
       renderItem({ status: "Standard" });
       fireEvent.click(screen.getByRole("button", { name: /edit priority/i }));
@@ -336,42 +333,32 @@ describe("CurrentQueueItem", () => {
       fireEvent.click(screen.getByText("Set to Priority"));
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          "CurrentQueueItem: setCasePriority failed",
-          expect.any(Error),
-        );
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(
+          screen.getByText("Failed to update priority. Please try again."),
+        ).toBeInTheDocument();
       });
-
-      consoleSpy.mockRestore();
     });
 
-    it("logs an error when flagCaseSafeguarding fails", async () => {
+    it("shows an alert when flagCaseSafeguarding fails", async () => {
       mockFlagCaseSafeguarding.mockRejectedValueOnce(
         new Error("network error"),
       );
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
 
       renderItem({ isFlagged: false });
       const flagSpan = screen.getByLabelText("Flag case");
       fireEvent.click(flagSpan.querySelector("button")!);
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          "CurrentQueueItem: flagCaseSafeguarding failed",
-          expect.any(Error),
-        );
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(
+          screen.getByText("Failed to update flag. Please try again."),
+        ).toBeInTheDocument();
       });
-
-      consoleSpy.mockRestore();
     });
 
-    it("logs an error when Ticket.update fails on save notes", async () => {
+    it("shows an alert when Ticket.update fails on save notes", async () => {
       mockUpdate.mockRejectedValueOnce(new Error("write failed"));
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
 
       renderItem({ notes: "Some note" });
       fireEvent.click(
@@ -383,12 +370,11 @@ describe("CurrentQueueItem", () => {
       fireEvent.click(screen.getByRole("button", { name: /^confirm$/i }));
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          "Failed to save note for case:case-1",
-        );
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(
+          screen.getByText("Failed to save notes. Please try again."),
+        ).toBeInTheDocument();
       });
-
-      consoleSpy.mockRestore();
     });
   });
 });

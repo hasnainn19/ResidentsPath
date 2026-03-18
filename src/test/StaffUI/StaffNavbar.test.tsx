@@ -78,17 +78,15 @@ describe("StaffNavbar", () => {
     mockAuthData.familyName = "Smith";
   });
 
-  it("logs an error when signOut throws", async () => {
+  it("shows an alert when signOut throws", async () => {
     vi.mocked(signOut).mockRejectedValueOnce(new Error("auth error"));
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     renderNavbar();
     fireEvent.click(screen.getByText("Logout"));
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error signing out:",
-        expect.any(Error),
-      );
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(
+        screen.getByText("Failed to sign out. Please try again."),
+      ).toBeInTheDocument();
     });
-    consoleSpy.mockRestore();
   });
 });
