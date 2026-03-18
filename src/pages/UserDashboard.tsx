@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { generateClient } from "aws-amplify/api";
-import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
+import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import CloseIcon from '@mui/icons-material/Close';
 
 import type { Schema } from '../../amplify/data/resource';
 import TextToSpeechButton from '../components/TextToSpeechButton';
@@ -145,10 +146,24 @@ export default function UserDashboard() {
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {showNotificationsAlert && (
-                        <Alert severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>{translate("userdash-notifications")}</Alert>
+                        <Alert aria-label='notifications-alert' severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>{translate("userdash-notifications")}</Alert>
                     )}
                     {showStepOutAlert && (
-                        <Alert severity="info" sx={{mb:2}} onClose={() => setShowStepOutAlert(false)}>{translate("userdash-stepout")}</Alert>
+                        <Alert
+                        aria-label='stepOut-alert'
+                        severity="info"
+                        sx={{mb:2}}
+                        action={
+                            <IconButton
+                                aria-label="close-stepOut-alert"
+                                onClick={() => setShowStepOutAlert(false)}
+                                >
+                                <CloseIcon />
+                            </IconButton>
+                        }
+                        >
+                            {translate("userdash-stepout")}
+                        </Alert>
                     )}
                     {(errors || fetchError) && (
                         <Alert severity="error" color="error" onClose={() => setErrors('')}>
@@ -194,6 +209,7 @@ export default function UserDashboard() {
                                             <Typography variant='body1'>{translate("userdash-wesend")}</Typography>
                                             <Stack direction='row' spacing={2}>
                                                 <Button
+                                                    aria-label='notifications-button'
                                                     className='dashboardBtn'
                                                     variant={notificationsEnabled ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
@@ -215,6 +231,7 @@ export default function UserDashboard() {
                                             <Typography variant='body1'>{translate("userdash-if")}</Typography>
                                             <Stack direction='row' spacing={2}>
                                                 <Button
+                                                    aria-label='stepOut-button'
                                                     className='dashboardBtn'
                                                     variant={steppedOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
@@ -249,6 +266,7 @@ export default function UserDashboard() {
                 title={translate("userdash-wouldyou")}
                 description={translate("userdash-wewill")}
                 confirmLabel="Step out"
+                aria-label='stepOut-dialog'
                 open={stepOutDialogOpen}
                 onClose={() => setStepOutDialogOpen(false)}
                 onConfirm={handleStepOutConfirm}
@@ -259,6 +277,7 @@ export default function UserDashboard() {
                 title={translate("userdash-getqueue")}
                 description={translate("userdash-notify")}
                 confirmLabel="Enable notifications"
+                aria-label='notifications-dialog'
                 open={enableNotificationsDialogOpen}
                 onClose={() => setEnableNotificationsDialogOpen(false)}
                 onConfirm={handleEnableNotificationsConfirm}
