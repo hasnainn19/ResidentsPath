@@ -1,5 +1,5 @@
 import type { ScheduledHandler } from "aws-lambda";
-import { getAmplifyClient } from "../utils/amplifyClient";
+import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
 import { createQueueSubmission } from "../utils/submissionShared";
 
 type SeedDepartmentName =
@@ -40,39 +40,49 @@ const SEED_CASES: { caseId: string; departmentName: SeedDepartmentName }[] = [
 /**
  * Runs every day at midnight UTC via EventBridge, on the main (production) deployment only —
  * as that is where the seeded cases exist.
- * Clears all WAITING tickets for the seeded cases and creates one fresh ticket per case,
- * skipping any case that has been RESOLVED or CLOSED.
  */
 export const handler: ScheduledHandler = async () => {
   const client = await getAmplifyClient();
 
-  for (const { caseId, departmentName } of SEED_CASES) {
-    const logPrefix = `dailySeedQueue [${departmentName}]`;
+  await Promise.all(
+    SEED_CASES.map(({ caseId, departmentName }) => seedCase(client, caseId, departmentName)),
+  );
+};
 
-    // fetches the case and skips if RESOLVED or CLOSED
-    const { data: caseRecord, errors: caseErrors } = await client.models.Case.get({ id: caseId });
+/**
+ * Clears all WAITING tickets for the seeded cases and creates one fresh ticket per case,
+ * skipping any case that has been RESOLVED or CLOSED.
+ */
+async function seedCase(
+  client: AmplifyClient,
+  caseId: string,
+  departmentName: SeedDepartmentName,
+): Promise<void> {
+  const logPrefix = `dailySeedQueue [${departmentName}]`;
 
-    if (caseErrors?.length || !caseRecord) {
-      console.error(`${logPrefix}: Failed to fetch case ${caseId}`, caseErrors);
-      continue;
-    }
+  const { data: caseRecord, errors: caseErrors } = await client.models.Case.get({ id: caseId });
 
-    if (caseRecord.status === "RESOLVED" || caseRecord.status === "CLOSED") {
-      console.log(`${logPrefix}: Skipping case ${caseId} with status ${caseRecord.status}`);
-      continue;
-    }
+  if (caseErrors?.length || !caseRecord) {
+    console.error(`${logPrefix}: Failed to fetch case ${caseId}`, caseErrors);
+    return;
+  }
 
-    // Clears old tickets by listing them by caseId, filters for WAITING, deletes them
-    const { data: tickets, errors: ticketErrors } = await client.models.Ticket.listTicketByCaseId({ caseId });
+  if (caseRecord.status === "RESOLVED" || caseRecord.status === "CLOSED") {
+    console.log(`${logPrefix}: Skipping case ${caseId} with status ${caseRecord.status}`);
+    return;
+  }
 
-    if (ticketErrors?.length) {
-      console.error(`${logPrefix}: Failed to list tickets for case ${caseId}`, ticketErrors);
-      continue;
-    }
+  const { data: tickets, errors: ticketErrors } = await client.models.Ticket.listTicketByCaseId({ caseId });
 
-    const waitingTickets = (tickets ?? []).filter((t) => t.status === "WAITING");
+  if (ticketErrors?.length) {
+    console.error(`${logPrefix}: Failed to list tickets for case ${caseId}`, ticketErrors);
+    return;
+  }
 
-    for (const ticket of waitingTickets) {
+  const waitingTickets = (tickets ?? []).filter((t) => t.status === "WAITING");
+
+  await Promise.all(
+    waitingTickets.map(async (ticket) => {
       const { errors: deleteErrors } = await client.models.Ticket.delete({ id: ticket.id });
       if (deleteErrors?.length) {
         console.error(`${logPrefix}: Failed to delete ticket ${ticket.id}`, deleteErrors);
@@ -80,44 +90,44 @@ export const handler: ScheduledHandler = async () => {
       else {
         console.log(`${logPrefix}: Deleted WAITING ticket ${ticket.id}`);
       }
-    }
+    }),
+  );
 
-    const visitState = {
-      createdTicketId: null,
-      claimedQueueId: null,
-      claimedTicketDigits: null,
-      claimedQueuePositionKey: null,
-      createdAppointmentId: null,
-      claimedAppointmentSlot: null,
-      claimedBookingReferenceNumber: null,
-    };
+  const visitState = {
+    createdTicketId: null,
+    claimedQueueId: null,
+    claimedTicketDigits: null,
+    claimedQueuePositionKey: null,
+    createdAppointmentId: null,
+    claimedAppointmentSlot: null,
+    claimedBookingReferenceNumber: null,
+  };
 
-    /**
-     * Creates a fresh ticket via createQueueSubmission which handles:
-     * - Ticket number generation (e.g. H001) — resets naturally each day since the queue ID is date-based
-     * - Queue position counter — also date-based, so starts fresh each day
-     * - Estimated wait times from the Department record
-     * Queue recalculation is handled automatically since the Ticket table DynamoDB stream fires on INSERT,
-     * which triggers onTicketCompleted, which calls recalculateDepartmentQueue for the affected department
-     */
-    try {
-      const result = await createQueueSubmission({
-        client,
-        caseId,
-        departmentName,
-        logPrefix,
-        visitState,
-      });
+  /**
+   * Creates a fresh ticket via createQueueSubmission which handles:
+   * - Ticket number generation (e.g. H001) — resets naturally each day since the queue ID is date-based
+   * - Queue position counter — also date-based, so starts fresh each day
+   * - Estimated wait times from the Department record
+   * Queue recalculation is handled automatically since the Ticket table DynamoDB stream fires on INSERT,
+   * which triggers onTicketCompleted, which calls recalculateDepartmentQueue for the affected department
+   */
+  try {
+    const result = await createQueueSubmission({
+      client,
+      caseId,
+      departmentName,
+      logPrefix,
+      visitState,
+    });
 
-      if (!result.ok) {
-        console.error(`${logPrefix}: Failed to create ticket — ${result.errorMessage}`);
-      }
-      else {
-        console.log(`${logPrefix}: Created ticket ${result.ticketNumber} for case ${caseId}`);
-      }
+    if (!result.ok) {
+      console.error(`${logPrefix}: Failed to create ticket — ${result.errorMessage}`);
+    } 
+    else {
+      console.log(`${logPrefix}: Created ticket ${result.ticketNumber} for case ${caseId}`);
     }
-    catch (error) {
-      console.error(`${logPrefix}: Unexpected error while creating ticket for case ${caseId}`, error);
-    }
+  } 
+  catch (error) {
+    console.error(`${logPrefix}: Unexpected error while creating ticket for case ${caseId}`, error);
   }
-};
+}
