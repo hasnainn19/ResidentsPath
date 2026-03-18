@@ -206,6 +206,33 @@ describe("submitEnquiry handler", () => {
     expect(mockUserCreate).not.toHaveBeenCalled();
   });
 
+  it("skips User.update when no fields to update", async () => {
+    mockUserGet.mockResolvedValue({
+      data: { id: "user-sub", isRegistered: true },
+      errors: undefined,
+    });
+
+    const inputWithBlankDetails = {
+      ...validInput,
+      firstName: " ",
+      lastName: " ",
+      email: " ",
+      phone: " ",
+      middleName: "",
+      preferredName: "",
+      pronouns: "",
+      pronounsOtherText: "",
+      addressLine1: "",
+      addressLine2: "",
+      addressLine3: "",
+      townOrCity: "",
+      postcode: "",
+    };
+    const result = await handler(makeEvent(inputWithBlankDetails, { sub: "user-sub" }));
+    expect(result?.ok).toBe(true);
+    expect(mockUserUpdate).not.toHaveBeenCalled();
+  });
+
   it("falls back to create guest user when User.get throws", async () => {
     mockUserGet.mockRejectedValue(new Error("error"));
 
@@ -322,12 +349,13 @@ describe("submitEnquiry handler", () => {
     expect(result?.referenceNumber).toBeDefined();
   });
 
-  it("returns CONFLICT error when appointment slot is taken", async () => {
+  it("returns CONFLICT error and cleans up when appointment slot is taken", async () => {
     mockCreateAppointmentSubmission.mockResolvedValue({
       ok: false,
       errorCode: "CONFLICT",
       errorMessage: "Slot unavailable",
     });
+    mockCaseDelete.mockResolvedValue({ errors: undefined });
 
     const result = await handler(
       makeEvent({
@@ -340,6 +368,8 @@ describe("submitEnquiry handler", () => {
     expect(result?.ok).toBe(false);
     expect(result?.errorCode).toBe("CONFLICT");
     expect(result?.errorMessage).toBe("Slot unavailable");
+    expect(mockCleanupCreatedVisitResources).toHaveBeenCalled();
+    expect(mockCaseDelete).toHaveBeenCalledWith({ id: "case1" });
   });
 
   // -- Cleanup on failure --
