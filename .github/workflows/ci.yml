@@ -38,5 +38,3 @@ jobs:
 
       - name: Run tests
         run: npm run test
-
-      - run: echo "Running empty CI workflow for pull request to main branch"
