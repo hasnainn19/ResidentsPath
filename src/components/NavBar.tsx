@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppBar, Box, Toolbar, Typography, Button, Menu, MenuItem, Tooltip, Stack, IconButton } from '@mui/material';
-import { AccountCircle } from '@mui/icons-material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { signOut } from 'aws-amplify/auth';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -104,7 +104,7 @@ export default function NavBar() {
 
 					<Box>
 						<IconButton onClick={handleOpenUserMenu} color="inherit">
-							<AccountCircle />
+							<AccountCircleIcon />
 						</IconButton>
 						<Menu
 							id="menu-appbar"
