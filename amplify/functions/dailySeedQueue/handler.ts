@@ -44,9 +44,18 @@ const SEED_CASES: { caseId: string; departmentName: SeedDepartmentName }[] = [
 export const handler: ScheduledHandler = async () => {
   const client = await getAmplifyClient();
 
-  await Promise.all(
+  const results = await Promise.allSettled(
     SEED_CASES.map(({ caseId, departmentName }) => seedCase(client, caseId, departmentName)),
   );
+
+  const failures = results.filter((result) => result.status === "rejected");
+  if (failures.length > 0) {
+    console.error(
+      `dailySeedQueue: ${failures.length} of ${SEED_CASES.length} seedCase operations failed`,
+      failures,
+    );
+    throw new Error(`dailySeedQueue: ${failures.length} seedCase operations failed`);
+  }
 };
 
 /**
@@ -81,14 +90,19 @@ async function seedCase(
 
   const waitingTickets = (tickets ?? []).filter((t) => t.status === "WAITING");
 
-  await Promise.all(
+  await Promise.allSettled(
     waitingTickets.map(async (ticket) => {
-      const { errors: deleteErrors } = await client.models.Ticket.delete({ id: ticket.id });
-      if (deleteErrors?.length) {
-        console.error(`${logPrefix}: Failed to delete ticket ${ticket.id}`, deleteErrors);
+      try {
+        const { errors: deleteErrors } = await client.models.Ticket.delete({ id: ticket.id });
+        if (deleteErrors?.length) {
+          console.error(`${logPrefix}: Failed to delete ticket ${ticket.id}`, deleteErrors);
+        } 
+        else {
+          console.log(`${logPrefix}: Deleted WAITING ticket ${ticket.id}`);
+        }
       } 
-      else {
-        console.log(`${logPrefix}: Deleted WAITING ticket ${ticket.id}`);
+      catch (error) {
+        console.error(`${logPrefix}: Error while deleting ticket ${ticket.id}`, error);
       }
     }),
   );
