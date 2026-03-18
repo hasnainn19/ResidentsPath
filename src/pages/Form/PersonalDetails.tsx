@@ -241,9 +241,14 @@ export default function PersonalDetails() {
             mostRecentPostcode.trim() !== "" &&
             !isValidUkPostcode(mostRecentPostcode);
 
+          const pronounsOtherMissing =
+            provideDetails === "yes" &&
+            formData.pronouns === "OTHER" &&
+            !formData.pronounsOtherText.trim();
+
           if (
             provideDetails === "yes" &&
-            (postcodeInvalidNow || contactMethodInvalid || emailInvalid || phoneInvalid)
+            (postcodeInvalidNow || contactMethodInvalid || emailInvalid || phoneInvalid || pronounsOtherMissing)
           ) {
             setPostcodeTouched(true);
             setContactMethodTouched(true);
@@ -420,6 +425,7 @@ export default function PersonalDetails() {
 
                         {formData.pronouns === "OTHER" && (
                           <TextField
+                            required
                             label="Pronouns (please specify)"
                             value={formData.pronounsOtherText}
                             onChange={(e) => setField("pronounsOtherText", e.target.value)}
@@ -702,7 +708,8 @@ export default function PersonalDetails() {
               onPrevious={() => nav("/form/enquiry-selection")}
               advanceDisabled={
                 provideDetails === "yes" &&
-                (postcodeInvalid || contactMethodInvalid || emailInvalid || phoneInvalid)
+                (postcodeInvalid || contactMethodInvalid || emailInvalid || phoneInvalid ||
+                  (formData.pronouns === "OTHER" && !formData.pronounsOtherText.trim()))
               }
             />
           </Stack>
