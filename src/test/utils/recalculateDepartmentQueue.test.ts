@@ -36,7 +36,7 @@ const makeWaitingTicket = (id: string, position: number) => ({
   position,
   createdAt: isoAtMinutes(0),
   completedAt: null,
-  departmentName: "dept1",
+  departmentName: DEPT_NAME,
 });
 
 // durationMinutes controls how long the ticket took (completedAt - createdAt)
@@ -46,11 +46,13 @@ const makeCompletedTicket = (id: string, durationMinutes: number) => ({
   position: -1,
   createdAt: isoAtMinutes(0),
   completedAt: isoAtMinutes(durationMinutes),
-  departmentName: "dept1",
+  departmentName: DEPT_NAME,
 });
 
-const makeDepartment = (estimatedWaitingTime: number | null = 45, name = "Homelessness") => ({
-  id: "dept1",
+const DEPT_NAME = "Homelessness";
+
+const makeDepartment = (estimatedWaitingTime: number | null = 45, name = DEPT_NAME) => ({
+  id: name,
   name,
   estimatedWaitingTime,
 });
@@ -65,8 +67,8 @@ describe("recalculateDepartmentQueue", () => {
   it("throws when no tickets are found for the department today", async () => {
     mockTicketList.mockResolvedValue({ data: [] });
 
-    await expect(recalculateDepartmentQueue("dept1")).rejects.toThrow(
-      "No tickets found for department dept1 for today",
+    await expect(recalculateDepartmentQueue(DEPT_NAME)).rejects.toThrow(
+      `No tickets found for department ${DEPT_NAME} for today`,
     );
   });
 
@@ -74,8 +76,8 @@ describe("recalculateDepartmentQueue", () => {
     mockTicketList.mockResolvedValue({ data: [makeWaitingTicket("w1", 0)] });
     mockDepartmentGet.mockResolvedValue({ data: null });
 
-    await expect(recalculateDepartmentQueue("dept1")).rejects.toThrow(
-      "Department dept1 not found",
+    await expect(recalculateDepartmentQueue(DEPT_NAME)).rejects.toThrow(
+      `Department ${DEPT_NAME} not found`,
     );
   });
 
@@ -83,7 +85,7 @@ describe("recalculateDepartmentQueue", () => {
     mockTicketList.mockResolvedValue({ data: [makeWaitingTicket("w1", 0)] });
     mockDepartmentGet.mockResolvedValue({ data: makeDepartment(30) });
 
-    const result = await recalculateDepartmentQueue("dept1");
+    const result = await recalculateDepartmentQueue(DEPT_NAME);
 
     expect(result).toBe(true);
   });
@@ -98,7 +100,7 @@ describe("recalculateDepartmentQueue", () => {
     });
     mockDepartmentGet.mockResolvedValue({ data: makeDepartment(30) });
 
-    await recalculateDepartmentQueue("dept1");
+    await recalculateDepartmentQueue(DEPT_NAME);
 
     // Sorted by position: t1(1) - 0, t2(3) - 1, t3(5) - 2
     expect(mockTicketUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: "t1", position: 0 }));
@@ -116,7 +118,7 @@ describe("recalculateDepartmentQueue", () => {
     });
     mockDepartmentGet.mockResolvedValue({ data: makeDepartment(30) });
 
-    await recalculateDepartmentQueue("dept1");
+    await recalculateDepartmentQueue(DEPT_NAME);
 
     expect(mockTicketUpdate).toHaveBeenCalledTimes(1);
     expect(mockTicketUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: "w1" }));
@@ -133,7 +135,7 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(40) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       // position 0: lower = round(40 * 0) = 0, upper = 0 + 20 = 20
       expect(mockTicketUpdate).toHaveBeenCalledWith({
@@ -161,7 +163,7 @@ describe("recalculateDepartmentQueue", () => {
       // estimatedWaitingTime: null - falls back to getDefaultEstimatedWaitingTime("Homelessness") = 100
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(null, "Homelessness") });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       // position 0: lower = round(100 * 0) = 0, upper = 20
       expect(mockTicketUpdate).toHaveBeenCalledWith({
@@ -189,7 +191,7 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(30) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       expect(mockDepartmentUpdate).not.toHaveBeenCalled();
     });
@@ -211,10 +213,10 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(999) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       expect(mockDepartmentUpdate).toHaveBeenCalledWith({
-        id: "dept1",
+        id: DEPT_NAME,
         estimatedWaitingTime: 30,
       });
     });
@@ -225,7 +227,7 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(999) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       // median = 30 min
       // position 0: lower = round(30 * 0) = 0, upper = 20
@@ -244,6 +246,26 @@ describe("recalculateDepartmentQueue", () => {
       });
     });
 
+    it("clamps estimatedWaitingTime to 1 when median rounds to 0", async () => {
+      // All 5 tickets have very short durations (0.4 min each) — median = 0.4, Math.round = 0, clamped to 1
+      const shortDurationTickets = Array.from({ length: 5 }, (_, i) => ({
+        ...makeCompletedTicket(`c${i + 1}`, 0),
+        completedAt: new Date(BASE_TIME + 0.4 * 60000).toISOString(),
+      }));
+
+      mockTicketList.mockResolvedValue({
+        data: [...shortDurationTickets, makeWaitingTicket("w1", 0)],
+      });
+      mockDepartmentGet.mockResolvedValue({ data: makeDepartment(999) });
+
+      await recalculateDepartmentQueue(DEPT_NAME);
+
+      expect(mockDepartmentUpdate).toHaveBeenCalledWith({
+        id: DEPT_NAME,
+        estimatedWaitingTime: 1,
+      });
+    });
+
     it("does not update Department when all completed ticket durations are zero", async () => {
       // createdAt === completedAt - duration = 0 for all - median = 0 - Department.update NOT called
       const zeroDurationTickets = fiveCompletedTickets.map((t) => ({
@@ -256,7 +278,7 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(999) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       expect(mockDepartmentUpdate).not.toHaveBeenCalled();
     });
@@ -274,12 +296,12 @@ describe("recalculateDepartmentQueue", () => {
       });
       mockDepartmentGet.mockResolvedValue({ data: makeDepartment(999) });
 
-      await recalculateDepartmentQueue("dept1");
+      await recalculateDepartmentQueue(DEPT_NAME);
 
       // The 5 kept (by most recent completedAt): c5(50), c4(40), c3(30), c2(20), c1(10)
       // c6_oldest (completedAt=1min) is cut — median of remaining = 30
       expect(mockDepartmentUpdate).toHaveBeenCalledWith({
-        id: "dept1",
+        id: DEPT_NAME,
         estimatedWaitingTime: 30,
       });
     });
