@@ -1,5 +1,11 @@
-type ModelOperationResult = {
-  errors?: unknown[] | undefined;
+/**
+ * Type definition for the result of an AppSync model operation.
+ * Data will always be present but may be null if the operation failed or returned no data. 
+ * Errors is an optional array of error objects.
+ */
+type ModelOperationResult<T> = {
+  data: T | null;
+  errors?: unknown[];
 };
 
 /**
@@ -37,7 +43,7 @@ export function logModelErrors(prefix: string | undefined, errors: unknown[] | u
  * @returns The data from the result, or null if absent
  */
 export async function callModel<T>(
-  result: Promise<{ data: T; errors?: unknown[] | undefined }>,
+  result: Promise<ModelOperationResult<T>>,
   errorLogPrefix?: string,
 ): Promise<T | null> {
   const { data, errors } = await result;
@@ -57,10 +63,10 @@ export async function callModel<T>(
  * @returns The full result object if successful
  * @throws Error with failureMessage if the operation returns errors
  */
-export async function runCleanup<T extends ModelOperationResult>(
+export async function runCleanup<T>(
   failureLogPrefix: string,
   failureMessage: string,
-  fn: () => Promise<T>,
+  fn: () => Promise<ModelOperationResult<T>>,
 ) {
   const result = await fn();
 
