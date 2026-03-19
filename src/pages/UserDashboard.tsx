@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Schema } from '../../amplify/data/resource';
-import { generateClient } from "aws-amplify/api";
+import { generateClient } from "aws-amplify/data";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DangerousIcon from '@mui/icons-material/Dangerous';
