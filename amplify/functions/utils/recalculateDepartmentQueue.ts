@@ -88,7 +88,7 @@ async function calculateEstTimeWithMedian(completedTickets: CompletedTicket[], d
       await callModel(
         client.models.Department.update({
             id: departmentName,
-            estimatedWaitingTime: Math.round(estWaitingTime),
+            estimatedWaitingTime: Math.max(1, Math.round(estWaitingTime)), // Round to nearest minute, minimum of 1
         }),
         "recalculateDepartmentQueue: Department.update failed"
       );
