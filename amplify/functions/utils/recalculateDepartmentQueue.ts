@@ -1,6 +1,7 @@
 import { getAmplifyClient } from "./amplifyClient";
 import type { Schema } from "../../data/resource";
 import { getDefaultEstimatedWaitingTime, getEstimatedWaitTimeBounds } from "./queueWaitTimes";
+import { callModel } from "./runCleanup";
 
 const client = await getAmplifyClient();
 
@@ -31,15 +32,18 @@ async function getTodayTickets(departmentName:string){
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
-  const { data: tickets } = await client.models.Ticket.list({
-      filter: {
-          departmentName: { eq: departmentName },
-          createdAt: {
-              ge: startOfDay.toISOString(),
-              le: endOfDay.toISOString()
-          }
-      }
-  });
+  const tickets = await callModel(
+    client.models.Ticket.list({
+        filter: {
+            departmentName: { eq: departmentName },
+            createdAt: {
+                ge: startOfDay.toISOString(),
+                le: endOfDay.toISOString()
+            }
+        }
+    }),
+    "recalculateDepartmentQueue: Ticket.list failed"
+  );
 
   if (!tickets || tickets.length === 0) {
     throw new Error(`No tickets found for department ${departmentName} for today`);
@@ -78,10 +82,13 @@ async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["ty
   if (medianTime > 0) {
       estWaitingTime = medianTime;
 
-      await client.models.Department.update({
-          id: departmentName,
-          estimatedWaitingTime: Math.round(estWaitingTime),
-      });
+      await callModel(
+        client.models.Department.update({
+            id: departmentName,
+            estimatedWaitingTime: Math.round(estWaitingTime),
+        }),
+        "recalculateDepartmentQueue: Department.update failed"
+      );
   }
 
   return estWaitingTime;
@@ -105,12 +112,15 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
 
       const { lower, upper } = getEstimatedWaitTimeBounds(position, estWaitingTime);
 
-      await client.models.Ticket.update({
-          id: ticket.id,
-          position,
-          estimatedWaitTimeLower: lower,
-          estimatedWaitTimeUpper: upper,
-      });
+      await callModel(
+        client.models.Ticket.update({
+            id: ticket.id,
+            position,
+            estimatedWaitTimeLower: lower,
+            estimatedWaitTimeUpper: upper,
+        }),
+        `recalculateDepartmentQueue: Ticket.update failed for ticket ${ticket.id}`
+      );
   }
 }
 
@@ -149,8 +159,11 @@ export async function recalculateDepartmentQueue(departmentName:string) {
       )
       .slice(0,5);
     
-    // Get department 
-    const { data: department } = await client.models.Department.get({ id: departmentName });
+    // Get department
+    const department = await callModel(
+      client.models.Department.get({ id: departmentName }),
+      "recalculateDepartmentQueue: Department.get failed"
+    );
 
     if (!department) {
       throw new Error(`Department ${departmentName} not found`);
