@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from "aws-amplify/api";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert } from '@mui/material';
@@ -13,6 +13,7 @@ import { useParams } from 'react-router-dom';
 import ContactDetailsDialog from '../components/ContactDetailsDialog';
 import { useUser } from '../hooks/useUser';
 import { useTicketQueueInfo } from '../hooks/useTicketQueueInfo';
+import { getDataAuthMode } from '../utils/getDataAuthMode';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -32,7 +33,7 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const { user } = useUser();
-    const client = generateClient<Schema>({ authMode: "userPool" });
+    const client = useMemo(() => generateClient<Schema>(), []);
     const {  t: translate } = useTranslation();
 
     const {
@@ -52,7 +53,11 @@ export default function UserDashboard() {
     const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
         if (!ticketId) return false;
         try {
-            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut });
+            const authMode = await getDataAuthMode();
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut(
+                { ticketId, caseId: caseId!, steppedOut },
+                { authMode },
+            );
             if (stepOutErrors && stepOutErrors.length > 0) {
                 setErrors(stepOutErrors[0].message);
                 return false;
@@ -74,13 +79,14 @@ export default function UserDashboard() {
         if (!ticketId) return false;
 
         try {
+            const authMode = await getDataAuthMode();
             const { errors: notifErrors } = await client.mutations.toggleNotifications({
                 ticketId,
                 caseId: caseId!,
                 enabled,
                 contactMethod,
                 contactValue,
-            });
+            }, { authMode });
             if (notifErrors && notifErrors.length > 0) {
                 setErrors(notifErrors[0].message);
                 return false;
