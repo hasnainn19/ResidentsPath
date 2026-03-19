@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { DynamoDBRecord } from "aws-lambda";
 
 const {
@@ -77,6 +77,36 @@ describe("getRecordTableName", () => {
 // -- getTableNames --
 
 describe("getTableNames", () => {
+  let previousTicketTableName: string | undefined;
+  let previousCaseTableName: string | undefined;
+  let previousAppointmentTableName: string | undefined;
+
+  beforeEach(() => {
+    previousTicketTableName = process.env.TICKET_TABLE_NAME;
+    previousCaseTableName = process.env.CASE_TABLE_NAME;
+    previousAppointmentTableName = process.env.APPOINTMENT_TABLE_NAME;
+  });
+
+  afterEach(() => {
+    if (previousTicketTableName === undefined) {
+      delete process.env.TICKET_TABLE_NAME;
+    } else {
+      process.env.TICKET_TABLE_NAME = previousTicketTableName;
+    }
+
+    if (previousCaseTableName === undefined) {
+      delete process.env.CASE_TABLE_NAME;
+    } else {
+      process.env.CASE_TABLE_NAME = previousCaseTableName;
+    }
+
+    if (previousAppointmentTableName === undefined) {
+      delete process.env.APPOINTMENT_TABLE_NAME;
+    } else {
+      process.env.APPOINTMENT_TABLE_NAME = previousAppointmentTableName;
+    }
+  });
+
   it("returns table names from env", () => {
     process.env.TICKET_TABLE_NAME = "Tickets";
     process.env.CASE_TABLE_NAME = "Cases";
@@ -87,10 +117,6 @@ describe("getTableNames", () => {
       caseTableName: "Cases",
       appointmentTableName: "Appointments",
     });
-
-    delete process.env.TICKET_TABLE_NAME;
-    delete process.env.CASE_TABLE_NAME;
-    delete process.env.APPOINTMENT_TABLE_NAME;
   });
 
   it("throws when env vars are missing", () => {
