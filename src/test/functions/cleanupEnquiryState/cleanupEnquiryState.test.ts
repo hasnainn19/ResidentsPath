@@ -224,9 +224,7 @@ describe("cleanupEnquiryState handler", () => {
       mockListAllPages
         .mockResolvedValueOnce([{ id: "apt1", date: "2026-06-15", time: "09:00" }])
         .mockResolvedValueOnce([]);
-
-      const defaultImpl = mockTryCleanup.getMockImplementation()!;
-      mockTryCleanup.mockImplementationOnce(defaultImpl).mockImplementationOnce(async () => false);
+      mockAppointmentDelete.mockRejectedValueOnce(new Error("delete failed"));
 
       const event = makeEvent([
         makeRecord(
@@ -238,6 +236,7 @@ describe("cleanupEnquiryState handler", () => {
       ]);
 
       await handler(event);
+      expect(mockAppointmentDelete).toHaveBeenCalledWith({ id: "apt1" });
       expect(mockReleaseAppointmentSlot).not.toHaveBeenCalled();
     });
 
