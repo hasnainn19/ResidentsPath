@@ -321,6 +321,103 @@ describe("EnquirySelection", () => {
     expect(mockApplyTopLevelChange).toHaveBeenCalledWith(previousState, "CouncilTax");
   });
 
+  it("clears childrenCount when dependent children is unchecked", async () => {
+    renderPage({
+      formData: {
+        hasChildren: true,
+        childrenCount: "2",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showChildrenQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "I have dependent children" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      hasChildren: true,
+      childrenCount: "2",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      hasChildren: false,
+      childrenCount: "",
+    });
+  });
+
+  it("clears disabilityType when disability support is unchecked", async () => {
+    renderPage({
+      formData: {
+        hasDisabilityOrSensory: true,
+        disabilityType: "HEARING_IMPAIRMENT",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDisabilityQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: "I have a disability or sensory impairment" }),
+    );
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      hasDisabilityOrSensory: true,
+      disabilityType: "HEARING_IMPAIRMENT",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      hasDisabilityOrSensory: false,
+      disabilityType: "",
+    });
+  });
+
+  it("resets safe contact fields when domestic abuse is unchecked", async () => {
+    renderPage({
+      formData: {
+        domesticAbuse: true,
+        safeToContact: "no",
+        safeContactNotes: "Use email only",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDomesticAbuseQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: "I am a domestic abuse victim/survivor" }),
+    );
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      domesticAbuse: true,
+      safeToContact: "no",
+      safeContactNotes: "Use email only",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      domesticAbuse: false,
+      safeToContact: "PREFER_NOT_TO_SAY",
+      safeContactNotes: "",
+    });
+  });
+
   it("renders the additional follow-up questions for the selected enquiry", () => {
     renderPage({
       formData: {
@@ -387,12 +484,75 @@ describe("EnquirySelection", () => {
     expect(screen.getByPlaceholderText("Tell us why this is urgent")).toBeInTheDocument();
   });
 
+  it('clears urgent fields when urgent support is no longer needed', async () => {
+    renderPage({
+      formData: {
+        urgent: "yes",
+        urgentReason: "OTHER",
+        urgentReasonOtherText: "Needs help today",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("radio", { name: "No" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      urgent: "yes",
+      urgentReason: "OTHER",
+      urgentReasonOtherText: "Needs help today",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      urgent: "no",
+      urgentReason: "",
+      urgentReasonOtherText: "",
+    });
+  });
+
   it("calls handleSave when save and continue later is pressed", () => {
     renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: "Save and continue later" }));
 
     expect(mockHandleSave).toHaveBeenCalled();
+  });
+
+  it("applies proceed change logic and clears appointment details", async () => {
+    renderPage({
+      formData: {
+        proceed: "BOOK_APPOINTMENT",
+        appointmentDateIso: "2026-04-01",
+        appointmentTime: "10:00",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+      },
+      canGoNext: true,
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "Select an option..." }));
+    await user.click(await screen.findByRole("option", { name: "Join digital queue" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      proceed: "BOOK_APPOINTMENT",
+      appointmentDateIso: "2026-04-01",
+      appointmentTime: "10:00",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      proceed: "JOIN_DIGITAL_QUEUE",
+      appointmentDateIso: "",
+      appointmentTime: "",
+    });
   });
 
   it("navigates to personal details when the form is submitted and can continue", () => {
@@ -403,6 +563,16 @@ describe("EnquirySelection", () => {
     fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
 
     expect(mockNavigate).toHaveBeenCalledWith("/form/personal-details");
+  });
+
+  it("does not navigate when the form is submitted and cannot continue", () => {
+    renderPage({
+      canGoNext: false,
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
+
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("shows support notes when the helper says they should be displayed", () => {
