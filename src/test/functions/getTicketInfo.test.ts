@@ -154,6 +154,20 @@ describe("getTicketInfo handler", () => {
     ).rejects.toThrow("No waiting ticket for today for case case1");
   });
 
+  it("ignores tickets that are not in WAITING status", async () => {
+    mockCaseGet.mockResolvedValue({ data: makeCase() });
+
+    mockTicketList.mockResolvedValue({
+        data: [
+        makeTicket({ status: "COMPLETED", }),
+        ],
+    });
+
+    await expect(
+        handler(makeEvent({ caseId: "case1" }), {} as any, {} as any)
+    ).rejects.toThrow("No waiting ticket for today for case case1");
+  });
+
   // -------------------
   // Success case
   // -------------------
