@@ -655,7 +655,7 @@ describe("cleanupCreatedVisitResources", () => {
     }
   });
 
-  it("does not call tryCleanup or runCleanup when state is null", async () => {
+  it("does not call tryCleanup or runCleanup when no resources have been created or claimed", async () => {
     const client = makeClient();
     await cleanupCreatedVisitResources(client, makeVisitState(), "test");
     expect(tryCleanup).not.toHaveBeenCalled();
