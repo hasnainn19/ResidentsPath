@@ -53,7 +53,7 @@ describe("getTicketInfo handler", () => {
   // -------------------
   // Input validation
   // -------------------
-  it("throws when caseId is missing", async () => {
+  it("throws error when caseId is missing", async () => {
     await expect(
       handler(makeEvent({}), {} as any, {} as any)
     ).rejects.toThrow("caseId required");
@@ -62,7 +62,7 @@ describe("getTicketInfo handler", () => {
   // -------------------
   // Case lookup
   // -------------------
-  it("throws when case is not found", async () => {
+  it("throws error when case is not found", async () => {
     mockCaseGet.mockResolvedValue({ data: null });
 
     await expect(
@@ -83,7 +83,7 @@ describe("getTicketInfo handler", () => {
   // -------------------
   // Ticket lookup
   // -------------------
-  it("throws when no tickets found", async () => {
+  it("throws error when no tickets found", async () => {
     mockCaseGet.mockResolvedValue({ data: makeCase() });
     mockTicketList.mockResolvedValue({ data: [] });
 
@@ -92,7 +92,7 @@ describe("getTicketInfo handler", () => {
     ).rejects.toThrow("Tickets with caseId case1 not found");
   });
 
-  it("throws when all tickets are null", async () => {
+  it("throws error when all tickets are null", async () => {
     mockCaseGet.mockResolvedValue({ data: makeCase() });
     mockTicketList.mockResolvedValue({ data: [null, null] });
 
@@ -101,7 +101,25 @@ describe("getTicketInfo handler", () => {
     ).rejects.toThrow("No valid tickets with caseId case1 found");
   });
 
-  it("throws when no WAITING ticket for today", async () => {
+  it("filters out null tickets and still finds a valid one", async () => {
+    mockCaseGet.mockResolvedValue({ data: makeCase() });
+
+    const validTicket = makeTicket();
+
+    mockTicketList.mockResolvedValue({
+        data: [null, validTicket, null],
+    });
+
+    const result = await handler(
+        makeEvent({ caseId: "case1" }),
+        {} as any,
+        {} as any
+    );
+
+    expect(result.ticketId).toBe(validTicket.id);
+  });
+
+  it("throws error when no WAITING ticket for today", async () => {
     mockCaseGet.mockResolvedValue({ data: makeCase() });
 
     const yesterday = new Date();
@@ -118,6 +136,21 @@ describe("getTicketInfo handler", () => {
 
     await expect(
       handler(makeEvent({ caseId: "case1" }), {} as any, {} as any)
+    ).rejects.toThrow("No waiting ticket for today for case case1");
+  });
+
+  it("throws error when all tickets are missing createdAt", async () => {
+    mockCaseGet.mockResolvedValue({ data: makeCase() });
+
+    mockTicketList.mockResolvedValue({
+        data: [
+        makeTicket({ createdAt: undefined }),
+        makeTicket({ createdAt: null }),
+        ],
+    });
+
+    await expect(
+        handler(makeEvent({ caseId: "case1" }), {} as any, {} as any)
     ).rejects.toThrow("No waiting ticket for today for case case1");
   });
 
