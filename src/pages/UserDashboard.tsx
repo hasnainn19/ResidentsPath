@@ -52,7 +52,12 @@ export default function UserDashboard() {
     const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
 
     const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
-        if (!ticketId) return false;
+        console.log("here");
+        if (!ticketId)
+        {
+            setErrors('Empty ticket ID!');
+            return false;
+        }
         try {
             const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut });
             if (stepOutErrors && stepOutErrors.length > 0) {
@@ -146,7 +151,21 @@ export default function UserDashboard() {
             <Box sx={{minHeight: '90vh', width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <Box sx={{ width: '80vw', pt:6 }}>
                     {showNotificationsAlert && (
-                        <Alert aria-label='notifications-alert' severity="success" sx={{mb:2}} onClose={() => setShowNotificationsAlert(false)}>{translate("userdash-notifications")}</Alert>
+                        <Alert 
+                            aria-label='notifications-alert'
+                            severity="success"
+                            sx={{mb:2}}
+                            action={
+                                <IconButton
+                                aria-label="close-notifications-alert"
+                                onClick={() => setShowNotificationsAlert(false)}
+                                >
+                                <CloseIcon />
+                            </IconButton>
+                            }
+                        >
+                            {translate("userdash-notifications")}
+                        </Alert>
                     )}
                     {showStepOutAlert && (
                         <Alert
@@ -166,7 +185,7 @@ export default function UserDashboard() {
                         </Alert>
                     )}
                     {(errors || fetchError) && (
-                        <Alert severity="error" color="error" onClose={() => setErrors('')}>
+                        <Alert aria-label='error-alert' severity="error" color="error" onClose={() => setErrors('')}>
                             {errors || fetchError}
                         </Alert>
                     )}
