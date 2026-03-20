@@ -18,31 +18,17 @@ vi.mock("../../../amplify/functions/utils/amplifyClient", () => ({
   getAmplifyClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-vi.mock("../../../amplify/functions/utils/caseAccess", () => ({
-  CASE_ACCESS_NOT_FOUND_MESSAGE: "We could not find a case with that reference number.",
-  CASE_ACCESS_ACCESS_DENIED_MESSAGE:
-    "We could not find that case reference number. If this case is linked to your account, please log in and try again.",
-  createFoundErrorResponse: (errorMessage: string) => ({
-    found: false,
-    errorMessage,
-  }),
-  getCaseAccessErrorMessage: (
-    reason: string,
-    messages: { notFound: string; accessDenied: string; loadFailed: string },
-  ) => {
-    if (reason === "CASE_NOT_FOUND" || reason === "USER_NOT_FOUND") {
-      return messages.notFound;
-    }
+vi.mock("../../../amplify/functions/utils/caseAccess", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../../amplify/functions/utils/caseAccess")
+  >("../../../amplify/functions/utils/caseAccess");
 
-    if (reason === "REGISTERED_USER_ACCESS_DENIED") {
-      return messages.accessDenied;
-    }
-
-    return messages.loadFailed;
-  },
-  getHasActiveWaitingTicket: mockGetHasActiveWaitingTicket,
-  loadAccessibleCaseByReference: mockLoadAccessibleCase,
-}));
+  return {
+    ...actual,
+    getHasActiveWaitingTicket: mockGetHasActiveWaitingTicket,
+    loadAccessibleCaseByReference: mockLoadAccessibleCase,
+  };
+});
 
 vi.mock("../../../amplify/functions/utils/submissionShared", () => ({
   getCaseAppointmentCount: mockGetCaseAppointmentCount,
