@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ReferencePage from "../../pages/ReferencePage";
 
@@ -105,59 +105,284 @@ describe("ReferencePage", () => {
     mockedCheckReferenceHook.refNoError = "";
   });
 
-  it("renders main UI elements", () => {
-    render(<ReferencePage />);
-    const scanButton = screen.getByTestId("scan-button"); 
+    it("renders main UI elements", () => {
+        render(<ReferencePage />);
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        expect(scanButton).toBeInTheDocument();
+        expect(screen.getByText("reference-use")).toBeInTheDocument();
+        expect(screen.getByText("reference-manual")).toBeInTheDocument();
+        expect(screen.getByText("reference-scan")).toBeInTheDocument();
+    });
 
-    expect(scanButton).toBeInTheDocument();
-    expect(screen.getByText("reference-use")).toBeInTheDocument();
-    expect(screen.getByText("reference-manual")).toBeInTheDocument();
-    expect(screen.getByText("reference-scan")).toBeInTheDocument();
-  });
+    it("calls checkRefNo when button is clicked", async () => {
+        render(<ReferencePage />);
+        const user = userEvent.setup();
+        const input = screen.getByRole("textbox");
+        await user.type(input, "ABC123");
+        const button = screen.getByRole("button", { name: "reference-check-status" });
+        await user.click(button);
+        expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
+    });
 
-  it("calls checkRefNo when button is clicked", async () => {
-    render(<ReferencePage />);
-    const user = userEvent.setup();
-    const input = screen.getByRole("textbox");
-    await user.type(input, "ABC123");
-    const button = screen.getByRole("button", { name: "reference-check-status" });
-    await user.click(button);
-    expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
-  });
+    it("calls checkRefNo when Enter is pressed", async () => {
+        render(<ReferencePage />);
+        const user = userEvent.setup();
+        const input = screen.getByRole("textbox");
+        await user.type(input, "ABC123{enter}");
+        expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
+    });
 
-  it("calls checkRefNo when Enter is pressed", async () => {
-    render(<ReferencePage />);
-    const user = userEvent.setup();
-    const input = screen.getByRole("textbox");
-    await user.type(input, "ABC123{enter}");
-    expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
-  });
+    it("navigates when foundCaseId is returned", () => {
+        mockedCheckReferenceHook.foundCaseId = "case123";
+        render(<ReferencePage />);
+        expect(mockNavigate).toHaveBeenCalledWith("/userdashboard/case123");
+    });
 
-  it("navigates when foundCaseId is returned", () => {
-    mockedCheckReferenceHook.foundCaseId = "case123";
-    render(<ReferencePage />);
-    expect(mockNavigate).toHaveBeenCalledWith("/userdashboard/case123");
-  });
+    it("shows error alert when refNoError exists", () => {
+        mockedCheckReferenceHook.refNoError = "Error message";
+        render(<ReferencePage />);
+        expect(screen.getByText("Error message")).toBeInTheDocument();
+    });
 
-  it("shows error alert when refNoError exists", () => {
-    mockedCheckReferenceHook.refNoError = "Error message";
-    render(<ReferencePage />);
-    expect(screen.getByText("Error message")).toBeInTheDocument();
-  });
+    it("shows error alert when refNoError exists and closes when user clicks close", async () => {
+        mockedCheckReferenceHook.refNoError = "Error message";
+        render(<ReferencePage />);
+        expect(screen.getByText("Error message")).toBeInTheDocument();
+        const user = userEvent.setup();
+        const closeButton = screen.getByRole("button", { name: /close/i });
+        await user.click(closeButton);
 
-  it("calls cancelAppointmentReference when cancel is triggered", async () => {
-    mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
-    mockCancel.mockResolvedValue({ ok: true });
-    render(<ReferencePage />);
-    await mockCancel("ref123");
-    expect(mockCancel).toHaveBeenCalledWith("ref123");
-  });
+        expect(screen.queryByText(/Error message/i)).not.toBeInTheDocument();
 
-  it("navigates to checkin page when check-in succeeds", async () => {
-    mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
-    mockCheckIn.mockResolvedValue({ checkedIn: true });
-    render(<ReferencePage />);
-    await mockCheckIn("ref123");
-    expect(mockCheckIn).toHaveBeenCalledWith("ref123");
-  });
+    });
+            
+    it("calls cancelAppointmentReference when cancel is triggered", async () => {
+        mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
+        mockCancel.mockResolvedValue({ ok: true });
+        render(<ReferencePage />);
+        await mockCancel("ref123");
+        expect(mockCancel).toHaveBeenCalledWith("ref123");
+    });
+
+    it("navigates to checkin page when check-in succeeds", async () => {
+        mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
+        mockCheckIn.mockResolvedValue({ checkedIn: true });
+        render(<ReferencePage />);
+        await mockCheckIn("ref123");
+        expect(mockCheckIn).toHaveBeenCalledWith("ref123");
+    });
+
+    it("starts scanning when QR scan button is clicked", async () => {
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        expect(scanButton).toBeInTheDocument();
+
+        const qrViewfinder = screen.getByTestId("qr-scan-view-finder");
+        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+
+        const user = userEvent.setup();
+        await user.click(scanButton); 
+        expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+        const cancelCameraButton = screen.getByTestId("camera-cancel-button");
+        expect(cancelCameraButton).toBeInTheDocument();
+    });
+
+    it("starts scanning when QR scan button is clicked and stops scanning when cancel is clicked", async () => {
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        expect(scanButton).toBeInTheDocument();
+
+        const qrViewfinder = screen.getByTestId("qr-scan-view-finder");
+        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+
+        const user = userEvent.setup();
+        await user.click(scanButton); 
+
+        expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+
+        const cancelCameraButton = screen.getByTestId("camera-cancel-button");
+        expect(cancelCameraButton).toBeInTheDocument();
+
+        await user.click(cancelCameraButton);
+        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        expect(screen.queryByTestId("camera-cancel-button")).not.toBeInTheDocument();
+        
+    });
+
+    it("calls checkRefNo when QR code is decoded", async () => {
+        let capturedOnDecode: ((decodedText: string) => void) | null = null;
+
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn((...args: any[]) => {
+                const onDecode = args[2];
+                capturedOnDecode = onDecode; 
+                return Promise.resolve();
+            }),
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+
+        // Click the QR scan button to start the scanner
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        const user = userEvent.setup();
+        await user.click(scanButton);
+
+        // The callback should have been captured
+        expect(capturedOnDecode).not.toBeNull();
+
+        // Simulate a QR code scan
+        capturedOnDecode!("QUEUE|ABC123");
+
+        // The checkRefNo function should have been called
+        expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123", "QUEUE");
+    });
+
+    it("shows an alert if QR code format is invalid", async () => {
+        let capturedOnDecode: ((decodedText: string) => void) | null = null;
+
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn((...args: any[]) => {
+                const onDecode = args[2];
+                capturedOnDecode = onDecode;
+                return Promise.resolve();
+            }),
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        const user = userEvent.setup();
+        await user.click(scanButton);
+
+        expect(capturedOnDecode).not.toBeNull();
+
+        capturedOnDecode!("INVALIDCODE");
+
+        const alert = await screen.findByText("Invalid QR code format");
+        expect(alert).toBeInTheDocument();
+    });
+
+    it("shows an alert if QR code prefix is incorrect", async () => {
+        let capturedOnDecode: ((decodedText: string) => void) | null = null;
+
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn((...args: any[]) => {
+            const onDecode = args[2]; 
+            capturedOnDecode = onDecode;
+            return Promise.resolve();
+            }),
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole('button', { name: /reference-tap/i });
+        const user = userEvent.setup();
+        await user.click(scanButton);
+
+        expect(capturedOnDecode).not.toBeNull();
+        capturedOnDecode!("ABC|123");
+
+        const alert = await screen.findByText("Incorrect QR Code Prefix");
+        expect(alert).toBeInTheDocument();
+    });
+
+    it("shows an alert if QR scanner fails to start", async () => {
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn(() => Promise.reject("Camera not found")), // <- triggers catch block
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole("button", { name: /reference-tap/i });
+        const user = userEvent.setup();
+        await user.click(scanButton);
+
+        const alert = await screen.findByText(/Error occured while scanning QR Code: Camera not found/i);
+        expect(alert).toBeInTheDocument();
+    });
+
+    it("shows a QR scan error alert and allows user to close it", async () => {
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn(() => Promise.reject("Camera not found")), // triggers catch block
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+
+        const scanButton = screen.getByRole("button", { name: /reference-tap/i });
+        const user = userEvent.setup();
+
+        await user.click(scanButton);
+
+        const alert = await screen.findByText(/Error occured while scanning QR Code: Camera not found/i);
+        expect(alert).toBeInTheDocument();
+
+        const closeButton = screen.getByRole("button", { name: /close/i });
+        await user.click(closeButton);
+
+        expect(screen.queryByText(/Error occured while scanning QR Code: Camera not found/i)).not.toBeInTheDocument();
+    });
+
+    it("calls stopScanner cleanup when ReferencePage unmounts", async () => {
+        const stopMock = vi.fn().mockResolvedValue(undefined);
+        const clearMock = vi.fn();
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn(() => Promise.resolve()),
+            stop: stopMock,
+            clear: clearMock,
+        }));
+
+        const { unmount } = render(<ReferencePage />);
+
+        const scanButton = screen.getByRole("button", { name: /reference-tap/i });
+        const user = userEvent.setup();
+
+        await user.click(scanButton);
+
+        expect(Html5Qrcode).toHaveBeenCalledTimes(1);
+
+        unmount();
+
+        await waitFor(() => {
+            expect(stopMock).toHaveBeenCalled();
+            expect(clearMock).toHaveBeenCalled();
+        });
+    });
+
+    it("does nothing if scanning is already in progress or startingRef is true", async () => {
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        Html5Qrcode.mockImplementation(() => ({
+            start: vi.fn(() => Promise.resolve()),
+            stop: vi.fn().mockResolvedValue(undefined),
+            clear: vi.fn(),
+        }));
+
+        render(<ReferencePage />);
+        const scanButton = screen.getByRole("button", { name: /reference-tap/i });
+        const user = userEvent.setup();
+
+        await user.click(scanButton);
+
+        await user.click(scanButton);
+
+        expect(Html5Qrcode).toHaveBeenCalledTimes(1);
+    });
+
 });
