@@ -70,17 +70,25 @@ describe("getEnquiriesStateTableName", () => {
 // -- Utility Helpers --
 
 describe("daysFromNowInSeconds", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-15T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("returns a value in the future for positive days", () => {
     const nowSeconds = Math.floor(Date.now() / 1000);
     const result = daysFromNowInSeconds(1);
-    expect(result).toBeGreaterThan(nowSeconds);
-    expect(result).toBeLessThanOrEqual(nowSeconds + 86400 + 1);
+    expect(result).toBe(nowSeconds + 86400);
   });
 
-  it("returns approximately now for 0 days", () => {
+  it("returns now for 0 days", () => {
     const nowSeconds = Math.floor(Date.now() / 1000);
     const result = daysFromNowInSeconds(0);
-    expect(Math.abs(result - nowSeconds)).toBeLessThan(2);
+    expect(result).toBe(nowSeconds);
   });
 });
 
