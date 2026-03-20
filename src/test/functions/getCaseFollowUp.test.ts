@@ -74,8 +74,14 @@ type GetCaseFollowUpResult = {
 
 const handler = _handler as (event: GetCaseFollowUpEvent) => Promise<GetCaseFollowUpResult>;
 
-function makeEvent(referenceNumber: string, identity: unknown = null): GetCaseFollowUpEvent {
-  return { arguments: { referenceNumber }, identity };
+function makeEvent(referenceNumber: string, identity?: unknown): GetCaseFollowUpEvent {
+  const event: GetCaseFollowUpEvent = { arguments: { referenceNumber } };
+
+  if (identity !== undefined) {
+    event.identity = identity;
+  }
+
+  return event;
 }
 
 const openCaseRecord = {
@@ -121,7 +127,7 @@ describe("getCaseFollowUp handler", () => {
 
     expect(mockLoadAccessibleCase).toHaveBeenCalledWith(
       mockClient,
-      null,
+      undefined,
       "ABC-DEF234",
       "getCaseFollowUp",
     );
