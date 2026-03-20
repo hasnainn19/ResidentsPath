@@ -257,7 +257,7 @@ const ReferencePage = () => {
 
                         <CardActions sx={{ px: 2, pb: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, height:'100%'}}>
                             <Box sx={{  width: '100%', height: '100%', mx: 'auto', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column'}}>
-                                <ScanButton onClick={handleQRScanner} >
+                                <ScanButton  onClick={handleQRScanner} >
                                     {!scanning && (
                                     <>
                                         <QrCodeScannerRoundedIcon fontSize="large"   />
@@ -268,7 +268,7 @@ const ReferencePage = () => {
                                     )}
                                 </ScanButton>
                                 <Box sx={{  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10, visibility: scanning ? 'visible' : 'hidden', pointerEvents: scanning ? 'auto' : 'none', overflow: 'hidden', borderRadius: 1, }}>
-                                    <div id="qr-reader" role="region" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
+                                    <div id="qr-reader" role="region"  data-testid="scan-button" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
                                     {scanning && (
                                         <Tooltip title={translate("reference-cancelqr")} placement="top">
                                             <Button variant='contained' size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: '3%', right: '2%', zIndex: 20 }} >
@@ -277,12 +277,6 @@ const ReferencePage = () => {
                                         </Tooltip>
                                     )}
                                 </Box>
-                                {/* Placeholder showing qr code extracts text */}
-                                {refNo && (
-                                    <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                                        {translate("reference-ref")}: {refNo}
-                                    </Typography>
-                                )}
                             </Box>
                         </CardActions>
                     </Card>
