@@ -18,11 +18,6 @@ vi.mock("../../../../amplify/functions/utils/amplifyClient", () => ({
   }),
 }));
 
-vi.mock("../../../../shared/referenceNumbers", () => ({
-  normaliseReferenceNumber: (v: string) => v.trim().toUpperCase(),
-  isBookingReferenceNumber: (v: string) => /^APT-[A-HJKMNPQRSTUVWXYZ]{3}[2-9]{3}$/.test(v),
-}));
-
 import { getAppointmentReferenceDetails } from "../../../../amplify/functions/utils/getAppointmentReferenceDetails";
 
 describe("getAppointmentReferenceDetails", () => {
