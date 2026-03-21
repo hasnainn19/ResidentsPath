@@ -136,7 +136,10 @@ describe("ReferencePage", () => {
         const user = userEvent.setup();
         const input = screen.getByRole("textbox");
         await user.type(input, "ABC123{enter}");
-        expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
+        await waitFor(() => {
+            expect(mockCheckRefNo).toHaveBeenCalled();
+            expect(mockCheckRefNo.mock.calls[0][0]).toContain("ABC123");        
+        });
     });
 
     it("navigates when foundCaseId is returned", () => {

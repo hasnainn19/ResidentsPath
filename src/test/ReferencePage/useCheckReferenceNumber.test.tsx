@@ -41,21 +41,7 @@ describe("useCheckReferenceNumber hook", () => {
         expect(result.current.refNoError).toBe("Enter a reference number.");
     });
 
-    it("sets appointmentReferenceNumber for valid booking reference", async () => {
-        const { result } = renderHook(() => useCheckReferenceNumber());
-
-        await act(async () => {
-            await result.current.checkRefNo("APP123");
-        });
-
-        await waitFor(() => {
-            expect(result.current.appointmentReferenceNumber).toBe("APP123");
-            expect(result.current.refNoError).toBe("");
-            expect(result.current.foundCaseId).toBe("");
-        });
-    });
-
-    it("calls checkTicketNo for ticket reference", async () => {
+    it("calls checkTicketNo for ticket reference with no type", async () => {
         mockGetDataAuthMode.mockResolvedValue("API_KEY");
         mockCheckTicketNumber.mockResolvedValue({
             data: { caseId: "CASE123" },
@@ -68,6 +54,26 @@ describe("useCheckReferenceNumber hook", () => {
 
         await act(async () => {
             await result.current.checkRefNo("H001"); 
+        });
+
+        expect(mockCheckTicketNumber).toHaveBeenCalled();
+        expect(result.current.foundCaseId).toBe("CASE123");
+        expect(result.current.refNoError).toBe("");
+    });
+
+    it("calls checkTicketNo for ticket reference with no type", async () => {
+        mockGetDataAuthMode.mockResolvedValue("API_KEY");
+        mockCheckTicketNumber.mockResolvedValue({
+            data: { caseId: "CASE123" },
+            errors: [],
+        });
+
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("H001", "QUEUE"); 
         });
 
         expect(mockCheckTicketNumber).toHaveBeenCalled();
@@ -146,25 +152,76 @@ describe("useCheckReferenceNumber hook", () => {
         });
     });
 
-    // it("does nothing if checkRefNo is called while already checking", async () => {
-    //     vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+    it("does nothing if checkRefNo is called while already checking", async () => {
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
 
-    //     mockCheckTicketNumber.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ data: { caseId: "CASE123" }, errors: [] }), 100)));
+        let resolveTicketCheck: Function;
+        const ticketCheckPromise = new Promise((resolve) => {
+            resolveTicketCheck = resolve;
+        });
 
-    //     const { result } = renderHook(() => useCheckReferenceNumber());
+        mockCheckTicketNumber.mockReturnValue(ticketCheckPromise);
 
-    //     const firstCall = act(async () => {
-    //         result.current.checkRefNo("H001");
-    //     });
+        const { result } = renderHook(() => useCheckReferenceNumber());
 
-    //     await act(async () => {
-    //         await result.current.checkRefNo("H002"); 
-    //     });
+        await act(async () => {
+            result.current.checkRefNo("H001");
+        });
 
-    //     await firstCall;
+        await act(async () => {
+            await result.current.checkRefNo("H002");
+        });
 
-    //     expect(mockCheckTicketNumber).toHaveBeenCalledTimes(1);
-    //     expect(result.current.foundCaseId).toBe("CASE123");
-    //     expect(result.current.refNoError).toBe("");
-    // });
+        await act(async () => {
+            resolveTicketCheck!({ data: { caseId: "CASE123" }, errors: [] });
+        });
+
+        expect(mockCheckTicketNumber).toHaveBeenCalledTimes(1);
+        expect(result.current.foundCaseId).toBe("CASE123");
+        expect(result.current.refNoError).toBe("");
+    });
+
+    it("sets appointmentReferenceNumber for valid booking reference with no type", async () => {
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("APP123");
+        });
+
+        await waitFor(() => {
+            expect(result.current.appointmentReferenceNumber).toBe("APP123");
+            expect(result.current.refNoError).toBe("");
+            expect(result.current.foundCaseId).toBe("");
+        });
+    });
+
+    it("sets appointmentReferenceNumber for valid booking reference with type", async () => {
+        const { result } = renderHook(() => useCheckReferenceNumber());
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(true);
+
+        await act(async () => {
+            await result.current.checkRefNo("APP123", "APPOINTMENT");
+        });
+
+        await waitFor(() => {
+            expect(result.current.appointmentReferenceNumber).toBe("APP123");
+            expect(result.current.refNoError).toBe("");
+            expect(result.current.foundCaseId).toBe("");
+        });
+    });
+
+    it("sets refNoError for valid appointment type but invalid appointment reference", async () => {
+        const { result } = renderHook(() => useCheckReferenceNumber());
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+        await act(async () => {
+            await result.current.checkRefNo("AP123", "APPOINTMENT");
+        });
+
+        await waitFor(() => {
+            expect(result.current.appointmentReferenceNumber).toBe("");
+            expect(result.current.refNoError).toBe("AP123 is invalid");
+            expect(result.current.foundCaseId).toBe("");
+        });
+    });
 });
