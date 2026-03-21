@@ -16,7 +16,7 @@ interface ContactDetailsDialogProps {
     confirmLabel: string;
 }
 
-export default function ContactDetailsDialog({ open, onClose, onConfirm, prefillEmail, prefillPhone, title, description, confirmLabel }: ContactDetailsDialogProps) {
+export default function ContactDetailsDialog({ open, onClose, onConfirm, prefillEmail, prefillPhone, title, description, confirmLabel, ...props }: ContactDetailsDialogProps) {
     const [contactMethod, setContactMethod] = useState<'SMS' | 'EMAIL' | null>(null);
     const [contactValue, setContactValue] = useState('');
     const [contactTouched, setContactTouched] = useState(false);
@@ -75,7 +75,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
     }
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+        <Dialog {...props} open={open} onClose={onClose} fullWidth maxWidth="xs">
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <Stack spacing={2} sx={{ pt: 1 }}>
@@ -84,6 +84,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                     </Typography>
                     <Stack direction="row" spacing={1}>
                         <Button
+                            aria-label='sms-button'
                             fullWidth
                             variant={contactMethod === 'SMS' ? 'contained' : 'outlined'}
                             startIcon={<SmsIcon />}
@@ -92,6 +93,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                             SMS
                         </Button>
                         <Button
+                            aria-label='email-button'
                             fullWidth
                             variant={contactMethod === 'EMAIL' ? 'contained' : 'outlined'}
                             startIcon={<EmailIcon />}
@@ -102,6 +104,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                     </Stack>
                     {contactMethod === 'SMS' && (
                         <TextField
+                            aria-label='phone-textfield'
                             label="Phone number"
                             value={contactValue}
                             onChange={(e) => setContactValue(e.target.value)}
@@ -126,6 +129,7 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                     )}
                     {contactMethod === 'EMAIL' && (
                         <TextField
+                            aria-label='email-textfield'
                             label="Email address"
                             type="email"
                             value={contactValue}
@@ -152,8 +156,9 @@ export default function ContactDetailsDialog({ open, onClose, onConfirm, prefill
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
+                <Button aria-label="cancel-button" onClick={onClose}>Cancel</Button>
                 <Button
+                    aria-label='confirm-button'
                     variant="contained"
                     disabled={!contactMethod || !contactValueValid}
                     onClick={handleConfirm}
