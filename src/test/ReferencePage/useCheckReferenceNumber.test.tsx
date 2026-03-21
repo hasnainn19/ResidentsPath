@@ -22,12 +22,7 @@ vi.mock("../../hooks/utils/getDataAuthMode", () => ({
     getDataAuthMode: () => mockGetDataAuthMode(),
 }));
 
-// Mock helpers
 
-// vi.mock("../../shared/referenceNumbers", () => ({
-//     normaliseReferenceNumber: vi.fn((ref) => ref),
-//     isBookingReferenceNumber: vi.fn((ref) => ref.startsWith("APP")),
-// }));
 
 describe("useCheckReferenceNumber hook", () => {
     beforeEach(() => {
@@ -80,7 +75,7 @@ describe("useCheckReferenceNumber hook", () => {
         expect(result.current.refNoError).toBe("");
     });
 
-    it("sets refNoError if ticket check fails", async () => {
+    it("sets refNoError if ticket check gives errors", async () => {
         mockGetDataAuthMode.mockResolvedValue("API_KEY");
         mockCheckTicketNumber.mockResolvedValue({ data: null, errors: [{ message: "Ticket not found" }] });
 
@@ -117,4 +112,59 @@ describe("useCheckReferenceNumber hook", () => {
 
         expect(result.current.refNoError).toBe("INVALID is invalid");
     });
+
+    it("sets refNoError if ticket check gives no data but no errors", async () => {
+        mockGetDataAuthMode.mockResolvedValue("API_KEY");
+        mockCheckTicketNumber.mockResolvedValue({ data: null, errors: [] });
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("TIC002", "QUEUE");
+        });
+
+        expect(result.current.refNoError).toBe("No ticket found");
+        expect(result.current.foundCaseId).toBe("");
+    });
+
+    it("sets refNoError if checkTicketNumber throws an error", async () => {
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+        mockCheckTicketNumber.mockImplementation(() => {
+            throw new Error("Network error");
+        });
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("H001"); 
+        });
+
+        await waitFor(() => {
+            expect(result.current.refNoError).toBe("Failed to fetch ticket: Error: Network error");
+            expect(result.current.foundCaseId).toBe("");
+        });
+    });
+
+    // it("does nothing if checkRefNo is called while already checking", async () => {
+    //     vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+    //     mockCheckTicketNumber.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ data: { caseId: "CASE123" }, errors: [] }), 100)));
+
+    //     const { result } = renderHook(() => useCheckReferenceNumber());
+
+    //     const firstCall = act(async () => {
+    //         result.current.checkRefNo("H001");
+    //     });
+
+    //     await act(async () => {
+    //         await result.current.checkRefNo("H002"); 
+    //     });
+
+    //     await firstCall;
+
+    //     expect(mockCheckTicketNumber).toHaveBeenCalledTimes(1);
+    //     expect(result.current.foundCaseId).toBe("CASE123");
+    //     expect(result.current.refNoError).toBe("");
+    // });
 });
