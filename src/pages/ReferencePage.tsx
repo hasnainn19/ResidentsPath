@@ -277,12 +277,6 @@ const ReferencePage = () => {
                                         </Tooltip>
                                     )}
                                 </Box>
-                                {/* Placeholder showing qr code extracts text */}
-                                {refNo && (
-                                    <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                                        {translate("reference-ref")}: {refNo}
-                                    </Typography>
-                                )}
                             </Box>
                         </CardActions>
                     </Card>
