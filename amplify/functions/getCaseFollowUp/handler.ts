@@ -1,6 +1,5 @@
 import type { Schema } from "../../data/resource";
 import {
-  DepartmentLabelByName,
   isValidCaseReferenceNumber,
   normaliseCaseReferenceNumber,
 } from "../../../shared/formSchema";
@@ -91,11 +90,13 @@ export const handler: Schema["getCaseFollowUp"]["functionHandler"] = async (even
     hasReachedAppointmentLimit = appointmentCount >= RESIDENT_CASE_APPOINTMENT_LIMIT;
   }
 
+  const { departmentName, status } = caseRecord;
+
   return {
     found: true,
     referenceNumber: caseRecord.referenceNumber ?? referenceNumber,
-    departmentName: caseRecord.departmentName ?? undefined,
-    status: caseRecord.status ?? undefined,
+    departmentName,
+    status,
     hasActiveWaitingTicket: waitingTicketLookup.hasActiveWaitingTicket,
     hasReachedAppointmentLimit,
   };
