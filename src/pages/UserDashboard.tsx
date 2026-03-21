@@ -53,6 +53,9 @@ export default function UserDashboard() {
         if (fetchError) {
             setErrors(fetchError);
         }
+        else {
+            setErrors('');
+        }
     }, [fetchError]);
 
     const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
