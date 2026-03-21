@@ -59,26 +59,7 @@ vi.mock("../../../context/FormWizardProvider", () => ({
 }));
 
 vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
-  default: ({
-    title,
-    subtitle,
-    children,
-    onBack,
-  }: {
-    title: string;
-    subtitle?: string;
-    children: ReactNode;
-    onBack?: () => void;
-  }) => (
-    <section>
-      <button type="button" onClick={onBack}>
-        Back
-      </button>
-      <h1>{title}</h1>
-      {subtitle ? <p>{subtitle}</p> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../components/FormPageComponents/PrivacyNoticeDialog", () => ({
@@ -104,17 +85,11 @@ vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
 
 vi.mock("../../../components/FormPageComponents/StepActions", () => ({
   default: ({
-    onSave,
-    showPrevious,
-    onPrevious,
     advanceLabel,
     advanceDisabled,
     advanceType = "submit",
     onAdvanceClick,
   }: {
-    onSave: () => void;
-    showPrevious?: boolean;
-    onPrevious?: () => void;
     advanceLabel: string;
     advanceDisabled?: boolean;
     advanceType?: "button" | "submit";
@@ -124,14 +99,6 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
 
     return (
       <div>
-        <button type="button" onClick={onSave}>
-          Save and continue later
-        </button>
-        {showPrevious ? (
-          <button type="button" onClick={onPrevious}>
-            Previous
-          </button>
-        ) : null}
         <button type={advanceType} disabled={advanceDisabled} onClick={onAdvanceClick}>
           {advanceLabel}
         </button>
@@ -280,7 +247,7 @@ describe("ReviewAndSubmit", () => {
     expect(screen.queryByRole("heading", { name: "Support needs" })).not.toBeInTheDocument();
   });
 
-  it("routes section edit actions to the matching step", async () => {
+  it("routes the request section edit action to enquiry selection", async () => {
     mockGetReviewDisplayValue.mockImplementation((key: keyof FormData) => {
       if (key === "firstName") return "Test";
       if (key === "enquiryId") return "Homelessness";
@@ -296,20 +263,39 @@ describe("ReviewAndSubmit", () => {
     const user = userEvent.setup();
 
     const requestSection = screen.getByRole("heading", { name: "Your request" }).closest("section");
+    expect(requestSection).not.toBeNull();
+
+    await user.click(within(requestSection as HTMLElement).getByRole("button", { name: "Edit" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/form/enquiry-selection");
+  });
+
+  it("routes the appointment section edit action to actions", async () => {
+    mockGetReviewDisplayValue.mockImplementation((key: keyof FormData) => {
+      if (key === "firstName") return "Test";
+      if (key === "enquiryId") return "Homelessness";
+      if (key === "appointmentDateIso") return "12 May 2026";
+      return null;
+    });
+
+    renderPage({
+      formData: {
+        privacyNoticeAccepted: true,
+      },
+    });
+    const user = userEvent.setup();
+
     const appointmentSection = screen
       .getByRole("heading", { name: "Appointment" })
       .closest("section");
 
-    expect(requestSection).not.toBeNull();
     expect(appointmentSection).not.toBeNull();
 
-    await user.click(within(requestSection as HTMLElement).getByRole("button", { name: "Edit" }));
     await user.click(
       within(appointmentSection as HTMLElement).getByRole("button", { name: "Edit" }),
     );
 
-    expect(mockNavigate).toHaveBeenNthCalledWith(1, "/form/enquiry-selection");
-    expect(mockNavigate).toHaveBeenNthCalledWith(2, "/form/actions");
+    expect(mockNavigate).toHaveBeenCalledWith("/form/actions");
   });
 
   it("keeps submit disabled until the privacy notice has been acknowledged", () => {
@@ -346,7 +332,6 @@ describe("ReviewAndSubmit", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Read the full privacy notice" }));
-
     expect(screen.getByText("Privacy notice dialog")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Close privacy notice" }));
@@ -354,7 +339,7 @@ describe("ReviewAndSubmit", () => {
     expect(screen.queryByText("Privacy notice dialog")).not.toBeInTheDocument();
   });
 
-  it("submits successfully, clears the draft, and navigates with an appointment receipt", async () => {
+  it("submits an appointment request with the built payload and auth mode", async () => {
     mockBuildSubmitEnquiryPayload.mockReturnValue({
       departmentName: "Homelessness",
       enquiry: "homelessness",
@@ -404,25 +389,136 @@ describe("ReviewAndSubmit", () => {
         appointmentTime: "11:30",
       }),
     );
-    expect(mockClearSavedDraft).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith("/receipts/CASE-12345", {
-      state: {
-        receipt: {
-          referenceNumber: "CASE-12345",
-          bookingReferenceNumber: "BOOK-222",
-          receiptType: "APPOINTMENT",
-          ticketNumber: "Q-19",
-          estimatedWaitTimeLower: 10,
-          estimatedWaitTimeUpper: 20,
-          appointmentDateIso: "2026-05-12",
-          appointmentTime: "11:30",
-          departmentName: "Homelessness",
-        },
+  });
+
+  it("clears the saved draft after a successful appointment submission", async () => {
+    mockBuildSubmitEnquiryPayload.mockReturnValue({
+      departmentName: "Homelessness",
+      enquiry: "homelessness",
+      proceed: "BOOK_APPOINTMENT",
+    });
+    mockSubmitEnquiry.mockResolvedValue({
+      data: {
+        ok: true,
+        referenceNumber: "CASE-12345",
+        bookingReferenceNumber: "BOOK-222",
+        ticketNumber: "Q-19",
+        estimatedWaitTimeLower: 10,
+        estimatedWaitTimeUpper: 20,
       },
+      errors: undefined,
+    });
+
+    renderPage({
+      formData: {
+        privacyNoticeAccepted: true,
+        proceed: "BOOK_APPOINTMENT",
+        appointmentDateIso: "2026-05-12",
+        appointmentTime: "11:30",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "Submit request" }));
+
+    await waitFor(() => {
+      expect(mockClearSavedDraft).toHaveBeenCalled();
     });
   });
 
-  it("submits successfully and navigates with a queue receipt", async () => {
+  it("navigates with an appointment receipt after a successful appointment submission", async () => {
+    mockBuildSubmitEnquiryPayload.mockReturnValue({
+      departmentName: "Homelessness",
+      enquiry: "homelessness",
+      proceed: "BOOK_APPOINTMENT",
+    });
+    mockSubmitEnquiry.mockResolvedValue({
+      data: {
+        ok: true,
+        referenceNumber: "CASE-12345",
+        bookingReferenceNumber: "BOOK-222",
+        ticketNumber: "Q-19",
+        estimatedWaitTimeLower: 10,
+        estimatedWaitTimeUpper: 20,
+      },
+      errors: undefined,
+    });
+
+    renderPage({
+      formData: {
+        privacyNoticeAccepted: true,
+        proceed: "BOOK_APPOINTMENT",
+        appointmentDateIso: "2026-05-12",
+        appointmentTime: "11:30",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "Submit request" }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/receipts/CASE-12345", {
+        state: {
+          receipt: {
+            referenceNumber: "CASE-12345",
+            bookingReferenceNumber: "BOOK-222",
+            receiptType: "APPOINTMENT",
+            ticketNumber: "Q-19",
+            estimatedWaitTimeLower: 10,
+            estimatedWaitTimeUpper: 20,
+            appointmentDateIso: "2026-05-12",
+            appointmentTime: "11:30",
+            departmentName: "Homelessness",
+          },
+        },
+      });
+    });
+  });
+
+  it("submits a queue request with the built payload and auth mode", async () => {
+    mockBuildSubmitEnquiryPayload.mockReturnValue({
+      departmentName: "General_Customer_Services",
+      enquiry: "general_services",
+      proceed: "JOIN_DIGITAL_QUEUE",
+    });
+    mockSubmitEnquiry.mockResolvedValue({
+      data: {
+        ok: true,
+        referenceNumber: "CASE-QUEUE",
+        ticketNumber: "A12",
+        estimatedWaitTimeLower: 5,
+        estimatedWaitTimeUpper: 15,
+      },
+      errors: undefined,
+    });
+
+    renderPage({
+      formData: {
+        privacyNoticeAccepted: true,
+        proceed: "JOIN_DIGITAL_QUEUE",
+        appointmentDateIso: "",
+        appointmentTime: "",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "Submit request" }));
+
+    await waitFor(() => {
+      expect(mockSubmitEnquiry).toHaveBeenCalledWith(
+        {
+          input: {
+            departmentName: "General_Customer_Services",
+            enquiry: "general_services",
+            proceed: "JOIN_DIGITAL_QUEUE",
+          },
+        },
+        { authMode: "identityPool" },
+      );
+    });
+  });
+
+  it("navigates with a queue receipt after a successful queue submission", async () => {
     mockBuildSubmitEnquiryPayload.mockReturnValue({
       departmentName: "General_Customer_Services",
       enquiry: "general_services",

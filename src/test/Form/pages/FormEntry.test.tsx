@@ -43,21 +43,7 @@ vi.mock("../../../context/FormWizardProvider", () => ({
 }));
 
 vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
-  default: ({
-    title,
-    subtitle,
-    children,
-  }: {
-    title: string;
-    subtitle?: string;
-    children: ReactNode;
-  }) => (
-    <section>
-      <h1>{title}</h1>
-      {subtitle ? <p>{subtitle}</p> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../pages/Form/model/draftStorage", async () => {

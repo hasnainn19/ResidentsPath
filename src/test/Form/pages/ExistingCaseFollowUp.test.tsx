@@ -31,36 +31,11 @@ vi.mock("../../../utils/getDataAuthMode", () => ({
 }));
 
 vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
-  default: ({
-    title,
-    subtitle,
-    children,
-  }: {
-    title: string;
-    subtitle?: string;
-    children: ReactNode;
-  }) => (
-    <section>
-      <h1>{title}</h1>
-      {subtitle ? <p>{subtitle}</p> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
-  default: ({
-    children,
-    copy,
-  }: {
-    children: ReactNode;
-    copy: { label?: string };
-  }) => (
-    <section>
-      {copy.label ? <h2>{copy.label}</h2> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
@@ -90,16 +65,14 @@ vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
 vi.mock("../../../components/FormPageComponents/OptionTile", () => ({
   default: ({
     title,
-    selected,
     disabled,
     onClick,
   }: {
     title: string;
-    selected?: boolean;
     disabled?: boolean;
     onClick?: () => void;
   }) => (
-    <button type="button" aria-pressed={selected} disabled={disabled} onClick={onClick}>
+    <button type="button" disabled={disabled} onClick={onClick}>
       {title}
     </button>
   ),
@@ -414,7 +387,7 @@ describe("ExistingCaseFollowUp", () => {
     expect(mockSubmitCaseFollowUp).not.toHaveBeenCalled();
   });
 
-  it("submits a queue follow-up and navigates with the queue receipt", async () => {
+  it("submits a queue follow-up with the expected payload and auth mode", async () => {
     mockGetCaseFollowUp.mockResolvedValue(
       makeLookupResponse({
         departmentName: "Adults_Duty",
@@ -452,6 +425,31 @@ describe("ExistingCaseFollowUp", () => {
         { authMode: "identityPool" },
       );
     });
+  });
+
+  it("navigates with a queue receipt after a successful queue follow-up", async () => {
+    mockGetCaseFollowUp.mockResolvedValue(
+      makeLookupResponse({
+        departmentName: "Adults_Duty",
+      }),
+    );
+    mockSubmitCaseFollowUp.mockResolvedValue(
+      makeSubmitResponse({
+        ticketNumber: "A12",
+        estimatedWaitTimeLower: 10,
+        estimatedWaitTimeUpper: 20,
+      }),
+    );
+
+    renderPage();
+    const user = userEvent.setup();
+
+    await lookupCase(user);
+    await screen.findByText("Case found: ABC-DEF234");
+
+    await user.type(screen.getByRole("textbox", { name: "Add new information (optional)" }), "  New information  ");
+    await user.click(screen.getByRole("button", { name: "Join digital queue" }));
+    await user.click(screen.getByRole("button", { name: "Submit" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/receipts/ABC-DEF234", {
       state: {
@@ -470,7 +468,7 @@ describe("ExistingCaseFollowUp", () => {
     });
   });
 
-  it("submits a booked appointment follow-up and navigates with the appointment receipt", async () => {
+  it("submits a booked appointment follow-up with the expected payload and auth mode", async () => {
     mockSubmitCaseFollowUp.mockResolvedValue(
       makeSubmitResponse({
         bookingReferenceNumber: "APT-XYZ234",
@@ -501,6 +499,24 @@ describe("ExistingCaseFollowUp", () => {
         { authMode: "identityPool" },
       );
     });
+  });
+
+  it("navigates with an appointment receipt after a successful booked follow-up", async () => {
+    mockSubmitCaseFollowUp.mockResolvedValue(
+      makeSubmitResponse({
+        bookingReferenceNumber: "APT-XYZ234",
+      }),
+    );
+
+    renderPage();
+    const user = userEvent.setup();
+
+    await lookupCase(user);
+    await screen.findByText("Case found: ABC-DEF234");
+
+    await user.click(screen.getByRole("button", { name: "Book appointment" }));
+    await user.click(screen.getByRole("button", { name: "Confirm appointment" }));
+    await user.click(screen.getByRole("button", { name: "Submit" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/receipts/ABC-DEF234", {
       state: {

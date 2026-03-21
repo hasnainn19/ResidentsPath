@@ -517,7 +517,7 @@ describe("PersonalDetails", () => {
     );
   });
 
-  it("normalises the postcode and navigates to the actions page on valid submit", () => {
+  it("normalises the postcode on valid submit", () => {
     renderPage({
       formData: {
         postcode: "tw31jl",
@@ -537,6 +537,17 @@ describe("PersonalDetails", () => {
       ...previousState,
       postcode: "TW3 1JL",
     });
+  });
+
+  it("navigates to the actions page on valid submit", () => {
+    renderPage({
+      formData: {
+        postcode: "tw31jl",
+      },
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
+
     expect(mockNavigate).toHaveBeenCalledWith("/form/actions");
   });
 

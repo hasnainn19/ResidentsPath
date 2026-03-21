@@ -128,19 +128,17 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
     advanceLabel,
     advanceDisabled,
     advanceType = "submit",
-    onAdvanceClick,
   }: {
     onSave: () => void;
     advanceLabel: string;
     advanceDisabled?: boolean;
     advanceType?: "button" | "submit";
-    onAdvanceClick?: () => void;
   }) => (
     <div>
       <button type="button" onClick={onSave}>
         Save and continue later
       </button>
-      <button type={advanceType} disabled={advanceDisabled} onClick={onAdvanceClick}>
+      <button type={advanceType} disabled={advanceDisabled}>
         {advanceLabel}
       </button>
     </div>

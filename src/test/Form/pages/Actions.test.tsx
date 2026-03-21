@@ -50,35 +50,11 @@ vi.mock("../../../context/FormWizardProvider", () => ({
 }));
 
 vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
-  default: ({
-    title,
-    subtitle,
-    children,
-    onBack,
-  }: {
-    title: string;
-    subtitle?: string;
-    children: ReactNode;
-    onBack?: () => void;
-  }) => (
-    <section>
-      <button type="button" onClick={onBack}>
-        Back
-      </button>
-      <h1>{title}</h1>
-      {subtitle ? <p>{subtitle}</p> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
-  default: ({ children, copy }: { children: ReactNode; copy: { label?: string } }) => (
-    <section>
-      {copy.label ? <h2>{copy.label}</h2> : null}
-      {children}
-    </section>
-  ),
+  default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
 vi.mock("../../../components/FormPageComponents/StepActions", () => ({
@@ -261,7 +237,9 @@ describe("Actions", () => {
       );
     });
 
-    expect(screen.getByText("There are currently 10 people in this queue.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("There are currently 10 people in this queue."),
+    ).toBeInTheDocument();
     expect(screen.getByText("Current queue level: Busy.")).toBeInTheDocument();
     expect(screen.getByText(/Last updated:/)).toBeInTheDocument();
     expect(screen.getByText("Join the digital queue")).toBeInTheDocument();
@@ -510,7 +488,7 @@ describe("Actions", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
-  it("calls handleSave and navigates back to personal details from the page actions", async () => {
+  it("calls handleSave from the page actions", async () => {
     renderPage({
       formData: {
         proceed: "BOOK_APPOINTMENT",
@@ -521,9 +499,22 @@ describe("Actions", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Save and continue later" }));
-    await user.click(screen.getByRole("button", { name: "Previous" }));
 
     expect(mockHandleSave).toHaveBeenCalled();
+  });
+
+  it("navigates back to personal details from the page actions", async () => {
+    renderPage({
+      formData: {
+        proceed: "BOOK_APPOINTMENT",
+        appointmentDateIso: "2026-05-12",
+        appointmentTime: "11:30",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: "Previous" }));
+
     expect(mockNavigate).toHaveBeenCalledWith("/form/personal-details");
   });
 });
