@@ -8,7 +8,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Authenticator } from '@aws-amplify/ui-react';
 
-import UserDashboard from '../../pages/UserDashboard';
 import theme from '../../Constants/Theme';
 
 vi.mock('react-i18next', async (importOriginal) => {

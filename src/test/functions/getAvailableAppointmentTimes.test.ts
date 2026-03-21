@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockDdbSend, mockQueryCommand } = vi.hoisted(() => ({
+const { mockDdbSend, mockQueryCommandConstructor } = vi.hoisted(() => ({
   mockDdbSend: vi.fn(),
-  mockQueryCommand: vi.fn((input) => ({ input })),
+  mockQueryCommandConstructor: vi.fn(function (this: any, input: any) {
+    this.input = input;
+  }),
 }));
 
-vi.mock("@aws-sdk/client-dynamodb", () => ({
-  DynamoDBClient: vi.fn(() => ({ send: mockDdbSend })),
-  QueryCommand: mockQueryCommand,
-}));
+vi.mock("@aws-sdk/client-dynamodb", () => {
+  return {
+    DynamoDBClient: class {
+      send = mockDdbSend;
+    },
+    QueryCommand: mockQueryCommandConstructor,
+  };
+});
 
 vi.mock("../../../shared/formSchema", () => ({
   DepartmentEnum: {
@@ -72,7 +78,7 @@ describe("getAvailableAppointmentTimes handler", () => {
 
     await handler(makeEvent("Homelessness", "2026-06-15"));
 
-    expect(mockQueryCommand).toHaveBeenCalledWith({
+    expect(mockQueryCommandConstructor).toHaveBeenCalledWith({
       TableName: "test-table",
       KeyConditionExpression: "pk = :pk",
       ExpressionAttributeValues: {
