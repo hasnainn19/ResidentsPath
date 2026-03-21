@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
 import type { FormData } from "../../../pages/Form/model/formFieldTypes";
@@ -203,11 +204,18 @@ function makeSelectionState(overrides: Record<string, unknown> = {}) {
 function renderPage(options?: {
   formData?: Partial<FormData>;
   selectionState?: Record<string, unknown>;
+  theme?: ReturnType<typeof createTheme>;
 }) {
   testState.formData = makeFormData(options?.formData);
   mockGetEnquirySelectionState.mockReturnValue(makeSelectionState(options?.selectionState));
 
-  return render(<Actions />);
+  const page = <Actions />;
+
+  if (options?.theme) {
+    return render(<ThemeProvider theme={options.theme}>{page}</ThemeProvider>);
+  }
+
+  return render(page);
 }
 
 describe("Actions", () => {
@@ -295,6 +303,37 @@ describe("Actions", () => {
     ).toBeInTheDocument();
   });
 
+  it("falls back to zero people, the current time, and the theme main colour when queue details are incomplete", async () => {
+    mockGetDepartmentQueueStatus.mockResolvedValue({
+      data: {
+        queueCount: undefined,
+        updatedAtIso: "",
+      },
+      errors: undefined,
+    });
+
+    const theme = createTheme({
+      palette: {
+        success: {
+          main: "#defbd3",
+          dark: "",
+        },
+      },
+    });
+
+    renderPage({
+      formData: {
+        proceed: "JOIN_DIGITAL_QUEUE",
+        routedDepartment: "Homelessness",
+      },
+      theme,
+    });
+
+    expect(await screen.findByText("There is currently nobody in this queue.")).toBeInTheDocument();
+    expect(screen.getByText("Current queue level: Quiet.")).toBeInTheDocument();
+    expect(screen.getByText(/Last updated:/)).toBeInTheDocument();
+  });
+
   it("clamps negative queue counts to zero and shows the quiet queue message", async () => {
     mockGetDepartmentQueueStatus.mockResolvedValue({
       data: {
@@ -372,6 +411,21 @@ describe("Actions", () => {
       data: null,
       errors: [{ message: "fail" }],
     });
+
+    renderPage({
+      formData: {
+        proceed: "JOIN_DIGITAL_QUEUE",
+        routedDepartment: "Homelessness",
+      },
+    });
+
+    expect(
+      await screen.findByText("Unable to load the current queue size right now."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a warning when loading queue information throws", async () => {
+    mockGetDepartmentQueueStatus.mockRejectedValue(new Error("Network down"));
 
     renderPage({
       formData: {

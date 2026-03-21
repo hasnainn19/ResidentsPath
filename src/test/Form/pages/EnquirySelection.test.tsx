@@ -321,6 +321,41 @@ describe("EnquirySelection", () => {
     expect(mockApplyTopLevelChange).toHaveBeenCalledWith(previousState, "CouncilTax");
   });
 
+  it("calls setFormData when the selected enquiry changes", async () => {
+    renderPage({
+      formData: {
+        topLevel: "Housing",
+        enquiryId: "housing_benefit",
+      },
+      selectionState: {
+        enquiryOptions: [
+          { value: "housing_benefit", label: "Housing Benefit", department: "Benefits" },
+          { value: "homelessness", label: "Homelessness", department: "Homelessness" },
+        ],
+        hasChosenEnquiry: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "Select an enquiry..." }));
+    await user.click(await screen.findByRole("option", { name: "Homelessness" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      topLevel: "Housing",
+      enquiryId: "housing_benefit",
+    });
+
+    expect(updater(previousState)).toEqual(
+      expect.objectContaining({
+        enquiryId: "homelessness",
+        routedDepartment: "Homelessness",
+      }),
+    );
+  });
+
   it("clears childrenCount when dependent children is unchecked", async () => {
     renderPage({
       formData: {
@@ -383,6 +418,35 @@ describe("EnquirySelection", () => {
     });
   });
 
+  it("sets disability support to true when the option is checked", async () => {
+    renderPage({
+      formData: {
+        hasDisabilityOrSensory: false,
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDisabilityQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: "I have a disability or sensory impairment" }),
+    );
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      hasDisabilityOrSensory: false,
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      hasDisabilityOrSensory: true,
+    });
+  });
+
   it("resets safe contact fields when domestic abuse is unchecked", async () => {
     renderPage({
       formData: {
@@ -415,6 +479,35 @@ describe("EnquirySelection", () => {
       domesticAbuse: false,
       safeToContact: "PREFER_NOT_TO_SAY",
       safeContactNotes: "",
+    });
+  });
+
+  it("sets domestic abuse to true when the option is checked", async () => {
+    renderPage({
+      formData: {
+        domesticAbuse: false,
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDomesticAbuseQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: "I am a domestic abuse victim/survivor" }),
+    );
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      domesticAbuse: false,
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      domesticAbuse: true,
     });
   });
 
@@ -456,6 +549,154 @@ describe("EnquirySelection", () => {
     expect(
       screen.getByPlaceholderText("Safe time or method, or do not contact"),
     ).toBeInTheDocument();
+  });
+
+  it("updates age range when a selection is made", async () => {
+    renderPage({
+      formData: {
+        ageRange: "",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showAgeRange: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "Select an age range..." }));
+    await user.click(await screen.findByRole("option", { name: "18-24" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      ageRange: "",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      ageRange: "AGE_18_24",
+    });
+  });
+
+  it("updates children count when a selection is made", async () => {
+    renderPage({
+      formData: {
+        hasChildren: true,
+        childrenCount: "",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showChildrenQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "How many children?" }));
+    await user.click(await screen.findByRole("option", { name: "2" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      hasChildren: true,
+      childrenCount: "",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      childrenCount: "2",
+    });
+  });
+
+  it("updates disability type when a selection is made", async () => {
+    renderPage({
+      formData: {
+        hasDisabilityOrSensory: true,
+        disabilityType: "",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDisabilityQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "Select a type..." }));
+    await user.click(await screen.findByRole("option", { name: "Hearing impairment" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      hasDisabilityOrSensory: true,
+      disabilityType: "",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      disabilityType: "HEARING_IMPAIRMENT",
+    });
+  });
+
+  it("updates household size when a selection is made", async () => {
+    renderPage({
+      formData: {
+        householdSize: "",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showHouseholdSize: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("combobox", { name: "How many people are in your household?" }),
+    );
+    await user.click(await screen.findByRole("option", { name: "4" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      householdSize: "",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      householdSize: "4",
+    });
+  });
+
+  it("updates safe-to-contact when a new option is selected", async () => {
+    renderPage({
+      formData: {
+        domesticAbuse: true,
+        safeToContact: "PREFER_NOT_TO_SAY",
+      },
+      selectionState: {
+        hasEnoughToProceed: true,
+        showDomesticAbuseQs: true,
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("combobox", { name: "Is it safe for us to contact you?" }));
+    await user.click(await screen.findByRole("option", { name: "Yes" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      domesticAbuse: true,
+      safeToContact: "PREFER_NOT_TO_SAY",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      safeToContact: "yes",
+    });
   });
 
   it("reveals the extra support options when requested", () => {

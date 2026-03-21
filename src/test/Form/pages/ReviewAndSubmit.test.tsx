@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -32,6 +32,7 @@ const {
   mockBuildSubmitEnquiryPayload: vi.fn(),
   testState: {
     formData: null as FormData | null,
+    latestAdvanceClick: null as null | (() => void | Promise<void>),
   },
 }));
 
@@ -118,21 +119,25 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
     advanceDisabled?: boolean;
     advanceType?: "button" | "submit";
     onAdvanceClick?: () => void;
-  }) => (
-    <div>
-      <button type="button" onClick={onSave}>
-        Save and continue later
-      </button>
-      {showPrevious ? (
-        <button type="button" onClick={onPrevious}>
-          Previous
+  }) => {
+    testState.latestAdvanceClick = onAdvanceClick ?? null;
+
+    return (
+      <div>
+        <button type="button" onClick={onSave}>
+          Save and continue later
         </button>
-      ) : null}
-      <button type={advanceType} disabled={advanceDisabled} onClick={onAdvanceClick}>
-        {advanceLabel}
-      </button>
-    </div>
-  ),
+        {showPrevious ? (
+          <button type="button" onClick={onPrevious}>
+            Previous
+          </button>
+        ) : null}
+        <button type={advanceType} disabled={advanceDisabled} onClick={onAdvanceClick}>
+          {advanceLabel}
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock("../../../pages/Form/model/getEnquirySelectionState", () => ({
@@ -317,6 +322,25 @@ describe("ReviewAndSubmit", () => {
     expect(screen.getByRole("button", { name: "Submit request" })).toBeDisabled();
   });
 
+  it("updates privacy notice acceptance when the acknowledgement checkbox is changed", async () => {
+    mockSetFormData.mockImplementation((updater: FormData | ((prev: FormData) => FormData)) => {
+      testState.formData =
+        typeof updater === "function" ? updater(testState.formData as FormData) : updater;
+    });
+
+    renderPage();
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: "I acknowledge the privacy notice for this form.",
+      }),
+    );
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+    expect(testState.formData?.privacyNoticeAccepted).toBe(true);
+  });
+
   it("opens and closes the privacy notice dialog", async () => {
     renderPage();
     const user = userEvent.setup();
@@ -478,7 +502,9 @@ describe("ReviewAndSubmit", () => {
       expect(submitButton).toBeDisabled();
     });
 
-    await user.click(submitButton);
+    await act(async () => {
+      await testState.latestAdvanceClick?.();
+    });
 
     expect(mockSubmitEnquiry).toHaveBeenCalledTimes(1);
 

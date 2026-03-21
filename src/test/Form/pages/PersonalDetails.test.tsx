@@ -296,6 +296,18 @@ describe("PersonalDetails", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
   });
 
+  it("shows the email helper text when the email address is invalid and blurred", () => {
+    renderPage({
+      formData: {
+        email: "test.tester@invalid@",
+      },
+    });
+
+    fireEvent.blur(screen.getByRole("textbox", { name: "Email (optional)" }));
+
+    expect(screen.getByText("Enter a valid email address or leave blank.")).toBeInTheDocument();
+  });
+
   it("disables continue when Text message is selected without a phone number", () => {
     renderPage({
       formData: {
@@ -305,6 +317,58 @@ describe("PersonalDetails", () => {
     });
 
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+  });
+
+  it("shows the contact-method helper text when Text message is selected without a phone number", () => {
+    renderPage({
+      formData: {
+        contactMethod: "TEXT_MESSAGE",
+        phone: "",
+      },
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
+
+    expect(screen.getByText("To use Text message, add a phone number above.")).toBeInTheDocument();
+  });
+
+  it("shows the contact-method helper text when Email is selected without an email address", () => {
+    renderPage({
+      formData: {
+        contactMethod: "EMAIL",
+        email: "",
+      },
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
+
+    expect(screen.getByText("To use Email, add an email address above.")).toBeInTheDocument();
+  });
+
+  it("updates contact method when a new option is selected", async () => {
+    renderPage({
+      formData: {
+        contactMethod: "",
+      },
+    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("combobox", { name: "Preferred method of contact (optional)" }),
+    );
+    await user.click(await screen.findByRole("option", { name: "Email" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      contactMethod: "",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      contactMethod: "EMAIL",
+    });
   });
 
   it("disables continue when the phone number is invalid", () => {
@@ -317,6 +381,18 @@ describe("PersonalDetails", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
   });
 
+  it("shows the phone helper text when the phone number is invalid and blurred", () => {
+    renderPage({
+      formData: {
+        phone: "not-a-number",
+      },
+    });
+
+    fireEvent.blur(screen.getByRole("textbox", { name: "Phone number (optional)" }));
+
+    expect(screen.getByText("Enter a valid phone number or leave blank.")).toBeInTheDocument();
+  });
+
   it("disables continue when Other pronouns is selected without extra text", () => {
     renderPage({
       formData: {
@@ -326,6 +402,19 @@ describe("PersonalDetails", () => {
     });
 
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+  });
+
+  it("blocks submit when Other pronouns is selected without extra text", () => {
+    renderPage({
+      formData: {
+        pronouns: "OTHER",
+        pronounsOtherText: "",
+      },
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: "Continue" }).closest("form")!);
+
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("clears the other pronouns text when a predefined pronouns option is chosen", async () => {
@@ -449,6 +538,28 @@ describe("PersonalDetails", () => {
       postcode: "TW3 1JL",
     });
     expect(mockNavigate).toHaveBeenCalledWith("/form/actions");
+  });
+
+  it("normalises the postcode when the field loses focus", () => {
+    renderPage({
+      formData: {
+        postcode: "tw31jl",
+      },
+    });
+
+    fireEvent.blur(screen.getByRole("textbox", { name: "Postcode (optional)" }));
+
+    expect(mockSetFormData).toHaveBeenCalledTimes(1);
+
+    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
+    const previousState = makeFormData({
+      postcode: "tw31jl",
+    });
+
+    expect(updater(previousState)).toEqual({
+      ...previousState,
+      postcode: "TW3 1JL",
+    });
   });
 
   it("blocks submit and does not navigate when the postcode is invalid", () => {
