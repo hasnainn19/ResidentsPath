@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ReferencePage from "../../pages/ReferencePage";
 
@@ -125,9 +125,6 @@ describe("ReferencePage", () => {
         const button = screen.getByRole("button", { name: /reference-check-status/i });
         await user.click(button);
 
-        // await waitFor(() => {
-        //     expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123");
-        // });
         await waitFor(() => {
             expect(mockCheckRefNo).toHaveBeenCalled();
             expect(mockCheckRefNo.mock.calls[0][0]).toContain("ABC123");        
