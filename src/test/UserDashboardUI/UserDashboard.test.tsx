@@ -175,7 +175,7 @@ describe("Notifications and Step-out UI", () => {
 
         await waitFor(() => {
             expect(screen.queryByLabelText('stepOut-dialog')).not.toBeInTheDocument();
-        });;
+        });
         expect(await screen.findByLabelText('stepOut-alert')).toBeInTheDocument();
     });
 
@@ -286,7 +286,7 @@ describe("Notifications and Step-out UI", () => {
 
         await waitFor(() => {
             expect(screen.queryByLabelText('notifications-dialog')).not.toBeInTheDocument();
-        });;
+        });
         expect(await screen.findByLabelText('notifications-alert')).toBeInTheDocument();
     });
 

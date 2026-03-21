@@ -56,7 +56,6 @@ export default function UserDashboard() {
     }, [fetchError]);
 
     const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
-        console.log("here");
         if (!ticketId)
         {
             setErrors('Empty ticket ID!');
