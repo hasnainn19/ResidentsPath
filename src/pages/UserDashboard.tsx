@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { generateClient } from "aws-amplify/api";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert, IconButton } from '@mui/material';
@@ -36,8 +36,12 @@ export default function UserDashboard() {
     const { user } = useUser();
     const client = generateClient<Schema>({ authMode: "userPool" });
     const {  t: translate } = useTranslation();
-
-    const {
+    const [showStepOutAlert, setShowStepOutAlert] = useState(false);
+    const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
+    const [errors, setErrors] = useState('');
+    const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
+    const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
+        const {
         position, waitTimeLower, waitTimeUpper,
         ticketId,
         steppedOut, setSteppedOut,
@@ -45,11 +49,11 @@ export default function UserDashboard() {
         error: fetchError,
     } = useTicketQueueInfo(caseId);
 
-    const [showStepOutAlert, setShowStepOutAlert] = useState(false);
-    const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
-    const [errors, setErrors] = useState('');
-    const [stepOutDialogOpen, setStepOutDialogOpen] = useState(false);
-    const [enableNotificationsDialogOpen, setEnableNotificationsDialogOpen] = useState(false);
+    useEffect(() => {
+        if (fetchError) {
+            setErrors(fetchError);
+        }
+    }, [fetchError]);
 
     const executeHandleSteppedOut = async (steppedOut: boolean): Promise<boolean> => {
         console.log("here");
@@ -78,7 +82,11 @@ export default function UserDashboard() {
         contactMethod?: 'SMS' | 'EMAIL',
         contactValue?: string,
     ): Promise<boolean> => {
-        if (!ticketId) return false;
+        if (!ticketId) 
+        {
+            setErrors('Empty ticket ID!');
+            return false;
+        }
 
         try {
             const { errors: notifErrors } = await client.mutations.toggleNotifications({
@@ -184,9 +192,21 @@ export default function UserDashboard() {
                             {translate("userdash-stepout")}
                         </Alert>
                     )}
-                    {(errors || fetchError) && (
-                        <Alert aria-label='error-alert' severity="error" color="error" onClose={() => setErrors('')}>
-                            {errors || fetchError}
+                    {(errors) && (
+                        <Alert
+                            aria-label='error-alert'
+                            severity="error"
+                            color="error"
+                            action={
+                                <IconButton
+                                    aria-label="close-errors-alert"
+                                    onClick={() => setErrors('')}
+                                    >
+                                    <CloseIcon />
+                                </IconButton>
+                            }
+                        >
+                            {errors}
                         </Alert>
                     )}
                     <Paper variant='outlined' sx={{ p:5, width:'100%'}}>
