@@ -50,7 +50,7 @@ export const handler: Schema["cancelAppointmentByReference"]["functionHandler"] 
     };
   }
 
-  if (appointment.status === "CONFIRMED" && appointment.checkedInAt) {
+  if (appointment.status === "CONFIRMED") {
     return {
       ...errorResponse(
         "INVALID_STATE",
