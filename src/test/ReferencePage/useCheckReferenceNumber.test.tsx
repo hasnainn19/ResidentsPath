@@ -224,4 +224,65 @@ describe("useCheckReferenceNumber hook", () => {
             expect(result.current.foundCaseId).toBe("");
         });
     });
+
+    it("resets isChecking after an error", async () => {
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+        mockCheckTicketNumber.mockImplementation(() => {
+            throw new Error("Boom");
+        });
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("H001");
+        });
+
+        expect(result.current.isChecking).toBe(false);
+    });
+
+    it("resets isChecking after an error", async () => {
+        vi.spyOn(referenceNumbers, "isBookingReferenceNumber").mockReturnValue(false);
+
+        mockCheckTicketNumber.mockImplementation(() => {
+            throw new Error("Boom");
+        });
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("H001");
+        });
+
+        expect(result.current.isChecking).toBe(false);
+    });
+
+    it("clears previous state when a new check starts", async () => {
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("APP123");
+        });
+
+        expect(result.current.appointmentReferenceNumber).toBe("APP123");
+
+        await act(async () => {
+            await result.current.checkRefNo("INVALID");
+        });
+
+        expect(result.current.appointmentReferenceNumber).toBe("");
+        expect(result.current.refNoError).toBe("INVALID is invalid");
+    });
+
+    it("handles normalised reference correctly", async () => {
+        vi.spyOn(referenceNumbers, "normaliseReferenceNumber").mockReturnValue("APP123");
+
+        const { result } = renderHook(() => useCheckReferenceNumber());
+
+        await act(async () => {
+            await result.current.checkRefNo("  app123  ");
+        });
+
+        expect(result.current.appointmentReferenceNumber).toBe("APP123");
+    });
 });
