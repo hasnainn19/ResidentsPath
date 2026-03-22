@@ -36,7 +36,7 @@ const makeEvent = (overrides: Record<string, unknown> = {}) =>
 
 describe("postConfirmation handler", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
     mockCognitoSend.mockResolvedValue({});
     mockUserCreate.mockResolvedValue({ data: { id: "cognito-sub-uuid-123" }, errors: undefined });
     vi.spyOn(console, "log").mockImplementation(() => {});
