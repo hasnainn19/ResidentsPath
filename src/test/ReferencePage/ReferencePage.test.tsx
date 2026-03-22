@@ -36,7 +36,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
-    i18n: { language: "en" }, // fixes i18n.language error
+    i18n: { language: "en" }, 
   }),
 }));
 
@@ -82,6 +82,18 @@ vi.mock("html5-qrcode", () => ({
     clear: vi.fn(),
   })),
 }));
+
+const createMockScanner = (overrides: Partial<{
+    start: any;
+    stop: any;
+    clear: any;
+    }> = {}) => {
+    return function (this: any) {
+        this.start = overrides.start ?? vi.fn().mockResolvedValue(undefined);
+        this.stop = overrides.stop ?? vi.fn().mockResolvedValue(undefined);
+        this.clear = overrides.clear ?? vi.fn();
+    };
+};
 
 // Child components
 vi.mock("../../components/NavBar", () => ({ default: () => <div>Navbar</div> }));
@@ -189,11 +201,15 @@ describe("ReferencePage", () => {
         expect(scanButton).toBeInTheDocument();
 
         const qrViewfinder = screen.getByTestId("qr-scan-view-finder");
-        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        await waitFor(() => {
+            expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        });
 
         const user = userEvent.setup();
         await user.click(scanButton); 
-        expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+        await waitFor(() => {
+            expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+        });        
         const cancelCameraButton = screen.getByTestId("camera-cancel-button");
         expect(cancelCameraButton).toBeInTheDocument();
     });
@@ -205,34 +221,37 @@ describe("ReferencePage", () => {
         expect(scanButton).toBeInTheDocument();
 
         const qrViewfinder = screen.getByTestId("qr-scan-view-finder");
-        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        await waitFor(() => {
+            expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        });
 
         const user = userEvent.setup();
         await user.click(scanButton); 
 
-        expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+        await waitFor(() => {
+            expect(qrViewfinder).toHaveStyle({ visibility: "visible" });
+        });
 
         const cancelCameraButton = screen.getByTestId("camera-cancel-button");
         expect(cancelCameraButton).toBeInTheDocument();
 
         await user.click(cancelCameraButton);
-        expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        await waitFor(() => {
+            expect(qrViewfinder).toHaveStyle({ visibility: "hidden" });
+        });        
         expect(screen.queryByTestId("camera-cancel-button")).not.toBeInTheDocument();
         
     });
 
     it("calls checkRefNo when QR code is decoded", async () => {
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
+        Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn((...args: any[]) => {
-                const onDecode = args[2];
-                capturedOnDecode = onDecode; 
+                capturedOnDecode = args[2];
                 return Promise.resolve();
             }),
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
         }));
 
         render(<ReferencePage />);
@@ -245,7 +264,6 @@ describe("ReferencePage", () => {
 
         capturedOnDecode!("QUEUE|ABC123");
 
-        // The checkRefNo function should have been called
         expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123", "QUEUE");
     });
 
@@ -253,14 +271,11 @@ describe("ReferencePage", () => {
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
         const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
+        Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn((...args: any[]) => {
-                const onDecode = args[2];
-                capturedOnDecode = onDecode;
+                capturedOnDecode = args[2];
                 return Promise.resolve();
             }),
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
         }));
 
         render(<ReferencePage />);
@@ -281,14 +296,11 @@ describe("ReferencePage", () => {
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
         const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
+        Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn((...args: any[]) => {
-            const onDecode = args[2]; 
-            capturedOnDecode = onDecode;
-            return Promise.resolve();
+                capturedOnDecode = args[2];
+                return Promise.resolve();
             }),
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
         }));
 
         render(<ReferencePage />);
@@ -306,10 +318,8 @@ describe("ReferencePage", () => {
 
     it("shows an alert if QR scanner fails to start", async () => {
         const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
-            start: vi.fn(() => Promise.reject("Camera not found")), // <- triggers catch block
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
+        Html5Qrcode.mockImplementation(createMockScanner({
+            start: vi.fn(() => Promise.reject("Camera not found")),
         }));
 
         render(<ReferencePage />);
@@ -324,10 +334,8 @@ describe("ReferencePage", () => {
 
     it("shows a QR scan error alert and allows user to close it", async () => {
         const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
-            start: vi.fn(() => Promise.reject("Camera not found")), // triggers catch block
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
+        Html5Qrcode.mockImplementation(createMockScanner({
+            start: vi.fn(() => Promise.reject("Camera not found")),
         }));
 
         render(<ReferencePage />);
@@ -347,11 +355,12 @@ describe("ReferencePage", () => {
     });
 
     it("calls stopScanner cleanup when ReferencePage unmounts", async () => {
+
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
         const stopMock = vi.fn().mockResolvedValue(undefined);
         const clearMock = vi.fn();
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
-            start: vi.fn(() => Promise.resolve()),
+
+        Html5Qrcode.mockImplementation(createMockScanner({
             stop: stopMock,
             clear: clearMock,
         }));
@@ -375,10 +384,8 @@ describe("ReferencePage", () => {
 
     it("does nothing if scanning is already in progress or startingRef is true", async () => {
         const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
-        Html5Qrcode.mockImplementation(() => ({
+        Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn(() => Promise.resolve()),
-            stop: vi.fn().mockResolvedValue(undefined),
-            clear: vi.fn(),
         }));
 
         render(<ReferencePage />);
