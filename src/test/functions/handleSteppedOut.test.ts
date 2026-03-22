@@ -22,7 +22,7 @@ import { handler } from "../../../amplify/functions/handleSteppedOut/handler";
 const makeEvent = (args: {
   ticketId?: string;
   caseId?: string;
-  steppedOut?: boolean;
+  steppedOut: boolean;
 }) => ({ arguments: args }) as any;
 
 const makeTicket = (overrides = {}) => ({
