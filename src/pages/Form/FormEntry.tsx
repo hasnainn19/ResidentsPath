@@ -24,8 +24,10 @@ export default function FormEntry() {
   };
 
   const handleContinueSaved = () => {
-    setFormData(draft!.data);
-    nav(getSafeDraftPath(draft!.lastPath), { replace: true });
+    if (!draft) return;
+
+    setFormData(draft.data);
+    nav(getSafeDraftPath(draft.lastPath), { replace: true });
   };
 
   return (
