@@ -132,6 +132,8 @@ vi.mock("../../../components/SubmissionReceiptComponents/ReceiptBody", () => ({
 
 import SubmissionReceipt from "../../../pages/Form/SubmissionReceipt";
 
+const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(window.navigator, "clipboard");
+
 function makeRouteReceipt(overrides: Partial<ReceiptLike> = {}): ReceiptLike {
   return {
     referenceNumber: " abc-def234 ",
@@ -172,6 +174,15 @@ function renderPage(options?: {
   return render(<SubmissionReceipt />);
 }
 
+function stubClipboard(writeText: (value: string) => Promise<void>) {
+  Object.defineProperty(window.navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText,
+    },
+  });
+}
+
 describe("SubmissionReceipt", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -187,16 +198,17 @@ describe("SubmissionReceipt", () => {
     mockToDataURL.mockResolvedValue("data:image/png;base64,qr-code");
     mockWriteText.mockResolvedValue(undefined);
 
-    Object.defineProperty(window.navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: mockWriteText,
-      },
-    });
+    stubClipboard(mockWriteText);
   });
 
   afterEach(() => {
     vi.mocked(console.error).mockRestore?.();
+
+    if (originalClipboardDescriptor) {
+      Object.defineProperty(window.navigator, "clipboard", originalClipboardDescriptor);
+    } else {
+      Reflect.deleteProperty(window.navigator, "clipboard");
+    }
   });
 
   it("shows an error when no case reference number is provided", async () => {
@@ -493,12 +505,7 @@ describe("SubmissionReceipt", () => {
   });
 
   it("shows a copy error when clipboard writing fails", async () => {
-    Object.defineProperty(window.navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: vi.fn().mockRejectedValue(new Error("Denied")),
-      },
-    });
+    stubClipboard(vi.fn().mockRejectedValue(new Error("Denied")));
 
     renderPage({
       locationState: {
