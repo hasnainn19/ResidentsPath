@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const { mockCognitoSend, mockUserCreate } = vi.hoisted(() => ({
   mockCognitoSend: vi.fn(),
@@ -36,11 +36,15 @@ const makeEvent = (overrides: Record<string, unknown> = {}) =>
 
 describe("postConfirmation handler", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
     mockCognitoSend.mockResolvedValue({});
     mockUserCreate.mockResolvedValue({ data: { id: "cognito-sub-uuid-123" }, errors: undefined });
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("adds the user to the Residents group with correct params", async () => {
