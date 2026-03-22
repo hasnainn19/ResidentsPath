@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const { mockRecalculate, mockUnmarshall } = vi.hoisted(() => ({
   mockRecalculate: vi.fn(),
@@ -35,10 +35,14 @@ function makeEvent(...records: ReturnType<typeof makeRecord>[]) {
 
 describe("onTicketCompleted handler", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     mockRecalculate.mockResolvedValue(true);
     mockUnmarshall.mockImplementation((x: any) => x);
     vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("calls recalculateDepartmentQueue when MODIFY changes status from WAITING to COMPLETED", async () => {
