@@ -15,10 +15,12 @@ import type { Proceed } from "./model/formFieldTypes";
 import {
   DepartmentLabelByName,
   FIELD_TEXT_CONSTRAINTS,
-  isValidCaseReferenceNumber,
-  normaliseCaseReferenceNumber,
   type DepartmentName,
 } from "../../../shared/formSchema";
+import {
+  isValidCaseReferenceNumber,
+  normaliseCaseReferenceNumber,
+} from "../../../shared/referenceNumbers";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 type CaseLookup = {
