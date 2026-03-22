@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Container, Button, Box, Typography } from '@mui/material';
-import { ArrowBackIos } from '@mui/icons-material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useTranslation } from 'react-i18next';
 import { Authenticator  } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
@@ -34,7 +34,7 @@ export default function AuthPage() {
 				<Box sx={{ mb: 4, textAlign: 'center' }}>
 					<Button
 						onClick={() => navigate(-1)}
-						startIcon={<ArrowBackIos sx={{ fontSize: '0.9rem' }} />}
+						startIcon={<ArrowBackIosIcon sx={{ fontSize: '0.9rem' }} />}
 						sx={{
 							textTransform: 'none',
 							color: 'text.primary',
