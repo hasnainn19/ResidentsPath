@@ -140,6 +140,11 @@ describe("toggleNotifications handler", () => {
         );
 
         expect(mockUserUpdate).not.toHaveBeenCalled();
+        expect(mockTicketUpdate).toHaveBeenCalledWith({
+          id: "ticket1",
+          notificationsEnabled: true,
+          notificationPreferredContactMethod: "SMS",
+        });
       });
     });
 
@@ -173,6 +178,11 @@ describe("toggleNotifications handler", () => {
         );
 
         expect(mockUserUpdate).not.toHaveBeenCalled();
+        expect(mockTicketUpdate).toHaveBeenCalledWith({
+          id: "ticket1",
+          notificationsEnabled: true,
+          notificationPreferredContactMethod: "EMAIL",
+        });
       });
     });
 
