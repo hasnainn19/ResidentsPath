@@ -15,7 +15,7 @@ describe("referenceNumbers", () => {
 
   it("returns undefined for missing case reference numbers and passes through non-strings", () => {
     expect(normaliseCaseReferenceNumber(undefined)).toBeUndefined();
-    expect(normaliseCaseReferenceNumber(123 as unknown as string)).toBe(123);
+    expect(normaliseCaseReferenceNumber(123)).toBe(123);
   });
 
   it("validates case reference numbers against the shared format", () => {
