@@ -1,16 +1,19 @@
 import { getAmplifyClient } from "./amplifyClient";
 import type { Schema } from "../../data/resource";
 import { getDefaultEstimatedWaitingTime, getEstimatedWaitTimeBounds } from "./queueWaitTimes";
+import { callModel } from "./runCleanup";
 
 const client = await getAmplifyClient();
+type Ticket = Schema["Ticket"]["type"];
+type WaitingTicket = Omit<Ticket, "status"> & { status: "WAITING" };
+type CompletedTicket = Omit<Ticket, "status" | "completedAt"> & { status: "COMPLETED"; completedAt: string };
 
 /**
  * Returns the median value from a sorted array of numbers.
  * Used to calculate the median time from completed tickets.
+ * Always called with exactly 5 durations (guaranteed by the completedTickets.length >= 5 check).
  */
 function median(values: number[]) {
-  if (values.length === 0) return 0;
-
   values.sort((a, b) => a - b);
 
   const mid = Math.floor(values.length / 2);
@@ -32,15 +35,18 @@ async function getTodayTickets(departmentName:string){
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
-  const { data: tickets } = await client.models.Ticket.list({
-      filter: {
-          departmentName: { eq: departmentName },
-          createdAt: {
-              ge: startOfDay.toISOString(),
-              le: endOfDay.toISOString()
-          }
-      }
-  });
+  const tickets = await callModel(
+    client.models.Ticket.list({
+        filter: {
+            departmentName: { eq: departmentName },
+            createdAt: {
+                ge: startOfDay.toISOString(),
+                le: endOfDay.toISOString()
+            }
+        }
+    }),
+    "recalculateDepartmentQueue: Ticket.list failed"
+  );
 
   if (!tickets || tickets.length === 0) {
     throw new Error(`No tickets found for department ${departmentName} for today`);
@@ -52,19 +58,18 @@ async function getTodayTickets(departmentName:string){
 /**
  * Calculates the median time from the provided completed tickets and
  * updates the department's estimatedWaitingTime in DynamoDB with the result.
+ * Only called when completedTickets.length >= 5, so durations always has at least 5 values.
  *
  * @param completedTickets - The most recent completed tickets to calculate the median from
  * @param departmentName - The ID of the department to update
- * @returns The calculated median time in minutes, or 0 if it could not be determined
+ * @returns The calculated median time in minutes, or 0 if all durations are zero
  */
-async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["type"][], departmentName:string)
+async function calculateEstTimeWithMedian(completedTickets: CompletedTicket[], departmentName:string)
 {
-  let estWaitingTime=0;
+  let estWaitingTime = 0;
   const durations: number[] = [];
 
   for (const ticket of completedTickets) {
-
-      if (!ticket.createdAt || !ticket.completedAt) continue;
 
       const start = new Date(ticket.createdAt).getTime();
       const end = new Date(ticket.completedAt).getTime();
@@ -80,12 +85,16 @@ async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["ty
   if (medianTime > 0) {
       estWaitingTime = medianTime;
 
-      await client.models.Department.update({
-          id: departmentName,
-          estimatedWaitingTime: Math.round(estWaitingTime),
-      });
+      await callModel(
+        client.models.Department.update({
+            id: departmentName,
+            estimatedWaitingTime: Math.max(1, Math.round(estWaitingTime)), // Round to nearest minute, minimum of 1
+        }),
+        "recalculateDepartmentQueue: Department.update failed"
+      );
   }
-    return estWaitingTime;
+
+  return estWaitingTime;
 }
 
 /**
@@ -96,7 +105,7 @@ async function calculateEstTimeWithMedian(completedTickets: Schema["Ticket"]["ty
  * @param waitingTickets - Waiting tickets sorted by current position ascending
  * @param estWaitingTime - The estimated time in minutes to serve one person
  */
-async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWaitingTime:number)
+async function updateTickets(waitingTickets: WaitingTicket[], estWaitingTime:number)
 {
   for (let i = 0; i < waitingTickets.length; i++) {
 
@@ -106,12 +115,15 @@ async function updateTickets(waitingTickets: Schema["Ticket"]["type"][], estWait
 
       const { lower, upper } = getEstimatedWaitTimeBounds(position, estWaitingTime);
 
-      await client.models.Ticket.update({
-          id: ticket.id,
-          position,
-          estimatedWaitTimeLower: lower,
-          estimatedWaitTimeUpper: upper,
-      });
+      await callModel(
+        client.models.Ticket.update({
+            id: ticket.id,
+            position,
+            estimatedWaitTimeLower: lower,
+            estimatedWaitTimeUpper: upper,
+        }),
+        `recalculateDepartmentQueue: Ticket.update failed for ticket ${ticket.id}`
+      );
   }
 }
 
@@ -139,19 +151,22 @@ export async function recalculateDepartmentQueue(departmentName:string) {
     // Waiting tickets
     const waitingTickets = tickets.filter(
       t => t.status === "WAITING"
-    );
+    ) as WaitingTicket[];
 
     // Completed tickets
     const completedTickets = tickets
       .filter(t => t.status === "COMPLETED" && t.completedAt)
       .sort((a,b) =>
-        new Date(b.completedAt ?? 0).getTime() -
-        new Date(a.completedAt ?? 0).getTime()
+        new Date(b.completedAt!).getTime() -
+        new Date(a.completedAt!).getTime()
       )
-      .slice(0,5);
+      .slice(0,5) as CompletedTicket[];
     
-    // Get department 
-    const { data: department } = await client.models.Department.get({ id: departmentName });
+    // Get department
+    const department = await callModel(
+      client.models.Department.get({ id: departmentName }),
+      "recalculateDepartmentQueue: Department.get failed"
+    );
 
     if (!department) {
       throw new Error(`Department ${departmentName} not found`);
@@ -160,9 +175,10 @@ export async function recalculateDepartmentQueue(departmentName:string) {
     let estWaitingTime = 0;
     if (completedTickets.length >= 5) {
         estWaitingTime = await calculateEstTimeWithMedian(completedTickets, departmentName);
-    } else {
+    } 
+    else {
         estWaitingTime =
-          department?.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department?.name);
+          department.estimatedWaitingTime ?? getDefaultEstimatedWaitingTime(department.name);
     }
     
     await updateTickets(waitingTickets, estWaitingTime);
