@@ -1,7 +1,7 @@
 // TextToSpeechButton.test.tsx
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import TextToSpeechButton from '../../components/TextToSpeechButton';
-import { vi, beforeEach, describe, it, expect } from 'vitest';
+import { vi, beforeEach, describe, it, expect, afterEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -28,22 +28,19 @@ class MockUtterance {
 beforeEach(() => {
   vi.clearAllMocks();
 
-  Object.defineProperty(window, 'speechSynthesis', {
-    writable: true,
-    configurable: true,
-    value: {
-      speak: speakMock,
-      cancel: cancelMock,
-      getVoices: getVoicesMock,
-      onvoiceschanged: null,
-    },
+  vi.stubGlobal('speechSynthesis', {
+    speak: speakMock,
+    cancel: cancelMock,
+    getVoices: getVoicesMock,
+    onvoiceschanged: null,
   });
 
-  Object.defineProperty(window, 'SpeechSynthesisUtterance', {
-    writable: true,
-    configurable: true,
-    value: MockUtterance,
-  });
+  vi.stubGlobal('SpeechSynthesisUtterance', MockUtterance);
+});
+
+afterEach(() => {
+  // Restore all globals to original state
+  vi.unstubAllGlobals();
 });
 
 
