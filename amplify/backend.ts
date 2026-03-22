@@ -1,42 +1,34 @@
 import { defineBackend } from "@aws-amplify/backend";
+import { Aws } from "aws-cdk-lib";
+import { Rule, Schedule } from "aws-cdk-lib/aws-events";
+import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
+import { AttributeType, BillingMode, StreamViewType, Table } from "aws-cdk-lib/aws-dynamodb";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { FilterCriteria, FilterRule, StartingPosition } from "aws-cdk-lib/aws-lambda";
+import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
-import { postConfirmation } from "./functions/postConfirmation/resource";
-import { PolicyStatement } from "aws-cdk-lib/aws-iam";
-import { Aws } from "aws-cdk-lib";
-import { submitEnquiry } from "./functions/submitEnquiry/resource";
-import { submitCaseFollowUp } from "./functions/submitCaseFollowUp/resource";
+
+import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
+import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
+import { dailySeedQueue } from "./functions/dailySeedQueue/resource";
+import { flagCaseSafeguarding } from "./functions/flagCaseSafeguarding/resource";
+import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
 import { getCaseFollowUp } from "./functions/getCaseFollowUp/resource";
 import { getDashboardStats } from "./functions/getDashboardStats/resource";
-import { getServiceStats } from "./functions/getServiceStats/resource";
-import { adjustQueuePosition } from "./functions/adjustQueuePosition/resource";
-import { getQueueItems } from "./functions/getQueueItems/resource";
-import { markTicketSeen } from "./functions/markTicketSeen/resource";
-import { setCasePriority } from "./functions/setCasePriority/resource";
-import { flagCaseSafeguarding } from "./functions/flagCaseSafeguarding/resource";
-import {
-  Table,
-  AttributeType,
-  BillingMode,
-  StreamViewType,
-} from "aws-cdk-lib/aws-dynamodb";
-import { getAvailableAppointmentTimes } from "./functions/getAvailableAppointmentTimes/resource";
-import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { getDepartmentQueueStatus } from "./functions/getDepartmentQueueStatus/resource";
-import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
-import { notifyResident } from "./functions/notifyResident/resource";
-import { cleanupEnquiryState } from "./functions/cleanupEnquiryState/resource";
+import { getQueueItems } from "./functions/getQueueItems/resource";
+import { getServiceStats } from "./functions/getServiceStats/resource";
+import { getTicketInfo } from "./functions/getTicketInfo/resource";
 import { handleSteppedOut } from "./functions/handleSteppedOut/resource";
-import { dailySeedQueue } from "./functions/dailySeedQueue/resource";
-import {
-  FilterCriteria,
-  FilterRule,
-  StartingPosition,
-} from "aws-cdk-lib/aws-lambda";
-import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
-import { Schedule } from "aws-cdk-lib/aws-events";
-import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
-import { Rule } from "aws-cdk-lib/aws-events";
+import { markTicketSeen } from "./functions/markTicketSeen/resource";
+import { notifyResident } from "./functions/notifyResident/resource";
+import { onTicketCompleted } from "./functions/onTicketCompleted/resource";
+import { postConfirmation } from "./functions/postConfirmation/resource";
+import { setCasePriority } from "./functions/setCasePriority/resource";
+import { submitCaseFollowUp } from "./functions/submitCaseFollowUp/resource";
+import { submitEnquiry } from "./functions/submitEnquiry/resource";
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more

@@ -60,7 +60,7 @@ export const handler: Schema["getTicketInfo"]["functionHandler"] = async (event)
     }
 
     // Filter out null tickets
-    const validTickets = (tickets ?? []).filter(Boolean);
+    const validTickets = tickets.filter(Boolean);
 
     if (!validTickets || validTickets.length === 0) {
         throw new Error(`No valid tickets with caseId ${caseId} found`);
