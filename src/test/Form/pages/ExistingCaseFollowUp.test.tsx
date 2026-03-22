@@ -462,7 +462,7 @@ describe("ExistingCaseFollowUp", () => {
           estimatedWaitTimeUpper: 20,
           appointmentDateIso: undefined,
           appointmentTime: undefined,
-          departmentName: "Adults_Duty",
+          departmentName: "Adults duty",
         },
       },
     });
