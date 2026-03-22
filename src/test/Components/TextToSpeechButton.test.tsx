@@ -1,5 +1,5 @@
 // TextToSpeechButton.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import TextToSpeechButton from '../../components/TextToSpeechButton';
 import { vi, beforeEach, describe, it, expect } from 'vitest';
 
@@ -11,7 +11,6 @@ const speakMock = vi.fn();
 const cancelMock = vi.fn();
 const getVoicesMock = vi.fn().mockReturnValue([
     { lang: 'en-GB', name: 'British Voice' } as SpeechSynthesisVoice,
-    { lang: 'en-US', name: 'US Voice' } as SpeechSynthesisVoice,
 ]);
 
 class MockUtterance {
@@ -48,15 +47,15 @@ beforeEach(() => {
 });
 
 
-describe('TextToSpeechButton', () => {
+describe("TextToSpeechButton", () => {
 
-    it('calls speechSynthesis.speak when button is clicked', () => {
+    it("calls speechSynthesis.speak when button is clicked", () => {
         render(<TextToSpeechButton text="Hello world" />);
         fireEvent.click(screen.getByRole('button'));
         expect(speakMock).toHaveBeenCalledTimes(1);
     });
 
-    it('cancels speech if already speaking', () => {
+    it("cancels speech if already speaking", () => {
         render(<TextToSpeechButton text="Hello world" />);
         const button = screen.getByRole('button');
 
@@ -66,7 +65,7 @@ describe('TextToSpeechButton', () => {
         expect(cancelMock).toHaveBeenCalledTimes(1);
     });
 
-    it('changes icon and text while speaking', () => {
+    it("changes icon and text while speaking", () => {
         render(<TextToSpeechButton text="Hello world" />);
         const button = screen.getByRole('button');
 
@@ -75,7 +74,7 @@ describe('TextToSpeechButton', () => {
         expect(screen.getByText('general-stop')).toBeInTheDocument();
     });
 
-    it('uses the British voice if available', () => {
+    it("uses the British voice if available", () => {
         render(<TextToSpeechButton text="Hello world" />);
         fireEvent.click(screen.getByRole('button'));
 
@@ -83,13 +82,17 @@ describe('TextToSpeechButton', () => {
         expect(utteranceArg.voice?.lang).toBe('en-GB');
     });
 
-    // it('resets speaking state when utterance ends', () => {
-    //     render(<TextToSpeechButton text="Hello world" />);
-    //     fireEvent.click(screen.getByRole('button'));
 
-    //     const utteranceArg = speakMock.mock.calls[0][0] as SpeechSynthesisUtterance;
-    //     utteranceArg.onend?.();
+    it("resets speaking state when utterance ends", async () => {
+        render(<TextToSpeechButton text="Hello world" />);
+        fireEvent.click(screen.getByRole('button'));
 
-    //     expect(screen.getByText('general-read')).toBeInTheDocument();
-    // });
+        const utteranceArg = speakMock.mock.calls[0][0] as any;
+
+        act(() => {
+            utteranceArg.onend?.();
+        });
+
+        expect(await screen.findByText('general-read')).toBeInTheDocument();
+    });
 });
