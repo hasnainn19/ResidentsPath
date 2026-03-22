@@ -13,6 +13,7 @@ import BookingPanel from "../../components/BookingPanel";
 import { FIELD_META } from "./model/fieldMeta";
 import type { Proceed } from "./model/formFieldTypes";
 import {
+  DepartmentLabelByName,
   FIELD_TEXT_CONSTRAINTS,
   isValidCaseReferenceNumber,
   normaliseCaseReferenceNumber,
@@ -119,6 +120,9 @@ export default function ExistingCaseFollowUp() {
   const appointmentUnavailable = !!lookupResult?.hasReachedAppointmentLimit;
   const bookingIncomplete =
     proceed === "BOOK_APPOINTMENT" && (!appointmentDateIso.trim() || !appointmentTime.trim());
+  const serviceAreaLabel = lookupResult
+    ? DepartmentLabelByName[lookupResult.departmentName] ?? lookupResult.departmentName
+    : "";
 
   const canSubmit =
     !!lookupResult &&
@@ -181,7 +185,7 @@ export default function ExistingCaseFollowUp() {
             estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: proceed === "BOOK_APPOINTMENT" ? appointmentDateIso : undefined,
             appointmentTime: proceed === "BOOK_APPOINTMENT" ? appointmentTime : undefined,
-            departmentName: activeCase.departmentName,
+            departmentName: serviceAreaLabel,
           },
         },
       });
@@ -299,7 +303,7 @@ export default function ExistingCaseFollowUp() {
                       Case found: {lookupResult.referenceNumber}
                     </Typography>
                     <Typography variant="body2">
-                      Service area: {lookupResult.departmentName || "Unknown service"}
+                      Service area: {serviceAreaLabel || "Unknown service"}
                     </Typography>
                   </Stack>
                 </Alert>
