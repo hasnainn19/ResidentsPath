@@ -84,6 +84,8 @@ describe("toggleNotifications handler", () => {
       await expect(
         handler(makeEvent({ ticketId: "ticket1", caseId: "case1", enabled: false }), {} as any, {} as any),
       ).rejects.toThrow("toggleNotifications: Ticket not found");
+
+      expect(mockTicketUpdate).not.toHaveBeenCalled();
     });
 
     it("throws when the ticket does not belong to the given case", async () => {
@@ -92,6 +94,8 @@ describe("toggleNotifications handler", () => {
       await expect(
         handler(makeEvent({ ticketId: "ticket1", caseId: "case1", enabled: false }), {} as any, {} as any),
       ).rejects.toThrow("toggleNotifications: Not authorized");
+
+      expect(mockTicketUpdate).not.toHaveBeenCalled();
     });
   });
 
