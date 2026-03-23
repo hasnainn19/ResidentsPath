@@ -181,7 +181,7 @@ describe("useAuth", () => {
         expect(result.current.familyName).toBeNull();
     });
 
-    it("resets to unauthenticated state and logs error when fetchAuthSession throws", async () => {
+    it("sets error state and logs error when fetchAuthSession throws", async () => {
         mockUseAuthenticator.mockReturnValue({ authStatus: "authenticated" });
         mockFetchAuthSession.mockRejectedValue(new Error("Network error"));
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
