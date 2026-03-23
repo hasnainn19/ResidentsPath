@@ -15,7 +15,7 @@ export default defineConfig({
           name: "frontend",
           include: ["tests/src/**/*.test.{ts,tsx}"],
           environment: "jsdom",
-          setupFiles: ["./tests/src/setup.ts"],
+          setupFiles: ["./tests/setup/setup.frontend.ts"],
         },
       },
       {
