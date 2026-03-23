@@ -52,7 +52,7 @@ describe("useAuth", () => {
         vi.restoreAllMocks();
     });
 
-    it("stays loading and does not call fetchAuthSession when authStatus is configuring", async () => {
+    it("sets loading status while Amplify is configuring", async () => {
         mockUseAuthenticator.mockReturnValue({ authStatus: "configuring" });
 
         const { result } = renderHook(() => useAuth());
@@ -61,6 +61,7 @@ describe("useAuth", () => {
             expect(result.current.isLoading).toBe(true);
         });
 
+        expect(result.current.status).toBe("loading");
         expect(result.current.isAuthenticated).toBe(false);
         expect(mockFetchAuthSession).not.toHaveBeenCalled();
     });
@@ -74,6 +75,7 @@ describe("useAuth", () => {
             expect(result.current.isLoading).toBe(false);
         });
 
+        expect(result.current.status).toBe("unauthenticated");
         expect(result.current.isAuthenticated).toBe(false);
         expect(result.current.groups).toBeNull();
         expect(result.current.email).toBeNull();
@@ -97,6 +99,7 @@ describe("useAuth", () => {
             expect(result.current.isLoading).toBe(false);
         });
 
+        expect(result.current.status).toBe("authenticated");
         expect(result.current.isAuthenticated).toBe(true);
         expect(result.current.groups).toEqual(["Staff", "Residents", "HounslowHouseDevices"]);
         expect(result.current.isStaff).toBe(true);
@@ -192,11 +195,12 @@ describe("useAuth", () => {
             expect(result.current.isLoading).toBe(false);
         });
 
+        expect(result.current.status).toBe("error");
         expect(result.current.isAuthenticated).toBe(false);
-        expect(result.current.groups).toBeUndefined();
-        expect(result.current.email).toBeUndefined();
-        expect(result.current.givenName).toBeUndefined();
-        expect(result.current.familyName).toBeUndefined();
+        expect(result.current.groups).toBeNull();
+        expect(result.current.email).toBeNull();
+        expect(result.current.givenName).toBeNull();
+        expect(result.current.familyName).toBeNull();
         expect(consoleSpy).toHaveBeenCalledWith("Error fetching auth session:", expect.any(Error));
     });
 

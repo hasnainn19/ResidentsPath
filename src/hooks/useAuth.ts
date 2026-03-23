@@ -20,6 +20,12 @@ function getTokenGroups(value: unknown): string[] | null {
     return null;
 }
 
+type AuthState =
+    | { status: "loading" }
+    | { status: "unauthenticated" }
+    | { status: "authenticated"; groups: string[] | null; email: string | null; givenName: string | null; familyName: string | null }
+    | { status: "error" }
+
 /**
  * Custom hook that provides authentication state and user information from AWS Cognito.
  *
@@ -32,104 +38,70 @@ function getTokenGroups(value: unknown): string[] | null {
  * All data is read from the ID token, which contains both group membership
  * and user profile attributes.
  *
- * All values are derived from state so they all update together
+ * A single AuthState value is used so all derived values update atomically
  * in the same render cycle, preventing stale intermediate states.
  */
 export function useAuth() {
     const { authStatus } = useAuthenticator((context) => [context.authStatus]);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    
-    // Initialised as undefined to indicate auth has not been configured yet
-    const [groups, setGroups] = useState<string[] | null | undefined>(undefined);
-    const [isLoading, setIsLoading] = useState(true);
-    const [email, setEmail] = useState<string | null | undefined>(undefined);
-    const [givenName, setGivenName] = useState<string | null | undefined>(undefined);
-    const [familyName, setFamilyName] = useState<string | null | undefined>(undefined);
-
-    function setAuthenticatedState(groups: string[] | null, email: string | null, givenName: string | null, familyName: string | null) {
-        setIsAuthenticated(true);
-        setGroups(groups);
-        setEmail(email);
-        setGivenName(givenName);
-        setFamilyName(familyName);
-    }
-
-    function setUnauthenticatedState() {
-        setIsAuthenticated(false);
-        setGroups(null);
-        setEmail(null);
-        setGivenName(null);
-        setFamilyName(null);
-    }
-
-    function setErrorState() {
-        setIsAuthenticated(false);
-        setGroups(undefined);
-        setEmail(undefined);
-        setGivenName(undefined);
-        setFamilyName(undefined);
-    }
+    const [authState, setAuthState] = useState<AuthState>({ status: "loading" });
 
     useEffect(() => {
         const fetchUserGroups = async () => {
 
             if (authStatus === "configuring") {
                 // Amplify is still initializing
-                setIsLoading(true);
+                setAuthState({ status: "loading" });
                 return;
             }
 
             // If the user is authenticated, fetch their Cognito data from the ID token
             if (authStatus === "authenticated") {
                 try {
-                    setIsLoading(true);
+                    setAuthState({ status: "loading" });
                     const session = await fetchAuthSession();
                     const idToken = session.tokens?.idToken?.payload;
                     const accessToken = session.tokens?.accessToken?.payload;
-                    const groups =
-                        getTokenGroups(idToken?.["cognito:groups"]) ??
-                        getTokenGroups(accessToken?.["cognito:groups"]);
 
-                    setAuthenticatedState(
-                        groups,
-                        idToken?.email as string ?? null,
-                        idToken?.given_name as string ?? null,
-                        idToken?.family_name as string ?? null,
-                    );
+                    setAuthState({
+                        status: "authenticated",
+                        groups: getTokenGroups(idToken?.["cognito:groups"]) ?? getTokenGroups(accessToken?.["cognito:groups"]),
+                        email: idToken?.email as string ?? null,
+                        givenName: idToken?.given_name as string ?? null,
+                        familyName: idToken?.family_name as string ?? null,
+                    });
                 }
                 catch (error) {
                     console.error("Error fetching auth session:", error);
-                    setErrorState();
-                }
-                finally {
-                    setIsLoading(false);
+                    setAuthState({ status: "error" });
                 }
             }
             // User is not authenticated
             else {
-                setUnauthenticatedState();
-                setIsLoading(false);
+                setAuthState({ status: "unauthenticated" });
             }
         }
 
         fetchUserGroups();
     }, [authStatus]); // Run whenever authStatus changes
 
+    const authenticated = authState.status === "authenticated";
+    const groups = authenticated ? authState.groups : null;
+
     return {
+        // Auth status
+        status: authState.status,
+
         // Boolean flags
-        isAuthenticated,
+        isLoading: authState.status === "loading",
+        isAuthenticated: authenticated,
         isStaff: Boolean(groups?.includes("Staff")),
         isResident: Boolean(groups?.includes("Residents")),
         isHounslowHouseDevice: Boolean(groups?.includes("HounslowHouseDevices")),
 
         // Raw data
         groups,
-        email,
-        givenName,
-        familyName,
-
-        // Loading state
-        isLoading,
+        email: authenticated ? authState.email : null,
+        givenName: authenticated ? authState.givenName : null,
+        familyName: authenticated ? authState.familyName : null,
     }
-
 }
