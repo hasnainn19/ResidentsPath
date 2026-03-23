@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ComponentType } from 'react';
 import { MemoryRouter } from "react-router-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import '@testing-library/jest-dom';
@@ -33,20 +34,49 @@ vi.mock('../../hooks/useUser', () => ({
   }),
 }));
 
-describe("Notifications and Step-out UI", () => {
-    let user: UserEvent;
+function mockAmplifyClient(handleMock: any, toggleMock: any) {
+    vi.doMock('aws-amplify/data', () => ({
+        generateClient: () => ({
+            mutations: {
+                handleSteppedOut: handleMock,
+                toggleNotifications: toggleMock,
+            },
+        }),
+    }));
+}
 
-    beforeAll(() => {
-        Object.defineProperty(window, "speechSynthesis", {
-            value: {
+function renderDashboard(UserDashboard: ComponentType) {
+    render(
+        <MemoryRouter>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <ThemeProvider theme={theme}>
+                    <Authenticator.Provider>
+                        <UserDashboard />
+                    </Authenticator.Provider>
+                </ThemeProvider>
+            </LocalizationProvider>
+        </MemoryRouter>
+    );
+}
+
+function setupSpeechSynthesis() {
+    Object.defineProperty(window, "speechSynthesis", {
+        value: {
             getVoices: () => [{ name: "Test Voice", lang: "en-GB" }],
             speak: vi.fn(),
             cancel: vi.fn(),
             pause: vi.fn(),
             resume: vi.fn(),
-            },
-            writable: true,
-        });
+        },
+        writable: true,
+    });
+}
+
+describe("Notifications and Step-out UI", () => {
+    let user: UserEvent;
+
+    beforeAll(() => {
+        setupSpeechSynthesis();
     });
 
     const setup = async ({
@@ -67,14 +97,7 @@ describe("Notifications and Step-out UI", () => {
         mockHandleSteppedOut.mockImplementation(handleMock);
         mockToggleNotifications.mockImplementation(toggleMock);
 
-        vi.doMock('aws-amplify/api', () => ({
-            generateClient: () => ({
-                mutations: {
-                handleSteppedOut: mockHandleSteppedOut,
-                toggleNotifications: mockToggleNotifications,
-                },
-            }),
-        }));
+        mockAmplifyClient(mockHandleSteppedOut, mockToggleNotifications);
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => {
         const React = require('react');
@@ -102,18 +125,7 @@ describe("Notifications and Step-out UI", () => {
         const { default: UserDashboard } = await import('../../pages/UserDashboard');
 
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard(UserDashboard);
     };
 
     beforeEach(() => {
@@ -344,16 +356,7 @@ describe('executeHandleSteppedOut function', () => {
     let user: UserEvent;
 
     beforeAll(() => {
-        Object.defineProperty(window, "speechSynthesis", {
-        value: {
-            getVoices: () => [{ name: "Test Voice", lang: "en-GB" }],
-            speak: vi.fn(),
-            cancel: vi.fn(),
-            pause: vi.fn(),
-            resume: vi.fn(),
-        },
-        writable: true,
-        });
+        setupSpeechSynthesis();
     });
 
     const setup = async ({
@@ -367,14 +370,7 @@ describe('executeHandleSteppedOut function', () => {
     } = {}) => {
         vi.resetModules();
 
-        vi.doMock('aws-amplify/api', () => ({
-        generateClient: () => ({
-            mutations: {
-            handleSteppedOut: handleMock,
-            toggleNotifications: vi.fn().mockResolvedValue({ errors: [] }),
-            },
-        }),
-        }));
+        mockAmplifyClient(handleMock, vi.fn().mockResolvedValue({ errors: [] }));
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
@@ -393,18 +389,7 @@ describe('executeHandleSteppedOut function', () => {
         const { default: UserDashboard } = await import('../../pages/UserDashboard');
 
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard(UserDashboard);
     };
 
     it('shows error if there is no ticketId', async () => {
@@ -487,14 +472,7 @@ describe('executeToggleNotifications function', () => {
 
         vi.resetModules();
 
-        vi.doMock('aws-amplify/api', () => ({
-        generateClient: () => ({
-            mutations: {
-            toggleNotifications: toggleMock,
-            handleSteppedOut: vi.fn(),
-            },
-        }),
-        }));
+        mockAmplifyClient(vi.fn(), toggleMock);
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
@@ -513,18 +491,7 @@ describe('executeToggleNotifications function', () => {
         const { default: UserDashboard } = await import('../../pages/UserDashboard');
 
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard(UserDashboard);
     };
 
     it('shows error if there is no ticketId', async () => {
