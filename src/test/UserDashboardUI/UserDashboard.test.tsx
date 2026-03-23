@@ -34,16 +34,14 @@ vi.mock('../../hooks/useUser', () => ({
   }),
 }));
 
-function mockAmplifyClient(handleMock: any, toggleMock: any) {
-    vi.doMock('aws-amplify/data', () => ({
-        generateClient: () => ({
-            mutations: {
-                handleSteppedOut: handleMock,
-                toggleNotifications: toggleMock,
-            },
-        }),
-    }));
-}
+vi.mock('aws-amplify/data', () => ({
+    generateClient: () => ({
+        mutations: {
+            handleSteppedOut: mockHandleSteppedOut,
+            toggleNotifications: mockToggleNotifications,
+        },
+    }),
+}));
 
 function renderDashboard(UserDashboard: ComponentType) {
     render(
@@ -96,8 +94,6 @@ describe("Notifications and Step-out UI", () => {
 
         mockHandleSteppedOut.mockImplementation(handleMock);
         mockToggleNotifications.mockImplementation(toggleMock);
-
-        mockAmplifyClient(mockHandleSteppedOut, mockToggleNotifications);
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => {
         const React = require('react');
@@ -370,7 +366,7 @@ describe('executeHandleSteppedOut function', () => {
     } = {}) => {
         vi.resetModules();
 
-        mockAmplifyClient(handleMock, vi.fn().mockResolvedValue({ errors: [] }));
+        mockHandleSteppedOut.mockImplementation(handleMock);
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
@@ -472,7 +468,7 @@ describe('executeToggleNotifications function', () => {
 
         vi.resetModules();
 
-        mockAmplifyClient(vi.fn(), toggleMock);
+        mockToggleNotifications.mockImplementation(toggleMock);
 
         vi.doMock('../../hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
