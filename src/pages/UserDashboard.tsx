@@ -251,7 +251,6 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     aria-label='notifications-button'
-                                                    className='dashboardBtn'
                                                     variant={notificationsEnabled ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={<NotificationsIcon />}
@@ -273,7 +272,6 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     aria-label='stepOut-button'
-                                                    className='dashboardBtn'
                                                     variant={steppedOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}

@@ -279,7 +279,6 @@ export default function BookingPanel(props: Props) {
               </Box>
 
               <Box
-                className="bookingpage-time-list"
                 sx={{
                   border: 2,
                   borderColor: "primary.main",
@@ -312,7 +311,6 @@ export default function BookingPanel(props: Props) {
                       <ListItem key={time} disablePadding>
                         <ListItemButton
                           selected={selectedTime === time}
-                          className="bookingpage-time-list-item-btn"
                           onClick={() => setSelectedTime(time)}
                           sx={{ borderBottom: "1px solid #ddd" }}
                         >
