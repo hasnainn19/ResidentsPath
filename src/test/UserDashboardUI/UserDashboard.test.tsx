@@ -12,6 +12,16 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import theme from '../../Constants/Theme';
 import UserDashboard from '../../pages/UserDashboard';
 
+vi.mock('@aws-amplify/ui-react', () => ({
+    Authenticator: {
+        Provider: ({ children }: { children: React.ReactNode }) => children,
+    },
+}));
+
+vi.mock('../../components/NavBar', () => ({
+    default: () => null,
+}));
+
 vi.mock('react-i18next', async (importOriginal) => {
     const actual = await importOriginal<typeof import('react-i18next')>();
     return {
@@ -119,7 +129,7 @@ describe("Notifications and Step-out UI", () => {
             };
         });
 
-        user = userEvent.setup();
+        user = userEvent.setup({ delay: null });
         renderDashboard();
     };
 
@@ -378,7 +388,7 @@ describe('executeHandleSteppedOut function', () => {
             isLoading: false,
         }));
 
-        user = userEvent.setup();
+        user = userEvent.setup({ delay: null });
         renderDashboard();
     };
 
@@ -474,7 +484,7 @@ describe('executeToggleNotifications function', () => {
             isLoading: false,
         }));
 
-        user = userEvent.setup();
+        user = userEvent.setup({ delay: null });
         renderDashboard();
     };
 
