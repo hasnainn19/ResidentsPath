@@ -17,7 +17,6 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
     id: caseId,
   });
   if (!selectedCase) {
-    console.error(`Failed to find case with caseId ${caseId}`);
     throw Error(`Failed to find case with caseId ${caseId}`);
   }
 
