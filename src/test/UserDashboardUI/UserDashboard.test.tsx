@@ -90,6 +90,7 @@ function setupSpeechSynthesis() {
             resume: vi.fn(),
         },
         writable: true,
+        configurable: true,
     });
 }
 
