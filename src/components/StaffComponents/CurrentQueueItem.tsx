@@ -215,7 +215,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
                   <Select
                     labelId={`move-position-label-${caseItem.id}`}
                     label="Move to position"
-                    value={String(caseItem.position)}
+                    value={String(caseItem.position + 1)}
                     onChange={handlePositionChange}
                   >
                     {positionOptions.map((position) => (
