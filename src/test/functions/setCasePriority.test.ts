@@ -67,6 +67,8 @@ describe("setCasePriority handler", () => {
 
     await expect(
       handler(makeEvent("c1", true), {} as any, {} as any),
-    ).rejects.toThrow("Failed to update the priority level of case:c1 to true");
+    ).rejects.toThrow(
+      "Failed to update the priority level of case:c1 to true, Error: network error",
+    );
   });
 });

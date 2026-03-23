@@ -27,7 +27,7 @@ export const handler: Schema["setCasePriority"]["functionHandler"] = async (
     await client.models.Case.update({ id: caseId, priority });
   } catch (error) {
     throw new Error(
-      `Failed to update the priority level of case:${caseId} to ${priority}`,
+      `Failed to update the priority level of case:${caseId} to ${priority}, ${error}`,
     );
   }
 
