@@ -1,4 +1,4 @@
-import type { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 type UseAuthReturn = ReturnType<typeof useAuth>;
 
