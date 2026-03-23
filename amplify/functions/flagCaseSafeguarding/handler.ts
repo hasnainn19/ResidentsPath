@@ -19,7 +19,7 @@ export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] =
     const { caseId, flagged } = event.arguments;
 
     if (!caseId || flagged == null) {
-      throw new Error("caseId and flagged are required");
+      throw new Error("caseId and flag values are required");
     }
 
     try {
