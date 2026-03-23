@@ -2,8 +2,10 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, afterEach } from "vitest";
 import { useAuth } from "../../hooks/useAuth";
 
-const mockUseAuthenticator = vi.fn();
-const mockFetchAuthSession = vi.fn();
+const { mockUseAuthenticator, mockFetchAuthSession } = vi.hoisted(() => ({
+    mockUseAuthenticator: vi.fn(),
+    mockFetchAuthSession: vi.fn(),
+}));
 
 vi.mock("@aws-amplify/ui-react", () => ({
     useAuthenticator: (selector: (ctx: unknown) => unknown) => mockUseAuthenticator(selector),
