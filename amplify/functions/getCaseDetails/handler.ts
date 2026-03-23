@@ -17,7 +17,6 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
     id: caseId,
   });
   if (!selectedCase) {
-    console.error(`Failed to find case with caseId ${caseId}`);
     throw Error(`Failed to find case with caseId ${caseId}`);
   }
 
@@ -29,9 +28,7 @@ export const handler: Schema["getCaseDetails"]["functionHandler"] = async (
   const { data: user } = await client.models.User.get({
     id: selectedCase?.userId,
   });
-  if (!user) {
-    console.error("No user found");
-  }
+
   const tickets = (selectedTickets ?? []).map((t) => ({
     ticketId: t.id ?? null,
     ticketStatus: (t.status as string) ?? null,
