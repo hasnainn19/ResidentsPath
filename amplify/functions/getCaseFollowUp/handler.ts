@@ -2,7 +2,7 @@ import type { Schema } from "../../data/resource";
 import {
   isValidCaseReferenceNumber,
   normaliseCaseReferenceNumber,
-} from "../../../shared/formSchema";
+} from "../../../shared/referenceNumbers";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   CASE_ACCESS_ACCESS_DENIED_MESSAGE,

@@ -15,10 +15,12 @@ import type { Proceed } from "./model/formFieldTypes";
 import {
   DepartmentLabelByName,
   FIELD_TEXT_CONSTRAINTS,
-  isValidCaseReferenceNumber,
-  normaliseCaseReferenceNumber,
   type DepartmentName,
 } from "../../../shared/formSchema";
+import {
+  isValidCaseReferenceNumber,
+  normaliseCaseReferenceNumber,
+} from "../../../shared/referenceNumbers";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 type CaseLookup = {
@@ -127,25 +129,20 @@ export default function ExistingCaseFollowUp() {
   const canSubmit =
     !!lookupResult &&
     !!proceed &&
-    !(appointmentUnavailable && proceed === "BOOK_APPOINTMENT") &&
     !bookingIncomplete &&
     !submitting;
 
   const handleSubmit = async () => {
-    if (!lookupResult || !canSubmit) {
-      if (!lookupResult) {
-        setSubmitError("Find your case before you continue.");
-      } else if (!proceed) {
+    if (!canSubmit) {
+      if (!proceed) {
         setSubmitError("Choose how you want to proceed.");
-      } else if (appointmentUnavailable && proceed === "BOOK_APPOINTMENT") {
-        setSubmitError(
-          "You can only book up to two appointments for this case online. Please contact us if you need another appointment.",
-        );
       } else if (bookingIncomplete) {
         setSubmitError("Choose an appointment date and time.");
       }
       return;
     }
+
+    const activeCase = lookupResult!;
 
     setSubmitting(true);
     setSubmitError(null);
@@ -155,7 +152,7 @@ export default function ExistingCaseFollowUp() {
       const response = await client.mutations.submitCaseFollowUp(
         {
           input: {
-            referenceNumber: lookupResult.referenceNumber,
+            referenceNumber: activeCase.referenceNumber,
             caseUpdate: caseUpdate.trim() || undefined,
             proceed,
             appointmentDateIso: proceed === "BOOK_APPOINTMENT" ? appointmentDateIso : undefined,
