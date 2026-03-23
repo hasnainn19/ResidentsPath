@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -70,6 +71,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
   const [notes, setNotes] = useState(caseItem.notes ?? "");
   const [confirmNotesOpen, setConfirmNotesOpen] = useState(false);
   const [confirmSeenOpen, setConfirmSeenOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const positionOptions = Array.from(
     { length: totalPositions },
     (_, index) => index + 1,
@@ -90,7 +92,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
       });
       setLocalStatus(newStatus);
     } catch (e) {
-      console.error("CurrentQueueItem: setCasePriority failed", e);
+      setError("Failed to update priority. Please try again.");
     } finally {
       setPrioritySaving(false);
     }
@@ -106,7 +108,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
       });
       setIsFlagged(newFlagged);
     } catch (e) {
-      console.error("CurrentQueueItem: flagCaseSafeguarding failed", e);
+      setError("Failed to update flag. Please try again.");
     } finally {
       setFlagSaving(false);
     }
@@ -119,7 +121,7 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     try {
       await client.models.Ticket.update({ id: caseItem.id, notes });
     } catch (error) {
-      console.error(`Failed to save note for case:${caseItem.caseId}`);
+      setError("Failed to save notes. Please try again.");
     } finally {
       setConfirmNotesOpen(false);
       setNotesOpen(false);
@@ -245,6 +247,11 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
             </Stack>
           </Stack>
         </Stack>
+        {error && (
+          <Alert severity="error" onClose={() => setError(null)} sx={{ mt: 1 }}>
+            {error}
+          </Alert>
+        )}
       </CardContent>
 
       <Dialog
