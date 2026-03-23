@@ -84,15 +84,16 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
       ),
     );
   } catch (error) {
-    console.error(`Failed to adjust positions for ${departmentName}`);
+    throw new Error(`Failed to adjust positions for ${departmentName}`);
   }
 
   // Recalculate wait times
   try {
     await recalculateDepartmentQueue(departmentName);
-  } 
-  catch (error) {
-    console.error(`recalculateDepartmentQueue: failed for department ${departmentName}`, error);
+  } catch (error) {
+    throw new Error(
+      `recalculateDepartmentQueue: failed for department ${departmentName}`,
+    );
   }
 
   return true;
