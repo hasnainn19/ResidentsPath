@@ -30,7 +30,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
   // Fetch the target ticket to get its department
   const { data: ticket } = await client.models.Ticket.get({ id: ticketId });
   if (!ticket) {
-    throw new Error(`Ticket ${ticketId} not found, ${error}`);
+    throw new Error(`Ticket ${ticketId} not found`);
   }
 
   if (ticket.status !== "WAITING") {

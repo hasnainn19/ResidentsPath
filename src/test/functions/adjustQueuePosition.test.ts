@@ -209,7 +209,9 @@ describe("adjustQueuePosition handler", () => {
 
     await expect(
       handler(makeEvent("t1", 1), {} as any, {} as any),
-    ).rejects.toThrow("Failed to adjust positions for dept1");
+    ).rejects.toThrow(
+      "Failed to adjust positions for dept1, Error: DynamoDB error",
+    );
   });
 
   it("throws an error when recalculateDepartmentQueue fails", async () => {
@@ -221,7 +223,7 @@ describe("adjustQueuePosition handler", () => {
     await expect(
       handler(makeEvent("t1", 1), {} as any, {} as any),
     ).rejects.toThrow(
-      "recalculateDepartmentQueue: failed for department dept1",
+      "recalculateDepartmentQueue: failed for department dept1, Error: recalc error",
     );
   });
 });
