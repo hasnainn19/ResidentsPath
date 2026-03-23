@@ -15,6 +15,18 @@ import {
   normaliseUkPostcode,
 } from "../../../shared/formSchema";
 
+function expectZodIssues(
+  result: { success: boolean; error?: { issues: unknown[] } },
+  ...issues: Array<{ path: string[]; message: string }>
+) {
+  if (result.success) throw new Error("Expected parse to fail");
+  expect(result.error!.issues).toEqual(
+    expect.arrayContaining(
+      issues.map(({ path, message }) => expect.objectContaining({ path, message }))
+    )
+  );
+}
+
 const baseFormInput = {
   departmentName: "Homelessness" as const,
   enquiry: "Help with housing",
@@ -101,10 +113,9 @@ describe("formSchema shared helpers", () => {
 
   it("throws when the current appointment time cannot be computed", () => {
     const dateTimeSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
-      () =>
-        ({
-          formatToParts: () => [{ type: "year", value: "2026" }],
-        }) as unknown as Intl.DateTimeFormat,
+      function() {
+        return { formatToParts: () => [{ type: "year", value: "2026" }] } as unknown as Intl.DateTimeFormat;
+      }
     );
 
     try {
@@ -223,18 +234,7 @@ describe("formSchema", () => {
       appointmentTime: "10:00",
     });
 
-    if (result.success) {
-      throw new Error("Expected blank appointment dates to fail as missing values");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["appointmentDateIso"], message: "appointmentDateIso is required for appointment" });
   });
 
   it("treats blank Dayjs-like appointment dates as missing values", () => {
@@ -247,18 +247,7 @@ describe("formSchema", () => {
       appointmentTime: "10:00",
     });
 
-    if (result.success) {
-      throw new Error("Expected blank Dayjs-like appointment dates to fail as missing values");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["appointmentDateIso"], message: "appointmentDateIso is required for appointment" });
   });
 
   it("rejects non-string appointment date objects that are not Dayjs-like", () => {
@@ -280,18 +269,7 @@ describe("formSchema", () => {
       appointmentTime: "10:00",
     });
 
-    if (result.success) {
-      throw new Error("Expected null appointment dates to fail as missing values");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["appointmentDateIso"], message: "appointmentDateIso is required for appointment" });
   });
 
   it("normalises blank phone country input to undefined during parsing", () => {
@@ -311,18 +289,7 @@ describe("formSchema", () => {
       appointmentTime: "09:30",
     });
 
-    if (result.success) {
-      throw new Error("Expected past appointment slot to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentTime"],
-          message: "Appointments must be in the future",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["appointmentTime"], message: "Appointments must be in the future" });
   });
 
   it("rejects appointment details on the queue path", () => {
@@ -332,21 +299,9 @@ describe("formSchema", () => {
       appointmentTime: "10:00",
     });
 
-    if (result.success) {
-      throw new Error("Expected queue form input to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso must not be provided for queue",
-        }),
-        expect.objectContaining({
-          path: ["appointmentTime"],
-          message: "appointmentTime must not be provided for queue",
-        }),
-      ]),
+    expectZodIssues(result,
+      { path: ["appointmentDateIso"], message: "appointmentDateIso must not be provided for queue" },
+      { path: ["appointmentTime"], message: "appointmentTime must not be provided for queue" },
     );
   });
 
@@ -356,18 +311,7 @@ describe("formSchema", () => {
       urgent: "yes",
     });
 
-    if (result.success) {
-      throw new Error("Expected urgent input to fail without a reason");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["urgentReason"],
-          message: "urgentReason is required when urgent is yes",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["urgentReason"], message: "urgentReason is required when urgent is yes" });
   });
 
   it("requires extra details when the urgent reason is Other", () => {
@@ -377,18 +321,7 @@ describe("formSchema", () => {
       urgentReason: "OTHER",
     });
 
-    if (result.success) {
-      throw new Error("Expected urgent Other input to fail without details");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["urgentReasonOtherText"],
-          message: "Details are required when Other is selected",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["urgentReasonOtherText"], message: "Details are required when Other is selected" });
   });
 
   it("rejects urgent other text when urgent is not yes", () => {
@@ -398,18 +331,7 @@ describe("formSchema", () => {
       urgentReasonOtherText: "Need help today",
     });
 
-    if (result.success) {
-      throw new Error("Expected urgent other text to fail when urgent is not yes");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["urgentReasonOtherText"],
-          message: "urgentReasonOtherText must not be provided unless urgent is yes",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["urgentReasonOtherText"], message: "urgentReasonOtherText must not be provided unless urgent is yes" });
   });
 
   it("rejects an urgent reason when urgent is not yes", () => {
@@ -419,18 +341,7 @@ describe("formSchema", () => {
       urgentReason: "SAFETY_CONCERN",
     });
 
-    if (result.success) {
-      throw new Error("Expected urgent reason to fail when urgent is not yes");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["urgentReason"],
-          message: "urgentReason must not be provided unless urgent is yes",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["urgentReason"], message: "urgentReason must not be provided unless urgent is yes" });
   });
 
   it("rejects urgent other text when the urgent reason is not Other", () => {
@@ -441,18 +352,7 @@ describe("formSchema", () => {
       urgentReasonOtherText: "Need help today",
     });
 
-    if (result.success) {
-      throw new Error("Expected urgent other text to fail for non-Other urgent reasons");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["urgentReasonOtherText"],
-          message: "urgentReasonOtherText must only be provided when urgentReason is OTHER",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["urgentReasonOtherText"], message: "urgentReasonOtherText must only be provided when urgentReason is OTHER" });
   });
 
   it("requires safe contact notes when domestic abuse is true and contact is not safe", () => {
@@ -462,18 +362,7 @@ describe("formSchema", () => {
       safeToContact: "no",
     });
 
-    if (result.success) {
-      throw new Error("Expected domestic abuse input to fail without contact notes");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["safeContactNotes"],
-          message: "safeContactNotes is required when safeToContact is no",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["safeContactNotes"], message: "safeContactNotes is required when safeToContact is no" });
   });
 
   it("requires a safe contact answer when domestic abuse is flagged", () => {
@@ -482,18 +371,7 @@ describe("formSchema", () => {
       domesticAbuse: true,
     });
 
-    if (result.success) {
-      throw new Error("Expected domestic abuse input to fail without a safe contact answer");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["safeToContact"],
-          message: "safeToContact is required when domesticAbuse is true",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["safeToContact"], message: "safeToContact is required when domesticAbuse is true" });
   });
 
   it("rejects safe contact notes when contact is marked safe", () => {
@@ -504,18 +382,7 @@ describe("formSchema", () => {
       safeContactNotes: "Use email only",
     });
 
-    if (result.success) {
-      throw new Error("Expected safe contact notes to fail when contact is marked safe");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["safeContactNotes"],
-          message: "safeContactNotes must only be provided when safeToContact is no",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["safeContactNotes"], message: "safeContactNotes must only be provided when safeToContact is no" });
   });
 
   it("rejects safe contact details when domestic abuse is false", () => {
@@ -526,21 +393,9 @@ describe("formSchema", () => {
       safeContactNotes: "Use email only",
     });
 
-    if (result.success) {
-      throw new Error("Expected safe contact fields to fail without domestic abuse");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["safeToContact"],
-          message: "safeToContact must not be provided unless domesticAbuse is true",
-        }),
-        expect.objectContaining({
-          path: ["safeContactNotes"],
-          message: "safeContactNotes must not be provided unless domesticAbuse is true",
-        }),
-      ]),
+    expectZodIssues(result,
+      { path: ["safeToContact"], message: "safeToContact must not be provided unless domesticAbuse is true" },
+      { path: ["safeContactNotes"], message: "safeContactNotes must not be provided unless domesticAbuse is true" },
     );
   });
 
@@ -551,18 +406,7 @@ describe("formSchema", () => {
       pronounsOtherText: "He/him",
     });
 
-    if (result.success) {
-      throw new Error("Expected pronounsOtherText to fail without OTHER pronouns");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["pronounsOtherText"],
-          message: "pronounsOtherText must only be provided when pronouns is OTHER",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["pronounsOtherText"], message: "pronounsOtherText must only be provided when pronouns is OTHER" });
   });
 
   it("requires pronounsOtherText when pronouns is Other", () => {
@@ -571,18 +415,7 @@ describe("formSchema", () => {
       pronouns: "OTHER",
     });
 
-    if (result.success) {
-      throw new Error("Expected OTHER pronouns to fail without extra text");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["pronounsOtherText"],
-          message: "Details are required when Other is selected",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["pronounsOtherText"], message: "Details are required when Other is selected" });
   });
 
   it("rejects newlines in pronounsOtherText", () => {
@@ -592,18 +425,7 @@ describe("formSchema", () => {
       pronounsOtherText: "Line one\nLine two",
     });
 
-    if (result.success) {
-      throw new Error("Expected pronounsOtherText to reject newline characters");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["pronounsOtherText"],
-          message: "Contains invalid control characters",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["pronounsOtherText"], message: "Contains invalid control characters" });
   });
 
   it("allows newlines in urgentReasonOtherText", () => {
@@ -635,18 +457,7 @@ describe("formSchema", () => {
       pronounsOtherText: "Line one\tLine two",
     });
 
-    if (result.success) {
-      throw new Error("Expected disallowed control characters to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["pronounsOtherText"],
-          message: "Contains invalid control characters",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["pronounsOtherText"], message: "Contains invalid control characters" });
   });
 
   it("rejects other-text fields with the delete control character", () => {
@@ -656,18 +467,7 @@ describe("formSchema", () => {
       pronounsOtherText: "Line one\u007fLine two",
     });
 
-    if (result.success) {
-      throw new Error("Expected delete control characters to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["pronounsOtherText"],
-          message: "Contains invalid control characters",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["pronounsOtherText"], message: "Contains invalid control characters" });
   });
 
   it("rejects disability details when disability status is not provided", () => {
@@ -676,18 +476,7 @@ describe("formSchema", () => {
       disabilityType: "HEARING_IMPAIRMENT",
     });
 
-    if (result.success) {
-      throw new Error("Expected disabilityType to fail without disability status");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["disabilityType"],
-          message: "disabilityType must not be provided when hasDisabilityOrSensory is undefined",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["disabilityType"], message: "disabilityType must not be provided when hasDisabilityOrSensory is undefined" });
   });
 
   it("rejects disability details when disability status is false", () => {
@@ -697,18 +486,7 @@ describe("formSchema", () => {
       disabilityType: "HEARING_IMPAIRMENT",
     });
 
-    if (result.success) {
-      throw new Error("Expected disabilityType to fail when disability status is false");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["disabilityType"],
-          message: "disabilityType must not be provided when hasDisabilityOrSensory is false",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["disabilityType"], message: "disabilityType must not be provided when hasDisabilityOrSensory is false" });
   });
 
   it("requires an email address when contactMethod is email", () => {
@@ -717,18 +495,7 @@ describe("formSchema", () => {
       contactMethod: "EMAIL",
     });
 
-    if (result.success) {
-      throw new Error("Expected email contact input to fail without an email address");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["email"],
-          message: "Email is required when contactMethod is EMAIL",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["email"], message: "Email is required when contactMethod is EMAIL" });
   });
 
   it("requires phone fields when contactMethod is text message", () => {
@@ -737,21 +504,9 @@ describe("formSchema", () => {
       contactMethod: "TEXT_MESSAGE",
     });
 
-    if (result.success) {
-      throw new Error("Expected text message contact input to fail without phone fields");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["phoneCountry"],
-          message: "Phone country is required when contactMethod is TEXT_MESSAGE",
-        }),
-        expect.objectContaining({
-          path: ["phone"],
-          message: "Phone is required when contactMethod is TEXT_MESSAGE",
-        }),
-      ]),
+    expectZodIssues(result,
+      { path: ["phoneCountry"], message: "Phone country is required when contactMethod is TEXT_MESSAGE" },
+      { path: ["phone"], message: "Phone is required when contactMethod is TEXT_MESSAGE" },
     );
   });
 
@@ -763,18 +518,7 @@ describe("formSchema", () => {
       phone: "0000000",
     });
 
-    if (result.success) {
-      throw new Error("Expected invalid phone number input to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["phone"],
-          message: "Phone must be a valid phone number",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["phone"], message: "Phone must be a valid phone number" });
   });
 
   it("rejects duplicate support needs", () => {
@@ -783,18 +527,7 @@ describe("formSchema", () => {
       supportNeeds: ["ACCESSIBILITY", "ACCESSIBILITY"],
     });
 
-    if (result.success) {
-      throw new Error("Expected duplicate support needs to fail validation");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["supportNeeds"],
-          message: "supportNeeds must not contain duplicates",
-        }),
-      ]),
-    );
+    expectZodIssues(result, { path: ["supportNeeds"], message: "supportNeeds must not contain duplicates" });
   });
 });
 
@@ -814,21 +547,9 @@ describe("caseFollowUpSchema", () => {
       proceed: "BOOK_APPOINTMENT",
     });
 
-    if (result.success) {
-      throw new Error("Expected booking follow-up to fail without appointment details");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso is required for appointment",
-        }),
-        expect.objectContaining({
-          path: ["appointmentTime"],
-          message: "appointmentTime is required for appointment",
-        }),
-      ]),
+    expectZodIssues(result,
+      { path: ["appointmentDateIso"], message: "appointmentDateIso is required for appointment" },
+      { path: ["appointmentTime"], message: "appointmentTime is required for appointment" },
     );
   });
 
@@ -840,21 +561,9 @@ describe("caseFollowUpSchema", () => {
       appointmentTime: "10:00",
     });
 
-    if (result.success) {
-      throw new Error("Expected queue follow-up to fail with appointment details");
-    }
-
-    expect(result.error.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: ["appointmentDateIso"],
-          message: "appointmentDateIso must not be provided for queue",
-        }),
-        expect.objectContaining({
-          path: ["appointmentTime"],
-          message: "appointmentTime must not be provided for queue",
-        }),
-      ]),
+    expectZodIssues(result,
+      { path: ["appointmentDateIso"], message: "appointmentDateIso must not be provided for queue" },
+      { path: ["appointmentTime"], message: "appointmentTime must not be provided for queue" },
     );
   });
 });
