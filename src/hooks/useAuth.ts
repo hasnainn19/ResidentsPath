@@ -63,12 +63,19 @@ export function useAuth() {
                     const idToken = session.tokens?.idToken?.payload;
                     const accessToken = session.tokens?.accessToken?.payload;
 
+                    // Runtime type guards are used instead of type assertions (as string)
+                    // to ensure non-string payload values never violate the string | null contract
                     setAuthState({
                         status: "authenticated",
-                        groups: getTokenGroups(idToken?.["cognito:groups"]) ?? getTokenGroups(accessToken?.["cognito:groups"]),
-                        email: idToken?.email as string ?? null,
-                        givenName: idToken?.given_name as string ?? null,
-                        familyName: idToken?.family_name as string ?? null,
+                        groups:
+                            getTokenGroups(idToken?.["cognito:groups"]) ??
+                            getTokenGroups(accessToken?.["cognito:groups"]),
+                        email:
+                            typeof idToken?.email === "string" ? idToken.email : null,
+                        givenName:
+                            typeof idToken?.given_name === "string" ? idToken.given_name : null,
+                        familyName:
+                            typeof idToken?.family_name === "string" ? idToken.family_name : null,
                     });
                 }
                 catch (error) {
