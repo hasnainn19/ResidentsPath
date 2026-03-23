@@ -75,13 +75,7 @@ vi.mock("aws-amplify/data", () => ({
   }),
 }));
 
-// vi.mock("html5-qrcode", () => ({
-//   Html5Qrcode: vi.fn().mockImplementation(() => ({
-//     start: vi.fn().mockResolvedValue(undefined),
-//     stop: vi.fn().mockResolvedValue(undefined),
-//     clear: vi.fn(),
-//   })),
-// }));
+
 vi.mock("html5-qrcode", () => {
   return {
     Html5Qrcode: vi.fn().mockImplementation(function (this: any) {
