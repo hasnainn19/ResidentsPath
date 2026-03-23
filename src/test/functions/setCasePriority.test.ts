@@ -46,7 +46,7 @@ describe("setCasePriority handler", () => {
 
   // -- Error Handling --
 
-  it("returns false when no caseId", async () => {
+  it("throws error when no caseId", async () => {
     mockCaseUpdate.mockRejectedValue(new Error("update failed"));
 
     await expect(
@@ -54,7 +54,7 @@ describe("setCasePriority handler", () => {
     ).rejects.toThrow("caseId and priority are required");
   });
 
-  it("returns false when no priority value", async () => {
+  it("throws error when no priority value", async () => {
     mockCaseUpdate.mockRejectedValue(new Error("update failed"));
 
     await expect(
@@ -62,7 +62,7 @@ describe("setCasePriority handler", () => {
     ).rejects.toThrow("caseId and priority are required");
   });
 
-  it("returns false if update couldn't be applied", async () => {
+  it("throws error if update couldn't be applied", async () => {
     mockCaseUpdate.mockRejectedValue(new Error("network error"));
 
     await expect(
