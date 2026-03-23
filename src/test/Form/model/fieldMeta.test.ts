@@ -39,11 +39,7 @@ describe("fieldMeta", () => {
     });
 
     expect(
-      getReviewDisplayValue(
-        "privacyNoticeAccepted",
-        formData,
-        getEnquirySelectionState(formData),
-      ),
+      getReviewDisplayValue("privacyNoticeAccepted", formData, getEnquirySelectionState(formData)),
     ).toBeNull();
   });
 
@@ -53,9 +49,9 @@ describe("fieldMeta", () => {
       pronounsOtherText: "Ze/zir",
     });
 
-    expect(
-      getReviewDisplayValue("pronouns", formData, getEnquirySelectionState(formData)),
-    ).toBe("Ze/zir");
+    expect(getReviewDisplayValue("pronouns", formData, getEnquirySelectionState(formData))).toBe(
+      "Ze/zir",
+    );
   });
 
   it("formats standard pronouns using the option label", () => {
@@ -63,9 +59,9 @@ describe("fieldMeta", () => {
       pronouns: "HE_HIM",
     });
 
-    expect(
-      getReviewDisplayValue("pronouns", formData, getEnquirySelectionState(formData)),
-    ).toBe("He/him");
+    expect(getReviewDisplayValue("pronouns", formData, getEnquirySelectionState(formData))).toBe(
+      "He/him",
+    );
   });
 
   it("formats OTHER urgent reasons using the custom text", () => {
@@ -329,15 +325,11 @@ describe("fieldMeta", () => {
     expect(FIELD_META.urgentReason.dependsOn?.(makeFormData({ urgent: "yes" }))).toBe(true);
     expect(FIELD_META.appointmentDateIso.dependsOn?.(makeFormData({ proceed: "" }))).toBe(false);
     expect(
-      FIELD_META.appointmentDateIso.dependsOn?.(
-        makeFormData({ proceed: "BOOK_APPOINTMENT" }),
-      ),
+      FIELD_META.appointmentDateIso.dependsOn?.(makeFormData({ proceed: "BOOK_APPOINTMENT" })),
     ).toBe(true);
     expect(FIELD_META.appointmentTime.dependsOn?.(makeFormData({ proceed: "" }))).toBe(false);
     expect(
-      FIELD_META.appointmentTime.dependsOn?.(
-        makeFormData({ proceed: "BOOK_APPOINTMENT" }),
-      ),
+      FIELD_META.appointmentTime.dependsOn?.(makeFormData({ proceed: "BOOK_APPOINTMENT" })),
     ).toBe(true);
     expect(FIELD_META.ageRange.dependsOn?.(makeFormData({ dob: "2000-06-01" }))).toBe(false);
     expect(FIELD_META.ageRange.dependsOn?.(makeFormData({ dob: "" }))).toBe(true);
