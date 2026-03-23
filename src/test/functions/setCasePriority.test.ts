@@ -54,7 +54,7 @@ describe("setCasePriority handler", () => {
     ).rejects.toThrow("caseId and priority are required");
   });
 
-  it("returns false when no flagged value", async () => {
+  it("returns false when no priority value", async () => {
     mockCaseUpdate.mockRejectedValue(new Error("update failed"));
 
     await expect(
