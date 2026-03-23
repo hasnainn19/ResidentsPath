@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ReferencePage from "../../pages/ReferencePage";
 
@@ -75,14 +75,22 @@ vi.mock("aws-amplify/data", () => ({
   }),
 }));
 
-vi.mock("html5-qrcode", () => ({
-  Html5Qrcode: vi.fn().mockImplementation(() => ({
-    start: vi.fn().mockResolvedValue(undefined),
-    stop: vi.fn().mockResolvedValue(undefined),
-    clear: vi.fn(),
-  })),
-}));
-
+// vi.mock("html5-qrcode", () => ({
+//   Html5Qrcode: vi.fn().mockImplementation(() => ({
+//     start: vi.fn().mockResolvedValue(undefined),
+//     stop: vi.fn().mockResolvedValue(undefined),
+//     clear: vi.fn(),
+//   })),
+// }));
+vi.mock("html5-qrcode", () => {
+  return {
+    Html5Qrcode: vi.fn().mockImplementation(function (this: any) {
+      this.start = vi.fn().mockResolvedValue(undefined);
+      this.stop = vi.fn().mockResolvedValue(undefined);
+      this.clear = vi.fn();
+    }),
+  };
+});
 const createMockScanner = (overrides: Partial<{
     start: any;
     stop: any;
@@ -262,8 +270,9 @@ describe("ReferencePage", () => {
 
         expect(capturedOnDecode).not.toBeNull();
 
-        capturedOnDecode!("QUEUE|ABC123");
-
+        await act(async () => {
+            capturedOnDecode!("QUEUE|ABC123");
+        });
         expect(mockCheckRefNo).toHaveBeenCalledWith("ABC123", "QUEUE");
     });
 
@@ -286,8 +295,10 @@ describe("ReferencePage", () => {
 
         expect(capturedOnDecode).not.toBeNull();
 
-        capturedOnDecode!("INVALIDCODE");
 
+        await act(async () => {
+            capturedOnDecode!("INVALIDCODE");
+        });
         const alert = await screen.findByText("Invalid QR code format");
         expect(alert).toBeInTheDocument();
     });
@@ -310,8 +321,9 @@ describe("ReferencePage", () => {
         await user.click(scanButton);
 
         expect(capturedOnDecode).not.toBeNull();
-        capturedOnDecode!("ABC|123");
-
+        await act(async () => {
+            capturedOnDecode!("ABC|123");
+        });
         const alert = await screen.findByText("Incorrect QR Code Prefix");
         expect(alert).toBeInTheDocument();
     });
