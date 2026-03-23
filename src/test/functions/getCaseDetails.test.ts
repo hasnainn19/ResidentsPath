@@ -130,7 +130,7 @@ describe("getCaseDetails handler", () => {
     expect(result!.residentName).toBeUndefined();
   });
 
-  it("handles null selectedTickets gracefully", async () => {
+  it("Returns empty for null selectedTickets", async () => {
     mockCaseGet.mockResolvedValue({ data: makeCase() });
     mockTicketListByCaseId.mockResolvedValue({ data: null });
     mockUserGet.mockResolvedValue({ data: makeUser() });
