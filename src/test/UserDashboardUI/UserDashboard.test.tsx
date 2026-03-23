@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { useState } from 'react';
 import { MemoryRouter } from "react-router-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import '@testing-library/jest-dom';
@@ -9,6 +10,17 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Authenticator } from '@aws-amplify/ui-react';
 
 import theme from '../../Constants/Theme';
+import UserDashboard from '../../pages/UserDashboard';
+
+vi.mock('@aws-amplify/ui-react', () => ({
+    Authenticator: {
+        Provider: ({ children }: { children: React.ReactNode }) => children,
+    },
+}));
+
+vi.mock('../../components/NavBar', () => ({
+    default: () => null,
+}));
 
 vi.mock('react-i18next', async (importOriginal) => {
     const actual = await importOriginal<typeof import('react-i18next')>();
@@ -24,8 +36,10 @@ vi.mock('react-i18next', async (importOriginal) => {
     };
 });
 
-const mockHandleSteppedOut = vi.fn();
-const mockToggleNotifications = vi.fn();
+const { mockHandleSteppedOut, mockToggleNotifications } = vi.hoisted(() => ({
+    mockHandleSteppedOut: vi.fn(),
+    mockToggleNotifications: vi.fn(),
+}));
 
 vi.mock('../../hooks/useUser', () => ({
   useUser: () => ({
@@ -33,23 +47,61 @@ vi.mock('../../hooks/useUser', () => ({
   }),
 }));
 
-describe("Notifications and Step-out UI", () => {
-    let user: UserEvent;
+vi.mock('aws-amplify/data', () => ({
+    generateClient: () => ({
+        mutations: {
+            handleSteppedOut: mockHandleSteppedOut,
+            toggleNotifications: mockToggleNotifications,
+        },
+    }),
+}));
 
-    beforeAll(() => {
-        Object.defineProperty(window, "speechSynthesis", {
-            value: {
+vi.mock('../../utils/getDataAuthMode', () => ({
+    getDataAuthMode: vi.fn().mockResolvedValue('userPool'),
+}));
+
+vi.mock('../../hooks/useTicketQueueInfo', () => ({
+    useTicketQueueInfo: vi.fn(),
+}));
+
+import { useTicketQueueInfo } from '../../hooks/useTicketQueueInfo';
+
+function renderDashboard() {
+    render(
+        <MemoryRouter>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <ThemeProvider theme={theme}>
+                    <Authenticator.Provider>
+                        <UserDashboard />
+                    </Authenticator.Provider>
+                </ThemeProvider>
+            </LocalizationProvider>
+        </MemoryRouter>
+    );
+}
+
+function setupSpeechSynthesis() {
+    Object.defineProperty(window, "speechSynthesis", {
+        value: {
             getVoices: () => [{ name: "Test Voice", lang: "en-GB" }],
             speak: vi.fn(),
             cancel: vi.fn(),
             pause: vi.fn(),
             resume: vi.fn(),
-            },
-            writable: true,
-        });
+        },
+        writable: true,
+        configurable: true,
+    });
+}
+
+describe("Notifications and Step-out UI", () => {
+    let user: UserEvent;
+
+    beforeAll(() => {
+        setupSpeechSynthesis();
     });
 
-    const setup = async ({
+    const setup = ({
         ticketId = '123',
         steppedOutInitial = false,
         notificationsInitial = false,
@@ -62,58 +114,28 @@ describe("Notifications and Step-out UI", () => {
         handleMock?: any;
         toggleMock?: any;
     } = {}) => {
-        vi.resetModules();
-
         mockHandleSteppedOut.mockImplementation(handleMock);
         mockToggleNotifications.mockImplementation(toggleMock);
 
-        vi.doMock('aws-amplify/api', () => ({
-            generateClient: () => ({
-                mutations: {
-                handleSteppedOut: mockHandleSteppedOut,
-                toggleNotifications: mockToggleNotifications,
-                },
-            }),
-        }));
-
-        vi.doMock('../../hooks/useTicketQueueInfo', () => {
-        const React = require('react');
+        vi.mocked(useTicketQueueInfo).mockImplementation(() => {
+            const [steppedOut, setSteppedOut] = useState(steppedOutInitial);
+            const [notificationsEnabled, setNotificationsEnabled] = useState(notificationsInitial);
             return {
-                useTicketQueueInfo: () => {
-                const [steppedOut, setSteppedOut] = React.useState(steppedOutInitial);
-                const [notificationsEnabled, setNotificationsEnabled] =
-                    React.useState(notificationsInitial);
-
-                return {
-                    position: 1,
-                    waitTimeLower: 5,
-                    waitTimeUpper: 10,
-                    ticketId,
-                    steppedOut,
-                    setSteppedOut,
-                    notificationsEnabled,
-                    setNotificationsEnabled,
-                    error: null,
-                };
-                },
+                position: 1,
+                waitTimeLower: 5,
+                waitTimeUpper: 10,
+                ticketId,
+                steppedOut,
+                setSteppedOut,
+                notificationsEnabled,
+                setNotificationsEnabled,
+                error: '',
+                isLoading: false,
             };
         });
 
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
-
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard();
     };
 
     beforeEach(() => {
@@ -121,7 +143,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Step-out dialog shows up when StepOut button is clicked", async () => {
-        await setup();
+        setup();
         await expect(screen.queryByLabelText('stepOut-dialog')).not.toBeInTheDocument();
         await user.click(screen.getByLabelText('stepOut-button'));
 
@@ -129,7 +151,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Step-out dialog disappears when canceled", async () => {
-        await setup();
+        setup();
         await user.click(screen.getByLabelText('stepOut-button'));
         expect(await screen.findByLabelText('stepOut-dialog')).toBeInTheDocument();
 
@@ -143,7 +165,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Step out alert shows up when you enter phone number in Step-out dialog and confirm", async () => {
-        await setup();
+        setup();
         await user.click(screen.getByLabelText('stepOut-button'));
 
         expect(await screen.findByLabelText('stepOut-dialog')).toBeInTheDocument();
@@ -160,7 +182,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Step out alert shows up when you enter email in Step-out dialog and confirm", async () => {
-        await setup();
+        setup();
         await user.click(screen.getByLabelText('stepOut-button'));
 
         expect(await screen.findByLabelText('stepOut-dialog')).toBeInTheDocument();
@@ -181,7 +203,7 @@ describe("Notifications and Step-out UI", () => {
 
 
     it("Step out alert is no longer shown when you click the same button", async () => {
-        await setup();
+        setup();
         await user.click(screen.getByLabelText('stepOut-button'));
 
         expect(await screen.queryByLabelText('stepOut-alert')).not.toBeInTheDocument();
@@ -208,7 +230,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Step out alert is no longer shown when you close the alert", async () => {
-        await setup();
+        setup();
         await user.click(screen.getByLabelText('stepOut-button'));
 
         await user.click(screen.getByLabelText('email-button'));
@@ -228,7 +250,7 @@ describe("Notifications and Step-out UI", () => {
 
 
     it("Notifications dialog is shown when enable notifications button is clicked", async () => {
-        await setup()
+        setup()
         expect(await screen.queryByLabelText('notifications-dialog')).not.toBeInTheDocument();
         
         const notifButton=await screen.getByLabelText('notifications-button')
@@ -239,7 +261,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Notifications dialog disappears when canceled", async () => {
-        await setup()
+        setup()
         await user.click(screen.getByLabelText('notifications-button'));
         expect(await screen.findByLabelText('notifications-dialog')).toBeInTheDocument();
 
@@ -254,7 +276,7 @@ describe("Notifications and Step-out UI", () => {
 
 
      it("Notifications alert shows up when you enter phone number in notifications dialog and confirm", async () => {
-        await setup()
+        setup()
         await user.click(screen.getByLabelText('notifications-button'));
 
         expect(await screen.findByLabelText('notifications-dialog')).toBeInTheDocument();
@@ -271,7 +293,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Notifications alert shows up when you enter email in notifications dialog and confirm", async () => {
-        await setup()
+        setup()
         await user.click(screen.getByLabelText('notifications-button'));
 
         expect(await screen.findByLabelText('notifications-dialog')).toBeInTheDocument();
@@ -292,7 +314,7 @@ describe("Notifications and Step-out UI", () => {
 
 
      it("Notifications alert is no longer shown when you click the same button", async () => {
-        await setup()
+        setup()
         await user.click(screen.getByLabelText('notifications-button'));
 
         expect(await screen.queryByLabelText('notifications-alert')).not.toBeInTheDocument();
@@ -319,7 +341,7 @@ describe("Notifications and Step-out UI", () => {
     });
 
     it("Notifications alert is no longer shown when you close the alert", async () => {
-        await setup()
+        setup()
         await user.click(screen.getByLabelText('notifications-button'));
 
         await user.click(screen.getByLabelText('email-button'));
@@ -344,19 +366,10 @@ describe('executeHandleSteppedOut function', () => {
     let user: UserEvent;
 
     beforeAll(() => {
-        Object.defineProperty(window, "speechSynthesis", {
-        value: {
-            getVoices: () => [{ name: "Test Voice", lang: "en-GB" }],
-            speak: vi.fn(),
-            cancel: vi.fn(),
-            pause: vi.fn(),
-            resume: vi.fn(),
-        },
-        writable: true,
-        });
+        setupSpeechSynthesis();
     });
 
-    const setup = async ({
+    const setup = ({
         ticketId = '123',
         steppedOut = false,
         handleMock = vi.fn().mockResolvedValue({ errors: [] }),
@@ -365,50 +378,27 @@ describe('executeHandleSteppedOut function', () => {
         steppedOut?: boolean;
         handleMock?: any;
     } = {}) => {
-        vi.resetModules();
+        mockHandleSteppedOut.mockImplementation(handleMock);
 
-        vi.doMock('aws-amplify/api', () => ({
-        generateClient: () => ({
-            mutations: {
-            handleSteppedOut: handleMock,
-            toggleNotifications: vi.fn().mockResolvedValue({ errors: [] }),
-            },
-        }),
+        vi.mocked(useTicketQueueInfo).mockImplementation(() => ({
+            ticketId,
+            steppedOut,
+            setSteppedOut: vi.fn(),
+            notificationsEnabled: true,
+            setNotificationsEnabled: vi.fn(),
+            position: 1,
+            waitTimeLower: 5,
+            waitTimeUpper: 10,
+            error: '',
+            isLoading: false,
         }));
-
-        vi.doMock('../../hooks/useTicketQueueInfo', () => ({
-            useTicketQueueInfo: () => ({
-                ticketId,
-                steppedOut,
-                setSteppedOut: vi.fn(),
-                notificationsEnabled: true,
-                setNotificationsEnabled: vi.fn(),
-                position: 1,
-                waitTimeLower: 5,
-                waitTimeUpper: 10,
-                error: null,
-            }),
-        }));
-
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
 
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard();
     };
 
     it('shows error if there is no ticketId', async () => {
-        await setup({ ticketId: null });
+        setup({ ticketId: null });
 
         await user.click(screen.getByLabelText('stepOut-button'));
 
@@ -417,7 +407,7 @@ describe('executeHandleSteppedOut function', () => {
     });
 
     it('shows stepOut alert successfully when API call succeeds', async () => {
-        await setup();
+        setup();
 
         await user.click(screen.getByLabelText('stepOut-button'));
 
@@ -426,7 +416,7 @@ describe('executeHandleSteppedOut function', () => {
     });
 
     it('sets errors if handleSteppedOut returns errors', async () => {
-        await setup({
+        setup({
             handleMock: vi.fn().mockResolvedValue({
             errors: [{ message: 'API failed' }],
             }),
@@ -439,7 +429,7 @@ describe('executeHandleSteppedOut function', () => {
     });
 
     it('sets errors if handleSteppedOut throws error for step-out ', async () => {
-        await setup({
+        setup({
             handleMock: vi.fn().mockRejectedValue(new Error('Network error')),
         });
 
@@ -452,7 +442,7 @@ describe('executeHandleSteppedOut function', () => {
     });
 
     it('sets errors if handleSteppedOut throws error for update', async () => {
-        await setup({
+        setup({
             handleMock: vi.fn().mockRejectedValue(new Error('Network error')),
             steppedOut:true,
         });
@@ -472,7 +462,7 @@ describe('executeToggleNotifications function', () => {
     let user: UserEvent;
     let mockTicketId: string | null;
 
-    const setup = async ({
+    const setup = ({
         ticketId = '123',
         notificationsEnabled = true,
         toggleMock = vi.fn().mockResolvedValue({ errors: [] }),
@@ -484,51 +474,27 @@ describe('executeToggleNotifications function', () => {
         error?: string | null;
     } = {}) => {
         mockTicketId = ticketId;
+        mockToggleNotifications.mockImplementation(toggleMock);
 
-        vi.resetModules();
-
-        vi.doMock('aws-amplify/api', () => ({
-        generateClient: () => ({
-            mutations: {
-            toggleNotifications: toggleMock,
-            handleSteppedOut: vi.fn(),
-            },
-        }),
+        vi.mocked(useTicketQueueInfo).mockImplementation(() => ({
+            ticketId: mockTicketId,
+            steppedOut: false,
+            setSteppedOut: vi.fn(),
+            notificationsEnabled,
+            setNotificationsEnabled: vi.fn(),
+            position: 1,
+            waitTimeLower: 5,
+            waitTimeUpper: 10,
+            error: fetchError ?? '',
+            isLoading: false,
         }));
-
-        vi.doMock('../../hooks/useTicketQueueInfo', () => ({
-            useTicketQueueInfo: () => ({
-                ticketId: mockTicketId,
-                steppedOut: false,
-                setSteppedOut: vi.fn(),
-                notificationsEnabled,
-                setNotificationsEnabled: vi.fn(),
-                position: 1,
-                waitTimeLower: 5,
-                waitTimeUpper: 10,
-                error:fetchError,
-            }),
-        }));
-
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
 
         user = userEvent.setup();
-
-        render(
-        <MemoryRouter>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <Authenticator.Provider>
-                <UserDashboard />
-                </Authenticator.Provider>
-            </ThemeProvider>
-            </LocalizationProvider>
-        </MemoryRouter>
-        );
+        renderDashboard();
     };
 
     it('shows error if there is no ticketId', async () => {
-        await setup({ ticketId: null });
+        setup({ ticketId: null });
 
         await user.click(screen.getByLabelText('notifications-button'));
 
@@ -537,7 +503,7 @@ describe('executeToggleNotifications function', () => {
     });
 
     it('shows error if API call returns errors', async () => {
-        await setup({
+        setup({
             toggleMock: vi.fn().mockResolvedValue({
             errors: [{ message: 'Notif failed' }],
             }),
@@ -550,7 +516,7 @@ describe('executeToggleNotifications function', () => {
     });
 
     it('shows error if toggleNotifications throws error when disabling', async () => {
-        await setup({
+        setup({
             toggleMock: vi.fn().mockRejectedValue(new Error('Network error')),
         });
 
@@ -563,7 +529,7 @@ describe('executeToggleNotifications function', () => {
     });
 
     it('shows error if toggleNotifications throws error when enabling', async () => {
-        await setup({
+        setup({
             toggleMock: vi.fn().mockRejectedValue(new Error('Network error')),
             notificationsEnabled: false,
         });
@@ -583,7 +549,7 @@ describe('executeToggleNotifications function', () => {
     });
 
     it('shows notifications alert successfully when enabling notifications', async () => {
-        await setup({
+        setup({
             ticketId: '123',
             notificationsEnabled: false,
             toggleMock: vi.fn().mockResolvedValue({ errors: [] }),
@@ -612,7 +578,7 @@ describe('executeToggleNotifications function', () => {
 
     // Error alert
     it('Errors alert closes when clicked its close button', async () => {
-        await setup({
+        setup({
             toggleMock: vi.fn().mockResolvedValue({
             errors: [{ message: 'Notif failed' }],
             }),
@@ -631,7 +597,7 @@ describe('executeToggleNotifications function', () => {
     it('shows error alert when fetchError is present', async () => {
         const errorMsg = 'Failed to fetch ticket info';
 
-        await setup({ error: 'Failed to fetch ticket info' });
+        setup({ error: 'Failed to fetch ticket info' });
 
         const errorAlert = await screen.findByLabelText('error-alert');
         expect(errorAlert).toBeInTheDocument();

@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const { mockDdbSend, mockUpdateItemCommand } = vi.hoisted(() => ({
   mockDdbSend: vi.fn(),
-  mockUpdateItemCommand: vi.fn((input: unknown) => ({ input })),
+  mockUpdateItemCommand: vi.fn(),
 }));
 
 vi.mock("@aws-sdk/client-dynamodb", () => ({
-  DynamoDBClient: vi.fn(() => ({ send: mockDdbSend })),
+  DynamoDBClient: vi.fn(function() { return { send: mockDdbSend }; }),
   UpdateItemCommand: mockUpdateItemCommand,
 }));
 
@@ -138,7 +138,6 @@ function makeVisitState(): CreatedVisitResourcesState {
 }
 
 function restoreMockDefaults() {
-  mockUpdateItemCommand.mockImplementation((input: unknown) => ({ input }));
   vi.mocked(daysFromNowInSeconds).mockReturnValue(9999);
   vi.mocked(getDate).mockReturnValue("20260615");
   vi.mocked(getEnquiriesStateTableName).mockReturnValue("test-table");
@@ -149,7 +148,7 @@ function restoreMockDefaults() {
     async (
       _failureLogPrefix: string,
       failureMessage: string,
-      fn: () => Promise<{ errors?: unknown[] | undefined }>,
+      fn: () => Promise<{ data: unknown | null; errors?: unknown[] | undefined }>,
     ) => {
       const result = await fn();
       if (result.errors?.length) {
