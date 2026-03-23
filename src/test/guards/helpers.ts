@@ -10,6 +10,7 @@ type UseAuthReturn = ReturnType<typeof useAuth>;
 export function createMockAuth(mockFn: { mockReturnValue: (val: UseAuthReturn) => void }) {
     return (overrides: Partial<UseAuthReturn> = {}) => {
         mockFn.mockReturnValue({
+            status: "unauthenticated",
             isAuthenticated: false,
             isLoading: false,
             isStaff: false,
