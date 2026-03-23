@@ -56,6 +56,10 @@ vi.mock('aws-amplify/data', () => ({
     }),
 }));
 
+vi.mock('../../utils/getDataAuthMode', () => ({
+    getDataAuthMode: vi.fn().mockResolvedValue('userPool'),
+}));
+
 vi.mock('../../hooks/useTicketQueueInfo', () => ({
     useTicketQueueInfo: vi.fn(),
 }));
