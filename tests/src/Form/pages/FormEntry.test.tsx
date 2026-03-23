@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import { initialFormData } from "../../../pages/Form/model/initialState";
-import type { FormData } from "../../../pages/Form/model/formFieldTypes";
+import { initialFormData } from "../../../../src/pages/Form/model/initialState";
+import type { FormData } from "../../../../src/pages/Form/model/formFieldTypes";
 
 const {
   mockNavigate,
@@ -35,20 +35,20 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-vi.mock("../../../context/FormWizardProvider", () => ({
+vi.mock("../../../../src/context/FormWizardProvider", () => ({
   useFormWizard: () => ({
     formData: testState.formData,
     setFormData: mockSetFormData,
   }),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../pages/Form/model/draftStorage", async () => {
-  const actual = await vi.importActual<typeof import("../../../pages/Form/model/draftStorage")>(
-    "../../../pages/Form/model/draftStorage",
+vi.mock("../../../../src/pages/Form/model/draftStorage", async () => {
+  const actual = await vi.importActual<typeof import("../../../../src/pages/Form/model/draftStorage")>(
+    "../../../../src/pages/Form/model/draftStorage",
   );
 
   return {
@@ -59,7 +59,7 @@ vi.mock("../../../pages/Form/model/draftStorage", async () => {
   };
 });
 
-import FormEntry from "../../../pages/Form/FormEntry";
+import FormEntry from "../../../../src/pages/Form/FormEntry";
 
 function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {

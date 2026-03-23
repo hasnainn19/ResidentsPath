@@ -14,11 +14,11 @@ vi.mock("aws-amplify/data", () => ({
   generateClient: vi.fn(),
 }));
 
-vi.mock("../../../../amplify/functions/utils/amplifyClient", () => ({
+vi.mock("../../../amplify/functions/utils/amplifyClient", () => ({
   getAmplifyClient: vi.fn(),
 }));
 
-vi.mock("../../../../amplify/functions/utils/enquiriesStateTable", () => ({
+vi.mock("../../../amplify/functions/utils/enquiriesStateTable", () => ({
   claimAppointmentSlot: vi.fn(),
   releaseAppointmentSlot: vi.fn(),
   releaseBookingReferenceNumber: vi.fn(),
@@ -33,18 +33,18 @@ vi.mock("../../../../amplify/functions/utils/enquiriesStateTable", () => ({
   markAppointmentSlotBooked: vi.fn(),
 }));
 
-vi.mock("../../../../amplify/functions/utils/queueWaitTimes", () => ({
+vi.mock("../../../amplify/functions/utils/queueWaitTimes", () => ({
   getDefaultEstimatedWaitingTime: vi.fn().mockReturnValue(15),
   getEstimatedWaitTimeBounds: vi.fn().mockReturnValue({ lower: 10, upper: 20 }),
 }));
 
-vi.mock("../../../../amplify/functions/utils/runCleanup", () => ({
+vi.mock("../../../amplify/functions/utils/runCleanup", () => ({
   logModelErrors: vi.fn(),
   runCleanup: vi.fn().mockResolvedValue({ errors: undefined }),
   tryCleanup: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock("../../../../shared/departmentCodes", () => ({
+vi.mock("../../../shared/departmentCodes", () => ({
   DepartmentCodeByName: {
     Homelessness: "H",
     Adults_Duty: "A",

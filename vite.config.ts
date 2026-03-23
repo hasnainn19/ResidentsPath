@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   test: {
-    globals: true,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
@@ -15,6 +14,7 @@ export default defineConfig({
           name: "frontend",
           include: ["tests/src/**/*.test.{ts,tsx}"],
           environment: "jsdom",
+          globals: true,
           setupFiles: ["./tests/setup/setup.frontend.ts"],
         },
       },
@@ -23,6 +23,7 @@ export default defineConfig({
           name: "backend",
           include: ["tests/amplify/**/*.test.ts"],
           environment: "node",
+          globals: true,
         },
       },
       {
@@ -30,6 +31,7 @@ export default defineConfig({
           name: "shared",
           include: ["tests/shared/**/*.test.ts"],
           environment: "node",
+          globals: true,
         },
       },
     ],

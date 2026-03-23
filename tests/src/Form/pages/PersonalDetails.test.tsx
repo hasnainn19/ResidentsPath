@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import type { FormData } from "../../../pages/Form/model/formFieldTypes";
+import type { FormData } from "../../../../src/pages/Form/model/formFieldTypes";
 
 const { mockNavigate, mockSetFormData, mockHandleSave, testState } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("../../../context/FormWizardProvider", () => ({
+vi.mock("../../../../src/context/FormWizardProvider", () => ({
   useFormWizard: () => ({
     formData: testState.formData,
     setFormData: mockSetFormData,
@@ -27,7 +27,7 @@ vi.mock("../../../context/FormWizardProvider", () => ({
   }),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({
     title,
     subtitle,
@@ -50,7 +50,7 @@ vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
+vi.mock("../../../../src/components/FormPageComponents/WithTTS", () => ({
   default: ({ children, copy }: { children: ReactNode; copy: { label?: string } }) => (
     <section>
       {copy.label ? <h2>{copy.label}</h2> : null}
@@ -59,11 +59,11 @@ vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
   ),
 }));
 
-vi.mock("../../../components/TextToSpeechButton", () => ({
+vi.mock("../../../../src/components/TextToSpeechButton", () => ({
   default: () => null,
 }));
 
-vi.mock("../../../components/FormPageComponents/StepActions", () => ({
+vi.mock("../../../../src/components/FormPageComponents/StepActions", () => ({
   default: ({
     onSave,
     showPrevious,
@@ -120,7 +120,7 @@ vi.mock("@mui/x-date-pickers/DatePicker", () => ({
   ),
 }));
 
-import PersonalDetails from "../../../pages/Form/PersonalDetails";
+import PersonalDetails from "../../../../src/pages/Form/PersonalDetails";
 
 function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {

@@ -5,7 +5,7 @@ import {
   isBookingReferenceNumber,
   normaliseCaseReferenceNumber,
   normaliseReferenceNumber,
-} from "../../../shared/referenceNumbers";
+} from "../../shared/referenceNumbers";
 
 describe("referenceNumbers", () => {
   it("normalises case reference numbers and converts blank strings to undefined", () => {

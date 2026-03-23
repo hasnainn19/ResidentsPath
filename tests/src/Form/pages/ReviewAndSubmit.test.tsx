@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import type { FormData } from "../../../pages/Form/model/formFieldTypes";
+import type { FormData } from "../../../../src/pages/Form/model/formFieldTypes";
 
 const {
   mockNavigate,
@@ -45,11 +45,11 @@ vi.mock("aws-amplify/data", () => ({
   generateClient: mockGenerateClient,
 }));
 
-vi.mock("../../../utils/getDataAuthMode", () => ({
+vi.mock("../../../../src/utils/getDataAuthMode", () => ({
   getDataAuthMode: mockGetDataAuthMode,
 }));
 
-vi.mock("../../../context/FormWizardProvider", () => ({
+vi.mock("../../../../src/context/FormWizardProvider", () => ({
   useFormWizard: () => ({
     formData: testState.formData,
     setFormData: mockSetFormData,
@@ -58,11 +58,11 @@ vi.mock("../../../context/FormWizardProvider", () => ({
   }),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../components/FormPageComponents/PrivacyNoticeDialog", () => ({
+vi.mock("../../../../src/components/FormPageComponents/PrivacyNoticeDialog", () => ({
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
     open ? (
       <div>
@@ -74,7 +74,7 @@ vi.mock("../../../components/FormPageComponents/PrivacyNoticeDialog", () => ({
     ) : null,
 }));
 
-vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
+vi.mock("../../../../src/components/FormPageComponents/WithTTS", () => ({
   default: ({ children, copy }: { children: ReactNode; copy: { label?: string } }) => (
     <section>
       {copy.label ? <h2>{copy.label}</h2> : null}
@@ -83,7 +83,7 @@ vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/StepActions", () => ({
+vi.mock("../../../../src/components/FormPageComponents/StepActions", () => ({
   default: ({
     advanceLabel,
     advanceDisabled,
@@ -107,20 +107,20 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
   },
 }));
 
-vi.mock("../../../pages/Form/model/getEnquirySelectionState", () => ({
+vi.mock("../../../../src/pages/Form/model/getEnquirySelectionState", () => ({
   getEnquirySelectionState: mockGetEnquirySelectionState,
 }));
 
-vi.mock("../../../pages/Form/model/fieldMeta", () => ({
+vi.mock("../../../../src/pages/Form/model/fieldMeta", () => ({
   getReviewDisplayValue: mockGetReviewDisplayValue,
   getReviewLabel: mockGetReviewLabel,
 }));
 
-vi.mock("../../../pages/Form/model/buildSubmitEnquiryPayload", () => ({
+vi.mock("../../../../src/pages/Form/model/buildSubmitEnquiryPayload", () => ({
   buildSubmitEnquiryPayload: mockBuildSubmitEnquiryPayload,
 }));
 
-import ReviewAndSubmit from "../../../pages/Form/ReviewAndSubmit";
+import ReviewAndSubmit from "../../../../src/pages/Form/ReviewAndSubmit";
 
 function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {

@@ -26,19 +26,19 @@ vi.mock("aws-amplify/data", () => ({
   generateClient: mockGenerateClient,
 }));
 
-vi.mock("../../../utils/getDataAuthMode", () => ({
+vi.mock("../../../../src/utils/getDataAuthMode", () => ({
   getDataAuthMode: mockGetDataAuthMode,
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
+vi.mock("../../../../src/components/FormPageComponents/WithTTS", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
+vi.mock("../../../../src/components/FormPageComponents/LongTextSection", () => ({
   default: ({
     copy,
     value,
@@ -62,7 +62,7 @@ vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/OptionTile", () => ({
+vi.mock("../../../../src/components/FormPageComponents/OptionTile", () => ({
   default: ({
     title,
     disabled,
@@ -78,7 +78,7 @@ vi.mock("../../../components/FormPageComponents/OptionTile", () => ({
   ),
 }));
 
-vi.mock("../../../components/BookingPanel", () => ({
+vi.mock("../../../../src/components/BookingPanel", () => ({
   default: ({
     departmentName,
     onConfirm,
@@ -95,7 +95,7 @@ vi.mock("../../../components/BookingPanel", () => ({
   ),
 }));
 
-import ExistingCaseFollowUp from "../../../pages/Form/ExistingCaseFollowUp";
+import ExistingCaseFollowUp from "../../../../src/pages/Form/ExistingCaseFollowUp";
 
 function renderPage() {
   return render(<ExistingCaseFollowUp />);

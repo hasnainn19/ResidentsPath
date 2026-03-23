@@ -54,15 +54,15 @@ vi.mock("qrcode", () => ({
   toDataURL: mockToDataURL,
 }));
 
-vi.mock("../../../utils/getDataAuthMode", () => ({
+vi.mock("../../../../src/utils/getDataAuthMode", () => ({
   getDataAuthMode: mockGetDataAuthMode,
 }));
 
-vi.mock("../../../components/NavBar", () => ({
+vi.mock("../../../../src/components/NavBar", () => ({
   default: () => <div>Navigation</div>,
 }));
 
-vi.mock("../../../components/SubmissionReceiptComponents/ReceiptHeaderCard", () => ({
+vi.mock("../../../../src/components/SubmissionReceiptComponents/ReceiptHeaderCard", () => ({
   default: ({
     chipLabel,
     heading,
@@ -97,7 +97,7 @@ vi.mock("../../../components/SubmissionReceiptComponents/ReceiptHeaderCard", () 
   ),
 }));
 
-vi.mock("../../../components/SubmissionReceiptComponents/ReceiptBody", () => ({
+vi.mock("../../../../src/components/SubmissionReceiptComponents/ReceiptBody", () => ({
   default: ({
     receipt,
     qrCodeUrl,
@@ -130,7 +130,7 @@ vi.mock("../../../components/SubmissionReceiptComponents/ReceiptBody", () => ({
   ),
 }));
 
-import SubmissionReceipt from "../../../pages/Form/SubmissionReceipt";
+import SubmissionReceipt from "../../../../src/pages/Form/SubmissionReceipt";
 
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(window.navigator, "clipboard");
 

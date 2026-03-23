@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
-import type { FormData } from "../../../pages/Form/model/formFieldTypes";
+import type { FormData } from "../../../../src/pages/Form/model/formFieldTypes";
 
 const {
   mockNavigate,
@@ -32,7 +32,7 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
-vi.mock("../../../context/FormWizardProvider", () => ({
+vi.mock("../../../../src/context/FormWizardProvider", () => ({
   useFormWizard: () => ({
     formData: testState.formData,
     setFormData: mockSetFormData,
@@ -40,7 +40,7 @@ vi.mock("../../../context/FormWizardProvider", () => ({
   }),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({
     title,
     subtitle,
@@ -58,11 +58,11 @@ vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormPrivacyNotice", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormPrivacyNotice", () => ({
   default: () => <div>Privacy notice</div>,
 }));
 
-vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
+vi.mock("../../../../src/components/FormPageComponents/WithTTS", () => ({
   default: ({
     children,
     copy,
@@ -77,7 +77,7 @@ vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/LeftCheckRow", () => ({
+vi.mock("../../../../src/components/FormPageComponents/LeftCheckRow", () => ({
   default: ({
     label,
     checked,
@@ -98,7 +98,7 @@ vi.mock("../../../components/FormPageComponents/LeftCheckRow", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
+vi.mock("../../../../src/components/FormPageComponents/LongTextSection", () => ({
   default: ({
     copy,
     value,
@@ -122,7 +122,7 @@ vi.mock("../../../components/FormPageComponents/LongTextSection", () => ({
   ),
 }));
 
-vi.mock("../../../components/FormPageComponents/StepActions", () => ({
+vi.mock("../../../../src/components/FormPageComponents/StepActions", () => ({
   default: ({
     onSave,
     advanceLabel,
@@ -145,9 +145,9 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
   ),
 }));
 
-vi.mock("../../../pages/Form/model/enquirySelectionLogic", async () => {
-  const actual = await vi.importActual<typeof import("../../../pages/Form/model/enquirySelectionLogic")>(
-    "../../../pages/Form/model/enquirySelectionLogic",
+vi.mock("../../../../src/pages/Form/model/enquirySelectionLogic", async () => {
+  const actual = await vi.importActual<typeof import("../../../../src/pages/Form/model/enquirySelectionLogic")>(
+    "../../../../src/pages/Form/model/enquirySelectionLogic",
   );
 
   return {
@@ -158,11 +158,11 @@ vi.mock("../../../pages/Form/model/enquirySelectionLogic", async () => {
   };
 });
 
-vi.mock("../../../pages/Form/model/getEnquirySelectionState", () => ({
+vi.mock("../../../../src/pages/Form/model/getEnquirySelectionState", () => ({
   getEnquirySelectionState: mockGetEnquirySelectionState,
 }));
 
-import EnquirySelection from "../../../pages/Form/EnquirySelection";
+import EnquirySelection from "../../../../src/pages/Form/EnquirySelection";
 
 function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {

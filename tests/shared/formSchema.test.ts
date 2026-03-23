@@ -13,7 +13,7 @@ import {
   isValidIsoDate,
   normalisePhoneToE164,
   normaliseUkPostcode,
-} from "../../../shared/formSchema";
+} from "../../shared/formSchema";
 
 const baseFormInput = {
   departmentName: "Homelessness" as const,

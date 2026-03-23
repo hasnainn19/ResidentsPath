@@ -5,7 +5,7 @@ const { mockListAppointment, mockGetCase } = vi.hoisted(() => ({
   mockGetCase: vi.fn(),
 }));
 
-vi.mock("../../../../amplify/functions/utils/amplifyClient", () => ({
+vi.mock("../../../amplify/functions/utils/amplifyClient", () => ({
   getAmplifyClient: vi.fn().mockResolvedValue({
     models: {
       Appointment: {

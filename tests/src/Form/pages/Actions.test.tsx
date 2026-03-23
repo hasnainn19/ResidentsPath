@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
-import type { FormData } from "../../../pages/Form/model/formFieldTypes";
+import type { FormData } from "../../../../src/pages/Form/model/formFieldTypes";
 
 const {
   mockNavigate,
@@ -37,11 +37,11 @@ vi.mock("aws-amplify/data", () => ({
   generateClient: mockGenerateClient,
 }));
 
-vi.mock("../../../utils/getDataAuthMode", () => ({
+vi.mock("../../../../src/utils/getDataAuthMode", () => ({
   getDataAuthMode: mockGetDataAuthMode,
 }));
 
-vi.mock("../../../context/FormWizardProvider", () => ({
+vi.mock("../../../../src/context/FormWizardProvider", () => ({
   useFormWizard: () => ({
     formData: testState.formData,
     setFormData: mockSetFormData,
@@ -49,15 +49,15 @@ vi.mock("../../../context/FormWizardProvider", () => ({
   }),
 }));
 
-vi.mock("../../../components/FormPageComponents/FormStepLayout", () => ({
+vi.mock("../../../../src/components/FormPageComponents/FormStepLayout", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../components/FormPageComponents/WithTTS", () => ({
+vi.mock("../../../../src/components/FormPageComponents/WithTTS", () => ({
   default: ({ children }: { children: ReactNode }) => <section>{children}</section>,
 }));
 
-vi.mock("../../../components/FormPageComponents/StepActions", () => ({
+vi.mock("../../../../src/components/FormPageComponents/StepActions", () => ({
   default: ({
     onSave,
     showPrevious,
@@ -91,7 +91,7 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
   ),
 }));
 
-vi.mock("../../../components/BookingPanel", () => ({
+vi.mock("../../../../src/components/BookingPanel", () => ({
   default: ({
     departmentName,
     onConfirm,
@@ -108,11 +108,11 @@ vi.mock("../../../components/BookingPanel", () => ({
   ),
 }));
 
-vi.mock("../../../pages/Form/model/getEnquirySelectionState", () => ({
+vi.mock("../../../../src/pages/Form/model/getEnquirySelectionState", () => ({
   getEnquirySelectionState: mockGetEnquirySelectionState,
 }));
 
-import Actions from "../../../pages/Form/Actions";
+import Actions from "../../../../src/pages/Form/Actions";
 
 function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {

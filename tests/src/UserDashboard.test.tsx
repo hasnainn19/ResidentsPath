@@ -8,7 +8,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Authenticator } from '@aws-amplify/ui-react';
 
-import theme from '../../Constants/Theme';
+import theme from '../../src/Constants/Theme';
 
 vi.mock('react-i18next', async (importOriginal) => {
     const actual = await importOriginal<typeof import('react-i18next')>();
@@ -27,7 +27,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 const mockHandleSteppedOut = vi.fn();
 const mockToggleNotifications = vi.fn();
 
-vi.mock('../../hooks/useUser', () => ({
+vi.mock('../../src/hooks/useUser', () => ({
   useUser: () => ({
     user: { email: 'test@test.com', phoneNumber: '1234567890' },
   }),
@@ -76,7 +76,7 @@ describe("Notifications and Step-out UI", () => {
             }),
         }));
 
-        vi.doMock('../../hooks/useTicketQueueInfo', () => {
+        vi.doMock('../../src/hooks/useTicketQueueInfo', () => {
         const React = require('react');
             return {
                 useTicketQueueInfo: () => {
@@ -99,7 +99,7 @@ describe("Notifications and Step-out UI", () => {
             };
         });
 
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
+        const { default: UserDashboard } = await import('../../src/pages/UserDashboard');
 
         user = userEvent.setup();
 
@@ -376,7 +376,7 @@ describe('executeHandleSteppedOut function', () => {
         }),
         }));
 
-        vi.doMock('../../hooks/useTicketQueueInfo', () => ({
+        vi.doMock('../../src/hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
                 ticketId,
                 steppedOut,
@@ -390,7 +390,7 @@ describe('executeHandleSteppedOut function', () => {
             }),
         }));
 
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
+        const { default: UserDashboard } = await import('../../src/pages/UserDashboard');
 
         user = userEvent.setup();
 
@@ -496,7 +496,7 @@ describe('executeToggleNotifications function', () => {
         }),
         }));
 
-        vi.doMock('../../hooks/useTicketQueueInfo', () => ({
+        vi.doMock('../../src/hooks/useTicketQueueInfo', () => ({
             useTicketQueueInfo: () => ({
                 ticketId: mockTicketId,
                 steppedOut: false,
@@ -510,7 +510,7 @@ describe('executeToggleNotifications function', () => {
             }),
         }));
 
-        const { default: UserDashboard } = await import('../../pages/UserDashboard');
+        const { default: UserDashboard } = await import('../../src/pages/UserDashboard');
 
         user = userEvent.setup();
 
