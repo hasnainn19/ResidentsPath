@@ -37,7 +37,7 @@ import {
   getQueuePositionCount,
   claimTicketDigits,
   releaseTicketNumber,
-} from "../../../../amplify/functions/utils/enquiriesStateTable";
+} from "../../../amplify/functions/utils/enquiriesStateTable";
 
 // -- Environment Configuration --
 

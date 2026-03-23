@@ -3,7 +3,7 @@ import {
   getIdentityGroups,
   getIdentitySub,
   isStaffIdentity,
-} from "../../../../amplify/functions/utils/identityGroups";
+} from "../../../amplify/functions/utils/identityGroups";
 
 // -- getIdentityGroups --
 

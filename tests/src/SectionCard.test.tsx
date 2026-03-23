@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import SectionCard from "../../components/StaffComponents/SectionCard";
-import DetailRow from "../../components/StaffComponents/DetailRow";
+import SectionCard from "../../src/components/StaffComponents/SectionCard";
+import DetailRow from "../../src/components/StaffComponents/DetailRow";
 
 describe("SectionCard", () => {
   it("renders the section title", () => {

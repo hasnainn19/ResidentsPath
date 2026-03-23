@@ -5,8 +5,8 @@ import {
   isCaseAccessValidationFailure,
   loadAccessibleCaseByReference,
   getHasActiveWaitingTicket,
-} from "../../../../amplify/functions/utils/caseAccess";
-import type { AmplifyClient } from "../../../../amplify/functions/utils/amplifyClient";
+} from "../../../amplify/functions/utils/caseAccess";
+import type { AmplifyClient } from "../../../amplify/functions/utils/amplifyClient";
 
 type ClientOverrides = {
   Case?: Record<string, unknown>;

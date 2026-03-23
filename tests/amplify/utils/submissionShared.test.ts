@@ -63,8 +63,8 @@ import {
   cleanupCreatedVisitResources,
   APPOINTMENT_SLOT_UNAVAILABLE_MESSAGE,
   type CreatedVisitResourcesState,
-} from "../../../../amplify/functions/utils/submissionShared";
-import type { AmplifyClient } from "../../../../amplify/functions/utils/amplifyClient";
+} from "../../../amplify/functions/utils/submissionShared";
+import type { AmplifyClient } from "../../../amplify/functions/utils/amplifyClient";
 import {
   claimAppointmentSlot,
   claimBookingReferenceNumber,
@@ -78,16 +78,16 @@ import {
   releaseBookingReferenceNumber,
   releaseQueuePosition,
   releaseTicketNumber,
-} from "../../../../amplify/functions/utils/enquiriesStateTable";
+} from "../../../amplify/functions/utils/enquiriesStateTable";
 import {
   getDefaultEstimatedWaitingTime,
   getEstimatedWaitTimeBounds,
-} from "../../../../amplify/functions/utils/queueWaitTimes";
+} from "../../../amplify/functions/utils/queueWaitTimes";
 import {
   logModelErrors,
   runCleanup,
   tryCleanup,
-} from "../../../../amplify/functions/utils/runCleanup";
+} from "../../../amplify/functions/utils/runCleanup";
 
 type ClientOverrides = {
   Appointment?: Record<string, unknown>;

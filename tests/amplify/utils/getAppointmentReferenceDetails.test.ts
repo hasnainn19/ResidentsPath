@@ -18,7 +18,7 @@ vi.mock("../../../../amplify/functions/utils/amplifyClient", () => ({
   }),
 }));
 
-import { getAppointmentReferenceDetails } from "../../../../amplify/functions/utils/getAppointmentReferenceDetails";
+import { getAppointmentReferenceDetails } from "../../../amplify/functions/utils/getAppointmentReferenceDetails";
 
 describe("getAppointmentReferenceDetails", () => {
   beforeEach(() => {
