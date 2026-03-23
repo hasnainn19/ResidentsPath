@@ -25,7 +25,9 @@ export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] =
     try {
       await client.models.Case.update({ id: caseId, flag: flagged });
     } catch (error) {
-      throw new Error(`Could not apply safeguarding flag for case:${caseId}`);
+      throw new Error(
+        `Could not apply safeguarding flag for case:${caseId}, ${error}`,
+      );
     }
 
     return true;

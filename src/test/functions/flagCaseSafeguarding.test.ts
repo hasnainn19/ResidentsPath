@@ -69,6 +69,8 @@ describe("flagCaseSafeguarding handler", () => {
 
     await expect(
       handler(makeEvent("c1", true), {} as any, {} as any),
-    ).rejects.toThrow("Could not apply safeguarding flag for case:c1");
+    ).rejects.toThrow(
+      "Could not apply safeguarding flag for case:c1, Error: network error",
+    );
   });
 });
