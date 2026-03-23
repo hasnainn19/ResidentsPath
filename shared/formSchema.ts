@@ -10,7 +10,10 @@ import {
   type CountryCode,
 } from "libphonenumber-js";
 import { z } from "zod";
-import { CASE_REFERENCE_RE } from "./referenceNumbers";
+import {
+  isValidCaseReferenceNumber,
+  normaliseCaseReferenceNumber,
+} from "./referenceNumbers";
 
 export const DEPARTMENTS = [
   { name: "Council_Tax_Or_Housing_Benefit", label: "Council Tax or Housing Benefit" },
@@ -209,18 +212,6 @@ function trimToUndef(value: unknown) {
   if (typeof value !== "string") return value;
   const t = value.trim();
   return t.length ? t : undefined;
-}
-
-export function normaliseCaseReferenceNumber(value: unknown) {
-  if (value === null || value === undefined) return undefined;
-  if (typeof value !== "string") return value;
-
-  const trimmed = value.trim().toUpperCase();
-  return trimmed.length ? trimmed : undefined;
-}
-
-export function isValidCaseReferenceNumber(value: string) {
-  return CASE_REFERENCE_RE.test(value);
 }
 
 export function getSupportedPhoneCountry(value: string | undefined): CountryCode | undefined {
@@ -496,13 +487,13 @@ function hasInvalidControlCharacters(value: string, allowNewlines = false) {
 }
 
 // Validation for "other" free text fields: required when "Other" option is selected
-const otherFreeText = (maxLen: number) =>
+const otherFreeText = (maxLen: number, allowNewlines = false) =>
   z
     .string()
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine((s) => !hasInvalidControlCharacters(s, true), "Contains invalid control characters");
+    .refine((s) => !hasInvalidControlCharacters(s, allowNewlines), "Contains invalid control characters");
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
@@ -629,7 +620,10 @@ export const formSchema = z
     urgentReason: z.preprocess(trimToUndef, UrgentReasonEnum.optional()),
     urgentReasonOtherText: z.preprocess(
       trimToUndef,
-      otherFreeText(FIELD_TEXT_CONSTRAINTS.urgentReasonOtherText.maxLen).optional(),
+      otherFreeText(
+        FIELD_TEXT_CONSTRAINTS.urgentReasonOtherText.maxLen,
+        FIELD_TEXT_CONSTRAINTS.urgentReasonOtherText.allowNewlines,
+      ).optional(),
     ),
 
     supportNeeds: z

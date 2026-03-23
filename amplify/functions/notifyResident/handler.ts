@@ -1,5 +1,6 @@
 import type { DynamoDBStreamHandler, DynamoDBRecord } from "aws-lambda";
 import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
+import { callModel } from "../utils/runCleanup";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { endUserMessagingClient } from "../utils/endUserMessagingClient";
 import { SendTextMessageCommand } from "@aws-sdk/client-pinpoint-sms-voice-v2";
@@ -87,13 +88,11 @@ function shouldNotifyResident(newImage: Record<string, any>, oldImage: Record<st
 }
 
 async function getCase(client: AmplifyClient, caseId: string) {
-    const { data: caseData } = await client.models.Case.get({ id: caseId });
-    return caseData ?? null;
+    return callModel(client.models.Case.get({ id: caseId }));
 }
 
 async function getUser(client: AmplifyClient, userId: string) {
-    const { data: user } = await client.models.User.get({ id: userId });
-    return user ?? null;
+    return callModel(client.models.User.get({ id: userId }));
 }
 
 async function sendSms(phoneNumber: string, ticketNumber: string, message: string): Promise<void> {
