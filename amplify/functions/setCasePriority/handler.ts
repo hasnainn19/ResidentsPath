@@ -20,17 +20,15 @@ export const handler: Schema["setCasePriority"]["functionHandler"] = async (
   const { caseId, priority } = event.arguments;
 
   if (!caseId || priority == null) {
-    console.error("caseId and priority are required");
-    return false;
+    throw new Error("caseId and priority are required");
   }
 
   try {
     await client.models.Case.update({ id: caseId, priority });
   } catch (error) {
-    console.error(
+    throw new Error(
       `Failed to update the priority level of case:${caseId} to ${priority}`,
     );
-    return false;
   }
 
   return true;
