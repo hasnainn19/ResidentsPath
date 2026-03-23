@@ -30,7 +30,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
   // Fetch the target ticket to get its department
   const { data: ticket } = await client.models.Ticket.get({ id: ticketId });
   if (!ticket) {
-    throw new Error(`Ticket ${ticketId} not found`);
+    throw new Error(`Ticket ${ticketId} not found, ${error}`);
   }
 
   if (ticket.status !== "WAITING") {
@@ -84,7 +84,9 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
       ),
     );
   } catch (error) {
-    throw new Error(`Failed to adjust positions for ${departmentName}`);
+    throw new Error(
+      `Failed to adjust positions for ${departmentName}, ${error}`,
+    );
   }
 
   // Recalculate wait times
@@ -92,7 +94,7 @@ export const handler: Schema["adjustQueuePosition"]["functionHandler"] = async (
     await recalculateDepartmentQueue(departmentName);
   } catch (error) {
     throw new Error(
-      `recalculateDepartmentQueue: failed for department ${departmentName}`,
+      `recalculateDepartmentQueue: failed for department ${departmentName}, ${error}`,
     );
   }
 
