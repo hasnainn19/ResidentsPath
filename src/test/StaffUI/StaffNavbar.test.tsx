@@ -48,11 +48,6 @@ describe("StaffNavbar", () => {
     expect(screen.getByText("User Dashboard")).toBeInTheDocument();
   });
 
-  it("renders the Logout button", () => {
-    renderNavbar();
-    expect(screen.getByText("Logout")).toBeInTheDocument();
-  });
-
   it("calls signOut when Logout is clicked", async () => {
     renderNavbar();
     fireEvent.click(screen.getByText("Logout"));
@@ -76,6 +71,21 @@ describe("StaffNavbar", () => {
     renderNavbar();
     expect(screen.queryByText("Jane Smith")).not.toBeInTheDocument();
     mockAuthData.familyName = "Smith";
+  });
+
+  it("display error if sign out failed", async () => {
+    vi.mocked(signOut).mockRejectedValueOnce(new Error("auth error"));
+    renderNavbar();
+    fireEvent.click(screen.getByText("Logout"));
+    await waitFor(() => {
+      expect(
+        screen.getByText("Failed to sign out. Please try again."),
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTitle("Close"));
+    expect(
+      screen.queryByText("Failed to sign out. Please try again."),
+    ).not.toBeInTheDocument();
   });
 
   it("shows an alert when signOut throws", async () => {
