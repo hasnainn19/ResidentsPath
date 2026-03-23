@@ -129,7 +129,7 @@ describe("Notifications and Step-out UI", () => {
             };
         });
 
-        user = userEvent.setup({ delay: null });
+        user = userEvent.setup();
         renderDashboard();
     };
 
@@ -388,7 +388,7 @@ describe('executeHandleSteppedOut function', () => {
             isLoading: false,
         }));
 
-        user = userEvent.setup({ delay: null });
+        user = userEvent.setup();
         renderDashboard();
     };
 
@@ -484,7 +484,7 @@ describe('executeToggleNotifications function', () => {
             isLoading: false,
         }));
 
-        user = userEvent.setup({ delay: null });
+        user = userEvent.setup();
         renderDashboard();
     };
 
