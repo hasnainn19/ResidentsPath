@@ -35,8 +35,9 @@ type AuthState =
  * - Fetching the user's profile attributes (email, given name, family name)
  * - Managing loading states during auth checks
  *
- * All data is read from the ID token, which contains both group membership
- * and user profile attributes.
+ * Profile attributes (email, given name, family name) are read from the ID token.
+ * Cognito group membership is read from the ID token where present, with a
+ * fallback to the access token if the ID token does not carry a groups claim.
  *
  * A single AuthState value is used so all derived values update atomically
  * in the same render cycle, preventing stale intermediate states.
