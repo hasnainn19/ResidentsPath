@@ -59,11 +59,6 @@ function sanitiseLoadedFormData(dataRaw: Record<string, unknown>): FormData {
       if (typeof v === "boolean") outRecord[key] = v;
       continue;
     }
-
-    if (typeof def === "number") {
-      if (typeof v === "number" && Number.isFinite(v)) outRecord[key] = v;
-      continue;
-    }
   }
 
   out.phoneCountry = getSupportedPhoneCountry(out.phoneCountry) ?? "GB";

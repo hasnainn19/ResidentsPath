@@ -141,7 +141,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
       const p = fd.pronouns;
       if (p === "OTHER") {
         const details = (fd.pronounsOtherText ?? "").trim();
-        return details ? `${details}` : "Other";
+        return details || null;
       }
       return optionLabel(UI_OPTIONS.pronouns, p);
     },
@@ -243,7 +243,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
       const r = fd.urgentReason;
       if (r === "OTHER") {
         const details = (fd.urgentReasonOtherText ?? "").trim();
-        return details ? `${details}` : "Other";
+        return details || null;
       }
       return optionLabel(UI_OPTIONS.urgentReason, r);
     },
