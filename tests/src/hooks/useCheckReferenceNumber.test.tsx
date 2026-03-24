@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-import { useCheckReferenceNumber } from "../../hooks/useCheckReferenceNumber";
+import { useCheckReferenceNumber } from "../../../src/hooks/useCheckReferenceNumber";
 import * as referenceNumbers from "../../../shared/referenceNumbers";
 
 // -------------------

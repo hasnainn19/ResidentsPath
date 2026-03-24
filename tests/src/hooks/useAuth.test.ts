@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, afterEach } from "vitest";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../../src/hooks/useAuth";
 
 const { mockUseAuthenticator, mockFetchAuthSession } = vi.hoisted(() => ({
     mockUseAuthenticator: vi.fn(),

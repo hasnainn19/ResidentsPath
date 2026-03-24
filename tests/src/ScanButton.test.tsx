@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ScanButton from "../../components/ReferencePageComponents/ScanButton";
+import ScanButton from "../../src/components/ReferencePageComponents/ScanButton";
 
 describe("ScanButton", () => {
   it("renders children and calls onClick when clicked", async () => {

@@ -9,8 +9,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Authenticator } from '@aws-amplify/ui-react';
 
-import theme from '../../Constants/Theme';
-import UserDashboard from '../../pages/UserDashboard';
+import theme from '../../src/Constants/Theme';
+import UserDashboard from '../../src/pages/UserDashboard';
 
 vi.mock('@aws-amplify/ui-react', () => ({
     Authenticator: {
@@ -60,11 +60,11 @@ vi.mock('../../utils/getDataAuthMode', () => ({
     getDataAuthMode: vi.fn().mockResolvedValue('userPool'),
 }));
 
-vi.mock('../../hooks/useTicketQueueInfo', () => ({
+vi.mock('../../src/hooks/useTicketQueueInfo', () => ({
     useTicketQueueInfo: vi.fn(),
 }));
 
-import { useTicketQueueInfo } from '../../hooks/useTicketQueueInfo';
+import { useTicketQueueInfo } from '../../src/hooks/useTicketQueueInfo';
 
 function renderDashboard() {
     render(
