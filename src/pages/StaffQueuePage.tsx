@@ -28,10 +28,14 @@ interface CaseItem {
   isFlagged: boolean;
   position: number;
   notes: string | null;
+  createdAt: string;
 }
 
 const StaffQueuePage = () => {
-  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const [searchParams] = useSearchParams();
   const selectedDepartmentName =
     searchParams.get("departmentName")?.trim() || "";
@@ -49,6 +53,7 @@ const StaffQueuePage = () => {
     isFlagged: item.flag,
     position: item.position,
     notes: item.notes,
+    createdAt: item.createdAt,
   }));
 
   const [search, setSearch] = useState("");

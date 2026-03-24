@@ -13,10 +13,14 @@ export interface QueueItem {
   flag: boolean;
   position: number;
   notes: string | null;
+  createdAt: string;
 }
 
 const useQueueItems = (departmentName: string) => {
-  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -47,13 +51,23 @@ const useQueueItems = (departmentName: string) => {
       await fetchItems();
 
       // Scope ticket subscriptions to this department
-      const filter = departmentName ? { departmentName: { eq: departmentName } } : undefined;
+      const filter = departmentName
+        ? { departmentName: { eq: departmentName } }
+        : undefined;
 
-      createSub = client.models.Ticket.onCreate({ filter }).subscribe({ next: fetchItems });
-      updateSub = client.models.Ticket.onUpdate({ filter }).subscribe({ next: fetchItems });
-      deleteSub = client.models.Ticket.onDelete({ filter }).subscribe({ next: fetchItems });
+      createSub = client.models.Ticket.onCreate({ filter }).subscribe({
+        next: fetchItems,
+      });
+      updateSub = client.models.Ticket.onUpdate({ filter }).subscribe({
+        next: fetchItems,
+      });
+      deleteSub = client.models.Ticket.onDelete({ filter }).subscribe({
+        next: fetchItems,
+      });
       // Case updates (priority, safeguarding flag) don't touch Ticket, so subscribe separately
-      caseUpdateSub = client.models.Case.onUpdate().subscribe({ next: fetchItems });
+      caseUpdateSub = client.models.Case.onUpdate().subscribe({
+        next: fetchItems,
+      });
     };
 
     init().catch(console.error);
