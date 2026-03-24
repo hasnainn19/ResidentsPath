@@ -8,13 +8,13 @@ const {
   mockUpdateItemCommand,
 } = vi.hoisted(() => ({
   mockSend: vi.fn(),
-  mockDeleteItemCommand: vi.fn((input: unknown) => ({ input, _type: "Delete" })),
-  mockGetItemCommand: vi.fn((input: unknown) => ({ input, _type: "Get" })),
-  mockPutItemCommand: vi.fn((input: unknown) => ({ input, _type: "Put" })),
-  mockUpdateItemCommand: vi.fn((input: unknown) => ({ input, _type: "Update" })),
+  mockDeleteItemCommand: vi.fn(),
+  mockGetItemCommand: vi.fn(),
+  mockPutItemCommand: vi.fn(),
+  mockUpdateItemCommand: vi.fn(),
 }));
 vi.mock("@aws-sdk/client-dynamodb", () => ({
-  DynamoDBClient: vi.fn(() => ({ send: mockSend })),
+  DynamoDBClient: vi.fn(function() { return { send: mockSend }; }),
   DeleteItemCommand: mockDeleteItemCommand,
   GetItemCommand: mockGetItemCommand,
   PutItemCommand: mockPutItemCommand,
@@ -112,10 +112,6 @@ describe("DynamoDB operations", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    mockDeleteItemCommand.mockImplementation((input: unknown) => ({ input, _type: "Delete" }));
-    mockGetItemCommand.mockImplementation((input: unknown) => ({ input, _type: "Get" }));
-    mockPutItemCommand.mockImplementation((input: unknown) => ({ input, _type: "Put" }));
-    mockUpdateItemCommand.mockImplementation((input: unknown) => ({ input, _type: "Update" }));
     previousEnquiriesStateTable = process.env.ENQUIRIES_STATE_TABLE;
     process.env.ENQUIRIES_STATE_TABLE = "test-table";
     mockSend.mockResolvedValue({});
@@ -134,43 +130,43 @@ describe("DynamoDB operations", () => {
   describe("claimCaseReferenceNumber", () => {
     it("sends PutItemCommand with correct key structure", async () => {
       await claimCaseReferenceNumber("ABC-DEF234");
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Item.pk.S).toBe("CASE_REFERENCE#ABC-DEF234");
-      expect(command.input.Item.sk.S).toBe("CLAIM");
-      expect(command.input.ConditionExpression).toContain("attribute_not_exists");
+      expect(mockPutItemCommand).toHaveBeenCalledTimes(1);
+      const input = mockPutItemCommand.mock.calls[0][0];
+      expect(input.Item.pk.S).toBe("CASE_REFERENCE#ABC-DEF234");
+      expect(input.Item.sk.S).toBe("CLAIM");
+      expect(input.ConditionExpression).toContain("attribute_not_exists");
     });
   });
 
   describe("releaseCaseReferenceNumber", () => {
     it("sends DeleteItemCommand with correct key", async () => {
       await releaseCaseReferenceNumber("ABC-DEF234");
-      expect(mockSend).toHaveBeenCalledTimes(1);
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Key.pk.S).toBe("CASE_REFERENCE#ABC-DEF234");
-      expect(command.input.Key.sk.S).toBe("CLAIM");
+      expect(mockDeleteItemCommand).toHaveBeenCalledTimes(1);
+      const input = mockDeleteItemCommand.mock.calls[0][0];
+      expect(input.Key.pk.S).toBe("CASE_REFERENCE#ABC-DEF234");
+      expect(input.Key.sk.S).toBe("CLAIM");
     });
 
     it("does nothing when ENQUIRIES_STATE_TABLE is not set", async () => {
       delete process.env.ENQUIRIES_STATE_TABLE;
       await releaseCaseReferenceNumber("ABC-DEF234");
-      expect(mockSend).not.toHaveBeenCalled();
+      expect(mockDeleteItemCommand).not.toHaveBeenCalled();
     });
   });
 
   describe("claimBookingReferenceNumber", () => {
     it("sends PutItemCommand with BOOKING prefix", async () => {
       await claimBookingReferenceNumber("APT-ABC234");
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Item.pk.S).toBe("BOOKING_REFERENCE#APT-ABC234");
+      const input = mockPutItemCommand.mock.calls[0][0];
+      expect(input.Item.pk.S).toBe("BOOKING_REFERENCE#APT-ABC234");
     });
   });
 
   describe("releaseBookingReferenceNumber", () => {
     it("sends DeleteItemCommand with BOOKING prefix", async () => {
       await releaseBookingReferenceNumber("APT-ABC234");
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Key.pk.S).toBe("BOOKING_REFERENCE#APT-ABC234");
+      const input = mockDeleteItemCommand.mock.calls[0][0];
+      expect(input.Key.pk.S).toBe("BOOKING_REFERENCE#APT-ABC234");
     });
   });
 
@@ -183,10 +179,10 @@ describe("DynamoDB operations", () => {
         dateIso: "2026-06-15",
         time: "09:00",
       });
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Item.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
-      expect(command.input.Item.sk.S).toBe("TIME#09:00");
-      expect(command.input.Item.status.S).toBe("PENDING");
+      const input = mockPutItemCommand.mock.calls[0][0];
+      expect(input.Item.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
+      expect(input.Item.sk.S).toBe("TIME#09:00");
+      expect(input.Item.status.S).toBe("PENDING");
     });
   });
 
@@ -197,9 +193,9 @@ describe("DynamoDB operations", () => {
         dateIso: "2026-06-15",
         time: "09:00",
       });
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Key.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
-      expect(command.input.ExpressionAttributeValues[":booked"].S).toBe("BOOKED");
+      const input = mockUpdateItemCommand.mock.calls[0][0];
+      expect(input.Key.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
+      expect(input.ExpressionAttributeValues[":booked"].S).toBe("BOOKED");
     });
 
     it("falls back to a 30-day expiry when the slot date is invalid", async () => {
@@ -211,8 +207,8 @@ describe("DynamoDB operations", () => {
         time: "09:00",
       });
 
-      const command = mockSend.mock.calls[0][0];
-      const expiresAt = Number(command.input.ExpressionAttributeValues[":expiresAt"].N);
+      const input = mockUpdateItemCommand.mock.calls[0][0];
+      const expiresAt = Number(input.ExpressionAttributeValues[":expiresAt"].N);
       const after = daysFromNowInSeconds(30);
 
       expect(expiresAt).toBeGreaterThanOrEqual(before);
@@ -227,9 +223,9 @@ describe("DynamoDB operations", () => {
         dateIso: "2026-06-15",
         time: "09:00",
       });
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Key.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
-      expect(command.input.Key.sk.S).toBe("TIME#09:00");
+      const input = mockDeleteItemCommand.mock.calls[0][0];
+      expect(input.Key.pk.S).toBe("APPOINTMENT_SLOT#Homelessness#2026-06-15");
+      expect(input.Key.sk.S).toBe("TIME#09:00");
     });
 
     it("does nothing when ENQUIRIES_STATE_TABLE is not set", async () => {
@@ -239,7 +235,7 @@ describe("DynamoDB operations", () => {
         dateIso: "2026-06-15",
         time: "09:00",
       });
-      expect(mockSend).not.toHaveBeenCalled();
+      expect(mockDeleteItemCommand).not.toHaveBeenCalled();
     });
   });
 
@@ -265,13 +261,13 @@ describe("DynamoDB operations", () => {
   describe("releaseQueuePosition", () => {
     it("sends UpdateItemCommand to decrement", async () => {
       await releaseQueuePosition("20260615#Homelessness");
-      expect(mockSend).toHaveBeenCalledTimes(1);
+      expect(mockUpdateItemCommand).toHaveBeenCalledTimes(1);
     });
 
     it("does nothing when ENQUIRIES_STATE_TABLE is not set", async () => {
       delete process.env.ENQUIRIES_STATE_TABLE;
       await releaseQueuePosition("key");
-      expect(mockSend).not.toHaveBeenCalled();
+      expect(mockUpdateItemCommand).not.toHaveBeenCalled();
     });
 
     it("does nothing when the queue position has already been released", async () => {
@@ -317,24 +313,24 @@ describe("DynamoDB operations", () => {
   describe("claimTicketDigits", () => {
     it("sends PutItemCommand with queue-based key", async () => {
       await claimTicketDigits("20260615#H", "001");
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Item.pk.S).toBe("QUEUE#20260615#H");
-      expect(command.input.Item.sk.S).toBe("TICKET#001");
+      const input = mockPutItemCommand.mock.calls[0][0];
+      expect(input.Item.pk.S).toBe("QUEUE#20260615#H");
+      expect(input.Item.sk.S).toBe("TICKET#001");
     });
   });
 
   describe("releaseTicketNumber", () => {
     it("sends DeleteItemCommand with correct key", async () => {
       await releaseTicketNumber("20260615#H", "001");
-      const command = mockSend.mock.calls[0][0];
-      expect(command.input.Key.pk.S).toBe("QUEUE#20260615#H");
-      expect(command.input.Key.sk.S).toBe("TICKET#001");
+      const input = mockDeleteItemCommand.mock.calls[0][0];
+      expect(input.Key.pk.S).toBe("QUEUE#20260615#H");
+      expect(input.Key.sk.S).toBe("TICKET#001");
     });
 
     it("does nothing when ENQUIRIES_STATE_TABLE is not set", async () => {
       delete process.env.ENQUIRIES_STATE_TABLE;
       await releaseTicketNumber("queueId", "001");
-      expect(mockSend).not.toHaveBeenCalled();
+      expect(mockDeleteItemCommand).not.toHaveBeenCalled();
     });
   });
 });
