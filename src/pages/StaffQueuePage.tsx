@@ -61,7 +61,9 @@ const StaffQueuePage = () => {
   }));
 
   const [search, setSearch] = useState("");
-  const [sortDate, setSortDate] = useState<"position" | "newest" | "oldest">("position");
+  const [sortValue, setSortValue] = useState<"position" | "newest" | "oldest">(
+    "position",
+  );
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingPositionChange, setPendingPositionChange] = useState<{
     caseId: string;
@@ -79,13 +81,17 @@ const StaffQueuePage = () => {
           c.description.toLowerCase().includes(search.toLowerCase()),
       )
       .sort((a, b) => {
-        if (sortDate === "newest")
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        if (sortDate === "oldest")
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        if (sortValue === "newest")
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        if (sortValue === "oldest")
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         return a.position - b.position;
       });
-  }, [search, cases, sortDate]);
+  }, [search, cases, sortValue]);
 
   const queueTitle = selectedDepartmentName
     ? selectedDepartmentName.replace(/_/g, " ")
@@ -160,12 +166,12 @@ const StaffQueuePage = () => {
         />
 
         <FormControl sx={{ minWidth: 160 }}>
-          <InputLabel>Sort by Date</InputLabel>
+          <InputLabel>Sort by</InputLabel>
           <Select
-            label="Sort by Date"
-            value={sortDate}
+            label="Sort by"
+            value={sortValue}
             onChange={(e) =>
-              setSortDate(e.target.value as "position" | "newest" | "oldest")
+              setSortValue(e.target.value as "position" | "newest" | "oldest")
             }
           >
             <MenuItem value="position">Queue Position</MenuItem>
