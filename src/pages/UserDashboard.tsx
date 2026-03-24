@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { generateClient } from "aws-amplify/api";
 import { Grid, styled, Paper, Typography, Box, Button, Stack, Alert, IconButton } from '@mui/material';
+import type { Schema } from '../../amplify/data/resource';
+import { generateClient } from "aws-amplify/data";
 import { useTranslation } from 'react-i18next';
 import DangerousIcon from '@mui/icons-material/Dangerous';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import CommentsDisabledIcon from '@mui/icons-material/CommentsDisabled';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import CloseIcon from '@mui/icons-material/Close';
-
-import type { Schema } from '../../amplify/data/resource';
 import TextToSpeechButton from '../components/TextToSpeechButton';
 import NavBar from '../components/NavBar';
 import ContactDetailsDialog from '../components/ContactDetailsDialog';
 import { useUser } from '../hooks/useUser';
 import { useTicketQueueInfo } from '../hooks/useTicketQueueInfo';
+import { getDataAuthMode } from '../utils/getDataAuthMode';
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -34,7 +34,7 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function UserDashboard() {
     const { caseId } = useParams<{ caseId: string }>();
     const { user } = useUser();
-    const client = generateClient<Schema>({ authMode: "userPool" });
+    const client = useMemo(() => generateClient<Schema>(), []);
     const {  t: translate } = useTranslation();
     const [showStepOutAlert, setShowStepOutAlert] = useState(false);
     const [showNotificationsAlert, setShowNotificationsAlert] = useState(false);
@@ -65,7 +65,11 @@ export default function UserDashboard() {
             return false;
         }
         try {
-            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut({ ticketId, caseId: caseId!, steppedOut });
+            const authMode = await getDataAuthMode();
+            const { errors: stepOutErrors } = await client.mutations.handleSteppedOut(
+                { ticketId, caseId: caseId!, steppedOut },
+                { authMode },
+            );
             if (stepOutErrors && stepOutErrors.length > 0) {
                 setErrors(stepOutErrors[0].message);
                 return false;
@@ -91,13 +95,14 @@ export default function UserDashboard() {
         }
 
         try {
+            const authMode = await getDataAuthMode();
             const { errors: notifErrors } = await client.mutations.toggleNotifications({
                 ticketId,
                 caseId: caseId!,
                 enabled,
                 contactMethod,
                 contactValue,
-            });
+            }, { authMode });
             if (notifErrors && notifErrors.length > 0) {
                 setErrors(notifErrors[0].message);
                 return false;
@@ -251,7 +256,6 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     aria-label='notifications-button'
-                                                    className='dashboardBtn'
                                                     variant={notificationsEnabled ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={<NotificationsIcon />}
@@ -273,7 +277,6 @@ export default function UserDashboard() {
                                             <Stack direction='row' spacing={2}>
                                                 <Button
                                                     aria-label='stepOut-button'
-                                                    className='dashboardBtn'
                                                     variant={steppedOut ? 'outlined' : 'contained'}
                                                     sx={{ borderColor: 'primary.main' }}
                                                     endIcon={steppedOut ? <CommentsDisabledIcon /> : <DirectionsWalkIcon />}

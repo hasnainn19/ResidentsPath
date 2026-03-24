@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
-import App from "./App";
 import StaffDashboard from "./pages/StaffDashboard";
 import StaffLayout from "./layouts/StaffLayout";
 import ReferencePage from "./pages/ReferencePage";
@@ -34,10 +33,6 @@ export const router = createBrowserRouter([
         <AuthPage />
       </RequireGuest>
     ),
-  },
-  {
-    path: "/start",
-    element: <App />,
   },
   {
     path: "/referencepage",
