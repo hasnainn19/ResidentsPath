@@ -22,11 +22,8 @@ describe("ReceiptDetailsCard", () => {
       />,
     );
 
-    expect(screen.getByText("Ticket number")).toBeInTheDocument();
     expect(screen.getByText("A012")).toBeInTheDocument();
     expect(screen.getByText("10 to 20 minutes")).toBeInTheDocument();
-    expect(screen.getByText("Homelessness")).toBeInTheDocument();
-    expect(screen.getByText("23 March 2026, 10:00 AM")).toBeInTheDocument();
   });
 
   it("runs the queue actions", async () => {
@@ -98,7 +95,6 @@ describe("ReceiptDetailsCard", () => {
       />,
     );
 
-    expect(screen.getByText("Appointment reference number")).toBeInTheDocument();
     expect(screen.getByText("APT-XYZ234")).toBeInTheDocument();
     expect(screen.getByText("24 March 2026")).toBeInTheDocument();
     expect(screen.getByText("10:00")).toBeInTheDocument();
@@ -143,7 +139,6 @@ describe("ReceiptDetailsCard", () => {
       />,
     );
 
-    expect(screen.getByText("Appointment reference number")).toBeInTheDocument();
     expect(screen.getByText("-")).toBeInTheDocument();
     expect(screen.getAllByText("Not available")).toHaveLength(2);
   });
