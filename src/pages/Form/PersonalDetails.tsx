@@ -313,6 +313,10 @@ export default function PersonalDetails() {
             <Stack spacing={{ xs: 1.5, sm: 2 }}>
               <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
                 <Stack spacing={2}>
+                  <Typography variant="body1" sx={{ fontWeight: 800 }} color="primary.main">
+                    Only first name and last name are required to continue.
+                  </Typography>
+
                   {/* Names row */}
                   <Box
                     sx={{
