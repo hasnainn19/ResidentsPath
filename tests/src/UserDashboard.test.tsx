@@ -18,7 +18,7 @@ vi.mock('@aws-amplify/ui-react', () => ({
     },
 }));
 
-vi.mock('../../components/NavBar', () => ({
+vi.mock('../../src/components/NavBar', () => ({
     default: () => null,
 }));
 
@@ -56,7 +56,7 @@ vi.mock('aws-amplify/data', () => ({
     }),
 }));
 
-vi.mock('../../utils/getDataAuthMode', () => ({
+vi.mock('../../src/utils/getDataAuthMode', () => ({
     getDataAuthMode: vi.fn().mockResolvedValue('userPool'),
 }));
 

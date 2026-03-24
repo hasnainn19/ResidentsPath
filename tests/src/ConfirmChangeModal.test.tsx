@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ConfirmChangeModal from "../../components/StaffComponents/ConfirmChangeModal";
+import ConfirmChangeModal from "../../src/components/StaffComponents/ConfirmChangeModal";
 
 const defaultProps = {
   open: true,

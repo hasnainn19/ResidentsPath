@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PeopleIcon from "@mui/icons-material/People";
-import StatCard from "../../components/StaffComponents/StatCard";
+import StatCard from "../../src/components/StaffComponents/StatCard";
 
 describe("StatCard", () => {
   it("renders a numeric value", () => {

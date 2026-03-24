@@ -2,14 +2,14 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { signOut } from "aws-amplify/auth";
-import StaffNavbar from "../../components/StaffComponents/StaffNavbar";
+import StaffNavbar from "../../src/components/StaffComponents/StaffNavbar";
 
 const mockAuthData: { givenName: string; familyName: string | null } = {
   givenName: "Jane",
   familyName: "Smith",
 };
 
-vi.mock("../../hooks/useAuth", () => ({
+vi.mock("../../src/hooks/useAuth", () => ({
   useAuth: () => mockAuthData,
 }));
 

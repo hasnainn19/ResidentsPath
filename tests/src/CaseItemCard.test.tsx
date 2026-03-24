@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import CaseItemCard from "../../components/StaffComponents/CaseItemCard";
-import type { CaseSummary } from "../../hooks/useCases";
+import CaseItemCard from "../../src/components/StaffComponents/CaseItemCard";
+import type { CaseSummary } from "../../src/hooks/useCases";
 
 const mockNavigate = vi.fn();
 

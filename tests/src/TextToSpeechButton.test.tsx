@@ -1,6 +1,6 @@
 // TextToSpeechButton.test.tsx
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import TextToSpeechButton from '../../components/TextToSpeechButton';
+import TextToSpeechButton from '../../src/components/TextToSpeechButton';
 import { vi, beforeEach, describe, it, expect, afterEach } from 'vitest';
 
 vi.mock('react-i18next', () => ({

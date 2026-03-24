@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import StaffNavItem from "../../components/StaffComponents/StaffNavItem";
+import StaffNavItem from "../../src/components/StaffComponents/StaffNavItem";
 
 const renderItem = (props?: Partial<{ icon: React.ReactNode; label: string; url: string }>) =>
   render(

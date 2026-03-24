@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
-import CurrentQueueItem from "../../components/StaffComponents/CurrentQueueItem";
+import CurrentQueueItem from "../../src/components/StaffComponents/CurrentQueueItem";
 
 const mockUpdate = vi.fn().mockResolvedValue({});
 const mockSetCasePriority = vi.fn().mockResolvedValue({});
