@@ -275,7 +275,6 @@ const schema = a
       flag: a.boolean().required(),
       position: a.integer().required(),
       notes: a.string(),
-      createdAt: a.string(),
     }),
 
     getQueueItems: a
