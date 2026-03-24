@@ -10,10 +10,7 @@ import {
   type CountryCode,
 } from "libphonenumber-js";
 import { z } from "zod";
-import {
-  isValidCaseReferenceNumber,
-  normaliseCaseReferenceNumber,
-} from "./referenceNumbers";
+import { isValidCaseReferenceNumber, normaliseCaseReferenceNumber } from "./referenceNumbers";
 
 export const DEPARTMENTS = [
   { name: "Council_Tax_Or_Housing_Benefit", label: "Council Tax or Housing Benefit" },
@@ -416,10 +413,7 @@ type AppointmentValidationFields = {
   appointmentTime?: string;
 };
 
-function validateAppointment(
-  value: AppointmentValidationFields,
-  ctx: z.RefinementCtx,
-) {
+function validateAppointment(value: AppointmentValidationFields, ctx: z.RefinementCtx) {
   if (value.proceed === "BOOK_APPOINTMENT") {
     if (!value.appointmentDateIso) {
       ctx.addIssue({
@@ -493,7 +487,10 @@ const otherFreeText = (maxLen: number, allowNewlines = false) =>
     .max(maxLen)
     .transform((s) => s.trim())
     .refine((s) => s.length > 0, "Details are required when Other is selected")
-    .refine((s) => !hasInvalidControlCharacters(s, allowNewlines), "Contains invalid control characters");
+    .refine(
+      (s) => !hasInvalidControlCharacters(s, allowNewlines),
+      "Contains invalid control characters",
+    );
 
 // The main Zod schema for the enquiry submission payload, used for validation in both frontend and backend
 export const formSchema = z
@@ -819,7 +816,6 @@ export const formSchema = z
         message: "Phone must be a valid phone number",
       });
     }
-
   })
   .transform((v) => {
     const normalisedPhone = v.phone ? normalisePhoneToE164(v.phone, v.phoneCountry) : undefined;
