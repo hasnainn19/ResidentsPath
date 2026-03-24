@@ -526,7 +526,9 @@ export const formSchema = z
 
     firstName: z.preprocess(
       trimToUndef,
-      z.string().max(FIELD_TEXT_CONSTRAINTS.firstName.maxLen).optional(),
+      z
+        .string({ required_error: "firstName is required" })
+        .max(FIELD_TEXT_CONSTRAINTS.firstName.maxLen),
     ),
     middleName: z.preprocess(
       trimToUndef,
@@ -534,7 +536,9 @@ export const formSchema = z
     ),
     lastName: z.preprocess(
       trimToUndef,
-      z.string().max(FIELD_TEXT_CONSTRAINTS.lastName.maxLen).optional(),
+      z
+        .string({ required_error: "lastName is required" })
+        .max(FIELD_TEXT_CONSTRAINTS.lastName.maxLen),
     ),
     preferredName: z.preprocess(
       trimToUndef,
@@ -650,22 +654,6 @@ export const formSchema = z
   })
   .strict()
   .superRefine((v, ctx) => {
-    if (!v.firstName) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["firstName"],
-        message: "firstName is required",
-      });
-    }
-
-    if (!v.lastName) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["lastName"],
-        message: "lastName is required",
-      });
-    }
-
     validateAppointment(v, ctx);
 
     if (v.domesticAbuse === true) {
