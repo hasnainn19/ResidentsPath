@@ -179,10 +179,10 @@ const ReferencePage = () => {
             });
 
         return () => {
-             if (scannerRef.current) {
-                 stopScanner();
-             }
-         };
+            if (scannerRef.current) {
+                stopScanner();
+            }
+        };
     }, [scanning]);
 
     return (
@@ -231,7 +231,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth value={refNo} id="outlined-search" label={translate("reference-tick")} sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title={translate("reference-check-status")} placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                          {translate("reference-check-status")}
                                     </Button>
                                 </Tooltip>
@@ -268,10 +268,10 @@ const ReferencePage = () => {
                                     )}
                                 </ScanButton>
                                 <Box sx={{  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10, visibility: scanning ? 'visible' : 'hidden', pointerEvents: scanning ? 'auto' : 'none', overflow: 'hidden', borderRadius: 1, }}>
-                                    <div id="qr-reader" role="region" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
+                                    <div id="qr-reader" role="region" data-testid="qr-scan-view-finder" aria-label="QR code scanner viewfinder" style={{  width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', transform: 'translateZ(0)', objectFit: 'cover' }} />
                                     {scanning && (
                                         <Tooltip title={translate("reference-cancelqr")} placement="top">
-                                            <Button variant='contained' size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: '3%', right: '2%', zIndex: 20 }} >
+                                            <Button variant='contained' data-testid="camera-cancel-button" size="small" onClick={(e) => { e.stopPropagation(); stopScanner(); }} sx={{ position: 'absolute', top: '3%', right: '2%', zIndex: 20 }} >
                                                 {translate("reference-cancel")}
                                             </Button>
                                         </Tooltip>
