@@ -248,6 +248,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     const caseCreateInput = removeIrrelevantValues({
       userId: finalUserId,
       departmentName: validated.departmentName,
+      name: `${validated.firstName} ${validated.lastName} -`,
       referenceNumber,
       status: "OPEN",
 

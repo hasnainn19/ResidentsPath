@@ -30,6 +30,9 @@ function renderGuard(
   return render(
     <MemoryRouter initialEntries={[`/form/${step}`]}>
       <Routes>
+        {step !== "personal-details" ? (
+          <Route path="/form/personal-details" element={<div>Personal details page</div>} />
+        ) : null}
         {step !== "enquiry-selection" ? (
           <Route path="/form/enquiry-selection" element={<div>Enquiry selection page</div>} />
         ) : null}
@@ -55,6 +58,8 @@ function renderGuard(
 describe("RequireFormSteps", () => {
   it("renders the requested step when it is allowed", () => {
     testState.formData = makeFormData({
+      firstName: "Test",
+      lastName: "Tester",
       topLevel: "Housing",
       enquiryId: "homelessness",
       proceed: "JOIN_DIGITAL_QUEUE",
@@ -67,6 +72,8 @@ describe("RequireFormSteps", () => {
 
   it("redirects back to enquiry selection when step one is incomplete", () => {
     testState.formData = makeFormData({
+      firstName: "Test",
+      lastName: "Tester",
       topLevel: "Housing",
       enquiryId: "",
       proceed: "",
@@ -79,6 +86,8 @@ describe("RequireFormSteps", () => {
 
   it("redirects back to actions when an appointment path has no confirmed slot", () => {
     testState.formData = makeFormData({
+      firstName: "Test",
+      lastName: "Tester",
       topLevel: "Housing",
       enquiryId: "homelessness",
       proceed: "BOOK_APPOINTMENT",
@@ -93,6 +102,8 @@ describe("RequireFormSteps", () => {
 
   it("allows the review step when a booking path already has a confirmed slot", () => {
     testState.formData = makeFormData({
+      firstName: "Test",
+      lastName: "Tester",
       topLevel: "Housing",
       enquiryId: "homelessness",
       proceed: "BOOK_APPOINTMENT",
@@ -103,5 +114,19 @@ describe("RequireFormSteps", () => {
     renderGuard("review-and-submit");
 
     expect(screen.getByText("Protected content")).toBeInTheDocument();
+  });
+
+  it("redirects back to personal details when the required names are missing", () => {
+    testState.formData = makeFormData({
+      topLevel: "Housing",
+      enquiryId: "homelessness",
+      proceed: "JOIN_DIGITAL_QUEUE",
+      firstName: "",
+      lastName: "",
+    });
+
+    renderGuard("actions");
+
+    expect(screen.getByText("Personal details page")).toBeInTheDocument();
   });
 });

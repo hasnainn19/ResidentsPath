@@ -650,6 +650,22 @@ export const formSchema = z
   })
   .strict()
   .superRefine((v, ctx) => {
+    if (!v.firstName) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["firstName"],
+        message: "firstName is required",
+      });
+    }
+
+    if (!v.lastName) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["lastName"],
+        message: "lastName is required",
+      });
+    }
+
     validateAppointment(v, ctx);
 
     if (v.domesticAbuse === true) {

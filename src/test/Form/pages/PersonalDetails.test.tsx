@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -126,7 +126,6 @@ function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {
     language: "en",
     privacyNoticeAccepted: false,
-    provideDetails: "yes",
     firstName: "",
     middleName: "",
     lastName: "",
@@ -188,15 +187,15 @@ describe("PersonalDetails", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the page title and optional detail sections", () => {
+  it("renders the page title and required detail sections", () => {
     renderPage();
 
     expect(screen.getByText("Council service request")).toBeInTheDocument();
-    expect(screen.getByText("Would you like to provide your details?")).toBeInTheDocument();
+    expect(screen.queryByText("Would you like to provide your details?")).not.toBeInTheDocument();
     expect(screen.getByText("Personal details")).toBeInTheDocument();
     expect(screen.getByText("Contact details")).toBeInTheDocument();
     expect(screen.getByText("Address")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
   });
 
   it("calls handleSave when save and continue later is pressed", () => {
@@ -207,77 +206,22 @@ describe("PersonalDetails", () => {
     expect(mockHandleSave).toHaveBeenCalled();
   });
 
-  it("clears stored personal details when the user chooses to continue without them", async () => {
-    renderPage();
-    const user = userEvent.setup();
-
-    await user.click(screen.getByRole("radio", { name: "No, continue without details" }));
-
-    expect(mockSetFormData).toHaveBeenCalledTimes(1);
-
-    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
-    const previousState = makeFormData({
-      firstName: "Test",
-      middleName: "T",
-      lastName: "Tester",
-      preferredName: "Test",
-      email: "test.tester@example.com",
-      phoneCountry: "US",
-      phone: "+15551234567",
-      dob: "1990-01-01",
-      addressLine1: "1 High Street",
-      addressLine2: "Flat 2",
-      addressLine3: "Hounslow",
-      townOrCity: "London",
-      postcode: "TW3 1JL",
-      pronouns: "OTHER",
-      pronounsOtherText: "He/him",
-      contactMethod: "EMAIL",
+  it("enables continue when first and last names are provided", () => {
+    renderPage({
+      formData: {
+        firstName: "Test",
+        lastName: "Tester",
+      },
     });
 
-    expect(updater(previousState)).toEqual(
-      expect.objectContaining({
-        provideDetails: "no",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        preferredName: "",
-        email: "",
-        phoneCountry: "GB",
-        phone: "",
-        dob: "",
-        addressLine1: "",
-        addressLine2: "",
-        addressLine3: "",
-        townOrCity: "",
-        postcode: "",
-        pronouns: "",
-        pronounsOtherText: "",
-        contactMethod: "",
-      }),
-    );
-  });
-
-  it("hides the optional detail sections when the user continues without details", async () => {
-    const view = renderPage();
-    const user = userEvent.setup();
-
-    await user.click(screen.getByRole("radio", { name: "No, continue without details" }));
-
-    const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
-    testState.formData = updater(makeFormData());
-    view.rerender(<PersonalDetails />);
-
-    await waitFor(() => {
-      expect(screen.queryByText("Personal details")).not.toBeInTheDocument();
-      expect(screen.queryByText("Contact details")).not.toBeInTheDocument();
-      expect(screen.queryByText("Address")).not.toBeInTheDocument();
-    });
+    expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
   it("disables continue when Email is selected without an email address", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         contactMethod: "EMAIL",
         email: "",
       },
@@ -289,6 +233,8 @@ describe("PersonalDetails", () => {
   it("disables continue when the email address is invalid", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         email: "test.tester@invalid@",
       },
     });
@@ -299,6 +245,8 @@ describe("PersonalDetails", () => {
   it("shows the email helper text when the email address is invalid and blurred", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         email: "test.tester@invalid@",
       },
     });
@@ -311,6 +259,8 @@ describe("PersonalDetails", () => {
   it("disables continue when Text message is selected without a phone number", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         contactMethod: "TEXT_MESSAGE",
         phone: "",
       },
@@ -322,6 +272,8 @@ describe("PersonalDetails", () => {
   it("shows the contact-method helper text when Text message is selected without a phone number", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         contactMethod: "TEXT_MESSAGE",
         phone: "",
       },
@@ -335,6 +287,8 @@ describe("PersonalDetails", () => {
   it("shows the contact-method helper text when Email is selected without an email address", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         contactMethod: "EMAIL",
         email: "",
       },
@@ -374,6 +328,8 @@ describe("PersonalDetails", () => {
   it("disables continue when the phone number is invalid", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         phone: "not-a-number",
       },
     });
@@ -384,6 +340,8 @@ describe("PersonalDetails", () => {
   it("shows the phone helper text when the phone number is invalid and blurred", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         phone: "not-a-number",
       },
     });
@@ -396,6 +354,8 @@ describe("PersonalDetails", () => {
   it("disables continue when Other pronouns is selected without extra text", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         pronouns: "OTHER",
         pronounsOtherText: "",
       },
@@ -407,6 +367,8 @@ describe("PersonalDetails", () => {
   it("blocks submit when Other pronouns is selected without extra text", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         pronouns: "OTHER",
         pronounsOtherText: "",
       },
@@ -520,6 +482,8 @@ describe("PersonalDetails", () => {
   it("normalises the postcode on valid submit", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         postcode: "tw31jl",
       },
     });
@@ -530,6 +494,8 @@ describe("PersonalDetails", () => {
 
     const updater = mockSetFormData.mock.calls[0]?.[0] as (prev: FormData) => FormData;
     const previousState = makeFormData({
+      firstName: "Test",
+      lastName: "Tester",
       postcode: "tw31jl",
     });
 
@@ -542,6 +508,8 @@ describe("PersonalDetails", () => {
   it("navigates to the actions page on valid submit", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         postcode: "tw31jl",
       },
     });
@@ -576,6 +544,8 @@ describe("PersonalDetails", () => {
   it("blocks submit and does not navigate when the postcode is invalid", () => {
     renderPage({
       formData: {
+        firstName: "Test",
+        lastName: "Tester",
         postcode: "INVALID",
       },
     });
