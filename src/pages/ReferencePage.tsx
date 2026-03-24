@@ -231,7 +231,7 @@ const ReferencePage = () => {
                             <Box sx={{ mt: 'auto', width: '100%' }}>
                                 <TextField fullWidth value={refNo} id="outlined-search" label={translate("reference-tick")} sx={{ mb: 3 }} onChange={(e) => setRefNo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") {handleCheckStatus(); }}}/> {/* pressing enter also submits ref no. */}  
                                 <Tooltip title={translate("reference-check-status")} placement="top">
-                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} className='referencepage-check-status-btn' sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
+                                    <Button variant="contained" onClick={handleCheckStatus} disabled={isChecking || isCheckingIn || isCancelling} endIcon={<ManageSearchOutlinedIcon />} sx={{ backgroundColor: 'primary.dark', width: '100%' }}>
                                          {translate("reference-check-status")}
                                     </Button>
                                 </Tooltip>
