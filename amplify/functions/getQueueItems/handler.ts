@@ -73,7 +73,7 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
       priority: caseRecord?.priority ?? false,
       flag: caseRecord?.flag ?? false,
       position: ticket.position ?? 1,
-      notes: ticket.notes ?? null,
+      notes: caseRecord?.notes ?? null,
     };
   });
 

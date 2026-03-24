@@ -83,8 +83,8 @@ const StaffQueuePage = () => {
     }
   };
 
-  const handleSelectPosition = (caseId: string, newPosition: number) => {
-    setPendingPositionChange({ caseId, position: newPosition });
+  const handleSelectPosition = (ticketId: string, newPosition: number) => {
+    setPendingPositionChange({ caseId: ticketId, position: newPosition });
     setConfirmModalOpen(true);
   };
 

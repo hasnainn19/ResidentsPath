@@ -117,9 +117,9 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
 
   const handleSaveNotes = async () => {
     try {
-      await client.models.Ticket.update({ id: caseItem.id, notes });
+      await client.models.Case.update({ id: caseItem.caseId, notes });
     } catch (error) {
-      console.error(`Failed to save note for case:${caseItem.caseId}`);
+      console.error(`Failed to save note for case:${caseItem.caseId}`, error);
     } finally {
       setConfirmNotesOpen(false);
       setNotesOpen(false);
