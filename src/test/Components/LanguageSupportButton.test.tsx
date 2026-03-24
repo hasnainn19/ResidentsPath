@@ -1,99 +1,112 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import LanguageSupportButton from "../../components/LanguageSupportButton";
 
-const changeLanguageMock = vi.fn();
+const { changeLanguageMock } = vi.hoisted(() => ({
+    changeLanguageMock: vi.fn(),
+}));
+
+
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    i18n: {
-      language: "en",
-      changeLanguage: changeLanguageMock,
-    },
-  }),
+    useTranslation: () => ({
+        i18n: {
+            language: "en",
+            changeLanguage: changeLanguageMock,
+        },
+        t: (key: string) => key,
+    }),
 }));
 
 describe("LanguageSupportButton", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     it("renders button with current language", () => {
         render(<LanguageSupportButton />);
         expect(screen.getByRole("button")).toHaveTextContent("EN");
     });
 
-    it("opens menu when button is clicked", () => {
+    it("opens menu when button is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        const button = screen.getByRole("button");
-        fireEvent.click(button);
+        await user.click(screen.getByRole("button"));
 
-        expect(screen.getByText("English")).toBeInTheDocument();
+        expect(await screen.findByText("English")).toBeInTheDocument();
         expect(screen.getByText("Polish")).toBeInTheDocument();
         expect(screen.getByText("Panjabi")).toBeInTheDocument();
     });
 
-    it("calls changeLanguage when Polish language is clicked", () => {
+    it("calls changeLanguage when Polish language is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
-        fireEvent.click(screen.getByText("Polish"));
+        await user.click(screen.getByRole("button"));
+        await user.click(screen.getByText("Polish"));
 
         expect(changeLanguageMock).toHaveBeenCalledWith("pl");
     });
 
-    it("calls changeLanguage when English language is clicked", () => {
+    it("calls changeLanguage when English language is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
-        fireEvent.click(screen.getByText("English"));
+        await user.click(screen.getByRole("button"));
+        await user.click(screen.getByText("English"));
 
         expect(changeLanguageMock).toHaveBeenCalledWith("en");
     });
 
-    it("calls changeLanguage when Welsh language is clicked", () => {
+    it("calls changeLanguage when Welsh language is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
-        fireEvent.click(screen.getByText("Welsh"));
+        await user.click(screen.getByRole("button"));
+        await user.click(await screen.findByText("Welsh"));
 
         expect(changeLanguageMock).toHaveBeenCalledWith("cy");
     });
 
-    it("calls changeLanguage when Panjabi language is clicked", () => {
+    it("calls changeLanguage when Panjabi language is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
-        fireEvent.click(screen.getByText("Panjabi"));
+        await user.click(screen.getByRole("button"));
+        await user.click(screen.getByText("Panjabi"));
 
         expect(changeLanguageMock).toHaveBeenCalledWith("pa");
     });
 
-    it("calls changeLanguage when Persian language is clicked", () => {
+    it("calls changeLanguage when Persian language is clicked", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
-        fireEvent.click(screen.getByText("Persian"));
+        await user.click(screen.getByRole("button"));
+        await user.click(await screen.findByText("Persian"));
 
         expect(changeLanguageMock).toHaveBeenCalledWith("fa");
     });
 
-    it("marks current language as selected", () => {
+    it("marks current language as selected", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
+        await user.click(screen.getByRole("button"));
 
-        const englishItem = screen.getByText("English").closest("li");
+        const englishItem = await screen.findByText("English");
         expect(englishItem).toHaveClass("Mui-selected");
     });
 
-    it("does not mark other languages as selected", () => {
+    it("does not mark other languages as selected", async () => {
         render(<LanguageSupportButton />);
+        const user = userEvent.setup();
 
-        fireEvent.click(screen.getByRole("button"));
+        await user.click(screen.getByRole("button"));
 
-        const polishItem = screen.getByText("Polish").closest("li");
-        expect(polishItem).not.toHaveAttribute("aria-selected", "true");
+        const polishItem = screen.getByText("Polish");
+        expect(polishItem.closest("li")).not.toHaveAttribute("aria-selected", "true");
     });
 });
