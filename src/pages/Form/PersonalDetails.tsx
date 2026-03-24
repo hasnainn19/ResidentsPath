@@ -59,7 +59,7 @@ export default function PersonalDetails() {
   const COPY = {
     info: {
       label: "Your details",
-      tts: "Your first name and last name are required. Other details are optional. Only council staff can view the information you provide. If you want updates, add at least one contact method.",
+      tts: "Only first name and last name are required. Other details are optional. Only council staff can view the information you provide. If you want updates, add at least one contact method.",
     },
     personalDetails: {
       label: "Personal details",
@@ -296,7 +296,7 @@ export default function PersonalDetails() {
                 <Stack component="li" direction="row" spacing={1} alignItems="flex-start">
                   <CheckCircleOutlineIcon fontSize="small" sx={{ mt: "2px" }} aria-hidden />
                   <Typography variant="body2" color="text.secondary">
-                    First name and last name are required.
+                    Only first name and last name are required.
                   </Typography>
                 </Stack>
 
@@ -313,6 +313,44 @@ export default function PersonalDetails() {
             <Stack spacing={{ xs: 1.5, sm: 2 }}>
               <WithTTS copy={COPY.personalDetails} titleVariant="subtitle1">
                 <Stack spacing={2}>
+                  {/* Names row */}
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
+                      gap: 2,
+                    }}
+                  >
+                    <TextField
+                      required
+                      label={FIELD_META.firstName.label}
+                      value={formData.firstName ?? ""}
+                      onChange={(e) => setField("firstName", e.target.value)}
+                      fullWidth
+                      autoComplete="given-name"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.firstName.maxLen } }}
+                    />
+
+                    <TextField
+                      label={labelOptional("middleName")}
+                      value={formData.middleName ?? ""}
+                      onChange={(e) => setField("middleName", e.target.value)}
+                      fullWidth
+                      autoComplete="additional-name"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.middleName.maxLen } }}
+                    />
+
+                    <TextField
+                      required
+                      label={FIELD_META.lastName.label}
+                      value={formData.lastName ?? ""}
+                      onChange={(e) => setField("lastName", e.target.value)}
+                      fullWidth
+                      autoComplete="family-name"
+                      slotProps={{ htmlInput: { maxLength: FIELD_META.lastName.maxLen } }}
+                    />
+                  </Box>
+
                   <Box
                     sx={{
                       display: "grid",
@@ -369,44 +407,6 @@ export default function PersonalDetails() {
                       fullWidth
                       autoComplete="nickname"
                       slotProps={{ htmlInput: { maxLength: FIELD_META.preferredName.maxLen } }}
-                    />
-                  </Box>
-
-                  {/* Names row */}
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
-                      gap: 2,
-                    }}
-                  >
-                    <TextField
-                      required
-                      label={FIELD_META.firstName.label}
-                      value={formData.firstName ?? ""}
-                      onChange={(e) => setField("firstName", e.target.value)}
-                      fullWidth
-                      autoComplete="given-name"
-                      slotProps={{ htmlInput: { maxLength: FIELD_META.firstName.maxLen } }}
-                    />
-
-                    <TextField
-                      label={labelOptional("middleName")}
-                      value={formData.middleName ?? ""}
-                      onChange={(e) => setField("middleName", e.target.value)}
-                      fullWidth
-                      autoComplete="additional-name"
-                      slotProps={{ htmlInput: { maxLength: FIELD_META.middleName.maxLen } }}
-                    />
-
-                    <TextField
-                      required
-                      label={FIELD_META.lastName.label}
-                      value={formData.lastName ?? ""}
-                      onChange={(e) => setField("lastName", e.target.value)}
-                      fullWidth
-                      autoComplete="family-name"
-                      slotProps={{ htmlInput: { maxLength: FIELD_META.lastName.maxLen } }}
                     />
                   </Box>
 
