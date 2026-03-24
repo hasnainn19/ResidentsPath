@@ -7,6 +7,10 @@ import {
   TextField,
   InputAdornment,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { generateClient } from "aws-amplify/data";
@@ -57,6 +61,7 @@ const StaffQueuePage = () => {
   }));
 
   const [search, setSearch] = useState("");
+  const [sortDate, setSortDate] = useState<"position" | "newest" | "oldest">("position");
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingPositionChange, setPendingPositionChange] = useState<{
     caseId: string;
@@ -73,8 +78,14 @@ const StaffQueuePage = () => {
           c.title.toLowerCase().includes(search.toLowerCase()) ||
           c.description.toLowerCase().includes(search.toLowerCase()),
       )
-      .sort((a, b) => a.position - b.position);
-  }, [search, cases]);
+      .sort((a, b) => {
+        if (sortDate === "newest")
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (sortDate === "oldest")
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return a.position - b.position;
+      });
+  }, [search, cases, sortDate]);
 
   const queueTitle = selectedDepartmentName
     ? selectedDepartmentName.replace(/_/g, " ")
@@ -133,7 +144,7 @@ const StaffQueuePage = () => {
         {queueTitle}
       </Typography>
 
-      <Stack direction="row" spacing={2} mb={3}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <TextField
           fullWidth
           placeholder="Search cases..."
@@ -147,6 +158,21 @@ const StaffQueuePage = () => {
             ),
           }}
         />
+
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel>Sort by Date</InputLabel>
+          <Select
+            label="Sort by Date"
+            value={sortDate}
+            onChange={(e) =>
+              setSortDate(e.target.value as "position" | "newest" | "oldest")
+            }
+          >
+            <MenuItem value="position">Queue Position</MenuItem>
+            <MenuItem value="newest">Newest First</MenuItem>
+            <MenuItem value="oldest">Oldest First</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
 
       {loading ? (
