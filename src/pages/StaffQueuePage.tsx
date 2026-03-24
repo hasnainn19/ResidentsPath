@@ -31,7 +31,10 @@ interface CaseItem {
 }
 
 const StaffQueuePage = () => {
-  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const [searchParams] = useSearchParams();
   const selectedDepartmentName =
     searchParams.get("departmentName")?.trim() || "";
@@ -83,8 +86,8 @@ const StaffQueuePage = () => {
     }
   };
 
-  const handleSelectPosition = (ticketId: string, newPosition: number) => {
-    setPendingPositionChange({ caseId: ticketId, position: newPosition });
+  const handleSelectPosition = (caseId: string, newPosition: number) => {
+    setPendingPositionChange({ caseId, position: newPosition });
     setConfirmModalOpen(true);
   };
 
