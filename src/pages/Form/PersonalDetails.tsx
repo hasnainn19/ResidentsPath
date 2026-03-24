@@ -414,6 +414,7 @@ export default function PersonalDetails() {
                   <DatePicker
                     label={labelOptional("dob")}
                     value={dobValue}
+                    format="DD-MM-YYYY"
                     disableFuture
                     openTo="year"
                     views={["year", "month", "day"]}

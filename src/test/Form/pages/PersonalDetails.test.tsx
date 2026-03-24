@@ -96,15 +96,17 @@ vi.mock("../../../components/FormPageComponents/StepActions", () => ({
 vi.mock("@mui/x-date-pickers/DatePicker", () => ({
   DatePicker: ({
     label,
+    format,
     value,
     onChange,
   }: {
     label: string;
+    format?: string;
     value?: { format?: (pattern: string) => string } | null;
     onChange?: (value: { format: (pattern: string) => string } | null) => void;
   }) => (
     <div>
-      <input aria-label={label} readOnly value={value?.format?.("YYYY-MM-DD") ?? ""} />
+      <input aria-label={label} readOnly value={value?.format?.(format ?? "YYYY-MM-DD") ?? ""} />
       <button
         type="button"
         aria-label={`Set ${label}`}
@@ -430,6 +432,16 @@ describe("PersonalDetails", () => {
       dob: "2001-02-03",
       ageRange: "",
     });
+  });
+
+  it("displays the date of birth as DD-MM-YYYY", () => {
+    renderPage({
+      formData: {
+        dob: "2001-02-03",
+      },
+    });
+
+    expect(screen.getByLabelText("Date of birth (optional)")).toHaveValue("03-02-2001");
   });
 
   it("preserves phone digits when the country changes and rebuilds the stored number", async () => {

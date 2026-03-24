@@ -163,7 +163,7 @@ describe("fieldMeta", () => {
 
     expect(
       getReviewDisplayValue("dob", validFormData, getEnquirySelectionState(validFormData)),
-    ).toBe("1 June 2000");
+    ).toBe("01-06-2000");
   });
 
   it("hides appointment review rows when the resident did not choose booking", () => {

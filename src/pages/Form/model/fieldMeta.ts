@@ -94,7 +94,7 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
     format: (fd) => {
       if (!fd.dob) return null;
       const d = dayjs(fd.dob);
-      return d.isValid() ? d.format("D MMMM YYYY") : fd.dob;
+      return d.isValid() ? d.format("DD-MM-YYYY") : fd.dob;
     },
   },
 
