@@ -18,3 +18,7 @@ frontend:
     cache:
         paths:
             - .npm/**/*
+    redirects:
+        - source: "/<*>"
+          target: "/index.html"
+          status: "200"
