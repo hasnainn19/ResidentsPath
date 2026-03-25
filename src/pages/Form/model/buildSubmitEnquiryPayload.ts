@@ -78,7 +78,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const contactMethod = optionalValue(data.contactMethod);
   const phoneCountry = trimOrUndef(data.phoneCountry);
   const phone = trimOrUndef(data.phone);
-  const dob = data.provideDetails === "yes" ? trimOrUndef(data.dob) : undefined;
+  const dob = trimOrUndef(data.dob);
   const ageRange =
     optionalValue(data.ageRange) ??
     (sel.selectedEnquiry?.askAgeQs === true && dob ? getAgeRangeFromDob(dob) : undefined);

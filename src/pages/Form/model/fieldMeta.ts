@@ -21,9 +21,6 @@ export type FieldMeta = {
   // If set, the review page uses this instead of label
   reviewLabel?: string;
 
-  // Hide on review unless the resident chose to provide personal details
-  requiresDetails?: boolean;
-
   // Hide on review unless this is true (eg dependent fields)
   dependsOn?: (fd: FormData) => boolean;
 
@@ -71,72 +68,59 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   language: { label: "Language" },
   privacyNoticeAccepted: { label: "Privacy notice accepted", omitWhen: () => true },
 
-  provideDetails: { label: "Provide personal details?" },
-
   firstName: {
     label: "First name",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.firstName.maxLen,
   },
   middleName: {
     label: "Middle name",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.middleName.maxLen,
   },
   lastName: {
     label: "Last name",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.lastName.maxLen,
   },
   preferredName: {
     label: "Preferred name",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.preferredName.maxLen,
   },
 
-  email: { label: "Email", requiresDetails: true, maxLen: FIELD_TEXT_CONSTRAINTS.email.maxLen },
-  phoneCountry: { label: "Phone country", requiresDetails: true },
-  phone: { label: "Phone number", requiresDetails: true },
+  email: { label: "Email", maxLen: FIELD_TEXT_CONSTRAINTS.email.maxLen },
+  phoneCountry: { label: "Phone country" },
+  phone: { label: "Phone number" },
 
   dob: {
     label: "Date of birth",
-    requiresDetails: true,
     format: (fd) => {
       if (!fd.dob) return null;
       const d = dayjs(fd.dob);
-      return d.isValid() ? d.format("D MMMM YYYY") : fd.dob;
+      return d.isValid() ? d.format("DD-MM-YYYY") : fd.dob;
     },
   },
 
   addressLine1: {
     label: "Address line 1",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.addressLine1.maxLen,
   },
   addressLine2: {
     label: "Address line 2",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.addressLine2.maxLen,
   },
   addressLine3: {
     label: "Address line 3",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.addressLine3.maxLen,
   },
   townOrCity: {
     label: "Town or city",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.townOrCity.maxLen,
   },
   postcode: {
     label: "Postcode",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.postcode.maxLen,
   },
 
   pronouns: {
     label: "Pronouns",
-    requiresDetails: true,
     format: (fd) => {
       const p = fd.pronouns;
       if (p === "OTHER") {
@@ -150,7 +134,6 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
   // Stored separately but displayed as part of Pronouns on review
   pronounsOtherText: {
     label: "Pronouns (other)",
-    requiresDetails: true,
     maxLen: FIELD_TEXT_CONSTRAINTS.pronounsOtherText.maxLen,
     omitWhen: () => true,
   },
@@ -286,7 +269,6 @@ export const FIELD_META: Record<FieldKey, FieldMeta> = {
 
   contactMethod: {
     label: "Preferred method of contact",
-    requiresDetails: true,
     format: (fd) => optionLabel(UI_OPTIONS.contactMethod, fd.contactMethod),
   },
 
@@ -328,7 +310,6 @@ export function getReviewDisplayValue(
 ): string | null {
   const meta = FIELD_META[key];
 
-  if (meta.requiresDetails && fd.provideDetails !== "yes") return null;
   if (meta.askedInContext && !meta.askedInContext(ctx)) return null;
   if (meta.dependsOn && !meta.dependsOn(fd)) return null;
   if (meta.omitWhen && meta.omitWhen(fd)) return null;
