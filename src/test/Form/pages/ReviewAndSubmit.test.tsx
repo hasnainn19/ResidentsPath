@@ -126,7 +126,6 @@ function makeFormData(overrides: Partial<FormData> = {}): FormData {
   return {
     language: "en",
     privacyNoticeAccepted: false,
-    provideDetails: "yes",
     firstName: "",
     middleName: "",
     lastName: "",

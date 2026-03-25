@@ -22,15 +22,14 @@ describe("fieldMeta", () => {
     expect(getReviewLabel("firstName")).toBe("First name");
   });
 
-  it("omits personal detail fields on review when details were not provided", () => {
+  it("shows personal detail fields on review when they have values", () => {
     const formData = makeFormData({
-      provideDetails: "no",
       firstName: "Test",
     });
 
     expect(
       getReviewDisplayValue("firstName", formData, getEnquirySelectionState(formData)),
-    ).toBeNull();
+    ).toBe("Test");
   });
 
   it("omits fields hidden by omitWhen rules", () => {
@@ -164,7 +163,7 @@ describe("fieldMeta", () => {
 
     expect(
       getReviewDisplayValue("dob", validFormData, getEnquirySelectionState(validFormData)),
-    ).toBe("1 June 2000");
+    ).toBe("01-06-2000");
   });
 
   it("hides appointment review rows when the resident did not choose booking", () => {

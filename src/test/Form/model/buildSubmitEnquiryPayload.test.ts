@@ -27,7 +27,6 @@ describe("buildSubmitEnquiryPayload", () => {
       makeFormData({
         topLevel: "Housing",
         enquiryId: "homelessness",
-        provideDetails: "yes",
         firstName: " Test ",
         middleName: " Middle ",
         lastName: " Tester ",
