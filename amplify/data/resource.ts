@@ -129,9 +129,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
       })
       .secondaryIndexes((index) => [index("caseId")])
-      .authorization((allow) => [
-        allow.groups(["Staff"]),
-      ]),
+      .authorization((allow) => [allow.groups(["Staff"])]),
 
     // Department - service departments (Housing, Council Tax, etc)
     Department: a
@@ -277,6 +275,7 @@ const schema = a
       flag: a.boolean().required(),
       position: a.integer().required(),
       notes: a.string(),
+      createdAt: a.datetime().required(),
     }),
 
     getQueueItems: a
