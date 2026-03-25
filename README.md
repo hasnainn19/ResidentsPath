@@ -82,8 +82,8 @@ vitest run --coverage
 Examples of targeted runs:
 
 ```bash
-npx vitest run src/test/Form/pages/FormEntry.test.tsx
-npx vitest run src/test/functions/submitEnquiry.test.ts
+npx vitest run tests/src/pages/Form/FormEntry.test.tsx
+npx vitest run tests/amplify/functions/submitEnquiry.test.ts
 ```
 
 ### Automated Testing Rationale
@@ -250,91 +250,92 @@ The tables below cover files included in the repository. Generated files created
 
 | Path | Information |
 | --- | --- |
-| `src/test/setup.ts` | Shared Vitest and Testing Library setup |
-| `src/test/Components/LanguageSupportButton.test.tsx` | Tests for the language support button |
-| `src/test/Components/TextToSpeechButton.test.tsx` | Tests for the text-to-speech button |
-| `src/test/Form/components/BookingPanel.test.tsx` | Tests for the booking panel |
-| `src/test/Form/components/FormPrivacyNotice.test.tsx` | Tests for the form privacy notice |
-| `src/test/Form/components/ReceiptBody.test.tsx` | Tests for the receipt body component |
-| `src/test/Form/components/ReceiptDetailsCard.test.tsx` | Tests for the receipt details card |
-| `src/test/Form/components/ReceiptHeaderCard.test.tsx` | Tests for the receipt header card |
-| `src/test/Form/components/ReceiptQrCard.test.tsx` | Tests for the receipt QR card |
-| `src/test/Form/components/RequireFormSteps.test.tsx` | Tests for required form-step behaviour |
-| `src/test/Form/components/ResumeFromSave.test.tsx` | Tests for resuming a saved draft |
-| `src/test/Form/model/buildSubmitEnquiryPayload.test.ts` | Tests for form submission payload building |
-| `src/test/Form/model/draftStorage.test.ts` | Tests for draft-storage behaviour |
-| `src/test/Form/model/enquirySelectionLogic.test.ts` | Tests for enquiry selection logic |
-| `src/test/Form/model/fieldMeta.test.ts` | Tests for form field metadata |
-| `src/test/Form/model/getEnquirySelectionState.test.ts` | Tests for derived enquiry selection state |
-| `src/test/Form/pages/Actions.test.tsx` | Tests for the actions form step |
-| `src/test/Form/pages/EnquirySelection.test.tsx` | Tests for the enquiry selection page |
-| `src/test/Form/pages/ExistingCaseFollowUp.test.tsx` | Tests for the existing-case follow-up page |
-| `src/test/Form/pages/FormEntry.test.tsx` | Tests for the form entry page |
-| `src/test/Form/pages/PersonalDetails.test.tsx` | Tests for the personal-details page |
-| `src/test/Form/pages/ReviewAndSubmit.test.tsx` | Tests for the review and submit page |
-| `src/test/Form/pages/SubmissionReceipt.test.tsx` | Tests for the submission receipt page |
-| `src/test/guards/helpers.ts` | Test helpers for route-guard tests |
-| `src/test/guards/RequireAuth.test.tsx` | Tests for the authenticated-route guard |
-| `src/test/guards/RequireGuest.test.tsx` | Tests for the guest-route guard |
-| `src/test/guards/RequireRole.test.tsx` | Tests for the role-route guard |
-| `src/test/hooks/useAuth.test.ts` | Tests for the auth hook |
-| `src/test/hooks/useCaseDetails.test.ts` | Tests for the case-details hook |
-| `src/test/hooks/useDashboardStats.test.ts` | Tests for the dashboard stats hook |
-| `src/test/hooks/useQueueItems.test.tsx` | Tests for the queue-items hook |
-| `src/test/hooks/useServiceStats.test.ts` | Tests for the service-stats hook |
-| `src/test/ReferencePage/ReferencePage.test.tsx` | Tests for the reference page |
-| `src/test/ReferencePage/AppointmentOptionsDialog.test.tsx` | Tests for the appointment options dialog on the reference page |
-| `src/test/ReferencePage/ScanButton.test.tsx` | Tests for the scan button |
-| `src/test/ReferencePage/useCheckReferenceNumber.test.tsx` | Tests for reference-number checking |
-| `src/test/ReferencePage/useAppointmentReferenceActions.test.tsx` | Tests for the appointment reference actions hook |
-| `src/test/shared/formSchema.test.ts` | Tests for the shared form schema |
-| `src/test/shared/referenceNumbers.test.ts` | Tests for shared reference-number logic |
-| `src/test/StaffUI/CaseItemCard.test.tsx` | Tests for the staff case item card |
-| `src/test/StaffUI/ConfirmChangeModal.test.tsx` | Tests for the staff confirmation modal |
-| `src/test/StaffUI/CurrentQueueItem.test.tsx` | Tests for the current queue item component |
-| `src/test/StaffUI/QueueRow.test.tsx` | Tests for the queue row component |
-| `src/test/StaffUI/SectionCard.test.tsx` | Tests for the staff section card |
-| `src/test/StaffUI/StaffNavbar.test.tsx` | Tests for the staff navigation bar |
-| `src/test/StaffUI/StaffNavItem.test.tsx` | Tests for the staff navigation item |
-| `src/test/StaffUI/StatCard.test.tsx` | Tests for the staff statistics card |
-| `src/test/UserDashboardUI/UserDashboard.test.tsx` | Tests for the resident dashboard |
-| `src/test/utils/recalculateDepartmentQueue.test.ts` | Tests for queue recalculation logic |
-| `src/test/utils/runCleanup.test.ts` | Tests for cleanup helper execution |
+| `tests/tsconfig.json` | TypeScript configuration for the test suite |
+| `tests/setup/setup.frontend.ts` | Shared Vitest and Testing Library setup for frontend tests |
+| `tests/shared/formSchema.test.ts` | Tests for the shared form schema |
+| `tests/shared/referenceNumbers.test.ts` | Tests for shared reference-number logic |
+| `tests/src/components/BookingPanel.test.tsx` | Tests for the booking panel |
+| `tests/src/components/FormPageComponents/FormPrivacyNotice.test.tsx` | Tests for the form privacy notice |
+| `tests/src/components/FormPageComponents/RequireFormSteps.test.tsx` | Tests for required form-step behaviour |
+| `tests/src/components/FormPageComponents/ResumeFromSave.test.tsx` | Tests for resuming a saved draft |
+| `tests/src/components/LanguageSupportButton.test.tsx` | Tests for the language support button |
+| `tests/src/components/ReferencePageComponents/AppointmentOptionsDialog.test.tsx` | Tests for the appointment options dialog on the reference page |
+| `tests/src/components/ReferencePageComponents/ScanButton.test.tsx` | Tests for the scan button |
+| `tests/src/components/StaffComponents/CaseItemCard.test.tsx` | Tests for the staff case item card |
+| `tests/src/components/StaffComponents/ConfirmChangeModal.test.tsx` | Tests for the staff confirmation modal |
+| `tests/src/components/StaffComponents/CurrentQueueItem.test.tsx` | Tests for the current queue item component |
+| `tests/src/components/StaffComponents/QueueRow.test.tsx` | Tests for the queue row component |
+| `tests/src/components/StaffComponents/SectionCard.test.tsx` | Tests for the staff section card |
+| `tests/src/components/StaffComponents/StaffNavItem.test.tsx` | Tests for the staff navigation item |
+| `tests/src/components/StaffComponents/StaffNavbar.test.tsx` | Tests for the staff navigation bar |
+| `tests/src/components/StaffComponents/StatCard.test.tsx` | Tests for the staff statistics card |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptBody.test.tsx` | Tests for the receipt body component |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptDetailsCard.test.tsx` | Tests for the receipt details card |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptHeaderCard.test.tsx` | Tests for the receipt header card |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptQrCard.test.tsx` | Tests for the receipt QR card |
+| `tests/src/components/TextToSpeechButton.test.tsx` | Tests for the text-to-speech button |
+| `tests/src/guards/helpers.ts` | Test helpers for route-guard tests |
+| `tests/src/guards/RequireAuth.test.tsx` | Tests for the authenticated-route guard |
+| `tests/src/guards/RequireGuest.test.tsx` | Tests for the guest-route guard |
+| `tests/src/guards/RequireRole.test.tsx` | Tests for the role-route guard |
+| `tests/src/hooks/useAppointmentReferenceActions.test.tsx` | Tests for the appointment reference actions hook |
+| `tests/src/hooks/useAuth.test.ts` | Tests for the auth hook |
+| `tests/src/hooks/useCaseDetails.test.ts` | Tests for the case-details hook |
+| `tests/src/hooks/useCheckReferenceNumber.test.tsx` | Tests for reference-number checking |
+| `tests/src/hooks/useDashboardStats.test.ts` | Tests for the dashboard stats hook |
+| `tests/src/hooks/useQueueItems.test.tsx` | Tests for the queue-items hook |
+| `tests/src/hooks/useServiceStats.test.ts` | Tests for the service-stats hook |
+| `tests/src/pages/Form/Actions.test.tsx` | Tests for the actions form step |
+| `tests/src/pages/Form/EnquirySelection.test.tsx` | Tests for the enquiry selection page |
+| `tests/src/pages/Form/ExistingCaseFollowUp.test.tsx` | Tests for the existing-case follow-up page |
+| `tests/src/pages/Form/FormEntry.test.tsx` | Tests for the form entry page |
+| `tests/src/pages/Form/PersonalDetails.test.tsx` | Tests for the personal-details page |
+| `tests/src/pages/Form/ReviewAndSubmit.test.tsx` | Tests for the review and submit page |
+| `tests/src/pages/Form/SubmissionReceipt.test.tsx` | Tests for the submission receipt page |
+| `tests/src/pages/Form/model/buildSubmitEnquiryPayload.test.ts` | Tests for form submission payload building |
+| `tests/src/pages/Form/model/draftStorage.test.ts` | Tests for draft-storage behaviour |
+| `tests/src/pages/Form/model/enquirySelectionLogic.test.ts` | Tests for enquiry selection logic |
+| `tests/src/pages/Form/model/fieldMeta.test.ts` | Tests for form field metadata |
+| `tests/src/pages/Form/model/getEnquirySelectionState.test.ts` | Tests for derived enquiry selection state |
+| `tests/src/pages/ReferencePage.test.tsx` | Tests for the reference page |
+| `tests/src/pages/UserDashboard.test.tsx` | Tests for the resident dashboard |
 
 #### Backend Test Files
 
 | Path | Information |
 | --- | --- |
-| `src/test/functions/adjustQueuePosition.test.ts` | Tests for queue-position adjustment |
-| `src/test/functions/cancelAppointmentByReference.test.ts` | Tests for appointment cancellation by reference |
-| `src/test/functions/checkInAppointmentByReference.test.ts` | Tests for appointment check-in by reference |
-| `src/test/functions/checkTicketNumber.test.ts` | Tests for ticket-number checking |
-| `src/test/functions/flagCaseSafeguarding.test.ts` | Tests for safeguarding flag updates |
-| `src/test/functions/getAvailableAppointmentTimes.test.ts` | Tests for appointment-time lookup |
-| `src/test/functions/getCaseDetails.test.ts` | Tests for case-detail retrieval |
-| `src/test/functions/getCaseFollowUp.test.ts` | Tests for existing-case follow-up retrieval |
-| `src/test/functions/getDashboardStats.test.ts` | Tests for dashboard statistics retrieval |
-| `src/test/functions/getDepartmentQueueStatus.test.ts` | Tests for department queue status retrieval |
-| `src/test/functions/getQueueItems.test.ts` | Tests for queue-item retrieval |
-| `src/test/functions/getServiceStats.test.ts` | Tests for service statistics retrieval |
-| `src/test/functions/getSubmissionReceipt.test.ts` | Tests for submission receipt retrieval |
-| `src/test/functions/getTicketInfo.test.ts` | Tests for ticket information retrieval |
-| `src/test/functions/handleSteppedOut.test.ts` | Tests for stepped-out handling |
-| `src/test/functions/markTicketSeen.test.ts` | Tests for marking tickets as seen |
-| `src/test/functions/notifyResident.test.ts` | Tests for resident notifications |
-| `src/test/functions/onTicketCompleted.test.ts` | Tests for ticket-completion follow-up |
-| `src/test/functions/postConfirmation.test.ts` | Tests for post-confirmation user setup |
-| `src/test/functions/setCasePriority.test.ts` | Tests for case-priority updates |
-| `src/test/functions/submitCaseFollowUp.test.ts` | Tests for follow-up submission handling |
-| `src/test/functions/submitEnquiry.test.ts` | Tests for enquiry submission handling |
-| `src/test/functions/toggleNotifications.test.ts` | Tests for notification preference toggling |
-| `src/test/functions/cleanupEnquiryState/cleanupEnquiryState.test.ts` | Tests for enquiry-state cleanup flow |
-| `src/test/functions/cleanupEnquiryState/cleanupEnquiryState-helpers.test.ts` | Tests for enquiry-state cleanup helpers |
-| `src/test/functions/utils/caseAccess.test.ts` | Tests for case-access utilities |
-| `src/test/functions/utils/enquiriesStateTable.test.ts` | Tests for enquiry-state table utilities |
-| `src/test/functions/utils/getAppointmentReferenceDetails.test.ts` | Tests for appointment-reference helper logic |
-| `src/test/functions/utils/identityGroups.test.ts` | Tests for identity-group utilities |
-| `src/test/functions/utils/submissionShared.test.ts` | Tests for shared submission utilities |
+| `tests/amplify/functions/adjustQueuePosition.test.ts` | Tests for queue-position adjustment |
+| `tests/amplify/functions/cancelAppointmentByReference.test.ts` | Tests for appointment cancellation by reference |
+| `tests/amplify/functions/checkInAppointmentByReference.test.ts` | Tests for appointment check-in by reference |
+| `tests/amplify/functions/checkTicketNumber.test.ts` | Tests for ticket-number checking |
+| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState-helpers.test.ts` | Tests for enquiry-state cleanup helpers |
+| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState.test.ts` | Tests for enquiry-state cleanup flow |
+| `tests/amplify/functions/flagCaseSafeguarding.test.ts` | Tests for safeguarding flag updates |
+| `tests/amplify/functions/getAvailableAppointmentTimes.test.ts` | Tests for appointment-time lookup |
+| `tests/amplify/functions/getCaseDetails.test.ts` | Tests for case-detail retrieval |
+| `tests/amplify/functions/getCaseFollowUp.test.ts` | Tests for existing-case follow-up retrieval |
+| `tests/amplify/functions/getDashboardStats.test.ts` | Tests for dashboard statistics retrieval |
+| `tests/amplify/functions/getDepartmentQueueStatus.test.ts` | Tests for department queue status retrieval |
+| `tests/amplify/functions/getQueueItems.test.ts` | Tests for queue-item retrieval |
+| `tests/amplify/functions/getServiceStats.test.ts` | Tests for service statistics retrieval |
+| `tests/amplify/functions/getSubmissionReceipt.test.ts` | Tests for submission receipt retrieval |
+| `tests/amplify/functions/getTicketInfo.test.ts` | Tests for ticket information retrieval |
+| `tests/amplify/functions/handleSteppedOut.test.ts` | Tests for stepped-out handling |
+| `tests/amplify/functions/markTicketSeen.test.ts` | Tests for marking tickets as seen |
+| `tests/amplify/functions/notifyResident.test.ts` | Tests for resident notifications |
+| `tests/amplify/functions/onTicketCompleted.test.ts` | Tests for ticket-completion follow-up |
+| `tests/amplify/functions/postConfirmation.test.ts` | Tests for post-confirmation user setup |
+| `tests/amplify/functions/setCasePriority.test.ts` | Tests for case-priority updates |
+| `tests/amplify/functions/submitCaseFollowUp.test.ts` | Tests for follow-up submission handling |
+| `tests/amplify/functions/submitEnquiry.test.ts` | Tests for enquiry submission handling |
+| `tests/amplify/functions/toggleNotifications.test.ts` | Tests for notification preference toggling |
+| `tests/amplify/utils/caseAccess.test.ts` | Tests for case-access utilities |
+| `tests/amplify/utils/enquiriesStateTable.test.ts` | Tests for enquiry-state table utilities |
+| `tests/amplify/utils/getAppointmentReferenceDetails.test.ts` | Tests for appointment-reference helper logic |
+| `tests/amplify/utils/identityGroups.test.ts` | Tests for identity-group utilities |
+| `tests/amplify/utils/recalculateDepartmentQueue.test.ts` | Tests for queue recalculation logic |
+| `tests/amplify/utils/runCleanup.test.ts` | Tests for cleanup helper execution |
+| `tests/amplify/utils/submissionShared.test.ts` | Tests for shared submission utilities |
 
 #### Amplify Backend Files
 
