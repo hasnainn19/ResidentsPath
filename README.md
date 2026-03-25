@@ -21,13 +21,95 @@ Install and run:
 ```bash
 npm install
 npx ampx sandbox
+npx ampx sandbox seed
 npm run dev
 ```
 
 Notes:
 
 - `npx ampx sandbox` provisions or updates the Amplify sandbox backend and generates `amplify_outputs.json`.
+- `npx ampx sandbox seed` seeds the department data used by the prototype within the sandbox.
+- On the production demo deployment, seeded queue data is also refreshed automatically each day at midnight UTC.
 - The frontend expects `amplify_outputs.json` to exist when the app starts.
+
+### Deployed Demo Staff Accounts
+
+The deployed version already includes pre-created staff accounts:
+
+- `StaffAccount1@residentspath.com`
+- `StaffAccount2@residentspath.com`
+- `StaffAccount3@residentspath.com`
+
+Password for all three staff accounts: `Testaccount123*`
+
+### Cognito Group Setup For Local Deployments
+
+Newly registered users are added to the `Residents` Cognito group automatically. To use staff-only features or Hounslow House device-only features, users must be placed in the correct Cognito group manually through the Cognito Console.
+
+
+- `Staff` is required for the protected staff pages, including the staff dashboard, queue management, and case management. Staff users also have the ability to check-in appointments and can create an unlimited number of additional appointments for a case.
+- `HounslowHouseDevices` is required for account which simulate the behaviour of devices at Hounslow House, which would be able to check-in appointments from the reference page.
+
+
+To set this up in the Cognito Console:
+
+1. Open AWS Cognito and go to the user pool for this deployment.
+2. Open `User management` and then `Users`.
+3. Select the user account that should act as a staff member or shared device account.
+4. Add it to the `Staff` or `HounslowHouseDevices` group as needed.
+5. If the user was already signed in when the group was assigned, you may need to sign out and sign back in so the updated group membership appears in the token claims.
+
+Note:
+
+For local sandbox setups, the generated `amplify_outputs.json` file contains the Cognito user pool ID under `auth.user_pool_id`.
+
+## Testing
+
+### How to Run Tests
+
+Run the full test suite with:
+
+```bash
+npm test
+```
+
+This runs:
+
+```bash
+vitest run --coverage
+```
+
+Examples of targeted runs:
+
+```bash
+npx vitest run src/test/Form/pages/FormEntry.test.tsx
+npx vitest run src/test/functions/submitEnquiry.test.ts
+```
+
+### Automated Testing Rationale
+
+The testing approach focused mainly on unit testing non-trivial frontend behaviour, shared validation rules, and backend behaviour, including edge cases where necessary. The aim was to achieve high coverage wherever practical, with only very small or trivial logic left untested.
+
+## Related Documents
+
+- `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
+
+## Known Missing Implementation
+
+- Translation support is not yet available across all pages. In particular, the resident form is only partially translated.
+- Mobile UI support is mainly implemented for the resident form. The reference page, dashboards, and staff workflows all require a desktop or laptop to use.
+
+## Authors
+
+The table below summarises the main contribution areas associated with each contributor.
+
+| Author | Main contribution areas |
+| --- | --- |
+| Jacob Whiting | Resident form, validation, submission logic, shared form schema, follow-up submissions, appointment booking and appointment reference backend, and related testing |
+| Hasnain Naqvi | Backend setup, data schema, authentication, notifications, backend integration, and related testing |
+| Naomi Quartsin | Reference page frontend, QR scanning, ticket and reference lookup, and related testing |
+| Romina Hosseinkhani | User dashboard, translations, nav bar, text-to-speech functionality, and related testing |
+| Abu-Bakarr Jalloh | Staff dashboard, queue management, case views, staff queue actions, and related testing |
 
 ## Repository Structure and File Inventory
 
@@ -324,46 +406,3 @@ The tables below cover files included in the repository. Generated files created
 | `amplify/functions/utils/runCleanup.ts` | Shared wrapper for running cleanup routines safely after failures |
 | `amplify/functions/utils/sesClient.ts` | Shared helper for creating the SES client used for outbound email |
 | `amplify/functions/utils/submissionShared.ts` | Shared submission logic reused by the new-submission and follow-up handlers |
-
-## Authors
-
-The table below summarises the main contribution areas associated with each contributor.
-
-| Author | Main contribution areas |
-| --- | --- |
-| Jacob Whiting | Resident form, validation, submission logic, shared form schema, follow-up submissions, appointment booking and reference backend, and related testing |
-| Hasnain Naqvi | Backend setup, data schema, authentication, notifications, backend integration, and related testing |
-| Naomi Quartsin | Reference page frontend, QR scanning, ticket and reference lookup, and related testing |
-| Romina Hosseinkhani | User dashboard, translations, nav bar, text-to-speech functionality, and related testing |
-| Abu-Bakarr Jalloh | Staff dashboard, queue management, case views, staff queue actions, and related testing |
-
-## Testing
-
-### How to Run Tests
-
-Run the full test suite with:
-
-```bash
-npm test
-```
-
-This runs:
-
-```bash
-vitest run --coverage
-```
-
-Examples of targeted runs:
-
-```bash
-npx vitest run src/test/Form/pages/FormEntry.test.tsx
-npx vitest run src/test/functions/submitEnquiry.test.ts
-```
-
-### Automated Testing Rationale
-
-The testing approach focused mainly on unit testing non-trivial frontend behaviour, shared validation rules, and backend behaviour. The aim was to achieve high coverage wherever practical, with only very small or trivial logic left untested.
-
-## Related Documents
-
-- `CHANGELOG.md` contains the separate major milestones and version timeline.
