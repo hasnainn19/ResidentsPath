@@ -29,7 +29,7 @@ Notes:
 
 - `npx ampx sandbox` provisions or updates the Amplify sandbox backend and generates `amplify_outputs.json`.
 - `npx ampx sandbox seed` seeds the department data used by the prototype within the sandbox.
-- On the production demo deployment, seeded queue data is also refreshed automatically each day at midnight UTC.
+- On the production demo deployment, seeded tickets are created every day at midnight UTC.
 - The frontend expects `amplify_outputs.json` to exist when the app starts.
 
 ### Deployed Demo Staff Accounts
@@ -48,7 +48,7 @@ Newly registered users are added to the `Residents` Cognito group automatically.
 
 
 - `Staff` is required for the protected staff pages, including the staff dashboard, queue management, and case management. Staff users also have the ability to check-in appointments and can create an unlimited number of additional appointments for a case.
-- `HounslowHouseDevices` is required for account which simulate the behaviour of devices at Hounslow House, which would be able to check-in appointments from the reference page.
+- `HounslowHouseDevices` is required for accounts which simulate the behaviour of devices at Hounslow House, which would be able to check-in appointments from the reference page.
 
 
 To set this up in the Cognito Console:
@@ -118,7 +118,7 @@ This prototype does not include a user manual. Instead, guidance is built into t
 
 - Translation support is not available across all pages. In particular, the resident form is only partially translated.
 - Text-to-speech support is only available in English.
-- Mobile UI support is mainly implemented for the resident form. The reference page, dashboards, and staff workflows all require a desktop or laptop to use.
+- Mobile UI support is only implemented for the resident form. The reference page, dashboards, and staff workflows all require a desktop or laptop to use.
 - Staff accounts cannot sign up through the prototype and must be created or assigned through the AWS Cognito Console.
 
 ## Authors
@@ -127,7 +127,7 @@ The table below summarises the main contribution areas associated with each cont
 
 | Author | Main contribution areas |
 | --- | --- |
-| Jacob Whiting | Resident form, validation, submission logic, shared form schema, follow-up submissions, appointment booking and appointment reference backend, and related testing |
+| Jacob Whiting | Resident form, submission logic, shared form schema, follow-up submissions, appointment booking and appointment reference backend, and related testing |
 | Hasnain Naqvi | Backend setup, data schema, authentication, notifications, backend integration, and related testing |
 | Naomi Quartsin | Reference page frontend, QR scanning, ticket and reference lookup, and related testing |
 | Romina Hosseinkhani | User dashboard, translations, nav bar, text-to-speech functionality, and related testing |
@@ -144,7 +144,7 @@ The tables below cover files included in the repository. Generated files created
 | `README.md` | Main repository guide |
 | `CHANGELOG.md` | Development timeline and feedback-driven change record |
 | `LICENSE` | Licence for the submitted code |
-| `.gitignore` | Git ignore rules for dependencies, build output, coverage files, and local environment artefacts |
+| `.gitignore` | Git ignore rules |
 | `package.json` | Root package manifest and scripts |
 | `package-lock.json` | Root dependency lockfile |
 | `tsconfig.json` | Base TypeScript configuration |
@@ -185,6 +185,8 @@ The tables below cover files included in the repository. Generated files created
 
 #### Frontend Component Files
 
+##### `src/components`
+
 | Path | Information |
 | --- | --- |
 | `src/components/BookingPanel.tsx` | Appointment selection and availability component |
@@ -193,6 +195,11 @@ The tables below cover files included in the repository. Generated files created
 | `src/components/LoadingSpinner.tsx` | Shared loading indicator component |
 | `src/components/NavBar.tsx` | Main navigation bar |
 | `src/components/TextToSpeechButton.tsx` | Text-to-speech trigger component |
+
+##### `src/components/FormPageComponents`
+
+| Path | Information |
+| --- | --- |
 | `src/components/FormPageComponents/FormPrivacyNotice.tsx` | Form privacy notice component |
 | `src/components/FormPageComponents/FormStepLayout.tsx` | Shared form step layout |
 | `src/components/FormPageComponents/LeftCheckRow.tsx` | Left-aligned check row for form summaries |
@@ -204,8 +211,18 @@ The tables below cover files included in the repository. Generated files created
 | `src/components/FormPageComponents/ResumeFromSave.tsx` | Saved-draft resume component |
 | `src/components/FormPageComponents/StepActions.tsx` | Navigation controls for form steps |
 | `src/components/FormPageComponents/WithTTS.tsx` | Wrapper for text-to-speech support in form content |
+
+##### `src/components/ReferencePageComponents`
+
+| Path | Information |
+| --- | --- |
 | `src/components/ReferencePageComponents/AppointmentOptionsDialog.tsx` | Dialog for appointment actions from the reference page |
 | `src/components/ReferencePageComponents/ScanButton.tsx` | QR scan trigger on the reference page |
+
+##### `src/components/StaffComponents`
+
+| Path | Information |
+| --- | --- |
 | `src/components/StaffComponents/CaseItemCard.tsx` | Staff case summary card |
 | `src/components/StaffComponents/ConfirmChangeModal.tsx` | Confirmation modal for staff actions |
 | `src/components/StaffComponents/CurrentQueueItem.tsx` | Staff queue item card with actions |
@@ -215,6 +232,11 @@ The tables below cover files included in the repository. Generated files created
 | `src/components/StaffComponents/StaffNavItem.tsx` | Item in the staff navigation |
 | `src/components/StaffComponents/StaffNavbar.tsx` | Staff navigation bar |
 | `src/components/StaffComponents/StatCard.tsx` | Staff statistics card |
+
+##### `src/components/SubmissionReceiptComponents`
+
+| Path | Information |
+| --- | --- |
 | `src/components/SubmissionReceiptComponents/ReceiptBody.tsx` | Main body of the submission receipt |
 | `src/components/SubmissionReceiptComponents/ReceiptDetailsCard.tsx` | Receipt details card |
 | `src/components/SubmissionReceiptComponents/ReceiptHeaderCard.tsx` | Receipt header card |
@@ -222,18 +244,25 @@ The tables below cover files included in the repository. Generated files created
 
 #### Frontend Page, Context, Hook, Guard, and Form Model Files
 
+##### `src/pages`
+
 | Path | Information |
 | --- | --- |
 | `src/pages/AccessDenied.tsx` | Displays the fallback screen for users who reach a route they are not allowed to access |
 | `src/pages/AuthPage.tsx` | Handles resident and staff sign-in and routes users into the correct flow |
 | `src/pages/CheckInConfirmation.tsx` | Shows the confirmation state after an appointment has been checked in successfully |
-| `src/pages/LandingPage.tsx` | Provides the main public entry point into the prototype and directs residents to the next step |
+| `src/pages/LandingPage.tsx` | Provides the main entry point into the prototype and directs residents to the next step |
 | `src/pages/ReferencePage.tsx` | Lets users enter or scan references to look up queue and appointment information |
 | `src/pages/StaffCaseDetails.tsx` | Shows the full details for an individual case and supports staff updates |
 | `src/pages/StaffCaseManagementPage.tsx` | Lists staff cases and provides navigation into individual case records |
-| `src/pages/StaffDashboard.tsx` | Shows headline staff metrics and entry points into the staff workflows |
+| `src/pages/StaffDashboard.tsx` | Shows headline staff metrics and entry points into the staff pages |
 | `src/pages/StaffQueuePage.tsx` | Displays the live queue and lets staff reorder, prioritise, flag, and complete queue items |
 | `src/pages/UserDashboard.tsx` | Shows a resident's current queue or appointment status, wait information, and notification settings |
+
+##### `src/pages/Form`
+
+| Path | Information |
+| --- | --- |
 | `src/pages/Form/Actions.tsx` | Shows queue information and, when applicable, the embedded appointment-booking panel for the resident's selected next step |
 | `src/pages/Form/EnquirySelection.tsx` | Collects the resident's enquiry and routes them into the appropriate branch of the form |
 | `src/pages/Form/ExistingCaseFollowUp.tsx` | Collects a follow-up submission for residents who already have an existing case |
@@ -242,8 +271,18 @@ The tables below cover files included in the repository. Generated files created
 | `src/pages/Form/PersonalDetails.tsx` | Collects personal, contact, and support information needed for the submission |
 | `src/pages/Form/ReviewAndSubmit.tsx` | Presents completed answers for review and triggers final submission to the backend |
 | `src/pages/Form/SubmissionReceipt.tsx` | Displays the resulting case, ticket, or appointment reference details after submission |
+
+##### `src/pages/Form/data`
+
+| Path | Information |
+| --- | --- |
 | `src/pages/Form/data/enquiries.ts` | Enquiry definitions used in the form |
 | `src/pages/Form/data/languages.ts` | Language options used in the form |
+
+##### `src/pages/Form/model`
+
+| Path | Information |
+| --- | --- |
 | `src/pages/Form/model/buildSubmitEnquiryPayload.ts` | Form data to submission-payload mapping |
 | `src/pages/Form/model/draftStorage.ts` | Form draft persistence logic |
 | `src/pages/Form/model/enquirySelectionLogic.ts` | Enquiry selection branching logic |
@@ -251,7 +290,17 @@ The tables below cover files included in the repository. Generated files created
 | `src/pages/Form/model/formFieldTypes.ts` | Type definitions for form state |
 | `src/pages/Form/model/getEnquirySelectionState.ts` | Derived state for enquiry selection |
 | `src/pages/Form/model/initialState.ts` | Initial form state values |
+
+##### `src/context`
+
+| Path | Information |
+| --- | --- |
 | `src/context/FormWizardProvider.tsx` | Stores form state, controls step progression, and manages draft resume behaviour |
+
+##### `src/hooks`
+
+| Path | Information |
+| --- | --- |
 | `src/hooks/useAppointmentReferenceActions.ts` | Wraps the check-in and cancellation actions available from an appointment reference |
 | `src/hooks/useAuth.ts` | Exposes the current authentication state and sign-in related helpers |
 | `src/hooks/useCaseDetails.ts` | Fetches and subscribes to the data needed for the staff case-details view |
@@ -262,102 +311,18 @@ The tables below cover files included in the repository. Generated files created
 | `src/hooks/useServiceStats.ts` | Loads per-service statistics used in staff reporting views |
 | `src/hooks/useTicketQueueInfo.ts` | Loads a resident's current queue position and estimated wait details |
 | `src/hooks/useUser.ts` | Loads the current user's stored profile and preference data |
+
+##### `src/guards`
+
+| Path | Information |
+| --- | --- |
 | `src/guards/RequireAuth.tsx` | Authenticated-route guard |
 | `src/guards/RequireGuest.tsx` | Guest-only route guard |
 | `src/guards/RequireRole.tsx` | Role-based route guard |
 
-#### Frontend Test Files
-
-| Path | Information |
-| --- | --- |
-| `tests/tsconfig.json` | TypeScript configuration for the test suite |
-| `tests/setup/setup.frontend.ts` | Shared Vitest and Testing Library setup for frontend tests |
-| `tests/shared/formSchema.test.ts` | Tests for the shared form schema |
-| `tests/shared/referenceNumbers.test.ts` | Tests for shared reference-number logic |
-| `tests/src/components/BookingPanel.test.tsx` | Tests for the booking panel |
-| `tests/src/components/FormPageComponents/FormPrivacyNotice.test.tsx` | Tests for the form privacy notice |
-| `tests/src/components/FormPageComponents/RequireFormSteps.test.tsx` | Tests for required form-step behaviour |
-| `tests/src/components/FormPageComponents/ResumeFromSave.test.tsx` | Tests for resuming a saved draft |
-| `tests/src/components/LanguageSupportButton.test.tsx` | Tests for the language support button |
-| `tests/src/components/ReferencePageComponents/AppointmentOptionsDialog.test.tsx` | Tests for the appointment options dialog on the reference page |
-| `tests/src/components/ReferencePageComponents/ScanButton.test.tsx` | Tests for the scan button |
-| `tests/src/components/StaffComponents/CaseItemCard.test.tsx` | Tests for the staff case item card |
-| `tests/src/components/StaffComponents/ConfirmChangeModal.test.tsx` | Tests for the staff confirmation modal |
-| `tests/src/components/StaffComponents/CurrentQueueItem.test.tsx` | Tests for the current queue item component |
-| `tests/src/components/StaffComponents/QueueRow.test.tsx` | Tests for the queue row component |
-| `tests/src/components/StaffComponents/SectionCard.test.tsx` | Tests for the staff section card |
-| `tests/src/components/StaffComponents/StaffNavItem.test.tsx` | Tests for the staff navigation item |
-| `tests/src/components/StaffComponents/StaffNavbar.test.tsx` | Tests for the staff navigation bar |
-| `tests/src/components/StaffComponents/StatCard.test.tsx` | Tests for the staff statistics card |
-| `tests/src/components/SubmissionReceiptComponents/ReceiptBody.test.tsx` | Tests for the receipt body component |
-| `tests/src/components/SubmissionReceiptComponents/ReceiptDetailsCard.test.tsx` | Tests for the receipt details card |
-| `tests/src/components/SubmissionReceiptComponents/ReceiptHeaderCard.test.tsx` | Tests for the receipt header card |
-| `tests/src/components/SubmissionReceiptComponents/ReceiptQrCard.test.tsx` | Tests for the receipt QR card |
-| `tests/src/components/TextToSpeechButton.test.tsx` | Tests for the text-to-speech button |
-| `tests/src/guards/helpers.ts` | Test helpers for route-guard tests |
-| `tests/src/guards/RequireAuth.test.tsx` | Tests for the authenticated-route guard |
-| `tests/src/guards/RequireGuest.test.tsx` | Tests for the guest-route guard |
-| `tests/src/guards/RequireRole.test.tsx` | Tests for the role-route guard |
-| `tests/src/hooks/useAppointmentReferenceActions.test.tsx` | Tests for the appointment reference actions hook |
-| `tests/src/hooks/useAuth.test.ts` | Tests for the auth hook |
-| `tests/src/hooks/useCaseDetails.test.ts` | Tests for the case-details hook |
-| `tests/src/hooks/useCheckReferenceNumber.test.tsx` | Tests for reference-number checking |
-| `tests/src/hooks/useDashboardStats.test.ts` | Tests for the dashboard stats hook |
-| `tests/src/hooks/useQueueItems.test.tsx` | Tests for the queue-items hook |
-| `tests/src/hooks/useServiceStats.test.ts` | Tests for the service-stats hook |
-| `tests/src/pages/Form/Actions.test.tsx` | Tests for the actions form step |
-| `tests/src/pages/Form/EnquirySelection.test.tsx` | Tests for the enquiry selection page |
-| `tests/src/pages/Form/ExistingCaseFollowUp.test.tsx` | Tests for the existing-case follow-up page |
-| `tests/src/pages/Form/FormEntry.test.tsx` | Tests for the form entry page |
-| `tests/src/pages/Form/PersonalDetails.test.tsx` | Tests for the personal-details page |
-| `tests/src/pages/Form/ReviewAndSubmit.test.tsx` | Tests for the review and submit page |
-| `tests/src/pages/Form/SubmissionReceipt.test.tsx` | Tests for the submission receipt page |
-| `tests/src/pages/Form/model/buildSubmitEnquiryPayload.test.ts` | Tests for form submission payload building |
-| `tests/src/pages/Form/model/draftStorage.test.ts` | Tests for draft-storage behaviour |
-| `tests/src/pages/Form/model/enquirySelectionLogic.test.ts` | Tests for enquiry selection logic |
-| `tests/src/pages/Form/model/fieldMeta.test.ts` | Tests for form field metadata |
-| `tests/src/pages/Form/model/getEnquirySelectionState.test.ts` | Tests for derived enquiry selection state |
-| `tests/src/pages/ReferencePage.test.tsx` | Tests for the reference page |
-| `tests/src/pages/UserDashboard.test.tsx` | Tests for the resident dashboard |
-
-#### Backend Test Files
-
-| Path | Information |
-| --- | --- |
-| `tests/amplify/functions/adjustQueuePosition.test.ts` | Tests for queue-position adjustment |
-| `tests/amplify/functions/cancelAppointmentByReference.test.ts` | Tests for appointment cancellation by reference |
-| `tests/amplify/functions/checkInAppointmentByReference.test.ts` | Tests for appointment check-in by reference |
-| `tests/amplify/functions/checkTicketNumber.test.ts` | Tests for ticket-number checking |
-| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState-helpers.test.ts` | Tests for enquiry-state cleanup helpers |
-| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState.test.ts` | Tests for enquiry-state cleanup flow |
-| `tests/amplify/functions/flagCaseSafeguarding.test.ts` | Tests for safeguarding flag updates |
-| `tests/amplify/functions/getAvailableAppointmentTimes.test.ts` | Tests for appointment-time lookup |
-| `tests/amplify/functions/getCaseDetails.test.ts` | Tests for case-detail retrieval |
-| `tests/amplify/functions/getCaseFollowUp.test.ts` | Tests for existing-case follow-up retrieval |
-| `tests/amplify/functions/getDashboardStats.test.ts` | Tests for dashboard statistics retrieval |
-| `tests/amplify/functions/getDepartmentQueueStatus.test.ts` | Tests for department queue status retrieval |
-| `tests/amplify/functions/getQueueItems.test.ts` | Tests for queue-item retrieval |
-| `tests/amplify/functions/getServiceStats.test.ts` | Tests for service statistics retrieval |
-| `tests/amplify/functions/getSubmissionReceipt.test.ts` | Tests for submission receipt retrieval |
-| `tests/amplify/functions/getTicketInfo.test.ts` | Tests for ticket information retrieval |
-| `tests/amplify/functions/handleSteppedOut.test.ts` | Tests for stepped-out handling |
-| `tests/amplify/functions/markTicketSeen.test.ts` | Tests for marking tickets as seen |
-| `tests/amplify/functions/notifyResident.test.ts` | Tests for resident notifications |
-| `tests/amplify/functions/onTicketCompleted.test.ts` | Tests for ticket-completion follow-up |
-| `tests/amplify/functions/postConfirmation.test.ts` | Tests for post-confirmation user setup |
-| `tests/amplify/functions/setCasePriority.test.ts` | Tests for case-priority updates |
-| `tests/amplify/functions/submitCaseFollowUp.test.ts` | Tests for follow-up submission handling |
-| `tests/amplify/functions/submitEnquiry.test.ts` | Tests for enquiry submission handling |
-| `tests/amplify/functions/toggleNotifications.test.ts` | Tests for notification preference toggling |
-| `tests/amplify/utils/caseAccess.test.ts` | Tests for case-access utilities |
-| `tests/amplify/utils/enquiriesStateTable.test.ts` | Tests for enquiry-state table utilities |
-| `tests/amplify/utils/getAppointmentReferenceDetails.test.ts` | Tests for appointment-reference helper logic |
-| `tests/amplify/utils/identityGroups.test.ts` | Tests for identity-group utilities |
-| `tests/amplify/utils/recalculateDepartmentQueue.test.ts` | Tests for queue recalculation logic |
-| `tests/amplify/utils/runCleanup.test.ts` | Tests for cleanup helper execution |
-| `tests/amplify/utils/submissionShared.test.ts` | Tests for shared submission utilities |
-
 #### Amplify Backend Files
+
+##### `amplify`
 
 | Path | Information |
 | --- | --- |
@@ -369,6 +334,11 @@ The tables below cover files included in the repository. Generated files created
 | `amplify/data/resource.ts` | Amplify data schema |
 | `amplify/i18n/amplifyTranslations.ts` | Amplify UI translation customisation |
 | `amplify/seed/seed.ts` | Seed script for backend data |
+
+##### `amplify/functions`
+
+| Path | Information |
+| --- | --- |
 | `amplify/functions/adjustQueuePosition/handler.ts` | Reorders waiting tickets within a department queue and persists the updated positions |
 | `amplify/functions/adjustQueuePosition/resource.ts` | Amplify resource definition for queue-position adjustment |
 | `amplify/functions/cancelAppointmentByReference/handler.ts` | Cancels an appointment when a valid appointment reference is supplied from the reference flow |
@@ -422,6 +392,11 @@ The tables below cover files included in the repository. Generated files created
 | `amplify/functions/submitEnquiry/resource.ts` | Amplify resource definition for enquiry submissions |
 | `amplify/functions/toggleNotifications/handler.ts` | Updates a resident's notification preferences from the dashboard flow |
 | `amplify/functions/toggleNotifications/resource.ts` | Amplify resource definition for notification preference changes |
+
+##### `amplify/functions/utils`
+
+| Path | Information |
+| --- | --- |
 | `amplify/functions/utils/amplifyClient.ts` | Shared helper for creating Amplify data clients inside backend functions |
 | `amplify/functions/utils/caseAccess.ts` | Shared rules for checking whether a user can access a case |
 | `amplify/functions/utils/cognitoClient.ts` | Shared helper for creating the Cognito client used by backend functions |
@@ -434,3 +409,159 @@ The tables below cover files included in the repository. Generated files created
 | `amplify/functions/utils/runCleanup.ts` | Shared wrapper for running cleanup routines safely after failures |
 | `amplify/functions/utils/sesClient.ts` | Shared helper for creating the SES client used for outbound email |
 | `amplify/functions/utils/submissionShared.ts` | Shared submission logic reused by the new-submission and follow-up handlers |
+
+#### Frontend Test Files
+
+##### `tests`
+
+| Path | Information |
+| --- | --- |
+| `tests/tsconfig.json` | TypeScript configuration for the test suite |
+| `tests/setup/setup.frontend.ts` | Shared Vitest and Testing Library setup for frontend tests |
+| `tests/shared/formSchema.test.ts` | Tests for the shared form schema |
+| `tests/shared/referenceNumbers.test.ts` | Tests for shared reference-number logic |
+
+##### `tests/src/components`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/components/BookingPanel.test.tsx` | Tests for the booking panel |
+| `tests/src/components/LanguageSupportButton.test.tsx` | Tests for the language support button |
+| `tests/src/components/TextToSpeechButton.test.tsx` | Tests for the text-to-speech button |
+
+##### `tests/src/components/FormPageComponents`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/components/FormPageComponents/FormPrivacyNotice.test.tsx` | Tests for the form privacy notice |
+| `tests/src/components/FormPageComponents/RequireFormSteps.test.tsx` | Tests for required form-step behaviour |
+| `tests/src/components/FormPageComponents/ResumeFromSave.test.tsx` | Tests for resuming a saved draft |
+
+##### `tests/src/components/ReferencePageComponents`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/components/ReferencePageComponents/AppointmentOptionsDialog.test.tsx` | Tests for the appointment options dialog on the reference page |
+| `tests/src/components/ReferencePageComponents/ScanButton.test.tsx` | Tests for the scan button |
+
+##### `tests/src/components/StaffComponents`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/components/StaffComponents/CaseItemCard.test.tsx` | Tests for the staff case item card |
+| `tests/src/components/StaffComponents/ConfirmChangeModal.test.tsx` | Tests for the staff confirmation modal |
+| `tests/src/components/StaffComponents/CurrentQueueItem.test.tsx` | Tests for the current queue item component |
+| `tests/src/components/StaffComponents/QueueRow.test.tsx` | Tests for the queue row component |
+| `tests/src/components/StaffComponents/SectionCard.test.tsx` | Tests for the staff section card |
+| `tests/src/components/StaffComponents/StaffNavItem.test.tsx` | Tests for the staff navigation item |
+| `tests/src/components/StaffComponents/StaffNavbar.test.tsx` | Tests for the staff navigation bar |
+| `tests/src/components/StaffComponents/StatCard.test.tsx` | Tests for the staff statistics card |
+
+##### `tests/src/components/SubmissionReceiptComponents`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptBody.test.tsx` | Tests for the receipt body component |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptDetailsCard.test.tsx` | Tests for the receipt details card |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptHeaderCard.test.tsx` | Tests for the receipt header card |
+| `tests/src/components/SubmissionReceiptComponents/ReceiptQrCard.test.tsx` | Tests for the receipt QR card |
+
+##### `tests/src/guards`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/guards/helpers.ts` | Test helpers for route-guard tests |
+| `tests/src/guards/RequireAuth.test.tsx` | Tests for the authenticated-route guard |
+| `tests/src/guards/RequireGuest.test.tsx` | Tests for the guest-route guard |
+| `tests/src/guards/RequireRole.test.tsx` | Tests for the role-route guard |
+
+##### `tests/src/hooks`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/hooks/useAppointmentReferenceActions.test.tsx` | Tests for the appointment reference actions hook |
+| `tests/src/hooks/useAuth.test.ts` | Tests for the auth hook |
+| `tests/src/hooks/useCaseDetails.test.ts` | Tests for the case-details hook |
+| `tests/src/hooks/useCheckReferenceNumber.test.tsx` | Tests for reference-number checking |
+| `tests/src/hooks/useDashboardStats.test.ts` | Tests for the dashboard stats hook |
+| `tests/src/hooks/useQueueItems.test.tsx` | Tests for the queue-items hook |
+| `tests/src/hooks/useServiceStats.test.ts` | Tests for the service-stats hook |
+
+##### `tests/src/utils`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/utils/getDataAuthMode.test.ts` | Tests for data auth mode selection |
+
+##### `tests/src/pages`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/pages/ReferencePage.test.tsx` | Tests for the reference page |
+| `tests/src/pages/UserDashboard.test.tsx` | Tests for the resident dashboard |
+
+##### `tests/src/pages/Form`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/pages/Form/Actions.test.tsx` | Tests for the actions form step |
+| `tests/src/pages/Form/EnquirySelection.test.tsx` | Tests for the enquiry selection page |
+| `tests/src/pages/Form/ExistingCaseFollowUp.test.tsx` | Tests for the existing-case follow-up page |
+| `tests/src/pages/Form/FormEntry.test.tsx` | Tests for the form entry page |
+| `tests/src/pages/Form/PersonalDetails.test.tsx` | Tests for the personal-details page |
+| `tests/src/pages/Form/ReviewAndSubmit.test.tsx` | Tests for the review and submit page |
+| `tests/src/pages/Form/SubmissionReceipt.test.tsx` | Tests for the submission receipt page |
+
+##### `tests/src/pages/Form/model`
+
+| Path | Information |
+| --- | --- |
+| `tests/src/pages/Form/model/buildSubmitEnquiryPayload.test.ts` | Tests for form submission payload building |
+| `tests/src/pages/Form/model/draftStorage.test.ts` | Tests for draft-storage behaviour |
+| `tests/src/pages/Form/model/enquirySelectionLogic.test.ts` | Tests for enquiry selection logic |
+| `tests/src/pages/Form/model/fieldMeta.test.ts` | Tests for form field metadata |
+| `tests/src/pages/Form/model/getEnquirySelectionState.test.ts` | Tests for derived enquiry selection state |
+
+#### Backend Test Files
+
+##### `tests/amplify/functions`
+
+| Path | Information |
+| --- | --- |
+| `tests/amplify/functions/adjustQueuePosition.test.ts` | Tests for queue-position adjustment |
+| `tests/amplify/functions/cancelAppointmentByReference.test.ts` | Tests for appointment cancellation by reference |
+| `tests/amplify/functions/checkInAppointmentByReference.test.ts` | Tests for appointment check-in by reference |
+| `tests/amplify/functions/checkTicketNumber.test.ts` | Tests for ticket-number checking |
+| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState-helpers.test.ts` | Tests for enquiry-state cleanup helpers |
+| `tests/amplify/functions/cleanupEnquiryState/cleanupEnquiryState.test.ts` | Tests for enquiry-state cleanup flow |
+| `tests/amplify/functions/flagCaseSafeguarding.test.ts` | Tests for safeguarding flag updates |
+| `tests/amplify/functions/getAvailableAppointmentTimes.test.ts` | Tests for appointment-time lookup |
+| `tests/amplify/functions/getCaseDetails.test.ts` | Tests for case-detail retrieval |
+| `tests/amplify/functions/getCaseFollowUp.test.ts` | Tests for existing-case follow-up retrieval |
+| `tests/amplify/functions/getDashboardStats.test.ts` | Tests for dashboard statistics retrieval |
+| `tests/amplify/functions/getDepartmentQueueStatus.test.ts` | Tests for department queue status retrieval |
+| `tests/amplify/functions/getQueueItems.test.ts` | Tests for queue-item retrieval |
+| `tests/amplify/functions/getServiceStats.test.ts` | Tests for service statistics retrieval |
+| `tests/amplify/functions/getSubmissionReceipt.test.ts` | Tests for submission receipt retrieval |
+| `tests/amplify/functions/getTicketInfo.test.ts` | Tests for ticket information retrieval |
+| `tests/amplify/functions/handleSteppedOut.test.ts` | Tests for stepped-out handling |
+| `tests/amplify/functions/markTicketSeen.test.ts` | Tests for marking tickets as seen |
+| `tests/amplify/functions/notifyResident.test.ts` | Tests for resident notifications |
+| `tests/amplify/functions/onTicketCompleted.test.ts` | Tests for ticket-completion follow-up |
+| `tests/amplify/functions/postConfirmation.test.ts` | Tests for post-confirmation user setup |
+| `tests/amplify/functions/setCasePriority.test.ts` | Tests for case-priority updates |
+| `tests/amplify/functions/submitCaseFollowUp.test.ts` | Tests for follow-up submission handling |
+| `tests/amplify/functions/submitEnquiry.test.ts` | Tests for enquiry submission handling |
+| `tests/amplify/functions/toggleNotifications.test.ts` | Tests for notification preference toggling |
+
+##### `tests/amplify/utils`
+
+| Path | Information |
+| --- | --- |
+| `tests/amplify/utils/caseAccess.test.ts` | Tests for case-access utilities |
+| `tests/amplify/utils/enquiriesStateTable.test.ts` | Tests for enquiry-state table utilities |
+| `tests/amplify/utils/getAppointmentReferenceDetails.test.ts` | Tests for appointment-reference helper logic |
+| `tests/amplify/utils/identityGroups.test.ts` | Tests for identity-group utilities |
+| `tests/amplify/utils/recalculateDepartmentQueue.test.ts` | Tests for queue recalculation logic |
+| `tests/amplify/utils/runCleanup.test.ts` | Tests for cleanup helper execution |
+| `tests/amplify/utils/submissionShared.test.ts` | Tests for shared submission utilities |
