@@ -97,9 +97,9 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
       proceed === "BOOK_APPOINTMENT" ? trimOrUndef(data.appointmentDateIso) : undefined,
     appointmentTime: proceed === "BOOK_APPOINTMENT" ? trimOrUndef(data.appointmentTime) : undefined,
 
-    firstName: trimOrUndef(data.firstName),
+    firstName: data.firstName.trim(),
     middleName: trimOrUndef(data.middleName),
-    lastName: trimOrUndef(data.lastName),
+    lastName: data.lastName.trim(),
     preferredName: trimOrUndef(data.preferredName),
 
     email: trimOrUndef(data.email),

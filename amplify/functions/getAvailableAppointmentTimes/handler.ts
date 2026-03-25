@@ -47,10 +47,8 @@ async function queryClaimedAppointmentTimes(departmentName: string, dateIso: str
       },
     }),
   );
-  return result
+  return result;
 }
-
-  const times = new Set<string>();
 
 // List all claimed appointment times for a given department and date by querying the enquiries state table
 async function listClaimedAppointmentTimes(departmentName: string, dateIso: string) {
