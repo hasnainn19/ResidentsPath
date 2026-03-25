@@ -169,13 +169,13 @@ describe("submitEnquiry handler", () => {
     expect(mockCaseCreate).toHaveBeenCalled();
   });
 
-  it("defaults the case title to first name and last name ending with a hyphen", async () => {
+  it("defaults the case title to first name and last name", async () => {
     const result = await handler(makeEvent(validInput));
 
     expect(result?.ok).toBe(true);
 
     const caseInput = mockCaseCreate.mock.calls[0][0];
-    expect(caseInput.name).toBe(`${validInput.firstName} ${validInput.lastName} -`);
+    expect(caseInput.name).toBe(`${validInput.firstName} ${validInput.lastName}`);
   });
 
   it("serialises supportNeeds to JSON for the case", async () => {
