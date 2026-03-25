@@ -31,6 +31,8 @@ const baseFormInput = {
   departmentName: "Homelessness" as const,
   enquiry: "Help with housing",
   proceed: "JOIN_DIGITAL_QUEUE" as const,
+  firstName: "Test",
+  lastName: "Tester",
 };
 
 describe("formSchema shared helpers", () => {
@@ -184,13 +186,31 @@ describe("formSchema", () => {
     expect(result.phone).toBe("+442079460018");
   });
 
-  it("treats blank trim-to-undefined fields as missing values during parsing", () => {
+  it("treats blank optional trim-to-undefined fields as missing values during parsing", () => {
     const result = formSchema.parse({
+      ...baseFormInput,
+      middleName: "   ",
+    });
+
+    expect(result.middleName).toBeUndefined();
+  });
+
+  it("rejects a missing first name", () => {
+    const result = formSchema.safeParse({
       ...baseFormInput,
       firstName: "   ",
     });
 
-    expect(result.firstName).toBeUndefined();
+    expectZodIssues(result, { path: ["firstName"], message: "firstName is required" });
+  });
+
+  it("rejects a missing last name", () => {
+    const result = formSchema.safeParse({
+      ...baseFormInput,
+      lastName: "   ",
+    });
+
+    expectZodIssues(result, { path: ["lastName"], message: "lastName is required" });
   });
 
   it("rejects non-string values passed through trim-to-undefined preprocessing", () => {
