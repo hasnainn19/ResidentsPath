@@ -39,6 +39,7 @@ interface CurrentQueueItemProps {
     isFlagged: boolean;
     position: number;
     notes: string | null;
+    createdAt: string;
   };
   totalPositions: number;
   handleSelectPosition: (caseId: string, position: number) => void;
@@ -74,6 +75,18 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
     { length: totalPositions },
     (_, index) => index + 1,
   );
+  const createdAtTime = useMemo(() => {
+    const value = new Date(caseItem.createdAt);
+
+    if (Number.isNaN(value.getTime())) {
+      return null;
+    }
+
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(value);
+  }, [caseItem.createdAt]);
   const statusColorMap: Record<string, "error" | "default"> = {
     Priority: "error",
     Standard: "default",
@@ -140,6 +153,11 @@ const CurrentQueueItem = (props: CurrentQueueItemProps) => {
               <Typography variant="caption" color="text.secondary">
                 #{caseItem.ticketNumber}
               </Typography>
+              {createdAtTime && (
+                <Typography variant="caption" color="text.secondary">
+                  Created {createdAtTime}
+                </Typography>
+              )}
             </Stack>
 
             <Typography variant="h6" fontWeight={600} gutterBottom>

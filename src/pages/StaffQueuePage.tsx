@@ -7,6 +7,10 @@ import {
   TextField,
   InputAdornment,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { generateClient } from "aws-amplify/data";
@@ -28,10 +32,14 @@ interface CaseItem {
   isFlagged: boolean;
   position: number;
   notes: string | null;
+  createdAt: string;
 }
 
 const StaffQueuePage = () => {
-  const client = useMemo(() => generateClient<Schema>({ authMode: "userPool" }), []);
+  const client = useMemo(
+    () => generateClient<Schema>({ authMode: "userPool" }),
+    [],
+  );
   const [searchParams] = useSearchParams();
   const selectedDepartmentName =
     searchParams.get("departmentName")?.trim() || "";
@@ -49,9 +57,13 @@ const StaffQueuePage = () => {
     isFlagged: item.flag,
     position: item.position,
     notes: item.notes,
+    createdAt: item.createdAt,
   }));
 
   const [search, setSearch] = useState("");
+  const [sortValue, setSortValue] = useState<"position" | "newest" | "oldest">(
+    "position",
+  );
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingPositionChange, setPendingPositionChange] = useState<{
     caseId: string;
@@ -68,8 +80,18 @@ const StaffQueuePage = () => {
           c.title.toLowerCase().includes(search.toLowerCase()) ||
           c.description.toLowerCase().includes(search.toLowerCase()),
       )
-      .sort((a, b) => a.position - b.position);
-  }, [search, cases]);
+      .sort((a, b) => {
+        if (sortValue === "newest")
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        if (sortValue === "oldest")
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        return a.position - b.position;
+      });
+  }, [search, cases, sortValue]);
 
   const queueTitle = selectedDepartmentName
     ? selectedDepartmentName.replace(/_/g, " ")
@@ -128,7 +150,7 @@ const StaffQueuePage = () => {
         {queueTitle}
       </Typography>
 
-      <Stack direction="row" spacing={2} mb={3}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <TextField
           fullWidth
           placeholder="Search cases..."
@@ -142,6 +164,21 @@ const StaffQueuePage = () => {
             ),
           }}
         />
+
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel>Sort by</InputLabel>
+          <Select
+            label="Sort by"
+            value={sortValue}
+            onChange={(e) =>
+              setSortValue(e.target.value as "position" | "newest" | "oldest")
+            }
+          >
+            <MenuItem value="position">Queue Position</MenuItem>
+            <MenuItem value="newest">Newest First</MenuItem>
+            <MenuItem value="oldest">Oldest First</MenuItem>
+          </Select>
+        </FormControl>
       </Stack>
 
       {loading ? (

@@ -129,9 +129,7 @@ const schema = a
         case: a.belongsTo("Case", "caseId"),
       })
       .secondaryIndexes((index) => [index("caseId")])
-      .authorization((allow) => [
-        allow.groups(["Staff"]),
-      ]),
+      .authorization((allow) => [allow.groups(["Staff"])]),
 
     // Department - service departments (Housing, Council Tax, etc)
     Department: a
@@ -574,7 +572,9 @@ const schema = a
           bookingReferenceNumber: a.string(),
         }),
       )
-      .authorization((allow) => [allow.groups(["Staff", "HounslowHouseDevices"])])
+      .authorization((allow) => [
+        allow.groups(["Staff", "HounslowHouseDevices"]),
+      ])
       .handler(a.handler.function(cancelAppointmentByReference)),
 
     getAvailableAppointmentTimes: a
