@@ -1,6 +1,6 @@
 ## User Testing
 
-The approach taken to user testing was the combination of the System Usability Scale (SUS) and an open-ended questionnaire. The test participants were given scenarios aiming to cover the core system features involved in both the staff and resident experiences. After completing these tasks, the participants completed the survey and questionnaire. The SUS was chosen due to its standardized measurement through its scoring system and its reliability when working with smaller sample sizes~\cite{sus_context}, while the open-ended questions provided valuable insights from the user's thoughts and experiences while interacting the system.
+The approach taken to user testing was the combination of the System Usability Scale (SUS) and an open-ended questionnaire. The test participants were given scenarios aiming to cover the core system features involved in both the staff and resident experiences. After completing these tasks, the participants completed the survey and questionnaire. The SUS was chosen due to its standardized measurement through its scoring system and its reliability when working with smaller sample sizes, while the open-ended questions provided valuable insights from the user's thoughts and experiences while interacting the system.
 
 ### User Manual - Resident User Testing
 
