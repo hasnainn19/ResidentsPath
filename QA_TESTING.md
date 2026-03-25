@@ -33,6 +33,31 @@ These checks can be repeated in either a sandbox environment or the deployed dem
 
 ## Notes
 
-- Add screenshots or short notes where useful.
 - Record any defects found during testing and link them to a later fix or commit where possible.
 - Use `Pass`, `Fail`, or `Blocked` when completing the status column.
+
+
+## Completed Test Environment
+
+| Item | Details |
+| --- | --- |
+| Environment | deployed version |
+| Test date | 25 March 2026 |
+| Tester | Jacob Whiting |
+| Build / commit | `70962bb` (`main`) |
+
+## Executed QA Record
+
+| Test ID | Actual result | Status |
+| --- | --- | --- |
+| QA-01 | Submission succeeded and the receipt showed a case reference number and queue ticket information. | Pass |
+| QA-02 | Appointment booking succeeded and the receipt showed the appointment date, time, and reference number. | Pass |
+| QA-03 | The reference number lookup returned the correct queue or appointment information. | Pass |
+| QA-04 | Appointment cancellation completed successfully and a clear success message was shown. | Pass |
+| QA-05 | Appointment check-in completed successfully and the check-in confirmation page was shown. | Pass |
+| QA-06 | Queue actions updated correctly and the changed queue state was visible in the staff interface. | Pass |
+| QA-07 | Resident access to staff-only pages was blocked, and staff access to the same pages succeeded. | Pass |
+| QA-08 | The saved draft resumed correctly and could also be cleared when starting again. | Pass |
+| QA-09 | Notification preferences updated successfully and the dashboard reflected the current notification state. | Pass |
+| QA-10 | The QR scan flow accepted a valid code and returned the correct queue or appointment information. | Pass |
+| QA-11 | The language switcher updated supported interface text without breaking the page flow. | Pass |

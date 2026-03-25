@@ -2,11 +2,33 @@
 
 This README provides the main repository guide, including access instructions, file information, authorship, testing information, and links to related project documents.
 
+## Authors
+
+The table below summarises the main contribution areas associated with each contributor.
+
+| Author | Main contribution areas |
+| --- | --- |
+| [Jacob Whiting](https://github.com/JacobSW1) | Resident form, submission logic, shared form schema, follow-up submissions, appointment booking and appointment reference backend, and related testing |
+| [Hasnain Naqvi](https://github.com/hasnainn19) | Backend setup, data schema, authentication, notifications, backend integration, and related testing |
+| [Naomi Quartsin](https://github.com/NQuartsin) | Reference page frontend, QR scanning, ticket and reference lookup, and related testing |
+| [Romina Hosseinkhani](https://github.com/RominaKCL) | User dashboard, translations, nav bar, text-to-speech functionality, and related testing |
+| [Abu-Bakarr Jalloh](https://github.com/jall0h) | Staff dashboard, queue management, case views, staff queue actions, and related testing |
+
 ## Access and Installation
 
 ### Live Demo
 
 - [ResidentsPath live demo](https://www.residentspath.uk)
+
+### Deployed Demo Staff Accounts
+
+The deployed version already includes pre-created staff accounts:
+
+- `StaffAccount1@residentspath.com`
+- `StaffAccount2@residentspath.com`
+- `StaffAccount3@residentspath.com`
+
+Password for all three staff accounts: `Testaccount123*`
 
 ### Local Setup
 
@@ -34,16 +56,6 @@ Notes:
 - `npx ampx sandbox seed` seeds the department data used by the prototype within the sandbox.
 - On the production demo deployment, seeded tickets are created every day at midnight UTC.
 - The frontend expects `amplify_outputs.json` to exist when the app starts.
-
-### Deployed Demo Staff Accounts
-
-The deployed version already includes pre-created staff accounts:
-
-- `StaffAccount1@residentspath.com`
-- `StaffAccount2@residentspath.com`
-- `StaffAccount3@residentspath.com`
-
-Password for all three staff accounts: `Testaccount123*`
 
 ### Cognito Group Setup For Local Deployments
 
@@ -103,8 +115,10 @@ This prototype does not include a user manual. Instead, guidance is built into t
 ## Related Documents
 
 - `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
-- `QA_TESTING.md` contains a manual quality-assurance checklist for the prototype.
+- `QA_TESTING.md` contains a manual quality assurance checklist for the prototype.
 - `RISK_ANALYSIS.md` contains the prototype-specific risk analysis and mitigation summary.
+- `user-testing/USER_TESTING_METHODS.md` contains the user testing method, survey, and results summary.
+- The user testing response data can be found in `user-testing/ResidentsPathUsabilityQuestionnaire-FormResponses.csv`.
 
 ## Incomplete Implementation
 
@@ -113,23 +127,11 @@ This prototype does not include a user manual. Instead, guidance is built into t
 - Mobile UI support is only implemented for the resident form. The reference page, dashboards, and staff workflows all require a desktop or laptop to use.
 - Staff accounts cannot sign up through the prototype and must be created or assigned through the AWS Cognito Console.
 
-## Authors
-
-The table below summarises the main contribution areas associated with each contributor.
-
-| Author | Main contribution areas |
-| --- | --- |
-| [Jacob Whiting](https://github.com/JacobSW1) | Resident form, submission logic, shared form schema, follow-up submissions, appointment booking and appointment reference backend, and related testing |
-| [Hasnain Naqvi](https://github.com/hasnainn19) | Backend setup, data schema, authentication, notifications, backend integration, and related testing |
-| [Naomi Quartsin](https://github.com/NQuartsin) | Reference page frontend, QR scanning, ticket and reference lookup, and related testing |
-| [Romina Hosseinkhani](https://github.com/RominaKCL) | User dashboard, translations, nav bar, text-to-speech functionality, and related testing |
-| [Abu-Bakarr Jalloh](https://github.com/jall0h) | Staff dashboard, queue management, case views, staff queue actions, and related testing |
-
 ## Repository Structure and File Inventory
 
 The tables below cover files included in the repository. Generated files created during install, build, or sandbox provisioning are not listed.
 
-#### Root, Configuration, and Static Files
+#### Project Documents
 
 | Path | Information |
 | --- | --- |
@@ -137,6 +139,13 @@ The tables below cover files included in the repository. Generated files created
 | `CHANGELOG.md` | Development timeline and feedback-driven change record |
 | `QA_TESTING.md` | Basic manual quality-assurance checklist for the prototype |
 | `RISK_ANALYSIS.md` | Risk analysis and mitigation summary for the implemented prototype |
+| `user-testing/USER_TESTING_METHODS.md` | User-testing method, survey, and results summary |
+| `user-testing/ResidentsPathUsabilityQuestionnaire-FormResponses.csv` | Raw questionnaire responses collected during user testing |
+
+#### Root, Configuration, and Static Files
+
+| Path | Information |
+| --- | --- |
 | `LICENSE` | Licence for the submitted code |
 | `.gitignore` | Git ignore rules |
 | `package.json` | Root package manifest and scripts |
