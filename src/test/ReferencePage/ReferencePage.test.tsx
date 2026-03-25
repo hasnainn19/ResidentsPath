@@ -221,9 +221,11 @@ describe("ReferencePage", () => {
         await user.type(input, "APT-ABC234");
         await user.click(screen.getByRole("button", { name: "appOptions-cancel" }));
 
-        expect(mockCancel).toHaveBeenCalledWith("APT-ABC234");
-        expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
-        expect(input).toHaveValue("");
+        await waitFor(() => {
+            expect(mockCancel).toHaveBeenCalledWith("APT-ABC234");
+            expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
+            expect(input).toHaveValue("");
+        });
     });
 
     it("navigates to checkin page when check-in succeeds", async () => {
@@ -237,10 +239,12 @@ describe("ReferencePage", () => {
         await user.type(input, "APT-ABC234");
         await user.click(screen.getByRole("button", { name: "landing-check" }));
 
-        expect(mockCheckIn).toHaveBeenCalledWith("APT-ABC234");
-        expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
-        expect(mockNavigate).toHaveBeenCalledWith("/checkinpage");
-        expect(input).toHaveValue("");
+        await waitFor(() => {
+            expect(mockCheckIn).toHaveBeenCalledWith("APT-ABC234");
+            expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
+            expect(mockNavigate).toHaveBeenCalledWith("/checkinpage");
+            expect(input).toHaveValue("");
+        });
     });
 
     it("shows appointment action status and clears it when closed", async () => {
