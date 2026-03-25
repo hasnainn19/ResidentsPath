@@ -14,7 +14,9 @@ import { getAmplifyClient } from "../utils/amplifyClient";
 
 const client = await getAmplifyClient();
 
-export const handler: Schema["getQueueItems"]["functionHandler"] = async (event) => {
+export const handler: Schema["getQueueItems"]["functionHandler"] = async (
+  event,
+) => {
   const { departmentName } = event.arguments;
 
   const startOfDay = new Date();
@@ -74,6 +76,7 @@ export const handler: Schema["getQueueItems"]["functionHandler"] = async (event)
       flag: caseRecord?.flag ?? false,
       position: ticket.position ?? 1,
       notes: ticket.notes ?? null,
+      createdAt: ticket.createdAt,
     };
   });
 
