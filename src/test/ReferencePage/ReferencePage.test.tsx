@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ReferencePage from "../../pages/ReferencePage";
@@ -23,6 +23,20 @@ const mockedCheckReferenceHook = {
   refNoError: "",
   checkRefNo: mockCheckRefNo,
   isChecking: false,
+};
+
+const mockedAppointmentActionsHook = {
+  actionStatus: null as { severity: "success" | "info" | "warning"; text: string } | null,
+  canCheckInAppointments: false,
+  clearActionStatus: vi.fn(),
+  isCheckingIn: false,
+  isCancelling: false,
+  cancelAppointmentReference: mockCancel,
+  checkInAppointmentReference: mockCheckIn,
+};
+
+const mockedAppointmentDialog = {
+  renderWithoutReference: false,
 };
 
 // -------------------
@@ -52,15 +66,7 @@ vi.mock("../../hooks/useCheckReferenceNumber", () => ({
 }));
 
 vi.mock("../../hooks/useAppointmentReferenceActions", () => ({
-  useAppointmentReferenceActions: () => ({
-    actionStatus: null,
-    canCheckInAppointments: false,
-    clearActionStatus: vi.fn(),
-    isCheckingIn: false,
-    isCancelling: false,
-    cancelAppointmentReference: mockCancel,
-    checkInAppointmentReference: mockCheckIn,
-  }),
+  useAppointmentReferenceActions: () => mockedAppointmentActionsHook,
 }));
 
 vi.mock("aws-amplify/data", () => ({
@@ -74,7 +80,6 @@ vi.mock("aws-amplify/data", () => ({
     },
   }),
 }));
-
 
 vi.mock("html5-qrcode", () => {
   return {
@@ -104,7 +109,28 @@ vi.mock("../../components/ReferencePageComponents/ScanButton", () => ({
   default: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
 }));
 vi.mock("../../components/ReferencePageComponents/AppointmentOptionsDialog", () => ({
-  default: () => <div>Dialog</div>,
+  default: ({
+    appointmentReferenceNumber,
+    canCheckInAppointments,
+    onClose,
+    onCancelAppointment,
+    onCheckInAppointment,
+  }: {
+    appointmentReferenceNumber?: string | null;
+    canCheckInAppointments: boolean;
+    onClose: () => void;
+    onCancelAppointment: () => void;
+    onCheckInAppointment: () => void;
+  }) =>
+    appointmentReferenceNumber || mockedAppointmentDialog.renderWithoutReference ? (
+      <div>
+        <button onClick={onClose}>Close appointment options</button>
+        <button onClick={onCancelAppointment}>appOptions-cancel</button>
+        {canCheckInAppointments ? (
+          <button onClick={onCheckInAppointment}>landing-check</button>
+        ) : null}
+      </div>
+    ) : null,
 }));
 
 // -------------------
@@ -117,6 +143,11 @@ describe("ReferencePage", () => {
         mockedCheckReferenceHook.foundCaseId = null;
         mockedCheckReferenceHook.appointmentReferenceNumber = null;
         mockedCheckReferenceHook.refNoError = "";
+        mockedAppointmentActionsHook.actionStatus = null;
+        mockedAppointmentActionsHook.canCheckInAppointments = false;
+        mockedAppointmentActionsHook.isCheckingIn = false;
+        mockedAppointmentActionsHook.isCancelling = false;
+        mockedAppointmentDialog.renderWithoutReference = false;
     });
 
     it("renders main UI elements", () => {
@@ -181,19 +212,101 @@ describe("ReferencePage", () => {
     });
             
     it("calls cancelAppointmentReference when cancel is triggered", async () => {
-        mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
-        mockCancel.mockResolvedValue({ ok: true });
+        mockedCheckReferenceHook.appointmentReferenceNumber = "APT-ABC234";
+        mockCancel.mockResolvedValue({
+            ok: true,
+            errorMessage: undefined,
+            alreadyCancelled: undefined,
+        });
+        const user = userEvent.setup();
         render(<ReferencePage />);
-        await mockCancel("ref123");
-        expect(mockCancel).toHaveBeenCalledWith("ref123");
+        const input = screen.getByRole("textbox");
+
+        await user.type(input, "APT-ABC234");
+        await user.click(screen.getByRole("button", { name: "appOptions-cancel" }));
+
+        await waitFor(() => {
+            expect(mockCancel).toHaveBeenCalledWith("APT-ABC234");
+            expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
+            expect(input).toHaveValue("");
+        });
     });
 
     it("navigates to checkin page when check-in succeeds", async () => {
-        mockedCheckReferenceHook.appointmentReferenceNumber = "ref123";
-        mockCheckIn.mockResolvedValue({ checkedIn: true });
+        mockedCheckReferenceHook.appointmentReferenceNumber = "APT-ABC234";
+        mockedAppointmentActionsHook.canCheckInAppointments = true;
+        mockCheckIn.mockResolvedValue({
+            ok: true,
+            checkedIn: true,
+            alreadyCheckedIn: undefined,
+            errorMessage: undefined,
+        });
+        const user = userEvent.setup();
         render(<ReferencePage />);
-        await mockCheckIn("ref123");
-        expect(mockCheckIn).toHaveBeenCalledWith("ref123");
+        const input = screen.getByRole("textbox");
+
+        await user.type(input, "APT-ABC234");
+        await user.click(screen.getByRole("button", { name: "landing-check" }));
+
+        await waitFor(() => {
+            expect(mockCheckIn).toHaveBeenCalledWith("APT-ABC234");
+            expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalled();
+            expect(mockNavigate).toHaveBeenCalledWith("/checkinpage");
+            expect(input).toHaveValue("");
+        });
+    });
+
+    it("shows appointment action status and clears it when closed", async () => {
+        mockedAppointmentActionsHook.actionStatus = {
+            severity: "success",
+            text: "Appointment updated",
+        };
+        const user = userEvent.setup();
+
+        render(<ReferencePage />);
+
+        expect(screen.getByText("Appointment updated")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /close/i }));
+
+        expect(mockedAppointmentActionsHook.clearActionStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes the appointment dialog through the page handler", async () => {
+        mockedCheckReferenceHook.appointmentReferenceNumber = "APT-ABC234";
+        const user = userEvent.setup();
+
+        render(<ReferencePage />);
+
+        await user.click(screen.getByRole("button", { name: "Close appointment options" }));
+
+        expect(mockedCheckReferenceHook.clearAppointmentReference).toHaveBeenCalledTimes(1);
+    });
+
+    it("does nothing when cancelling without an appointment reference", async () => {
+        mockedAppointmentDialog.renderWithoutReference = true;
+        const user = userEvent.setup();
+
+        render(<ReferencePage />);
+
+        await user.click(screen.getByRole("button", { name: "appOptions-cancel" }));
+
+        expect(mockCancel).not.toHaveBeenCalled();
+        expect(mockedCheckReferenceHook.clearAppointmentReference).not.toHaveBeenCalled();
+    });
+
+    it("does nothing when checking in without an appointment reference", async () => {
+        mockedAppointmentDialog.renderWithoutReference = true;
+        mockedAppointmentActionsHook.canCheckInAppointments = true;
+        const user = userEvent.setup();
+
+        render(<ReferencePage />);
+
+        await user.click(screen.getByRole("button", { name: "landing-check" }));
+
+        expect(mockCheckIn).not.toHaveBeenCalled();
+        expect(mockNavigate).not.toHaveBeenCalled();
+        expect(mockedCheckReferenceHook.clearAppointmentReference).not.toHaveBeenCalled();
     });
 
     it("starts scanning when QR scan button is clicked", async () => {
@@ -246,7 +359,7 @@ describe("ReferencePage", () => {
     });
 
     it("calls checkRefNo when QR code is decoded", async () => {
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
         Html5Qrcode.mockImplementation(createMockScanner({
@@ -273,7 +386,7 @@ describe("ReferencePage", () => {
     it("shows an alert if QR code format is invalid", async () => {
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn((...args: any[]) => {
                 capturedOnDecode = args[2];
@@ -300,7 +413,7 @@ describe("ReferencePage", () => {
     it("shows an alert if QR code prefix is incorrect", async () => {
         let capturedOnDecode: ((decodedText: string) => void) | null = null;
 
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn((...args: any[]) => {
                 capturedOnDecode = args[2];
@@ -323,7 +436,7 @@ describe("ReferencePage", () => {
     });
 
     it("shows an alert if QR scanner fails to start", async () => {
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn(() => Promise.reject("Camera not found")),
         }));
@@ -339,7 +452,7 @@ describe("ReferencePage", () => {
     });
 
     it("shows a QR scan error alert and allows user to close it", async () => {
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn(() => Promise.reject("Camera not found")),
         }));
@@ -362,7 +475,7 @@ describe("ReferencePage", () => {
 
     it("calls stopScanner cleanup when ReferencePage unmounts", async () => {
 
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         const stopMock = vi.fn().mockResolvedValue(undefined);
         const clearMock = vi.fn();
 
@@ -389,7 +502,7 @@ describe("ReferencePage", () => {
     });
 
     it("does nothing if scanning is already in progress or startingRef is true", async () => {
-        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as vi.Mock;
+        const Html5Qrcode = (await import("html5-qrcode")).Html5Qrcode as unknown as Mock;
         Html5Qrcode.mockImplementation(createMockScanner({
             start: vi.fn(() => Promise.resolve()),
         }));
