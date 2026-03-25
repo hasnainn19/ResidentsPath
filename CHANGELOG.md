@@ -62,6 +62,12 @@ All notable changes to this prototype are documented in this file.
 - Set up the automated testing suite, including coverage reporting and backend unit-test support (`edd7e6e`).
 - Implemented automated testing across the prototype, covering submission and receipt flows, follow-up flows, shared form logic, form pages and components, guards, user and staff dashboard views, reference page flows, and backend workflows (`cfe6d45`, `39ad88b`, `19d720f`, `b3afba3`, `48b7493`, `2405d32`, `ac121c7`, `f9b05c3`, `03d7d49`, `95905e6`, `4052889`, `faea774`, `fd502a4`, `f8d11d0`, `dfbb614`, `fbc1662`).
 
+### Fixed
+
+- Fixed a validation mismatch so first-name and last-name requirements were enforced consistently (`aa22db2`, `0549195`).
+- Removed dead code identified while expanding automated test coverage (`290964f`, `3bbceee`, `5b9b510`, `c12ca20`).
+
+
 ## [Implementing Feedback]
 
 This section records major prototype changes that show iterative design in response to feedback.
@@ -82,7 +88,7 @@ This section records major prototype changes that show iterative design in respo
 
 - Enquiry selection was moved to the first step (`72cdfe5`).
 - The enquiry list was changed to the council-provided service options (`72cdfe5`).
-- Self-service option were removed from the form. (`72cdfe5`).
+- Self-service options were removed from the form. (`72cdfe5`).
 
 #### Feedback Incorporated
 
