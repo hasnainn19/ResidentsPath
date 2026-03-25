@@ -213,7 +213,11 @@ describe("ReferencePage", () => {
             
     it("calls cancelAppointmentReference when cancel is triggered", async () => {
         mockedCheckReferenceHook.appointmentReferenceNumber = "APT-ABC234";
-        mockCancel.mockResolvedValue({ ok: true });
+        mockCancel.mockResolvedValue({
+            ok: true,
+            errorMessage: undefined,
+            alreadyCancelled: undefined,
+        });
         const user = userEvent.setup();
         render(<ReferencePage />);
         const input = screen.getByRole("textbox");
@@ -231,7 +235,12 @@ describe("ReferencePage", () => {
     it("navigates to checkin page when check-in succeeds", async () => {
         mockedCheckReferenceHook.appointmentReferenceNumber = "APT-ABC234";
         mockedAppointmentActionsHook.canCheckInAppointments = true;
-        mockCheckIn.mockResolvedValue({ checkedIn: true });
+        mockCheckIn.mockResolvedValue({
+            ok: true,
+            checkedIn: true,
+            alreadyCheckedIn: undefined,
+            errorMessage: undefined,
+        });
         const user = userEvent.setup();
         render(<ReferencePage />);
         const input = screen.getByRole("textbox");
