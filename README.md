@@ -86,6 +86,16 @@ npx vitest run tests/src/pages/Form/FormEntry.test.tsx
 npx vitest run tests/amplify/functions/submitEnquiry.test.ts
 ```
 
+### Coverage Summary
+
+Latest recorded coverage summary:
+
+![Coverage summary 1](tests/coverage_report/Coverage1.png)
+
+![Coverage summary 2](tests/coverage_report/Coverage2.png)
+
+If coverage is generated locally, the full HTML report can be opened from [coverage/index.html](coverage/index.html).
+
 ### Automated Testing Rationale
 
 The testing approach focused mainly on unit testing non-trivial frontend behaviour, shared validation rules, and backend behaviour, including edge cases where necessary. The aim was to achieve high coverage wherever practical, with only very small or trivial logic left untested.
