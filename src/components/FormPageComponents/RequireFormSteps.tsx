@@ -25,8 +25,10 @@ function isStep1Complete(data: FormData) {
 }
 
 function isStep2Complete(data: FormData) {
-  // Step 2 is always optional but requires step 1 to be complete
-  return isStep1Complete(data); 
+  const hasFirstName = typeof data.firstName === "string" && data.firstName.trim() !== "";
+  const hasLastName = typeof data.lastName === "string" && data.lastName.trim() !== "";
+
+  return hasFirstName && hasLastName;
 }
 
 function isStep3Complete(data: FormData) {

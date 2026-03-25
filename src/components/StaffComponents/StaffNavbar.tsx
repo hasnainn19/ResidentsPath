@@ -1,4 +1,4 @@
-import { Drawer, List, Toolbar, Typography, Box } from "@mui/material";
+import { Alert, Drawer, List, Toolbar, Typography, Box } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import QueueIcon from "@mui/icons-material/FormatListBulleted";
 import WorkIcon from "@mui/icons-material/Work";
@@ -7,18 +7,20 @@ import StaffNavItem from "./StaffNavItem";
 import { useAuth } from "../../hooks/useAuth";
 import { signOut } from "aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 const drawerWidth = 240;
 
 // This component represents the sidebar navigation for staff users, providing links to key sections of the dashboard such as the main dashboard, current cases, staff directory, and personal cases. It also includes a user profile section with an accordion for additional options like viewing the profile, audit logs, and logging out.
 const StaffNavbar = () => {
   const { givenName, familyName } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
   const handleLogout = async () => {
     try {
       await signOut();
       navigate("/");
     } catch (error) {
-      console.error("Error signing out:", error);
+      setError("Failed to sign out. Please try again.");
     }
   };
 
@@ -91,6 +93,11 @@ const StaffNavbar = () => {
           <StaffNavItem icon={<PersonIcon />} label="User Dashboard" url="/" />
         </Box>
         <Box sx={{ mb: 2, padding: 2 }}>
+          {error && (
+            <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 1 }}>
+              {error}
+            </Alert>
+          )}
           <Typography
             variant="body1"
             fontWeight={500}

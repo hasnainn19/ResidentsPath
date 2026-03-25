@@ -13,11 +13,14 @@ import BookingPanel from "../../components/BookingPanel";
 import { FIELD_META } from "./model/fieldMeta";
 import type { Proceed } from "./model/formFieldTypes";
 import {
+  DepartmentLabelByName,
   FIELD_TEXT_CONSTRAINTS,
-  isValidCaseReferenceNumber,
-  normaliseCaseReferenceNumber,
   type DepartmentName,
 } from "../../../shared/formSchema";
+import {
+  isValidCaseReferenceNumber,
+  normaliseCaseReferenceNumber,
+} from "../../../shared/referenceNumbers";
 import { getDataAuthMode } from "../../utils/getDataAuthMode";
 
 type CaseLookup = {
@@ -119,29 +122,27 @@ export default function ExistingCaseFollowUp() {
   const appointmentUnavailable = !!lookupResult?.hasReachedAppointmentLimit;
   const bookingIncomplete =
     proceed === "BOOK_APPOINTMENT" && (!appointmentDateIso.trim() || !appointmentTime.trim());
+  const serviceAreaLabel = lookupResult
+    ? DepartmentLabelByName[lookupResult.departmentName] ?? lookupResult.departmentName
+    : "";
 
   const canSubmit =
     !!lookupResult &&
     !!proceed &&
-    !(appointmentUnavailable && proceed === "BOOK_APPOINTMENT") &&
     !bookingIncomplete &&
     !submitting;
 
   const handleSubmit = async () => {
-    if (!lookupResult || !canSubmit) {
-      if (!lookupResult) {
-        setSubmitError("Find your case before you continue.");
-      } else if (!proceed) {
+    if (!canSubmit) {
+      if (!proceed) {
         setSubmitError("Choose how you want to proceed.");
-      } else if (appointmentUnavailable && proceed === "BOOK_APPOINTMENT") {
-        setSubmitError(
-          "You can only book up to two appointments for this case online. Please contact us if you need another appointment.",
-        );
       } else if (bookingIncomplete) {
         setSubmitError("Choose an appointment date and time.");
       }
       return;
     }
+
+    const activeCase = lookupResult!;
 
     setSubmitting(true);
     setSubmitError(null);
@@ -151,7 +152,7 @@ export default function ExistingCaseFollowUp() {
       const response = await client.mutations.submitCaseFollowUp(
         {
           input: {
-            referenceNumber: lookupResult.referenceNumber,
+            referenceNumber: activeCase.referenceNumber,
             caseUpdate: caseUpdate.trim() || undefined,
             proceed,
             appointmentDateIso: proceed === "BOOK_APPOINTMENT" ? appointmentDateIso : undefined,
@@ -186,7 +187,7 @@ export default function ExistingCaseFollowUp() {
             estimatedWaitTimeUpper: result.estimatedWaitTimeUpper ?? undefined,
             appointmentDateIso: proceed === "BOOK_APPOINTMENT" ? appointmentDateIso : undefined,
             appointmentTime: proceed === "BOOK_APPOINTMENT" ? appointmentTime : undefined,
-            departmentName: lookupResult.departmentName,
+            departmentName: serviceAreaLabel,
           },
         },
       });
@@ -304,7 +305,7 @@ export default function ExistingCaseFollowUp() {
                       Case found: {lookupResult.referenceNumber}
                     </Typography>
                     <Typography variant="body2">
-                      Service area: {lookupResult.departmentName || "Unknown service"}
+                      Service area: {serviceAreaLabel || "Unknown service"}
                     </Typography>
                   </Stack>
                 </Alert>

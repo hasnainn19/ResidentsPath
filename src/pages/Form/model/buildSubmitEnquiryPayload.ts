@@ -78,7 +78,7 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
   const contactMethod = optionalValue(data.contactMethod);
   const phoneCountry = trimOrUndef(data.phoneCountry);
   const phone = trimOrUndef(data.phone);
-  const dob = data.provideDetails === "yes" ? trimOrUndef(data.dob) : undefined;
+  const dob = trimOrUndef(data.dob);
   const ageRange =
     optionalValue(data.ageRange) ??
     (sel.selectedEnquiry?.askAgeQs === true && dob ? getAgeRangeFromDob(dob) : undefined);
@@ -97,9 +97,9 @@ export function buildSubmitEnquiryPayload(data: FormData): formInput {
       proceed === "BOOK_APPOINTMENT" ? trimOrUndef(data.appointmentDateIso) : undefined,
     appointmentTime: proceed === "BOOK_APPOINTMENT" ? trimOrUndef(data.appointmentTime) : undefined,
 
-    firstName: trimOrUndef(data.firstName),
+    firstName: data.firstName.trim(),
     middleName: trimOrUndef(data.middleName),
-    lastName: trimOrUndef(data.lastName),
+    lastName: data.lastName.trim(),
     preferredName: trimOrUndef(data.preferredName),
 
     email: trimOrUndef(data.email),
