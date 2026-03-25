@@ -94,10 +94,12 @@ The testing approach focused mainly on unit testing non-trivial frontend behavio
 
 - `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
 
-## Known Missing Implementation
+## Incomplete Implementation
 
-- Translation support is not yet available across all pages. In particular, the resident form is only partially translated.
+- Translation support is not available across all pages. In particular, the resident form is only partially translated.
+- Text-to-speech support is only available in English.
 - Mobile UI support is mainly implemented for the resident form. The reference page, dashboards, and staff workflows all require a desktop or laptop to use.
+- Staff accounts cannot sign up through the prototype and must be created or assigned through the AWS Cognito Console.
 
 ## Authors
 
@@ -122,6 +124,7 @@ The tables below cover files included in the repository. Generated files created
 | `README.md` | Main repository guide |
 | `CHANGELOG.md` | Development timeline and feedback-driven change record |
 | `LICENSE` | Licence for the submitted code |
+| `.gitignore` | Git ignore rules for dependencies, build output, coverage files, and local environment artefacts |
 | `package.json` | Root package manifest and scripts |
 | `package-lock.json` | Root dependency lockfile |
 | `tsconfig.json` | Base TypeScript configuration |
@@ -129,6 +132,7 @@ The tables below cover files included in the repository. Generated files created
 | `tsconfig.node.json` | Node and tooling TypeScript configuration |
 | `vite.config.ts` | Vite build and test configuration |
 | `eslint.config.js` | ESLint configuration |
+| `.github/workflows/ci.yml` | GitHub Actions workflow for running the project checks in continuous integration |
 | `amplify.yml` | Amplify deployment configuration |
 | `index.html` | Vite application HTML entry point |
 | `public/vite.svg` | Default Vite static asset |
@@ -274,7 +278,10 @@ The tables below cover files included in the repository. Generated files created
 | `src/test/guards/RequireGuest.test.tsx` | Tests for the guest-route guard |
 | `src/test/guards/RequireRole.test.tsx` | Tests for the role-route guard |
 | `src/test/hooks/useAuth.test.ts` | Tests for the auth hook |
+| `src/test/hooks/useCaseDetails.test.ts` | Tests for the case-details hook |
 | `src/test/hooks/useDashboardStats.test.ts` | Tests for the dashboard stats hook |
+| `src/test/hooks/useQueueItems.test.tsx` | Tests for the queue-items hook |
+| `src/test/hooks/useServiceStats.test.ts` | Tests for the service-stats hook |
 | `src/test/ReferencePage/ReferencePage.test.tsx` | Tests for the reference page |
 | `src/test/ReferencePage/AppointmentOptionsDialog.test.tsx` | Tests for the appointment options dialog on the reference page |
 | `src/test/ReferencePage/ScanButton.test.tsx` | Tests for the scan button |
