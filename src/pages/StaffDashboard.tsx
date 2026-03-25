@@ -11,12 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  Groups as GroupsIcon,
-  ExitToApp as ExitToAppIcon,
-  PriorityHigh as PriorityHighIcon,
-  SupervisorAccount as SupervisorAccountIcon,
-} from "@mui/icons-material";
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import GroupsIcon from '@mui/icons-material/Groups';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import StatCard from "../components/StaffComponents/StatCard";
 import QueueRow from "../components/StaffComponents/QueueRow";
 import useDashboardStats from "../hooks/useDashboardStats";

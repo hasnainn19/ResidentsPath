@@ -43,8 +43,6 @@ export type EnquiryItem = {
 
 export type LanguageOption = { code: string; label: string };
 
-export type YesNo = "yes" | "no";
-
 export type AgeRange = "" | NonNullable<formInput["ageRange"]>;
 
 export type PronounsOption = "" | NonNullable<formInput["pronouns"]>;
@@ -53,7 +51,6 @@ export type FormData = {
   language: string;
   privacyNoticeAccepted: boolean;
 
-  provideDetails: YesNo;
   firstName: string;
   middleName: string;
   lastName: string;

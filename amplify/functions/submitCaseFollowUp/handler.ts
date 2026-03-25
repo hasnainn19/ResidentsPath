@@ -30,7 +30,6 @@ import {
   type CreatedVisitResourcesState,
 } from "../utils/submissionShared";
 import { isStaffIdentity } from "../utils/identityGroups";
-import { runCleanup, tryCleanup } from "../utils/runCleanup";
 
 type SubmitCaseFollowUpErrorCode = "VALIDATION" | "CAPACITY" | "CONFLICT" | "SERVER";
 
@@ -240,17 +239,6 @@ export const handler: Schema["submitCaseFollowUp"]["functionHandler"] = async (e
       createdAppointmentId: createdVisitResources.createdAppointmentId ?? undefined,
       createdTicketId: createdVisitResources.createdTicketId ?? undefined,
     });
-
-    if (createdCaseUpdateId) {
-      const caseUpdateId = createdCaseUpdateId;
-      await tryCleanup("submitCaseFollowUp: cleanup CaseUpdate.delete failed", () =>
-        runCleanup(
-          "submitCaseFollowUp: CaseUpdate.delete failed",
-          `Failed to delete case update ${caseUpdateId}`,
-          () => client.models.CaseUpdate.delete({ id: caseUpdateId }),
-        ),
-      );
-    }
 
     await cleanupCreatedVisitResources(client, createdVisitResources, "submitCaseFollowUp");
 

@@ -19,14 +19,15 @@ export const handler: Schema["flagCaseSafeguarding"]["functionHandler"] =
     const { caseId, flagged } = event.arguments;
 
     if (!caseId || flagged == null) {
-      console.error("caseId and flagged are required");
+      throw new Error("caseId and flag values are required");
     }
 
     try {
       await client.models.Case.update({ id: caseId, flag: flagged });
     } catch (error) {
-      console.error(`Could not apply safeguarding flag for case:${caseId}`);
-      return false;
+      throw new Error(
+        `Could not apply safeguarding flag for case:${caseId}, ${error}`,
+      );
     }
 
     return true;

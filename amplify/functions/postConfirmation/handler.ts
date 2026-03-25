@@ -2,6 +2,7 @@ import type { PostConfirmationTriggerHandler } from "aws-lambda";
 import { AdminAddUserToGroupCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { cognitoClient } from "../utils/cognitoClient";
+import { logModelErrors } from "../utils/runCleanup";
 
 /**
  * Lambda function to handle Cognito post-confirmation trigger.
@@ -50,7 +51,12 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
             lastName: familyName,
         });
 
-        console.log(`Successfully created User record for ${email} with ID ${result.data?.id}`);
+        if (result.errors?.length) {
+            logModelErrors("postConfirmation: User.create failed", result.errors);
+        } 
+        else {
+            console.log(`Successfully created User record for ${email} with ID ${result.data?.id}`);
+        }
     }
     catch (error) {
         console.error("Failed to create User record:", error);

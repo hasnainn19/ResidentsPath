@@ -393,7 +393,7 @@ export async function cleanupCreatedVisitResources(
     );
   }
 
-  if (input.claimedQueueId && input.claimedTicketDigits) {
+  if (input.claimedQueueId && input.claimedTicketDigits && ticketDeleted) {
     const queueId = input.claimedQueueId;
     const ticketDigits = input.claimedTicketDigits;
 

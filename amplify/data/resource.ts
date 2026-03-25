@@ -574,7 +574,9 @@ const schema = a
         }),
       )
       .authorization((allow) => [
-        allow.groups(["Staff", "HounslowHouseDevices"]),
+        allow.guest(),
+        allow.authenticated(),
+        allow.authenticated("identityPool"),
       ])
       .handler(a.handler.function(cancelAppointmentByReference)),
 

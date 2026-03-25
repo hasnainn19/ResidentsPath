@@ -223,11 +223,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     createdGuestUserId = guestUserData.id;
   }
 
-  if (!userId) {
-    throw new Error("User id was not created");
-  }
-
-  const finalUserId = userId;
+  const finalUserId = userId!;
 
   let createdCaseId: string | null = null;
   let claimedReferenceNumber: string | null = null;
@@ -252,6 +248,7 @@ export const handler: Schema["submitEnquiry"]["functionHandler"] = async (event)
     const caseCreateInput = removeIrrelevantValues({
       userId: finalUserId,
       departmentName: validated.departmentName,
+      name: `${validated.firstName} ${validated.lastName}`,
       referenceNumber,
       status: "OPEN",
 
