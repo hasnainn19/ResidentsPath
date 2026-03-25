@@ -100,10 +100,6 @@ If coverage is generated locally, the full HTML report can be opened from [cover
 
 The testing approach focused mainly on unit testing non-trivial frontend behaviour, shared validation rules, and backend behaviour, including edge cases where necessary. The aim was to achieve high coverage wherever practical, with only very small or trivial logic left untested.
 
-## Related Documents
-
-- `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
-
 ## Help and Support
 
 This prototype does not include a user manual. Instead, guidance is built into the interface so users are told what to do as they move through the main journeys:
@@ -113,6 +109,10 @@ This prototype does not include a user manual. Instead, guidance is built into t
 - `SubmissionReceipt` provides a record of the submitted ticket, case, or appointment reference and explains how these details can be used later on the `ReferencePage`.
 - The staff dashboard, queue page, and case-management views label the main controls directly so staff can move between overview, queue, and case records without separate instructions.
 - Staff actions that change queue order or case state use visible action buttons and confirmation prompts so the effect of each control is clearer before it is applied.
+
+## Related Documents
+
+- `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
 
 ## Incomplete Implementation
 
