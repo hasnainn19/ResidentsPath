@@ -94,6 +94,16 @@ The testing approach focused mainly on unit testing non-trivial frontend behavio
 
 - `CHANGELOG.md` contains the separate major milestones and version timeline, including where feedback was implemented into the design.
 
+## Help and Support
+
+This prototype does not include a user manual. Instead, guidance is built into the interface so users are told what to do as they move through the main journeys:
+
+- The resident form is divided into clear steps, with navigation controls and page content that explain what information is being requested.
+- Inline validation and error messages tell users when required information is missing or when a submission step has failed.
+- `SubmissionReceipt` provides a record of the submitted ticket, case, or appointment reference and explains how these details can be used later on the `ReferencePage`.
+- The staff dashboard, queue page, and case-management views label the main controls directly so staff can move between overview, queue, and case records without separate instructions.
+- Staff actions that change queue order or case state use visible action buttons and confirmation prompts so the effect of each control is clearer before it is applied.
+
 ## Incomplete Implementation
 
 - Translation support is not available across all pages. In particular, the resident form is only partially translated.
